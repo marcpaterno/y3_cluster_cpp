@@ -52,3 +52,30 @@ $ git clone https://<your-username>@bitbucket.org/mpaterno/y3_cluster_cpp.git
 ```
 
 Now you're ready to start building the software.
+
+### Build cosmosis
+
+From your top-level directory, start up the "VM" (really the Docker container):
+
+```bash
+$ ./start-cosmosis-vm cosmosis
+```
+
+This will land you at a _bash_  prompt, where you can build and then run CosmoSIS.
+To build, just run _make_.
+
+```bash
+$ make
+```
+
+### Build the tests for our integration routines
+
+Inside the running container, move to the `y3_cluster_cpp` directory, and
+then build. Building is a two-step process: running CMake to generate many
+makefiles, and then running _make_ to build the code.
+
+```bash
+$ cd cosmosis-standard-library/y3_cluster_cpp
+$ cmake -DCUBA_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release .
+```
+
