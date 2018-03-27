@@ -1,4 +1,4 @@
-This is the y3_cluster_cpp repository.
+This is the y3_cluster_cpp repository.G
 
 ## Getting started
 
@@ -77,5 +77,9 @@ makefiles, and then running _make_ to build the code.
 ```bash
 $ cd cosmosis-standard-library/y3_cluster_cpp
 $ cmake -DCUBA_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release .
+$ make
+$ ctest
 ```
+
+The output from `ctest` should show some number of tests having run, and all passing.
 
