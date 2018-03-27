@@ -1,0 +1,7 @@
+integrand_test
+trivial_gamma_t
+Makefile
+CMakeFiles/
+cmake_install.cmake
+integration_test
+CTestTestfile.cmake
