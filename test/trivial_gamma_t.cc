@@ -9,6 +9,16 @@
 double constexpr pi() { return 4. * std::atan(1.0); };
 double constexpr invsqrt2pi() { return 1./std::sqrt(2.*pi()); };
 
+class mz_power_law {
+  public:
+    mz_power_law(double A, double B, double C) : _A(A), _B(B), _C(C) {}
+    double operator()(double M, double z) const { return _A * std::pow(M, _B) * std::pow(1.0+z, _C); }
+  private:
+    double _A;
+    double _B;
+    double _C;
+};
+
 inline
 double gaussian(double x, double mu, double sigma)
 {
@@ -26,13 +36,23 @@ struct HMF_t {
   }
 };
 
-struct MOR_t {
+class MOR_t {
+  public:
+    MOR_t(mz_power_law l, double sigma, double alpha) : _lambda(l), _sigma(sigma), _alpha(alpha) {}
+
   double
-  operator()(double x, double y, double z) const
+  operator()(double lt, double M, double zt) const
   {
-    //return x + y + z;
-    return 1.0;
+    double const ltm = _lambda(M, zt);
+    double const x = lt - ltm;
+    double const erfarg = -1.0 * _alpha * (x)/(std::sqrt(2.)*_sigma);
+    double const erfterm = std::erfc(erfarg);
+    return gaussian(x, 0.0, _sigma) * erfterm;
   }
+  private:
+  mz_power_law _lambda;
+  double _sigma;
+  double _alpha;
 };
 
 struct LO_LC_t {
@@ -161,7 +181,7 @@ main(int argc, char* argv[])
 	std::cerr << "Please specify an integer maxeval\n";
 }
   long long maxeval = std::stoll(args[0]);
-  MOR_t mor;
+  MOR_t mor { mz_power_law{ 1., 1., 0.1 }, 1., 1. };
   LO_LC_t lo_lc;
   LC_LT_t lc_lt { 1.0 };
   ZO_ZT_t zo_zt { 0.1 };
