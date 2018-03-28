@@ -4,7 +4,7 @@ enable_testing()
 
 # These flags are used by everything in the project. Put anything that affects
 # the ABI here -- e.g., the standard level.
-add_compile_options(-W -Wall -Werror)
+add_compile_options(-W -Wall) # -Werror)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
