@@ -76,7 +76,7 @@ makefiles, and then running _make_ to build the code.
 
 ```bash
 $ cd cosmosis-standard-library/y3_cluster_cpp
-$ cmake -DCUBA_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release .
+$ cmake -DCMAKE_MODULE_PATH=/cosmosis/cubacpp/cmake/modules  -DCUBA_DIR=/usr/local -DCMAKE_BUILD_TYPE=Release .
 $ make
 $ ctest
 ```
