@@ -221,5 +221,6 @@ main(int argc, char* argv[])
 
   cubacpp::Suave s;
   s.maxeval = maxeval;
+  s.flatness = 100.0;
   time_integration(s, gti, epsrel, epsabs, "suave");
 };
