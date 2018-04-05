@@ -1,4 +1,4 @@
-This is the y3_cluster_cpp repository.G
+This is the y3_cluster_cpp repository.
 
 ## Getting started
 
