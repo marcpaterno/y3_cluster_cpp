@@ -12,20 +12,22 @@ First, here is the pseudocode for the class template:
 ... lots of other headers probably needed!
 
 template <class TERM1, class TERM2>
-class Y3_Clustering {
+class Y3_Cluster {
 private:
   cubacpp::Cuhre integrator_; // the apparent champ of integrators
+  double epsrel_;
+  double epsabs_;
 
   // Constructor from a cosmosis::DataBlock.
   // See cosmosis/datablock/datablock.hh for the description
   // of the class DataBlock.
-  explicit Y3_Clustering(cosmosis::DataBlock const& config)
-    : cuhre_()
+  explicit Y3_Cluster(cosmosis::DataBlock const& config)
+    : integrator_()
     , epsrel_(),
     , epsabs_()
     {
-      config.get_val("???", "maxeval", cuhre_.maxeval); // set cuhre_.maxeval
-      config.get_val("???", "rule", cuhre_.key); // set rule for CUHRE 
+      config.get_val("???", "maxeval", integrator_.maxeval); // set cuhre_.maxeval
+      config.get_val("???", "rule", integrator_.key); // set rule for CUHRE 
       config.get_val("???", "epsrel", epsrel_);
       config.get_val("???", "epsabs", epsabs_);
     }
@@ -47,7 +49,7 @@ private:
 }
 ```
 
-Assume the class template is in the file `y3_clustering.hh`. The user writes
+Assume the class template is in the file `y3_cluster.hh`. The user writes
 as many headers as he wants, containing term implementations. Maybe we have
 a bunch of "standard" ones in the repository. He also writes a single `.cc` file:
 
@@ -55,13 +57,13 @@ a bunch of "standard" ones in the repository. He also writes a single `.cc` file
 
 // File MyY3Module.cc
 
-#include "y3_clustering.hh"
+#include "y3_cluster.hh"
 #include "term1.hh" // Use this implementation for term1
 #include "term2.hh" // ... and this for term2
 
 // Introduce a type alias ("typedef") that is the module class I want to use:
 
-using MyY3Module = y3_clutsering<term1, term2>;
+using MyY3Module = y3_clutser<term1, term2>;
 
 // Use the macro that generates the code to make this a CosmoSIS module:
 
