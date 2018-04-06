@@ -73,3 +73,14 @@ DEFINE_COSMOSIS_MODULE(MyY3Module);
 The user compiles `MyY3Module.cc`, links it with the right libraries, and
 produces a dynamic library `MyY3Module.so`. This library is the CosmoSIS
 module.
+
+### Interpolation
+
+We have chosen to support:
+1. bilinear interpolation
+2. allowing extrapolation
+3. initialize interpolator with x_array, y_array, z values at implied grid
+4. "evaluation" of the interpolation looks like a function call.
+
+We also need 1-d interpolation; will use linear interpolation. Also allow 
+extrapolation for 1-d interpolator.
