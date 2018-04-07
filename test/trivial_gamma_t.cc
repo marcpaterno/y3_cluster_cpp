@@ -10,13 +10,17 @@ double constexpr pi() { return 4. * std::atan(1.0); };
 double constexpr invsqrt2pi() { return 1./std::sqrt(2.*pi()); };
 
 class mz_power_law {
-  public:
-    mz_power_law(double A, double B, double C) : _A(A), _B(B), _C(C) {}
-    double operator()(double M, double z) const { return _A * std::pow(M, _B) * std::pow(1.0+z, _C); }
-  private:
-    double _A;
-    double _B;
-    double _C;
+public:
+  mz_power_law(double A, double B, double C) : log2_A_(std::log2(A)), B_(B), C_(C) {}
+  double operator()(double M, double z) const {
+    double const log2_res = B_ * std::log2(M) + C_* std::log2(1+z) + log2_A_;
+    return std::exp2(log2_res);
+  }
+
+private:
+  double log2_A_;
+  double B_;
+  double C_;
 };
 
 inline
