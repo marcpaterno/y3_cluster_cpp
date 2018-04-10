@@ -40,13 +40,21 @@ gaussian(double x, double mu, double sigma)
   return std::exp(-z * z / 2.) * 0.3989422804014327 / sigma;
 }
 
-struct HMF_t {
+class HMF_t {
+public:
+  explicit HMF_t(double nmz, double s, double q)
+	  : _nmz(nmz), _s(s), _q(q) {}
+
   double
-  operator()(double x, double y) const
+  operator()(double m, double z) const
   {
-    // return x * y;
-    return 1.0;
+     return _nmz*(_s*(m-13.8)+_q);
   }
+
+private:
+  double _nmz;
+  double _s;
+  double _q;
 };
 
 class MOR_t {
@@ -112,17 +120,17 @@ private:
 
 class ROFFSET_t {
 public:
-  ROFFSET_t(double o) : offset(o) {}
+  explicit ROFFSET_t(double tau) : _tau(tau) {}
 
   double
   operator()(double x) const
   {
     // return x - offset;
-    return 1.0;
+    return x/_tau/_tau*std::exp(-x/_tau);
   }
 
 private:
-  double offset;
+  double _tau;
 };
 
 struct T_CEN_t {
@@ -211,7 +219,7 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  HMF_t hmf;
+  HMF_t hmf{1.0, 0.037, 1.008};
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;
   auto gti = make_gamma_t_integrand(2.0,
