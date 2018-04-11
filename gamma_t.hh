@@ -80,17 +80,17 @@ public:
              double zt,
              double r,
              double R,
-             double lnm,
+             double m,
              double A) const
   {
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
     using std::exp;
-    auto const hmf_v = hmf(lnm, zt);
+    auto const hmf_v = hmf(m, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt, zt);
-    auto const mor_v = mor(lt, lnm, zt);
+    auto const mor_v = mor(lt, m, zt);
 
     // These will eventually be passed by CosmoSIS
     double omega_zt = 1.0;
@@ -105,10 +105,10 @@ public:
 
     double const gamma_t_int = omega_zt * dv_do_dz * zo_zt_v * hmf_v * mor_v * w * lc_lt_v
 
-    double const gamma_t_cen = fcen_ * exp(A * T_cen(R, lnm)) * del_sig_cen(r, lnm);
+    double const gamma_t_cen = fcen_ * exp(A * T_cen(R, m)) * del_sig_cen(r, m);
 
-    double const gamma_t_mis = (1.0 - fcen_) * exp(A * T_mis(r, lnm, R)) * 
-	    		       del_sig_mis(r, lnm, R) * roffset(R);
+    double const gamma_t_mis = (1.0 - fcen_) * exp(A * T_mis(r, m, R)) * 
+	    		       del_sig_mis(r, m, R) * roffset(R);
 
     // TODO: Actually calculate Nw. It is itself a multi-dimensional integral
     // for each sampling, so this will take some thought.
