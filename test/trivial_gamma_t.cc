@@ -85,13 +85,26 @@ private:
   double _alpha;
 };
 
-struct LO_LC_t {
+class  LO_LC_t {
+public:
+  explicit LO_LC_t(double alpha, double a, double b, double R_lambda) :
+    _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda) {}
+
   double
-  operator()(double x, double y, double z) const
+  operator()(double lo, double lc, double R_mis) const
   {
-    // return x * y + z;
-    return 1.0;
+    double x = R_mis / R_lambda
+    double y = lo / lc;
+    mu_y = std::exp(-x*x / _alpha*_alpha);
+    sigma_y = _a * std::atan(b*x)
+    return gaussian(y, mu_y, sigma_y);
   }
+
+private:
+  double _alpha;
+  double _a;
+  double _b;
+  double _R_lambda;
 };
 
 class LC_LT_t {
@@ -240,7 +253,7 @@ main(int argc, char* argv[])
 
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
-  LO_LC_t lo_lc;
+  LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   LC_LT_t lc_lt{1.0};
   ZO_ZT_t zo_zt{0.1};
   ROFFSET_t roffset{2.0};
