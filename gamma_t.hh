@@ -18,7 +18,9 @@ template <typename MOR,
           typename A_MIS,
           typename HMF,
           typename DEL_SIG_CEN,
-          typename DEL_SIG_MIS>
+          typename DEL_SIG_MIS, 
+	  typename DV_DO_DZ,
+	  typename OMEGA_Z>
 class Gamma_T_Integrand {
 private:
   double fcen_;
@@ -36,6 +38,8 @@ private:
   HMF hmf;
   DEL_SIG_CEN del_sig_cen;
   DEL_SIG_MIS del_sig_mis;
+  DV_DO_DZ dv_do_dz;
+  OMEGA_Z omega_z;
 
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
@@ -54,7 +58,9 @@ public:
                     A_MIS A_mis,
                     HMF hmf,
                     DEL_SIG_CEN del_sig_cen,
-                    DEL_SIG_MIS del_sig_mis)
+                    DEL_SIG_MIS del_sig_mis, 
+		    DV_DO_DZ dv_do_dz,
+		    OMEGA_Z omega_z)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -69,6 +75,8 @@ public:
     , hmf(hmf)
     , del_sig_cen(del_sig_cen)
     , del_sig_mis(del_sig_mis)
+    , dv_do_dz(dv_do_dz)
+    , omega_z(omega_z)
   {}
 
   // The function call operator -- this is the function to be integrated.
@@ -91,10 +99,12 @@ public:
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt, zt);
     auto const mor_v = mor(lt, m, zt);
+    auto const dv_do_dz_v=dv_do_dz(zt);
+    auto const omega_z_v=omega_z(zt);
 
     // These will eventually be passed by CosmoSIS
-    double omega_zt = 1.0;
-    double dv_do_dz = 1.0;
+    //double omega_zt = 1.0;
+    //double dv_do_dz = 1.0;
     double m_shear = 1.0;
     double sig_crit_inv = 1.0;
 
@@ -103,7 +113,7 @@ public:
 
     // The evaluation below follows the convention set in main overleaf document
 
-    double const gamma_t_int = omega_zt * dv_do_dz * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
 
     double const gamma_t_cen = fcen_ * exp(A * T_cen(R, m)) * del_sig_cen(r, m);
 
@@ -134,7 +144,9 @@ template <typename MOR,
           typename A_MIS,
           typename HMF,
           typename DEL_SIG_CEN,
-          typename DEL_SIG_MIS>
+          typename DEL_SIG_MIS,
+	  typename DV_DO_DZ,
+	  typename OMEGA_Z>
 Gamma_T_Integrand<MOR,
                   LO_LC,
                   LC_LT,
@@ -146,7 +158,9 @@ Gamma_T_Integrand<MOR,
                   A_MIS,
                   HMF,
                   DEL_SIG_CEN,
-                  DEL_SIG_MIS>
+                  DEL_SIG_MIS, 
+	          DV_DO_DZ, 
+	          OMEGA_Z>
 make_gamma_t_integrand(double fcen,
                        double msci,
                        MOR mor,
@@ -160,7 +174,9 @@ make_gamma_t_integrand(double fcen,
                        A_MIS a_mis,
                        HMF hmf,
                        DEL_SIG_CEN del_sig_cen,
-                       DEL_SIG_MIS del_sig_mis)
+                       DEL_SIG_MIS del_sig_mis, 
+		       DV_DO_DZ dv_do_dz,
+		       OMEGA_Z omega_z)
 {
   return {fcen,
           msci,
@@ -175,7 +191,9 @@ make_gamma_t_integrand(double fcen,
           a_mis,
           hmf,
           del_sig_cen,
-          del_sig_mis};
+          del_sig_mis, 
+          dv_do_dz,
+          omega_z};
 }
 
 #endif
