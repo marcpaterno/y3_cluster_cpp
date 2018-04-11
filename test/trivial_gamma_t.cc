@@ -249,7 +249,7 @@ main(int argc, char* argv[])
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
   LO_LC_t lo_lc;
-  LC_LT_t lc_lt{1.0};
+  LC_LT_t lc_lt{1.24, 4,19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.1};
   ROFFSET_t roffset{2.0};
   T_CEN_t t_cen;
