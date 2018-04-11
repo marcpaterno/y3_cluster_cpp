@@ -239,17 +239,17 @@ main(int argc, char* argv[])
 
   std::vector<double> dndlnmh;
   double num { 0 };
-  std::ifstream file1 ("test/dndlnmh.txt");
+  std::ifstream file1 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
   while (file1 >> num)
        dndlnmh.push_back(num);
 
   std::vector<double> mh;
-  std::ifstream file2 ("test/mh.txt");
+  std::ifstream file2 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/mh.txt");
   while (file2 >> num)
        mh.push_back(num);
 
   std::vector<double> zz;
-  std::ifstream file3 ("test/.txt");
+  std::ifstream file3 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/z.txt");
   while (file3 >> num)
        zz.push_back(num);
   if (zz.empty()) return 1;
