@@ -2,13 +2,45 @@
 #include "test/interp_1d.hh"
 #include "test/transform.hh"
 
+#include <cmath>
+#include <cstddef>
+#include <stdexcept>
+
 using y3_cluster::Interp1D;
 
-TEST_CASE("interp_1d works", "[interpolation][1d]")
+TEST_CASE("Interp1D exact at knots", "[interpolation][1d]")
 {
-  constexpr const int numpoints = 9;
+  constexpr const std::size_t numpoints = 9;
   std::array<double, numpoints> const xs = {1., 2., 3., 4., 5., 6, 7., 8., 9};
-  auto fcn = [](double x) { return 2 * x; };
+  auto fcn = [](double x) { return 2 * x * (3 - x) * std::cos(x); };
   std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
   Interp1D f{xs, ys};
+  for (std::size_t i = 0; i != numpoints; ++i) {
+    CHECK(ys[i] == f(xs[i]));
+  }
+}
+
+TEST_CASE("Interp1D on quadratic")
+{
+  constexpr const std::size_t numpoints = 3;
+  std::array<double, numpoints> const xs = {1., 2., 3.};
+  auto fcn = [](double x) { return x * x; };
+  std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
+  Interp1D f{xs, ys};
+  // Answer produced using Mathematica 11.3.0.0,
+  // using  Interpolation[{1., 4., 9.}, InterpolationOrder -> 1]
+  CHECK(f(1.41421) == Approx(2.24263).epsilon(1e-4));
+}
+
+TEST_CASE("Interp1D throws on extrapolation")
+{
+  constexpr const std::size_t numpoints = 2;
+  std::array<double, numpoints> const xs = {-5., 5.};
+  auto fcn = [](double x) { return -4 * x; };
+  std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
+  Interp1D f{xs, ys};
+  CHECK_THROWS_AS(f(-10), std::domain_error);
+  CHECK_NOTHROW(f(-5.0));
+  CHECK_NOTHROW(f(5.0));
+  CHECK_THROWS_AS(f(10), std::domain_error);
 }
