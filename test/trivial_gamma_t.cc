@@ -320,7 +320,7 @@ main(int argc, char* argv[])
                                     dsc,
                                     dsm,
 				    dvdodz,
-				    omegaz);
+				    omega_z);
   // Call the integrand once, printing out the value.
   std::cout << gti(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9) << std::endl;
   double const epsrel = 1.0e-3;
