@@ -25,13 +25,13 @@ double constexpr invsqrt2pi()
 class mz_power_law {
 public:
   mz_power_law(double A, double B, double C)
-    : log2_A_(std::log2(A)), B_(B), C_(C)
+    : log2_A_(std::log(A)), B_(B), C_(C)
   {}
   double
-  operator()(double M, double z) const
+  operator()(double lnM, double z) const
   {
-    double const log2_res = B_ * std::log2(M) + C_ * std::log2(1 + z) + log2_A_;
-    return std::exp2(log2_res);
+    double const log_res = B_ * lnM + C_ * std::log(1 + z) + log2_A_;
+    return std::exp(log_res);
   }
 
 private:
@@ -68,9 +68,9 @@ public:
   HMF_t(Interp1D const* nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
 
   double
-  operator()(double m, double z) const
+  operator()(double lnm, double z) const
   {
-    return _nmz->eval(z) * (_s * (m - 13.8) + _q);
+    return _nmz->eval(z) * (_s * (lnm - 13.8) + _q);
   }
 
 private:
@@ -86,9 +86,9 @@ public:
   {}
 
   double
-  operator()(double lt, double M, double zt) const
+  operator()(double lt, double lnM, double zt) const
   {
-    double const ltm = _lambda(M, zt);
+    double const ltm = _lambda(lnM, zt);
     double const x = lt - ltm;
     double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
     double const erfterm = std::erfc(erfarg);
