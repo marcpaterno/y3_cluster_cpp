@@ -89,19 +89,26 @@ public:
     using std::exp;
     auto const hmf_v = hmf(lnm, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
-    auto const lc_lt_v = lc_lt(lc, lt);
+    auto const lc_lt_v = lc_lt(lc, lt, zt);
     auto const mor_v = mor(lt, lnm, zt);
-    auto const prefactor = msci_ * hmf_v * zo_zt_v;
-    auto const postfactor = lc_lt_v * mor_v;
 
-    double const gamma_t_cen = prefactor * fcen_ * exp(A * T_cen(R, lnm)) *
-                               del_sig_cen(r, lnm) * A_cen(A, lc, lnm, zt) *
-                               postfactor;
+    // These will eventually be passed by CosmoSIS
+    double omega_zt = 1.0;
+    double dv_do_dz = 1.0;
+    double m_shear = 1.0;
+    double sig_crit_inv = 1.0;
 
-    double const gamma_t_mis = prefactor * (1.0 - fcen_) *
-                               exp(A * T_mis(r, lnm, R)) * del_sig_mis(r, lnm, R) *
-                               A_mis(A, lc, lnm, zt, R) * lo_lc(lo, lc, R) *
-                               postfactor * roffset(R);
+    // This is the lambda-redshift bin weight that we don't fully understand yet...
+    double w = 1.0;
+
+    // The evaluation below follows the convention set in main overleaf document
+
+    double const gamma_t_int = omega_zt * dv_do_dz * zo_zt_v * hmf_v * mor_v * w * lc_lt_v
+
+    double const gamma_t_cen = fcen_ * exp(A * T_cen(R, lnm)) * del_sig_cen(r, lnm);
+
+    double const gamma_t_mis = (1.0 - fcen_) * exp(A * T_mis(r, lnm, R)) * 
+	    		       del_sig_mis(r, lnm, R) * roffset(R);
 
     // TODO: Actually calculate Nw. It is itself a multi-dimensional integral
     // for each sampling, so this will take some thought.
@@ -109,7 +116,8 @@ public:
     // we can calculate the value of Nw for the current sample, and store
     // that value as a data member in the Gamma_T_Integrand object.
     double const Nw = 1.0;
-    double const gamma_t = (1.0 / Nw) * (gamma_t_cen + gamma_t_mis);
+    double const gamma_t = ((1.0 +m_shear) / (Nw * sig_crit_inv) * gamma_t_int *
+		           (gamma_t_cen + gamma_t_mis);
 
     return gamma_t;
   }

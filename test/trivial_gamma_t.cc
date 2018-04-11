@@ -85,28 +85,49 @@ private:
   double _alpha;
 };
 
-struct LO_LC_t {
+class  LO_LC_t {
+public:
+  explicit LO_LC_t(double alpha, double a, double b, double R_lambda) :
+    _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda) {}
+
   double
-  operator()(double x, double y, double z) const
+  operator()(double lo, double lc, double R_mis) const
   {
-    // return x * y + z;
-    return 1.0;
+    double x = R_mis / R_lambda
+    double y = lo / lc;
+    mu_y = std::exp(-x*x / _alpha*_alpha);
+    sigma_y = _a * std::atan(b*x)
+    return gaussian(y, mu_y, sigma_y);
   }
+
+private:
+  double _alpha;
+  double _a;
+  double _b;
+  double _R_lambda;
 };
 
 class LC_LT_t {
 public:
-  explicit LC_LT_t(double sigma) : _sigma(sigma) {}
+  explicit LC_LT_t(double tau, double mu, double sigma, double fmsk, double fprj)
+	  : _tau(tau), _mu(mu), _sigma(sigma), _fmsk(fmsk), _fprj(fprj) 
+  {}
 
   double
-  operator()(double lc, double lt) const
+  operator()(double lc, double lt, double zt) const
   {
-    double const x = lc - lt;
-    return gaussian(x, 0., _sigma);
+    return (1.0-_fmsk)*(1.0-_fprj)*invsqrt2pi()*std::exp(-std::pow((lc-_mu),2.0)/(2.0*std::pow(_sigma,2.0)))/_sigma\
+        +0.5*((1.0-_fmsk)*_fprj*_tau+_fmsk*_fprj/lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc)/(std::sqrt(2.0)*_sigma))\
+        +_fmsk*(std::erfc((_mu-lc-lt)/(std::sqrt(2.0)*_sigma))-std::erfc((_mu-lc)/(std::sqrt(2.0)*_sigma)))/(2.0*lt)\
+        -_fmsk*_fprj*(std::exp(-_tau*lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc-lt)/(std::sqrt(2.0)*_sigma)))/(2.0*lt)
   }
 
 private:
+  double _tau;
+  double _mu;
   double _sigma;
+  double _fmsk;
+  double _fprj;
 };
 
 class ZO_ZT_t {
@@ -240,8 +261,8 @@ main(int argc, char* argv[])
 
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
-  LO_LC_t lo_lc;
-  LC_LT_t lc_lt{1.0};
+  LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
+  LC_LT_t lc_lt{1.24, 4,19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.1};
   ROFFSET_t roffset{2.0};
   T_CEN_t t_cen;
