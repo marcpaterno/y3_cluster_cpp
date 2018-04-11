@@ -94,12 +94,15 @@ public:
   MOR_t(mz_power_law lambda, double sigma, double alpha)
     : _lambda(lambda), _sigma(sigma), _alpha(alpha) {}
 
-  explicit MOR_t(cosmosis::DataBlock &sample) {
+  explicit MOR_t(cosmosis::DataBlock &sample)
+  : _lambda([](cosmosis::DataBlock& x) {
     double A, B, C;
-    sample.get_val<double>("MOR_params", "A", A);
-    sample.get_val<double>("MOR_params", "B", B);
-    sample.get_val<double>("MOR_params", "C", C);
-    _lambda = mz_power_law{A, B, C};
+    x.get_val<double>("MOR_params", "A", A);
+    x.get_val<double>("MOR_params", "B", B);
+    x.get_val<double>("MOR_params", "C", C);
+    return mz_power_law{A, B, C};
+    }(sample))
+   {
     sample.get_val<double>("MOR_params", "sigma", _sigma);
     sample.get_val<double>("MOR_params", "alpha", _alpha);
   }
