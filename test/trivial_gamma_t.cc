@@ -1,5 +1,5 @@
 #include "cubacpp/cubacpp.hh"
-#include "examples/gamma_t.hh"
+#include "gamma_t.hh"
 #include <chrono>
 #include <cmath>
 #include <iostream>
