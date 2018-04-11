@@ -80,27 +80,27 @@ public:
              double zt,
              double r,
              double R,
-             double m,
+             double lnm,
              double A) const
   {
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
     using std::exp;
-    auto const hmf_v = hmf(m, zt);
+    auto const hmf_v = hmf(lnm, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt);
-    auto const mor_v = mor(lt, m, zt);
+    auto const mor_v = mor(lt, lnm, zt);
     auto const prefactor = msci_ * hmf_v * zo_zt_v;
     auto const postfactor = lc_lt_v * mor_v;
 
-    double const gamma_t_cen = prefactor * fcen_ * exp(A * T_cen(R, m)) *
-                               del_sig_cen(r, m) * A_cen(A, lc, m, zt) *
+    double const gamma_t_cen = prefactor * fcen_ * exp(A * T_cen(R, lnm)) *
+                               del_sig_cen(r, lnm) * A_cen(A, lc, lnm, zt) *
                                postfactor;
 
     double const gamma_t_mis = prefactor * (1.0 - fcen_) *
-                               exp(A * T_mis(r, m, R)) * del_sig_mis(r, m, R) *
-                               A_mis(A, lc, m, zt, R) * lo_lc(lo, lc, R) *
+                               exp(A * T_mis(r, lnm, R)) * del_sig_mis(r, lnm, R) *
+                               A_mis(A, lc, lnm, zt, R) * lo_lc(lo, lc, R) *
                                postfactor * roffset(R);
 
     // TODO: Actually calculate Nw. It is itself a multi-dimensional integral
