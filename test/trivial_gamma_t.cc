@@ -239,25 +239,21 @@ main(int argc, char* argv[])
 
   std::vector<double> dndlnmh;
   double num { 0 };
-  std::ifstream file1 ("dndlnmh.txt");
+  std::ifstream file1 ("test/dndlnmh.txt");
   while (file1 >> num)
        dndlnmh.push_back(num);
 
   std::vector<double> mh;
-  std::ifstream file2 ("mh.txt");
+  std::ifstream file2 ("test/mh.txt");
   while (file2 >> num)
        mh.push_back(num);
 
   std::vector<double> zz;
-  std::ifstream file3 ("z.txt");
+  std::ifstream file3 ("test/.txt");
   while (file3 >> num)
        zz.push_back(num);
   if (zz.empty()) return 1;
 
-  constexpr const std::size_t numpoints = 11;
-  std::array<double, numpoints> const xs = {0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
-  auto fcn = [](double x) { return 2 * x * (3 - x) * std::cos(x); };
-  std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
 
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
