@@ -43,13 +43,12 @@ gaussian(double x, double mu, double sigma)
 
 class HMF_t {
 public:
-  explicit HMF_t(double nmz, double s, double q)
-	  : _nmz(nmz), _s(s), _q(q) {}
+  explicit HMF_t(double nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
 
   double
   operator()(double m, double z) const
   {
-     return _nmz*(_s*(m-13.8)+_q);
+    return _nmz * (_s * (m - 13.8) + _q);
   }
 
 private:
@@ -127,7 +126,7 @@ public:
   operator()(double x) const
   {
     // return x - offset;
-    return x/_tau/_tau*std::exp(-x/_tau);
+    return x / _tau / _tau * std::exp(-x / _tau);
   }
 
 private:

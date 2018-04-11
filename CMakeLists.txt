@@ -14,6 +14,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 find_package(cuba REQUIRED)
+find_package(GSL REQUIRED)
 
 add_subdirectory(test)
-

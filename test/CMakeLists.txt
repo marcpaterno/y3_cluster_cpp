@@ -5,7 +5,7 @@ target_include_directories(integrand_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-			   ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(integrand_test integrand_test)
 
 add_executable(integration_test main.cc integration.test.cc)
@@ -15,15 +15,30 @@ target_include_directories(integration_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-			   ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(integration_test integration_test)
 
 add_executable(trivial_gamma_t trivial_gamma_t.cc)
 target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES})
 target_include_directories(trivial_gamma_t
-	                   PRIVATE
-			   ${CMAKE_SOURCE_DIR}
-			   ${CMAKE_SOURCE_DIR}/examples
-			   ${CUBA_INCLUDE_DIR}
-			   ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/examples
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
+add_executable(transform_test main.cc transform.test.cc)
+target_include_directories(transform_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(transform_test transform_test)
+
+add_executable(interp_1d_test main.cc interp_1d.test.cc interp_1d.cc)
+target_link_libraries(interp_1d_test PRIVATE ${GSL_LIBRARIES})
+target_include_directories(interp_1d_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${GSL_INCLUDE_DIR})
+add_test(interp_1d_test interp_1d_test)

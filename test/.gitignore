@@ -5,3 +5,5 @@ CMakeFiles/
 cmake_install.cmake
 integration_test
 CTestTestfile.cmake
+transform_test
+interp_1d_test
