@@ -304,7 +304,7 @@ main(int argc, char* argv[])
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;
   DV_DO_DZ_t dvdodz;
-  OMEGA_Z_t omega_z;
+  OMEGA_Z_t omega_z{0.2};
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
