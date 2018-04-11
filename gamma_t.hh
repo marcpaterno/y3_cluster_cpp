@@ -89,7 +89,7 @@ public:
     using std::exp;
     auto const hmf_v = hmf(m, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
-    auto const lc_lt_v = lc_lt(lc, lt);
+    auto const lc_lt_v = lc_lt(lc, lt, zt);
     auto const mor_v = mor(lt, m, zt);
 
     // These will eventually be passed by CosmoSIS
