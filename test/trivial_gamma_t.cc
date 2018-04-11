@@ -77,10 +77,10 @@ public:
   }
 
   double
-  operator()(double m, double z) const
+  operator()(double lnM, double zt) const
   {
     // TODO: This is clearly worng!
-    return _nmz->eval(z) * (_s * (m - 13.8) + _q);
+    return _nmz->eval(zt) * (_s * (lnM - 37.5) + _q);
   }
 
 private:
