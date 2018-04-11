@@ -26,9 +26,10 @@ double constexpr invsqrt2pi()
 
 class mz_power_law {
 public:
+  mz_power_law() : log2_A_(), B_(), C_() {}
   mz_power_law(double A, double B, double C)
-    : log2_A_(std::log(A)), B_(B), C_(C)
-  {}
+    : log2_A_(std::log(A)), B_(B), C_(C) {}
+
   double
   operator()(double lnM, double z) const
   {
@@ -69,10 +70,17 @@ class HMF_t {
 public:
   HMF_t(Interp1D const* nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
 
+  explicit HMF_t(cosmosis::DataBlock &sample) {
+    // TODO: Need to handle Interpolator once we have Interp2D
+    sample.get_val<double>("HMF_params", "s", _s);
+    sample.get_val<double>("HMF_params", "q", _q);
+  }
+
   double
-  operator()(double lnm, double z) const
+  operator()(double m, double z) const
   {
-    return _nmz->eval(z) * (_s * (lnm - 13.8) + _q);
+    // TODO: This is clearly worng!
+    return _nmz->eval(z) * (_s * (m - 13.8) + _q);
   }
 
 private:
@@ -83,11 +91,15 @@ private:
 
 class MOR_t {
 public:
-  MOR_t(mz_power_law l, double sigma, double alpha)
-    : _lambda(l), _sigma(sigma), _alpha(alpha) {}
+  MOR_t(mz_power_law lambda, double sigma, double alpha)
+    : _lambda(lambda), _sigma(sigma), _alpha(alpha) {}
 
   explicit MOR_t(cosmosis::DataBlock &sample) {
-    sample.get_val<double>("MOR_params", "lambda", _lambda);
+    double A, B, C;
+    sample.get_val<double>("MOR_params", "A", A);
+    sample.get_val<double>("MOR_params", "B", B);
+    sample.get_val<double>("MOR_params", "C", C);
+    _lambda = mz_power_law{A, B, C};
     sample.get_val<double>("MOR_params", "sigma", _sigma);
     sample.get_val<double>("MOR_params", "alpha", _alpha);
   }
