@@ -93,10 +93,10 @@ public:
   double
   operator()(double lo, double lc, double R_mis) const
   {
-    double x = R_mis / R_lambda
+    double x = R_mis / _R_lambda;
     double y = lo / lc;
-    mu_y = std::exp(-x*x / _alpha*_alpha);
-    sigma_y = _a * std::atan(b*x)
+    double mu_y = std::exp(-x*x / _alpha*_alpha);
+    double sigma_y = _a * std::atan(_b*x);
     return gaussian(y, mu_y, sigma_y);
   }
 
@@ -119,7 +119,7 @@ public:
     return (1.0-_fmsk)*(1.0-_fprj)*invsqrt2pi()*std::exp(-std::pow((lc-_mu),2.0)/(2.0*std::pow(_sigma,2.0)))/_sigma\
         +0.5*((1.0-_fmsk)*_fprj*_tau+_fmsk*_fprj/lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc)/(std::sqrt(2.0)*_sigma))\
         +_fmsk*(std::erfc((_mu-lc-lt)/(std::sqrt(2.0)*_sigma))-std::erfc((_mu-lc)/(std::sqrt(2.0)*_sigma)))/(2.0*lt)\
-        -_fmsk*_fprj*(std::exp(-_tau*lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc-lt)/(std::sqrt(2.0)*_sigma)))/(2.0*lt)
+        -_fmsk*_fprj*(std::exp(-_tau*lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc-lt)/(std::sqrt(2.0)*_sigma)))/(2.0*lt);
   }
 
 private:
@@ -262,7 +262,7 @@ main(int argc, char* argv[])
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
   LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
-  LC_LT_t lc_lt{1.24, 4,19, 2.03, 0.32, 0.12};
+  LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.1};
   ROFFSET_t roffset{2.0};
   T_CEN_t t_cen;

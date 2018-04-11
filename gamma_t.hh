@@ -103,7 +103,7 @@ public:
 
     // The evaluation below follows the convention set in main overleaf document
 
-    double const gamma_t_int = omega_zt * dv_do_dz * zo_zt_v * hmf_v * mor_v * w * lc_lt_v
+    double const gamma_t_int = omega_zt * dv_do_dz * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
 
     double const gamma_t_cen = fcen_ * exp(A * T_cen(R, m)) * del_sig_cen(r, m);
 
@@ -116,7 +116,7 @@ public:
     // we can calculate the value of Nw for the current sample, and store
     // that value as a data member in the Gamma_T_Integrand object.
     double const Nw = 1.0;
-    double const gamma_t = ((1.0 +m_shear) / (Nw * sig_crit_inv) * gamma_t_int *
+    double const gamma_t = ((1.0 +m_shear) / (Nw * sig_crit_inv)) * gamma_t_int *
 		           (gamma_t_cen + gamma_t_mis);
 
     return gamma_t;
