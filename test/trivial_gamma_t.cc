@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -209,6 +210,23 @@ main(int argc, char* argv[])
   if (args.size() != 1) {
     std::cerr << "Please specify an integer maxeval\n";
   }
+  std::vector<double> dndlnmh;
+  double num { 0 };
+  std::ifstream file1 ("dndlnmh.txt");
+  while (file1 >> num)
+       dndlnmh.emplace_back(num);
+
+  std::vector<double> mh;
+  std::ifstream file2 ("mh.txt");
+  while (file2 >> num)
+       mh.emplace_back(num);
+
+  std::vector<double> zz;
+  std::ifstream file3 ("z.txt");
+  while (file3 >> num)
+       zz.emplace_back(num);
+
+
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
   LO_LC_t lo_lc;
