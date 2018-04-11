@@ -31,7 +31,7 @@ Now get the right branches of the `cosmosis` and `cosmosis-standard-library` rep
 $ cd cosmosis
 $ git checkout v1.5rc1
 $ cd cosmosis-standard-library
-$ get checkout v1.5rc1
+$ git checkout v1.5rc1
 ```
 
 ### Get cuba_cpp
