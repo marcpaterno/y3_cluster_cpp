@@ -96,17 +96,25 @@ struct LO_LC_t {
 
 class LC_LT_t {
 public:
-  explicit LC_LT_t(double sigma) : _sigma(sigma) {}
+  explicit LC_LT_t(double tau, double mu, double sigma, double fmsk, double fprj)
+	  : _tau(tau), _mu(mu), _sigma(sigma), _fmsk(fmsk), _fprj(fprj) 
+  {}
 
   double
-  operator()(double lc, double lt) const
+  operator()(double lc, double lt, double zt) const
   {
-    double const x = lc - lt;
-    return gaussian(x, 0., _sigma);
+    return (1.0-_fmsk)*(1.0-_fprj)*invsqrt2pi()*std::exp(-std::pow((lc-_mu),2.0)/(2.0*std::pow(_sigma,2.0)))/_sigma\
+        +0.5*((1.0-_fmsk)*_fprj*_tau+_fmsk*_fprj/lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc)/(std::sqrt(2.0)*_sigma))\
+        +_fmsk*(std::erfc((_mu-lc-lt)/(std::sqrt(2.0)*_sigma))-std::erfc((_mu-lc)/(std::sqrt(2.0)*_sigma)))/(2.0*lt)\
+        -_fmsk*_fprj*(std::exp(-_tau*lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc-lt)/(std::sqrt(2.0)*_sigma)))/(2.0*lt)
   }
 
 private:
+  double _tau;
+  double _mu;
   double _sigma;
+  double _fmsk;
+  double _fprj;
 };
 
 class ZO_ZT_t {
