@@ -40,6 +40,22 @@ private:
   double C_;
 };
 
+class EZ {
+public:
+  explicit EZ(double omega_m, double omega_l,double omega_k) :
+	  _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k){}
+  double operator()(double z) const
+  {
+    return std::sqrt(_omega_m *(1.0+z)*(1.0+z)*(1.0+z) + _omega_k*(1.0+z)*(1.0+z)+ _omega_l  );
+  }
+
+private:
+  double _omega_m;
+  double _omega_l;
+  double _omega_k;
+};
+
+
 inline double
 gaussian(double x, double mu, double sigma)
 {
@@ -216,12 +232,16 @@ struct DEL_SIG_MIS_t {
 
 class DV_DO_DZ_t {
 public:
-
+  DV_DO_DZ_t(Interp1D const* da, EZ ezt) : _da(da), _ezt(ezt) {}
   double
-  operator()(double x) const
+  operator()(double zt) const
   {
-    return 1.0;
+     double const log2_res=2.0*std::log2(1.0+zt) + 2.0 * std::log2(_da->eval(zt)) - std::log2(_ezt(zt));
+     return 3000.0*std::exp2(log2_res);
   }
+private:
+  Interp1D const* _da;
+  EZ _ezt;
 };
 
 class OMEGA_Z_t {
@@ -274,6 +294,11 @@ main(int argc, char* argv[])
        zz.push_back(num);
   if (zz.empty()) return 1;
 
+  std::vector<double> da_arr;
+  std::ifstream file4 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/d_a.txt");
+  while (file4 >> num)
+       da_arr.push_back(num);
+  if (da_arr.empty()) return 1;
 
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
@@ -289,7 +314,8 @@ main(int argc, char* argv[])
   HMF_t hmf{&f, 0.037, 1.008};
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;
-  DV_DO_DZ_t dvdodz;
+  Interp1D da_f{zz, da_arr};
+  DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omegaz;
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
