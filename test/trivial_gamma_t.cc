@@ -214,13 +214,25 @@ struct DEL_SIG_MIS_t {
   }
 };
 
-struct DV_DO_DZ_t {
+class DV_DO_DZ_t {
+public:
+
   double
   operator()(double x) const
   {
     return 1.0;
   }
 };
+
+class OMEGA_Z_t {
+public:
+  double
+  operator()(double x) const
+  {
+    return 1.0;
+  }
+};
+
 
 template <class ALG, class F>
 void
@@ -278,6 +290,7 @@ main(int argc, char* argv[])
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;
   DV_DO_DZ_t dvdodz;
+  OMEGA_Z_t omegaz;
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
@@ -292,7 +305,8 @@ main(int argc, char* argv[])
                                     hmf,
                                     dsc,
                                     dsm,
-				    dvdodz);
+				    dvdodz,
+				    omegaz);
   // Call the integrand once, printing out the value.
   std::cout << gti(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9) << std::endl;
   double const epsrel = 1.0e-3;
