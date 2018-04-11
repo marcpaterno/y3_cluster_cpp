@@ -1,11 +1,17 @@
 #include "cubacpp/cubacpp.hh"
-#include "examples/gamma_t.hh"
+#include "gamma_t.hh"
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+
+#include "test/interp_1d.hh"
+#include "test/transform.hh"
+#include <stdexcept>
+
+using y3_cluster::Interp1D;
 
 double constexpr pi()
 {
@@ -43,16 +49,16 @@ gaussian(double x, double mu, double sigma)
 
 class HMF_t {
 public:
-  explicit HMF_t(double nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
+  HMF_t(Interp1D const* nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
 
   double
   operator()(double m, double z) const
   {
-    return _nmz * (_s * (m - 13.8) + _q);
+    return _nmz->eval(z) * (_s * (m - 13.8) + _q);
   }
 
 private:
-  double _nmz;
+  Interp1D const* _nmz;
   double _s;
   double _q;
 };
@@ -209,22 +215,28 @@ main(int argc, char* argv[])
   if (args.size() != 1) {
     std::cerr << "Please specify an integer maxeval\n";
   }
+
   std::vector<double> dndlnmh;
   double num { 0 };
   std::ifstream file1 ("dndlnmh.txt");
   while (file1 >> num)
-       dndlnmh.emplace_back(num);
+       dndlnmh.push_back(num);
 
   std::vector<double> mh;
   std::ifstream file2 ("mh.txt");
   while (file2 >> num)
-       mh.emplace_back(num);
+       mh.push_back(num);
 
   std::vector<double> zz;
   std::ifstream file3 ("z.txt");
   while (file3 >> num)
-       zz.emplace_back(num);
+       zz.push_back(num);
+  if (zz.empty()) return 1;
 
+  constexpr const std::size_t numpoints = 11;
+  std::array<double, numpoints> const xs = {0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+  auto fcn = [](double x) { return 2 * x * (3 - x) * std::cos(x); };
+  std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
 
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
@@ -236,7 +248,8 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  HMF_t hmf{1.0, 0.037, 1.008};
+  Interp1D f{zz, zz};
+  HMF_t hmf{&f, 0.037, 1.008};
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;
   auto gti = make_gamma_t_integrand(2.0,
