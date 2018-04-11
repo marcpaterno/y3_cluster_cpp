@@ -246,7 +246,6 @@ private:
 
 class OMEGA_Z_t {
 public:
-  explicit OMEGA_Z_t(double zpivot) : _zpivot(zpivot) {}
 
   double
   operator()(double zt) const
@@ -256,15 +255,13 @@ public:
                                 1.01744577E00,  -3.11253383E-01, 5.48481084E-03,   3.12629987E00};
     int poly_deg= 12;
     double omega_z= 0.0;
+    double zpivot=0.2;
 
     for(int i=0; i<12; i++){
-      omega_z=omega_z+ poly_coeff_vol[i]*std::pow(zt- _zpivot,poly_deg-i-1);
+      omega_z=omega_z+ poly_coeff_vol[i]*std::pow(zt- zpivot,poly_deg-i-1.);
     }
     return omega_z;
   }
-
-private:
-  double _zpivot;
 };
 
 
@@ -330,7 +327,7 @@ main(int argc, char* argv[])
   DEL_SIG_MIS_t dsm;
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
-  OMEGA_Z_t omega_z{0.2};
+  OMEGA_Z_t omega_z;
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
