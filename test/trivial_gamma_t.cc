@@ -246,11 +246,25 @@ private:
 
 class OMEGA_Z_t {
 public:
+  explicit OMEGA_Z_t(double zpivot) : _zpivot(zpivot) {}
+
   double
-  operator()(double x) const
+  operator()(double zt) const
   {
-    return 1.0;
+    double poly_coeff_vol[12]={ -1.14293122E05, 5.96846869E04, 9.24239180E03, -2.23118813E03, \
+                                -4.52580713E03, 1.18404878E03, 1.27951911E02, -5.05716847E01, \
+                                1.01744577E00,  -3.11253383E-01, 5.48481084E-03,   3.12629987E00};
+    int poly_deg= 12;
+    double omega_z= 0.0;
+
+    for(int i=0; i<12; i++){
+      omega_z=omega_z+ poly_coeff_vol[i]*std::pow(zt- _zpivot,poly_deg-i-1);
+    }
+    return omega_z;
   }
+
+private:
+  double _zpivot;
 };
 
 
@@ -316,7 +330,7 @@ main(int argc, char* argv[])
   DEL_SIG_MIS_t dsm;
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
-  OMEGA_Z_t omegaz;
+  OMEGA_Z_t omega_z{0.2};
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
@@ -332,7 +346,7 @@ main(int argc, char* argv[])
                                     dsc,
                                     dsm,
 				    dvdodz,
-				    omegaz);
+				    omega_z);
   // Call the integrand once, printing out the value.
   std::cout << gti(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9) << std::endl;
   double const epsrel = 1.0e-3;
