@@ -27,3 +27,16 @@ target_include_directories(trivial_gamma_t
 			   ${CUBA_INCLUDE_DIR}
 			   ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
+add_executable(transform_test main.cc transform.test.cc)
+target_include_directories(transform_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+			   ${CMAKE_SOURCE_DIR}/externals)
+add_test(transform_test transform_test)
+
+add_executable(interp_1d_test main.cc interp_1d.test.cc interp_1d.cc)
+target_include_directories(interp_1d_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+			   ${CMAKE_SOURCE_DIR}/externals)
+add_test(interp_1d_test interp_1d_test)
