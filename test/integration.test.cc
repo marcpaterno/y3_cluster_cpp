@@ -47,22 +47,21 @@ sf2(double x, double y)
 };
 double constexpr sf2res = 1.0;
 
-
-
-
-// Scalar-value free function of two arguments.
+// Scalar-value function of two arguments.
 // This function represents the same integrand as sf2,
 // but has built-in the range of integration of x=a to x=b
 // and y=c to y=d.
 class sf2_a_b {
 public:
   sf2_a_b(double a, double b, double c, double d) : _irx(a, b), _iry(c, d) {}
+  sf2_a_b(y3_cluster::IntegrationRange x, y3_cluster::IntegrationRange y) :
+     _irx(x), _iry(y) {}
 
   double
-  operator()(double u, double v) const
+  operator()(double x, double y) const
   {
     return _irx.jacobian() * _iry.jacobian() *
-           sf2(_irx.transform(u), _iry.transform(v));
+           sf2(_irx.transform(x), _iry.transform(y));
   }
 
 private:

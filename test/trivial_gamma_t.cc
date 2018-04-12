@@ -166,7 +166,7 @@ public:
   }
 
   double
-  operator()(double lc, double lt, double zt) const
+  operator()(double lc, double lt, double /* zt */) const
   {
     return (1.0-_fmsk) * (1.0-_fprj) * invsqrt2pi() * std::exp(-std::pow((lc-_mu), 2.0) / 
 	   (2.0 *_sigma * _sigma )) / _sigma +0.5*((1.0-_fmsk)*_fprj*_tau+_fmsk*_fprj/lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc)/(std::sqrt(2.0)*_sigma))\

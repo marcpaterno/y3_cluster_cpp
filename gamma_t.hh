@@ -120,10 +120,11 @@ public:
       omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
 
     double const gamma_t_cen =
-      fcen_ * exp(A * T_cen(R, lnM)) * del_sig_cen(r, lnM);
+      fcen_ * exp(A * T_cen(r, lnM)) * del_sig_cen(r, lnM);
 
     double const gamma_t_mis = (1.0 - fcen_) * exp(A * T_mis(r, lnM, R)) *
-                               del_sig_mis(r, lnM, R) * roffset(R);
+                               del_sig_mis(r, lnM, R) * roffset(R) *
+                               lo_lc(lo, lc, R);
 
     // TODO: Actually calculate Nw. It is itself a multi-dimensional integral
     // for each sampling, so this will take some thought.
