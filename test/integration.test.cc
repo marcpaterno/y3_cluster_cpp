@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "cubacpp/cubacpp.hh"
+#include "integration_range.hh"
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -47,26 +48,7 @@ sf2(double x, double y)
 double constexpr sf2res = 1.0;
 
 
-class IntegrationRange {
-public:
-  IntegrationRange(double a, double b) : _a(a), _range(b - a) {}
 
-  double
-  jacobian() const
-  {
-    return _range;
-  }
-
-  double
-  transform(double x) const
-  {
-    return _range * x + _a;
-  }
-
-private:
-  double _a;
-  double _range;
-};
 
 // Scalar-value free function of two arguments.
 // This function represents the same integrand as sf2,
@@ -84,8 +66,8 @@ public:
   }
 
 private:
-  IntegrationRange _irx;
-  IntegrationRange _iry;
+  y3_cluster::IntegrationRange _irx;
+  y3_cluster::IntegrationRange _iry;
 };
 
 // v3f2 is an example vector-valued function of two arguments.
