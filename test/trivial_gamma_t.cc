@@ -125,7 +125,7 @@ public:
   explicit LO_LC_t(double alpha, double a, double b, double R_lambda) :
     _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda) {}
 
-  explicit LO_LC_t(cosmosis::DataBlock &sample) {
+  explicit LO_LC_t(cosmosis::DataBlock & sample) {
     sample.get_val<double>("LO_LC_params", "alpha", _alpha);
     sample.get_val<double>("LO_LC_params", "a", _a);
     sample.get_val<double>("LO_LC_params", "b", _b);
