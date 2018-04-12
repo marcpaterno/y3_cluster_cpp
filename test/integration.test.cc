@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "cubacpp/cubacpp.hh"
+#include "integration_range.hh"
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -46,6 +47,29 @@ sf2(double x, double y)
 };
 double constexpr sf2res = 1.0;
 
+
+
+
+// Scalar-value free function of two arguments.
+// This function represents the same integrand as sf2,
+// but has built-in the range of integration of x=a to x=b
+// and y=c to y=d.
+class sf2_a_b {
+public:
+  sf2_a_b(double a, double b, double c, double d) : _irx(a, b), _iry(c, d) {}
+
+  double
+  operator()(double u, double v) const
+  {
+    return _irx.jacobian() * _iry.jacobian() *
+           sf2(_irx.transform(u), _iry.transform(v));
+  }
+
+private:
+  y3_cluster::IntegrationRange _irx;
+  y3_cluster::IntegrationRange _iry;
+};
+
 // v3f2 is an example vector-valued function of two arguments.
 inline std::array<double, 3>
 v3f2(double x, double y)
@@ -81,6 +105,16 @@ TEST_CASE("cuhre works", "[integration][cuhre]")
     auto res = alg.integrate(sf2, epsrel, epsabs);
     CHECK(res.value == Approx(sf2res).epsilon(epsrel));
     CHECK(fracerr(res.value, sf2res) < epsrel);
+    CHECK(res.neval < 10000);
+    CHECK(res.status == 0);
+  }
+  SECTION("sf2_a_b")
+  {
+    sf2_a_b igrand{-4., 7., -11, -3.};
+    double sf2_a_b_res = -1276.0;
+    auto res = alg.integrate(igrand, epsrel, epsabs);
+    CHECK(res.value == Approx(sf2_a_b_res).epsilon(epsrel));
+    CHECK(fracerr(res.value, sf2_a_b_res) < epsrel);
     CHECK(res.neval < 10000);
     CHECK(res.status == 0);
   }

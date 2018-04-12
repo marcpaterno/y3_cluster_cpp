@@ -77,10 +77,10 @@ public:
   }
 
   double
-  operator()(double m, double z) const
+  operator()(double lnM, double zt) const
   {
     // TODO: This is clearly worng!
-    return _nmz->eval(z) * (_s * (m - 13.8) + _q);
+    return _nmz->eval(zt) * (_s * (lnM - 37.5) + _q);
   }
 
 private:
@@ -94,12 +94,15 @@ public:
   MOR_t(mz_power_law lambda, double sigma, double alpha)
     : _lambda(lambda), _sigma(sigma), _alpha(alpha) {}
 
-  explicit MOR_t(cosmosis::DataBlock &sample) {
+  explicit MOR_t(cosmosis::DataBlock &sample)
+  : _lambda([](cosmosis::DataBlock& x) {
     double A, B, C;
-    sample.get_val<double>("MOR_params", "A", A);
-    sample.get_val<double>("MOR_params", "B", B);
-    sample.get_val<double>("MOR_params", "C", C);
-    _lambda = mz_power_law{A, B, C};
+    x.get_val<double>("MOR_params", "A", A);
+    x.get_val<double>("MOR_params", "B", B);
+    x.get_val<double>("MOR_params", "C", C);
+    return mz_power_law{A, B, C};
+    }(sample))
+   {
     sample.get_val<double>("MOR_params", "sigma", _sigma);
     sample.get_val<double>("MOR_params", "alpha", _alpha);
   }
@@ -215,7 +218,7 @@ private:
 
 struct T_CEN_t {
   double
-  operator()(double x, double y) const
+  operator()(double , double ) const
   {
     // return x + y;
     return 1.0;
@@ -224,7 +227,7 @@ struct T_CEN_t {
 
 struct T_MIS_t {
   double
-  operator()(double x, double y, double z) const
+  operator()(double , double , double ) const
   {
     // return x + y * z;
     return 1.0;
@@ -233,7 +236,7 @@ struct T_MIS_t {
 
 struct A_CEN_t {
   double
-  operator()(double a, double b, double c, double d) const
+  operator()(double , double , double , double ) const
   {
     // return (a + b) * (c + d);
     return 1.0;
@@ -242,7 +245,7 @@ struct A_CEN_t {
 
 struct A_MIS_t {
   double
-  operator()(double a, double b, double c, double d, double e) const
+  operator()(double , double , double , double , double ) const
   {
     // return (a + b + c) * (d + e);
     return 1.0;
@@ -251,7 +254,7 @@ struct A_MIS_t {
 
 struct DEL_SIG_CEN_t {
   double
-  operator()(double x, double y) const
+  operator()(double , double ) const
   {
     // return 3. * x + y;
     return 1.0;
@@ -260,7 +263,7 @@ struct DEL_SIG_CEN_t {
 
 struct DEL_SIG_MIS_t {
   double
-  operator()(double x, double y, double z) const
+  operator()(double , double , double ) const
   {
     // return (2. * x + 0.5 * y) * z;
     return 1.0;
