@@ -42,3 +42,10 @@ target_include_directories(interp_1d_test
                            ${CMAKE_SOURCE_DIR}/externals
                            ${GSL_INCLUDE_DIR})
 add_test(interp_1d_test interp_1d_test)
+
+add_executable(mz_power_law_test main.cc mz_power_law.test.cc)
+target_include_directories(mz_power_law_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(mz_power_law_test mz_power_law_test)

@@ -2,6 +2,7 @@
 #include "/cosmosis/cosmosis/datablock/section_names.h"
 #include "cubacpp/cubacpp.hh"
 #include "gamma_t.hh"
+#include "mz_power_law.hh"
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -13,8 +14,9 @@
 #include "test/transform.hh"
 #include <stdexcept>
 
-using y3_cluster::Interp1D;
 using y3_cluster::IntegrationRange;
+using y3_cluster::Interp1D;
+using y3_cluster::mz_power_law;
 
 double constexpr pi()
 {
@@ -23,26 +25,6 @@ double constexpr pi()
 double constexpr invsqrt2pi()
 {
   return 1. / std::sqrt(2. * pi());
-};
-
-class mz_power_law {
-public:
-  mz_power_law() : log2_A_(), B_(), C_() {}
-  mz_power_law(double A, double B, double C)
-    : log2_A_(std::log(A)), B_(B), C_(C)
-  {}
-
-  double
-  operator()(double lnM, double z) const
-  {
-    double const log_res = B_ * lnM + C_ * std::log(1 + z) + log2_A_;
-    return std::exp(log_res);
-  }
-
-private:
-  double log2_A_;
-  double B_;
-  double C_;
 };
 
 class EZ {
@@ -417,7 +399,7 @@ main(int argc, char* argv[])
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
-  IntegrationRange lnM_ir { std::log(1.e11), std::log(1.e17) };
+  IntegrationRange lnM_ir{std::log(1.e11), std::log(1.e17)};
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
@@ -435,8 +417,7 @@ main(int argc, char* argv[])
                                     dvdodz,
                                     omega_z,
                                     lnM_ir);
-  // Call the integrand once, printing out the value.
-  std::cout << gti(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9) << std::endl;
+
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
   cubacpp::Cuhre c;
