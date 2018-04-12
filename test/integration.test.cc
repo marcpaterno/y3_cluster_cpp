@@ -54,8 +54,9 @@ double constexpr sf2res = 1.0;
 class sf2_a_b {
 public:
   sf2_a_b(double a, double b, double c, double d) : _irx(a, b), _iry(c, d) {}
-  sf2_a_b(y3_cluster::IntegrationRange x, y3_cluster::IntegrationRange y) :
-     _irx(x), _iry(y) {}
+  sf2_a_b(y3_cluster::IntegrationRange x, y3_cluster::IntegrationRange y)
+    : _irx(x), _iry(y)
+  {}
 
   double
   operator()(double x, double y) const
