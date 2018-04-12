@@ -417,7 +417,7 @@ main(int argc, char* argv[])
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
-  IntegrationRange lnM_ir { std::log(1.e11), std::log(1.e17) };
+  IntegrationRange lnM_ir { std::log(1.e4), std::log(1.e17) };
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
