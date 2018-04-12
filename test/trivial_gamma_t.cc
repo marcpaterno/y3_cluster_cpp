@@ -1,11 +1,11 @@
-#include "cubacpp/cubacpp.hh"
-#include "gamma_t.hh"
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "/cosmosis/cosmosis/datablock/section_names.h"
+#include "cubacpp/cubacpp.hh"
+#include "gamma_t.hh"
 #include <chrono>
 #include <cmath>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -14,6 +14,7 @@
 #include <stdexcept>
 
 using y3_cluster::Interp1D;
+using y3_cluster::IntegrationRange;
 
 double constexpr pi()
 {
@@ -28,7 +29,8 @@ class mz_power_law {
 public:
   mz_power_law() : log2_A_(), B_(), C_() {}
   mz_power_law(double A, double B, double C)
-    : log2_A_(std::log(A)), B_(B), C_(C) {}
+    : log2_A_(std::log(A)), B_(B), C_(C)
+  {}
 
   double
   operator()(double lnM, double z) const
@@ -45,11 +47,14 @@ private:
 
 class EZ {
 public:
-  explicit EZ(double omega_m, double omega_l,double omega_k) :
-	  _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k){}
-  double operator()(double z) const
+  explicit EZ(double omega_m, double omega_l, double omega_k)
+    : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
+  {}
+  double
+  operator()(double z) const
   {
-    return std::sqrt(_omega_m *(1.0+z)*(1.0+z)*(1.0+z) + _omega_k*(1.0+z)*(1.0+z)+ _omega_l  );
+    return std::sqrt(_omega_m * (1.0 + z) * (1.0 + z) * (1.0 + z) +
+                     _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
   }
 
 private:
@@ -57,7 +62,6 @@ private:
   double _omega_l;
   double _omega_k;
 };
-
 
 inline double
 gaussian(double x, double mu, double sigma)
@@ -70,7 +74,8 @@ class HMF_t {
 public:
   HMF_t(Interp1D const* nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
 
-  explicit HMF_t(cosmosis::DataBlock &sample) {
+  explicit HMF_t(cosmosis::DataBlock& sample)
+  {
     // TODO: Need to handle Interpolator once we have Interp2D
     sample.get_val<double>("HMF_params", "s", _s);
     sample.get_val<double>("HMF_params", "q", _q);
@@ -92,17 +97,18 @@ private:
 class MOR_t {
 public:
   MOR_t(mz_power_law lambda, double sigma, double alpha)
-    : _lambda(lambda), _sigma(sigma), _alpha(alpha) {}
+    : _lambda(lambda), _sigma(sigma), _alpha(alpha)
+  {}
 
-  explicit MOR_t(cosmosis::DataBlock &sample)
-  : _lambda([](cosmosis::DataBlock& x) {
-    double A, B, C;
-    x.get_val<double>("MOR_params", "A", A);
-    x.get_val<double>("MOR_params", "B", B);
-    x.get_val<double>("MOR_params", "C", C);
-    return mz_power_law{A, B, C};
+  explicit MOR_t(cosmosis::DataBlock& sample)
+    : _lambda([](cosmosis::DataBlock& x) {
+      double A, B, C;
+      x.get_val<double>("MOR_params", "A", A);
+      x.get_val<double>("MOR_params", "B", B);
+      x.get_val<double>("MOR_params", "C", C);
+      return mz_power_law{A, B, C};
     }(sample))
-   {
+  {
     sample.get_val<double>("MOR_params", "sigma", _sigma);
     sample.get_val<double>("MOR_params", "alpha", _alpha);
   }
@@ -123,12 +129,14 @@ private:
   double _alpha;
 };
 
-class  LO_LC_t {
+class LO_LC_t {
 public:
-  explicit LO_LC_t(double alpha, double a, double b, double R_lambda) :
-    _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda) {}
+  explicit LO_LC_t(double alpha, double a, double b, double R_lambda)
+    : _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda)
+  {}
 
-  explicit LO_LC_t(cosmosis::DataBlock &sample) {
+  explicit LO_LC_t(cosmosis::DataBlock& sample)
+  {
     sample.get_val<double>("LO_LC_params", "alpha", _alpha);
     sample.get_val<double>("LO_LC_params", "a", _a);
     sample.get_val<double>("LO_LC_params", "b", _b);
@@ -140,8 +148,8 @@ public:
   {
     double x = R_mis / _R_lambda;
     double y = lo / lc;
-    double mu_y = std::exp(-x*x / _alpha*_alpha);
-    double sigma_y = _a * std::atan(_b*x);
+    double mu_y = std::exp(-x * x / _alpha * _alpha);
+    double sigma_y = _a * std::atan(_b * x);
     return gaussian(y, mu_y, sigma_y);
   }
 
@@ -154,10 +162,16 @@ private:
 
 class LC_LT_t {
 public:
-  explicit LC_LT_t(double tau, double mu, double sigma, double fmsk, double fprj)
-	  : _tau(tau), _mu(mu), _sigma(sigma), _fmsk(fmsk), _fprj(fprj) {}
+  explicit LC_LT_t(double tau,
+                   double mu,
+                   double sigma,
+                   double fmsk,
+                   double fprj)
+    : _tau(tau), _mu(mu), _sigma(sigma), _fmsk(fmsk), _fprj(fprj)
+  {}
 
-  explicit LC_LT_t(cosmosis::DataBlock &sample) {
+  explicit LC_LT_t(cosmosis::DataBlock& sample)
+  {
     sample.get_val<double>("LC_LT_params", "tau", _tau);
     sample.get_val<double>("LC_LT_params", "mu", _mu);
     sample.get_val<double>("LC_LT_params", "sigma", _sigma);
@@ -168,10 +182,27 @@ public:
   double
   operator()(double lc, double lt, double /* zt */) const
   {
-    return (1.0-_fmsk) * (1.0-_fprj) * invsqrt2pi() * std::exp(-std::pow((lc-_mu), 2.0) / 
-	   (2.0 *_sigma * _sigma )) / _sigma +0.5*((1.0-_fmsk)*_fprj*_tau+_fmsk*_fprj/lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc)/(std::sqrt(2.0)*_sigma))\
-        +_fmsk*(std::erfc((_mu-lc-lt)/(std::sqrt(2.0)*_sigma))-std::erfc((_mu-lc)/(std::sqrt(2.0)*_sigma)))/(2.0*lt)\
-        -_fmsk*_fprj*(std::exp(-_tau*lt)*std::exp(_tau*(2.0*_mu+_tau*std::pow(_sigma,2.0)-2.0*lc)/2.0)*std::erfc((_mu+_tau*std::pow(_sigma,2.0)-lc-lt)/(std::sqrt(2.0)*_sigma)))/(2.0*lt);
+    return (1.0 - _fmsk) * (1.0 - _fprj) * invsqrt2pi() *
+             std::exp(-std::pow((lc - _mu), 2.0) / (2.0 * _sigma * _sigma)) /
+             _sigma +
+           0.5 * ((1.0 - _fmsk) * _fprj * _tau + _fmsk * _fprj / lt) *
+             std::exp(_tau *
+                      (2.0 * _mu + _tau * std::pow(_sigma, 2.0) - 2.0 * lc) /
+                      2.0) *
+             std::erfc((_mu + _tau * std::pow(_sigma, 2.0) - lc) /
+                       (std::sqrt(2.0) * _sigma)) +
+           _fmsk *
+             (std::erfc((_mu - lc - lt) / (std::sqrt(2.0) * _sigma)) -
+              std::erfc((_mu - lc) / (std::sqrt(2.0) * _sigma))) /
+             (2.0 * lt) -
+           _fmsk * _fprj *
+             (std::exp(-_tau * lt) *
+              std::exp(_tau *
+                       (2.0 * _mu + _tau * std::pow(_sigma, 2.0) - 2.0 * lc) /
+                       2.0) *
+              std::erfc((_mu + _tau * std::pow(_sigma, 2.0) - lc - lt) /
+                        (std::sqrt(2.0) * _sigma))) /
+             (2.0 * lt);
   }
 
 private:
@@ -186,7 +217,8 @@ class ZO_ZT_t {
 public:
   explicit ZO_ZT_t(double sigma) : _sigma(sigma) {}
 
-  explicit ZO_ZT_t(cosmosis::DataBlock &sample) {
+  explicit ZO_ZT_t(cosmosis::DataBlock& sample)
+  {
     sample.get_val<double>("ZO_ZT_params", "sigma", _sigma);
   }
 
@@ -218,7 +250,7 @@ private:
 
 struct T_CEN_t {
   double
-  operator()(double , double ) const
+  operator()(double, double) const
   {
     // return x + y;
     return 1.0;
@@ -227,7 +259,7 @@ struct T_CEN_t {
 
 struct T_MIS_t {
   double
-  operator()(double , double , double ) const
+  operator()(double, double, double) const
   {
     // return x + y * z;
     return 1.0;
@@ -236,7 +268,7 @@ struct T_MIS_t {
 
 struct A_CEN_t {
   double
-  operator()(double , double , double , double ) const
+  operator()(double, double, double, double) const
   {
     // return (a + b) * (c + d);
     return 1.0;
@@ -245,7 +277,7 @@ struct A_CEN_t {
 
 struct A_MIS_t {
   double
-  operator()(double , double , double , double , double ) const
+  operator()(double, double, double, double, double) const
   {
     // return (a + b + c) * (d + e);
     return 1.0;
@@ -254,7 +286,7 @@ struct A_MIS_t {
 
 struct DEL_SIG_CEN_t {
   double
-  operator()(double , double ) const
+  operator()(double, double) const
   {
     // return 3. * x + y;
     return 1.0;
@@ -263,7 +295,7 @@ struct DEL_SIG_CEN_t {
 
 struct DEL_SIG_MIS_t {
   double
-  operator()(double , double , double ) const
+  operator()(double, double, double) const
   {
     // return (2. * x + 0.5 * y) * z;
     return 1.0;
@@ -276,9 +308,12 @@ public:
   double
   operator()(double zt) const
   {
-     double const log2_res=2.0*std::log2(1.0+zt) + 2.0 * std::log2(_da->eval(zt)) - std::log2(_ezt(zt));
-     return 3000.0*std::exp2(log2_res);
+    double const log2_res = 2.0 * std::log2(1.0 + zt) +
+                            2.0 * std::log2(_da->eval(zt)) -
+                            std::log2(_ezt(zt));
+    return 3000.0 * std::exp2(log2_res);
   }
+
 private:
   Interp1D const* _da;
   EZ _ezt;
@@ -286,24 +321,32 @@ private:
 
 class OMEGA_Z_t {
 public:
-
   double
   operator()(double zt) const
   {
-    double poly_coeff_vol[12]={ -1.14293122E05, 5.96846869E04, 9.24239180E03, -2.23118813E03, \
-                                -4.52580713E03, 1.18404878E03, 1.27951911E02, -5.05716847E01, \
-                                1.01744577E00,  -3.11253383E-01, 5.48481084E-03,   3.12629987E00};
-    int poly_deg= 12;
-    double omega_z= 0.0;
-    double zpivot=0.2;
+    double poly_coeff_vol[12] = {-1.14293122E05,
+                                 5.96846869E04,
+                                 9.24239180E03,
+                                 -2.23118813E03,
+                                 -4.52580713E03,
+                                 1.18404878E03,
+                                 1.27951911E02,
+                                 -5.05716847E01,
+                                 1.01744577E00,
+                                 -3.11253383E-01,
+                                 5.48481084E-03,
+                                 3.12629987E00};
+    int poly_deg = 12;
+    double omega_z = 0.0;
+    double zpivot = 0.2;
 
-    for(int i=0; i<12; i++){
-      omega_z=omega_z+ poly_coeff_vol[i]*std::pow(zt- zpivot,poly_deg-i-1.);
+    for (int i = 0; i < 12; i++) {
+      omega_z =
+        omega_z + poly_coeff_vol[i] * std::pow(zt - zpivot, poly_deg - i - 1.);
     }
     return omega_z;
   }
 };
-
 
 template <class ALG, class F>
 void
@@ -329,27 +372,33 @@ main(int argc, char* argv[])
   }
 
   std::vector<double> dndlnmh;
-  double num { 0 };
-  std::ifstream file1 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
+  double num{0};
+  std::ifstream file1(
+    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
   while (file1 >> num)
-       dndlnmh.push_back(num);
+    dndlnmh.push_back(num);
 
   std::vector<double> mh;
-  std::ifstream file2 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/mh.txt");
+  std::ifstream file2(
+    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/mh.txt");
   while (file2 >> num)
-       mh.push_back(num);
+    mh.push_back(num);
 
   std::vector<double> zz;
-  std::ifstream file3 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/z.txt");
+  std::ifstream file3(
+    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/z.txt");
   while (file3 >> num)
-       zz.push_back(num);
-  if (zz.empty()) return 1;
+    zz.push_back(num);
+  if (zz.empty())
+    return 1;
 
   std::vector<double> da_arr;
-  std::ifstream file4 ("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/d_a.txt");
+  std::ifstream file4(
+    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/d_a.txt");
   while (file4 >> num)
-       da_arr.push_back(num);
-  if (da_arr.empty()) return 1;
+    da_arr.push_back(num);
+  if (da_arr.empty())
+    return 1;
 
   long long maxeval = std::stoll(args[0]);
   MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
@@ -368,6 +417,7 @@ main(int argc, char* argv[])
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
+  IntegrationRange lnM_ir { std::log(1.e11), std::log(1.e17) };
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
@@ -382,8 +432,9 @@ main(int argc, char* argv[])
                                     hmf,
                                     dsc,
                                     dsm,
-				    dvdodz,
-				    omega_z);
+                                    dvdodz,
+                                    omega_z,
+                                    lnM_ir);
   // Call the integrand once, printing out the value.
   std::cout << gti(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9) << std::endl;
   double const epsrel = 1.0e-3;

@@ -42,6 +42,8 @@ private:
   DEL_SIG_MIS del_sig_mis;
   DV_DO_DZ dv_do_dz;
   OMEGA_Z omega_z;
+  
+  y3_cluster::IntegrationRange lnM_ir_;
 
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
@@ -62,7 +64,8 @@ public:
                     DEL_SIG_CEN del_sig_cen,
                     DEL_SIG_MIS del_sig_mis,
                     DV_DO_DZ dv_do_dz,
-                    OMEGA_Z omega_z)
+                    OMEGA_Z omega_z,
+                    y3_cluster::IntegrationRange lnM_ir)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -79,6 +82,7 @@ public:
     , del_sig_mis(del_sig_mis)
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
+    , lnM_ir_(lnM_ir)
   {}
 
   // The function call operator -- this is the function to be integrated.
@@ -90,13 +94,14 @@ public:
              double zt,
              double r,
              double R,
-             double lnM,
+             double scaled_lnM,
              double A) const
   {
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
     using std::exp;
+    auto const lnM = lnM_ir_.transform(scaled_lnM);
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt, zt);
@@ -135,7 +140,7 @@ public:
     double const gamma_t = ((1.0 + m_shear) / (Nw * sig_crit_inv)) *
                            gamma_t_int * (gamma_t_cen + gamma_t_mis);
 
-    return gamma_t;
+    return gamma_t * lnM_ir_.jacobian();
   }
 };
 
@@ -182,7 +187,8 @@ make_gamma_t_integrand(double fcen,
                        DEL_SIG_CEN del_sig_cen,
                        DEL_SIG_MIS del_sig_mis,
                        DV_DO_DZ dv_do_dz,
-                       OMEGA_Z omega_z)
+                       OMEGA_Z omega_z,
+                       y3_cluster::IntegrationRange lnM_ir)
 {
   return {fcen,
           msci,
@@ -199,7 +205,8 @@ make_gamma_t_integrand(double fcen,
           del_sig_cen,
           del_sig_mis,
           dv_do_dz,
-          omega_z};
+          omega_z,
+          lnM_ir};
 }
 
 #endif
