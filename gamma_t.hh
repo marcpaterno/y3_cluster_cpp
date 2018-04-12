@@ -1,6 +1,8 @@
 #ifndef Y3_CLUSTER_GAMMA_T_HH
 #define Y3_CLUSTER_GAMMA_T_HH
 
+#include "integration_range.hh"
+
 #include <cmath>
 
 // This class template is based
