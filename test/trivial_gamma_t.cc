@@ -64,10 +64,10 @@ public:
   }
 
   double
-  operator()(double lnM, double zt) const
+  operator()(double lnM, double /*zt*/) const
   {
     // TODO: This is clearly worng!
-    return _nmz->eval(zt) * (_s * (lnM - 37.5) + _q);
+    return _nmz->eval(lnM) * (_s * (lnM - 37.5) + _q);
   }
 
 private:
@@ -362,15 +362,15 @@ main(int argc, char* argv[])
 
   std::vector<double> mh;
   std::ifstream file2(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/mh.txt");
+    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
   while (file2 >> num)
-    mh.push_back(num);
+  {  mh.push_back(std::log(num));}
 
   std::vector<double> zz;
   std::ifstream file3(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/z.txt");
   while (file3 >> num)
-    zz.push_back(num);
+  {  zz.push_back(num);}
   if (zz.empty())
     return 1;
 
@@ -383,7 +383,7 @@ main(int argc, char* argv[])
     return 1;
 
   long long maxeval = std::stoll(args[0]);
-  MOR_t mor{mz_power_law{1., 1., 0.1}, 1., 1.};
+  MOR_t mor{mz_power_law{1.e-10, 1., 0.1}, 1., 1.};
   LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.1};
@@ -392,7 +392,7 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  Interp1D f{zz, zz};
+  Interp1D f{mh, mh};
   HMF_t hmf{&f, 0.037, 1.008};
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;

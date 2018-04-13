@@ -4,6 +4,7 @@
 #include "integration_range.hh"
 
 #include <cmath>
+#include <iostream>
 
 // This class template is based
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
