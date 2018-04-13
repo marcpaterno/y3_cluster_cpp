@@ -363,14 +363,16 @@ main(int argc, char* argv[])
   std::vector<double> mh;
   std::ifstream file2(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
-  while (file2 >> num)
-  {  mh.push_back(std::log(num));}
+  while (file2 >> num) {
+    mh.push_back(std::log(num));
+  }
 
   std::vector<double> zz;
   std::ifstream file3(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/z.txt");
-  while (file3 >> num)
-  {  zz.push_back(num);}
+  while (file3 >> num) {
+    zz.push_back(num);
+  }
   if (zz.empty())
     return 1;
 
