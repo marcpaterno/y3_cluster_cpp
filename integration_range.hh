@@ -6,8 +6,10 @@
 namespace y3_cluster {
   class IntegrationRange {
   public:
-    IntegrationRange(double a, double b) : _a(a), _range(b - a) {
-      if (_range == 0.0) throw std::logic_error("zero-length IntegrationRange");
+    IntegrationRange(double a, double b) : _a(a), _range(b - a)
+    {
+      if (_range == 0.0)
+        throw std::logic_error("zero-length IntegrationRange");
     }
 
     double

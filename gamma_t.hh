@@ -43,7 +43,7 @@ private:
   DEL_SIG_MIS del_sig_mis;
   DV_DO_DZ dv_do_dz;
   OMEGA_Z omega_z;
-  
+
   y3_cluster::IntegrationRange lnM_ir_;
 
 public:
