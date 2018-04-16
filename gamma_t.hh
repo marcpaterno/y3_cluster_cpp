@@ -45,6 +45,9 @@ private:
   OMEGA_Z omega_z;
 
   y3_cluster::IntegrationRange lnM_ir_;
+  y3_cluster::IntegrationRange lo_ir_;
+  y3_cluster::IntegrationRange lt_ir_;
+  y3_cluster::IntegrationRange lc_ir_;
 
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
@@ -66,7 +69,10 @@ public:
                     DEL_SIG_MIS del_sig_mis,
                     DV_DO_DZ dv_do_dz,
                     OMEGA_Z omega_z,
-                    y3_cluster::IntegrationRange lnM_ir)
+                    y3_cluster::IntegrationRange lnM_ir, 
+                    y3_cluster::IntegrationRange lo_ir, 
+                    y3_cluster::IntegrationRange lt_ir, 
+                    y3_cluster::IntegrationRange lc_ir)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -84,13 +90,16 @@ public:
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
     , lnM_ir_(lnM_ir)
+    , lo_ir_(lo_ir)
+    , lt_ir_(lt_ir)
+    , lc_ir_(lc_ir)
   {}
 
   // The function call operator -- this is the function to be integrated.
   double
-  operator()(double lo,
-             double lc,
-             double lt,
+  operator()(double scaled_lo,
+             double scaled_lc,
+             double scaled_lt,
              double zo,
              double zt,
              double r,
@@ -103,6 +112,9 @@ public:
     // seems to be the intent of the commented-out code below.
     using std::exp;
     auto const lnM = lnM_ir_.transform(scaled_lnM);
+    auto const lo = lo_ir_.transform(scaled_lo);
+    auto const lt = lt_ir_.transform(scaled_lt);
+    auto const lc = lc_ir_.transform(scaled_lc);
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt, zt);
@@ -141,7 +153,7 @@ public:
     double const gamma_t = ((1.0 + m_shear) / (Nw * sig_crit_inv)) *
                            gamma_t_int * (gamma_t_cen + gamma_t_mis);
 
-    return gamma_t * lnM_ir_.jacobian();
+    return gamma_t * lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian();
   }
 };
 
@@ -189,7 +201,10 @@ make_gamma_t_integrand(double fcen,
                        DEL_SIG_MIS del_sig_mis,
                        DV_DO_DZ dv_do_dz,
                        OMEGA_Z omega_z,
-                       y3_cluster::IntegrationRange lnM_ir)
+                       y3_cluster::IntegrationRange lnM_ir, 
+                       y3_cluster::IntegrationRange lo_ir, 
+                       y3_cluster::IntegrationRange lt_ir, 
+                       y3_cluster::IntegrationRange lc_ir)
 {
   return {fcen,
           msci,
@@ -207,7 +222,10 @@ make_gamma_t_integrand(double fcen,
           del_sig_mis,
           dv_do_dz,
           omega_z,
-          lnM_ir};
+          lnM_ir, 
+          lo_ir, 
+          lt_ir, 
+          lc_ir}; 
 }
 
 #endif

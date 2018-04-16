@@ -401,7 +401,10 @@ main(int argc, char* argv[])
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
-  IntegrationRange lnM_ir{std::log(1.e7), std::log(1.e17)};
+  IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
+  IntegrationRange lo_ir{1.0, 1000};
+  IntegrationRange lt_ir{1.0, 1000};
+  IntegrationRange lc_ir{1.0, 1000};
   auto gti = make_gamma_t_integrand(2.0,
                                     0.11,
                                     mor,
@@ -418,7 +421,10 @@ main(int argc, char* argv[])
                                     dsm,
                                     dvdodz,
                                     omega_z,
-                                    lnM_ir);
+                                    lnM_ir, 
+				    lo_ir,
+				    lt_ir,
+				    lc_ir);
 
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
