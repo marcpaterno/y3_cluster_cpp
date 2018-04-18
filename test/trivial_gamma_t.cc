@@ -32,6 +32,16 @@ public:
   explicit EZ(double omega_m, double omega_l, double omega_k)
     : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
   {}
+
+  explicit EZ(cosmosis::DataBlock& sample)
+  {
+    // TODO: These cosmology parameters can likely be taken
+    // from a more standard location
+    sample.get_val<double>("EZ_params", "omega_m", _omega_m);
+    sample.get_val<double>("EZ_params", "omega_l", _omega_l);
+    sample.get_val<double>("EZ_params", "omega_k", _omega_k);
+  }
+
   double
   operator()(double z) const
   {
@@ -59,6 +69,12 @@ public:
   explicit HMF_t(cosmosis::DataBlock& sample)
   {
     // TODO: Need to handle Interpolator once we have Interp2D
+    //: _lambda([](cosmosis::DataBlock& x) {
+    //  double ?, ?
+    //  x.get_val<double>("HMF_params", "?", ?);
+    //  x.get_val<double>("HMF_params", "?", ?);
+    //  return Interp1D{?, ?};
+    //}(sample))
     sample.get_val<double>("HMF_params", "s", _s);
     sample.get_val<double>("HMF_params", "q", _q);
   }
@@ -219,6 +235,11 @@ class ROFFSET_t {
 public:
   explicit ROFFSET_t(double tau) : _tau(tau) {}
 
+  explicit ROFFSET_t(cosmosis::DataBlock& sample)
+  {
+    sample.get_val<double>("ROFFSET_params", "tau", _tau);
+  }
+  
   double
   operator()(double x) const
   {
@@ -231,6 +252,15 @@ private:
 };
 
 struct T_CEN_t {
+
+  explicit T_CEN_t() {}
+
+  explicit T_CEN_t(cosmosis::DataBlock& /*sample*/)
+  {
+    // TODO: Add any needed data block parameters here
+    //sample.get_val<double>("T_CEN_params", "??", _??);
+  }
+  
   double
   operator()(double, double) const
   {
@@ -240,6 +270,15 @@ struct T_CEN_t {
 };
 
 struct T_MIS_t {
+
+  explicit T_MIS_t() {}
+
+  explicit T_MIS_t(cosmosis::DataBlock& /*sample*/)
+  {
+    // TODO: Add any needed data block parameters here
+    //sample.get_val<double>("T_MIS_params", "??", _??);
+  }
+  
   double
   operator()(double, double, double) const
   {
@@ -249,6 +288,15 @@ struct T_MIS_t {
 };
 
 struct A_CEN_t {
+
+  explicit A_CEN_t() {}
+
+  explicit A_CEN_t(cosmosis::DataBlock& /*sample*/)
+  {
+    // TODO: Add any needed data block parameters here
+    //sample.get_val<double>("A_CEN_params", "??", _??);
+  }
+  
   double
   operator()(double, double, double, double) const
   {
@@ -258,6 +306,15 @@ struct A_CEN_t {
 };
 
 struct A_MIS_t {
+
+  explicit A_MIS_t() {}
+
+  explicit A_MIS_t(cosmosis::DataBlock& /*sample*/)
+  {
+    // TODO: Add any needed data block parameters here
+    //sample.get_val<double>("A_MIS_params", "??", _??);
+  }
+  
   double
   operator()(double, double, double, double, double) const
   {
@@ -267,6 +324,15 @@ struct A_MIS_t {
 };
 
 struct DEL_SIG_CEN_t {
+
+  explicit DEL_SIG_CEN_t() {}
+
+  explicit DEL_SIG_CEN_t(cosmosis::DataBlock& /*sample*/)
+  {
+    // TODO: Add any needed data block parameters here
+    //sample.get_val<double>("DEL_SIG_CEN_params", "??", _??);
+  }
+  
   double
   operator()(double, double) const
   {
@@ -276,6 +342,15 @@ struct DEL_SIG_CEN_t {
 };
 
 struct DEL_SIG_MIS_t {
+
+  explicit DEL_SIG_MIS_t() {}
+
+  explicit DEL_SIG_MIS_t(cosmosis::DataBlock& /*sample*/)
+  {
+    // TODO: Add any needed data block parameters here
+    //sample.get_val<double>("DEL_SIG_MIS_params", "??", _??);
+  }
+  
   double
   operator()(double, double, double) const
   {
