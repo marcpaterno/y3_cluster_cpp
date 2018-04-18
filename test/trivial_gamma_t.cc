@@ -32,16 +32,6 @@ public:
   explicit EZ(double omega_m, double omega_l, double omega_k)
     : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
   {}
-
-  explicit EZ(cosmosis::DataBlock& sample)
-  {
-    // TODO: These cosmology parameters can likely be taken
-    // from a more standard location
-    sample.get_val<double>("EZ_params", "omega_m", _omega_m);
-    sample.get_val<double>("EZ_params", "omega_l", _omega_l);
-    sample.get_val<double>("EZ_params", "omega_k", _omega_k);
-  }
-
   double
   operator()(double z) const
   {
@@ -69,12 +59,6 @@ public:
   explicit HMF_t(cosmosis::DataBlock& sample)
   {
     // TODO: Need to handle Interpolator once we have Interp2D
-    //: _lambda([](cosmosis::DataBlock& x) {
-    //  double ?, ?
-    //  x.get_val<double>("HMF_params", "?", ?);
-    //  x.get_val<double>("HMF_params", "?", ?);
-    //  return Interp1D{?, ?};
-    //}(sample))
     sample.get_val<double>("HMF_params", "s", _s);
     sample.get_val<double>("HMF_params", "q", _q);
   }
@@ -235,11 +219,6 @@ class ROFFSET_t {
 public:
   explicit ROFFSET_t(double tau) : _tau(tau) {}
 
-  explicit ROFFSET_t(cosmosis::DataBlock& sample)
-  {
-    sample.get_val<double>("ROFFSET_params", "tau", _tau);
-  }
-  
   double
   operator()(double x) const
   {
@@ -252,15 +231,6 @@ private:
 };
 
 struct T_CEN_t {
-
-  explicit T_CEN_t() {}
-
-  explicit T_CEN_t(cosmosis::DataBlock& /*sample*/)
-  {
-    // TODO: Add any needed data block parameters here
-    //sample.get_val<double>("T_CEN_params", "??", _??);
-  }
-  
   double
   operator()(double, double) const
   {
@@ -270,15 +240,6 @@ struct T_CEN_t {
 };
 
 struct T_MIS_t {
-
-  explicit T_MIS_t() {}
-
-  explicit T_MIS_t(cosmosis::DataBlock& /*sample*/)
-  {
-    // TODO: Add any needed data block parameters here
-    //sample.get_val<double>("T_MIS_params", "??", _??);
-  }
-  
   double
   operator()(double, double, double) const
   {
@@ -288,15 +249,6 @@ struct T_MIS_t {
 };
 
 struct A_CEN_t {
-
-  explicit A_CEN_t() {}
-
-  explicit A_CEN_t(cosmosis::DataBlock& /*sample*/)
-  {
-    // TODO: Add any needed data block parameters here
-    //sample.get_val<double>("A_CEN_params", "??", _??);
-  }
-  
   double
   operator()(double, double, double, double) const
   {
@@ -306,15 +258,6 @@ struct A_CEN_t {
 };
 
 struct A_MIS_t {
-
-  explicit A_MIS_t() {}
-
-  explicit A_MIS_t(cosmosis::DataBlock& /*sample*/)
-  {
-    // TODO: Add any needed data block parameters here
-    //sample.get_val<double>("A_MIS_params", "??", _??);
-  }
-  
   double
   operator()(double, double, double, double, double) const
   {
@@ -324,15 +267,6 @@ struct A_MIS_t {
 };
 
 struct DEL_SIG_CEN_t {
-
-  explicit DEL_SIG_CEN_t() {}
-
-  explicit DEL_SIG_CEN_t(cosmosis::DataBlock& /*sample*/)
-  {
-    // TODO: Add any needed data block parameters here
-    //sample.get_val<double>("DEL_SIG_CEN_params", "??", _??);
-  }
-  
   double
   operator()(double, double) const
   {
@@ -342,15 +276,6 @@ struct DEL_SIG_CEN_t {
 };
 
 struct DEL_SIG_MIS_t {
-
-  explicit DEL_SIG_MIS_t() {}
-
-  explicit DEL_SIG_MIS_t(cosmosis::DataBlock& /*sample*/)
-  {
-    // TODO: Add any needed data block parameters here
-    //sample.get_val<double>("DEL_SIG_MIS_params", "??", _??);
-  }
-  
   double
   operator()(double, double, double) const
   {
@@ -436,10 +361,12 @@ main(int argc, char* argv[])
     dndlnmh.push_back(num);
 
   std::vector<double> mh;
+  std::vector<double> lnmh;
   std::ifstream file2(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
   while (file2 >> num) {
     mh.push_back(std::log(num));
+    lnmh.push_back(std::exp(-std::log(num)));
   }
 
   std::vector<double> zz;
@@ -469,7 +396,7 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  Interp1D f{mh, mh};
+  Interp1D f{mh, lnmh};
   HMF_t hmf{&f, 0.037, 1.008};
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;
@@ -477,7 +404,7 @@ main(int argc, char* argv[])
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
   IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
-  IntegrationRange lo_ir{1.0, 1000};
+  IntegrationRange lo_ir{20, 30};
   IntegrationRange lt_ir{1.0, 1000};
   IntegrationRange lc_ir{1.0, 1000};
   auto gti = make_gamma_t_integrand(2.0,
