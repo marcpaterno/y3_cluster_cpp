@@ -8,3 +8,6 @@ CTestTestfile.cmake
 transform_test
 interp_1d_test
 mz_power_law_test
+interp_2d_test
+point_3d_test
+fpsupport_test
