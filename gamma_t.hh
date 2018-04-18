@@ -4,6 +4,7 @@
 #include "integration_range.hh"
 
 #include <cmath>
+#include <iostream>
 
 // This class template is based
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
@@ -43,6 +44,11 @@ private:
   DV_DO_DZ dv_do_dz;
   OMEGA_Z omega_z;
 
+  y3_cluster::IntegrationRange lnM_ir_;
+  y3_cluster::IntegrationRange lo_ir_;
+  y3_cluster::IntegrationRange lt_ir_;
+  y3_cluster::IntegrationRange lc_ir_;
+
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -62,7 +68,11 @@ public:
                     DEL_SIG_CEN del_sig_cen,
                     DEL_SIG_MIS del_sig_mis,
                     DV_DO_DZ dv_do_dz,
-                    OMEGA_Z omega_z)
+                    OMEGA_Z omega_z,
+                    y3_cluster::IntegrationRange lnM_ir, 
+                    y3_cluster::IntegrationRange lo_ir, 
+                    y3_cluster::IntegrationRange lt_ir, 
+                    y3_cluster::IntegrationRange lc_ir)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -79,24 +89,32 @@ public:
     , del_sig_mis(del_sig_mis)
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
+    , lnM_ir_(lnM_ir)
+    , lo_ir_(lo_ir)
+    , lt_ir_(lt_ir)
+    , lc_ir_(lc_ir)
   {}
 
   // The function call operator -- this is the function to be integrated.
   double
-  operator()(double lo,
-             double lc,
-             double lt,
+  operator()(double scaled_lo,
+             double scaled_lc,
+             double scaled_lt,
              double zo,
              double zt,
              double r,
              double R,
-             double lnM,
+             double scaled_lnM,
              double A) const
   {
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
     using std::exp;
+    auto const lnM = lnM_ir_.transform(scaled_lnM);
+    auto const lo = lo_ir_.transform(scaled_lo);
+    auto const lt = lt_ir_.transform(scaled_lt);
+    auto const lc = lc_ir_.transform(scaled_lc);
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt, zt);
@@ -120,10 +138,11 @@ public:
       omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
 
     double const gamma_t_cen =
-      fcen_ * exp(A * T_cen(R, lnM)) * del_sig_cen(r, lnM);
+      fcen_ * exp(A * T_cen(r, lnM)) * del_sig_cen(r, lnM);
 
     double const gamma_t_mis = (1.0 - fcen_) * exp(A * T_mis(r, lnM, R)) *
-                               del_sig_mis(r, lnM, R) * roffset(R);
+                               del_sig_mis(r, lnM, R) * roffset(R) *
+                               lo_lc(lo, lc, R);
 
     // TODO: Actually calculate Nw. It is itself a multi-dimensional integral
     // for each sampling, so this will take some thought.
@@ -134,7 +153,7 @@ public:
     double const gamma_t = ((1.0 + m_shear) / (Nw * sig_crit_inv)) *
                            gamma_t_int * (gamma_t_cen + gamma_t_mis);
 
-    return gamma_t;
+    return gamma_t * lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian();
   }
 };
 
@@ -181,7 +200,11 @@ make_gamma_t_integrand(double fcen,
                        DEL_SIG_CEN del_sig_cen,
                        DEL_SIG_MIS del_sig_mis,
                        DV_DO_DZ dv_do_dz,
-                       OMEGA_Z omega_z)
+                       OMEGA_Z omega_z,
+                       y3_cluster::IntegrationRange lnM_ir, 
+                       y3_cluster::IntegrationRange lo_ir, 
+                       y3_cluster::IntegrationRange lt_ir, 
+                       y3_cluster::IntegrationRange lc_ir)
 {
   return {fcen,
           msci,
@@ -198,7 +221,11 @@ make_gamma_t_integrand(double fcen,
           del_sig_cen,
           del_sig_mis,
           dv_do_dz,
-          omega_z};
+          omega_z,
+          lnM_ir, 
+          lo_ir, 
+          lt_ir, 
+          lc_ir}; 
 }
 
 #endif

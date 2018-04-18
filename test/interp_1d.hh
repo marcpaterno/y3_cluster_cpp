@@ -15,7 +15,6 @@
 namespace y3_cluster {
   class Interp1D {
   public:
-    
     // Interpolator created from two arrays; compiler assures they are of the
     // same length.
     template <std::size_t N>
@@ -33,7 +32,11 @@ namespace y3_cluster {
     Interp1D(Interp1D const&) = delete;
 
     double operator()(double x) const;
-    double eval(double x) const {return this->operator()(x);};
+    double
+    eval(double x) const
+    {
+      return this->operator()(x);
+    };
 
   private:
     std::vector<double> xs_;
@@ -43,9 +46,8 @@ namespace y3_cluster {
 }
 
 template <std::size_t N>
-inline 
-y3_cluster::Interp1D::Interp1D(std::array<double, N> const& xs,
-                               std::array<double, N> const& ys)
+inline y3_cluster::Interp1D::Interp1D(std::array<double, N> const& xs,
+                                      std::array<double, N> const& ys)
   : Interp1D({begin(xs), end(xs)}, {begin(ys), end(ys)})
 {}
 
