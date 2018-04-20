@@ -266,13 +266,56 @@ struct A_MIS_t {
   }
 };
 
-struct DEL_SIG_CEN_t {
-  double
-  operator()(double, double) const
+/* NFW Profile , in h*M_solar*Mpc^-2 */
+class DEL_SIG_CEN_t {
+public:
+  explicit DEL_SIG_CEN_t(double c, double z_cl)
+    : _c(c), _z_cl(z_cl)
+  {}
+
+  explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
   {
-    // return 3. * x + y;
-    return 1.0;
+    sample.get_val<double>("del_sig_cen_params", "c", _c);
+    sample.get_val<double>("del_sig_cen_params", "z_cl", _z_cl);
   }
+
+  double
+  operator()(double r, double lnM) const /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
+  {
+    EZ ez{0.3,0.7,0.};
+
+    double delta_c = 200.*_c*_c*_c / (3.*(std::log(1.+ _c) - _c/(1.+ _c)));
+    double rho_crit = 2.77526157E11*ez(_z_cl)*ez(_z_cl);
+    /* EZ*EZ would be a little bit slower than direct definition */
+
+    double r_200 = std::pow(3.*std::exp(lnM)/(800.*pi()*rho_crit) , 1./3.);
+    double r_s = r_200 / _c;
+
+    double r_ratio = r / r_s;
+    double coeff = r_s * delta_c * rho_crit;
+
+    if(r_ratio<1.){
+      return coeff * ( 8.* std::atanh(std::sqrt((1.-r_ratio)/(1.+r_ratio)))/
+              (r_ratio*r_ratio*std::sqrt(1.-r_ratio*r_ratio))
+              +4.*std::log(r_ratio/2.)/(r_ratio*r_ratio)
+              -2./(r_ratio*r_ratio-1.)
+              +4.*std::atanh(std::sqrt((1.-r_ratio)/(1.+r_ratio)))/
+              ((r_ratio*r_ratio-1.)*std::sqrt(1.-r_ratio*r_ratio)) );
+    }else if(r_ratio==1.){
+      return coeff * (10./3. + 4.*std::log(0.5));
+    }else{
+      return coeff * (8.* std::atan(std::sqrt((r_ratio-1.)/(r_ratio+1.)))/
+              (r_ratio*r_ratio*std::sqrt(r_ratio*r_ratio-1.))
+              +4.*std::log(r_ratio/2.)/(r_ratio*r_ratio)
+              -2./(r_ratio*r_ratio-1.)
+              +4.*std::atanh(std::sqrt((r_ratio-1.)/(r_ratio+1.)))/
+              (std::pow(r_ratio*r_ratio-1.,1.5)) );
+    }
+  } 
+
+private:
+  double _c;
+  double _z_cl;
 };
 
 struct DEL_SIG_MIS_t {
@@ -398,7 +441,7 @@ main(int argc, char* argv[])
   A_MIS_t a_mis;
   Interp1D f{mh, lnmh};
   HMF_t hmf{&f, 0.037, 1.008};
-  DEL_SIG_CEN_t dsc;
+  DEL_SIG_CEN_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
