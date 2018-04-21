@@ -308,7 +308,7 @@ public:
               (r_ratio*r_ratio*std::sqrt(r_ratio*r_ratio-1.))
               +4.*std::log(r_ratio/2.)/(r_ratio*r_ratio)
               -2./(r_ratio*r_ratio-1.)
-              +4.*std::atanh(std::sqrt((r_ratio-1.)/(r_ratio+1.)))/
+              +4.*std::atan(std::sqrt((r_ratio-1.)/(r_ratio+1.)))/
               (std::pow(r_ratio*r_ratio-1.,1.5)) );
     }
   } 
