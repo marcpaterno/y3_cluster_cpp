@@ -400,16 +400,19 @@ main(int argc, char* argv[])
   double num{0};
   std::ifstream file1(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
-  while (file1 >> num)
-    dndlnmh.push_back(num);
+  for (int a =1; a< 970;a=a+1){
+     file1 >> num;
+     dndlnmh.push_back(num);
+  }
   if (dndlnmh.empty())
     return 1;
 
   std::vector<double> mh;
   std::ifstream file2(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
-  while (file2 >> num) {
-    mh.push_back(std::log(num));
+  for (int a =1; a< 970;a=a+1){
+     file2 >> num;
+     mh.push_back(std::log(num));
   }
   if (mh.empty())
     return 1;
@@ -432,16 +435,16 @@ main(int argc, char* argv[])
     return 1;
 
   long long maxeval = std::stoll(args[0]);
-  MOR_t mor{mz_power_law{1.e-10, 1., 0.1}, 1., 1.};
+  MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
   LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.1};
-  ROFFSET_t roffset{2.0};
+  ROFFSET_t roffset{0.2};
   T_CEN_t t_cen;
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  Interp1D f{mh, mh};
+  Interp1D f{mh, dndlnmh};
   HMF_t hmf{&f, 0.037, 1.008};
   DEL_SIG_CEN_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
@@ -449,7 +452,7 @@ main(int argc, char* argv[])
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
   IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
-  IntegrationRange lo_ir{20, 30};
+  IntegrationRange lo_ir{10, 30};
   IntegrationRange lt_ir{1.0, 1000};
   IntegrationRange lc_ir{1.0, 1000};
   auto gti = make_gamma_t_integrand(2.0,
