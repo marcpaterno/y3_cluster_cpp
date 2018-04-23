@@ -359,15 +359,17 @@ main(int argc, char* argv[])
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
   while (file1 >> num)
     dndlnmh.push_back(num);
+  if (dndlnmh.empty())
+    return 1;
 
   std::vector<double> mh;
-  std::vector<double> lnmh;
   std::ifstream file2(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
   while (file2 >> num) {
     mh.push_back(std::log(num));
-    lnmh.push_back(std::exp(-std::log(num)));
   }
+  if (mh.empty())
+    return 1;
 
   std::vector<double> zz;
   std::ifstream file3(
@@ -396,7 +398,7 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  Interp1D f{mh, lnmh};
+  Interp1D f{mh, mh};
   HMF_t hmf{&f, 0.037, 1.008};
   DEL_SIG_CEN_t dsc;
   DEL_SIG_MIS_t dsm;
