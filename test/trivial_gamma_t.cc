@@ -1,5 +1,6 @@
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "/cosmosis/cosmosis/datablock/section_names.h"
+#include "/cosmosis/cosmosis/datablock/c_datablock.h"
 #include "cubacpp/cubacpp.hh"
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
@@ -59,6 +60,8 @@ public:
   explicit HMF_t(cosmosis::DataBlock& sample)
   {
     // TODO: Need to handle Interpolator once we have Interp2D
+    // sample.get_val   
+    // auto interp_table = make_fake_array<double, d, d>(data);
     sample.get_val<double>("HMF_params", "s", _s);
     sample.get_val<double>("HMF_params", "q", _q);
   }
