@@ -53,7 +53,7 @@ private:
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
 
-  double r;
+  double *r;
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -82,7 +82,7 @@ public:
                     y3_cluster::IntegrationRange zt_ir, 
                     y3_cluster::IntegrationRange R_ir, 
                     y3_cluster::IntegrationRange A_ir, 
-		    double rarray)
+		    double *rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -151,9 +151,9 @@ public:
     // The evaluation below follows the convention set in main overleaf document
     //The evaluation is for Y3 likelihood
     double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
-    double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    double const gamma_t_cen =fcen_ * del_sig_cen(r, lnM) * exp(A * T_cen(r, lnM));
-    double const gamma_t_mis = (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r, lnM, R) *  exp(A * T_cen(r, lnM));
+    double  gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    double const gamma_t_cen =fcen_ * del_sig_cen(r[1], lnM) * exp(A * T_cen(r[1], lnM)); 
+    double const gamma_t_mis = (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r[1], lnM, R) *  exp(A * T_cen(r[1], lnM));
 
     // this is for y1 likelihood
     //double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v ;//*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
@@ -223,7 +223,8 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange zt_ir{0., 1.0};    
    y3_cluster::IntegrationRange R_ir{0., 1.0};    
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
-   double rarray=0.4;
+   double rarray[10];
+   for ( int i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*i;}
    return {fcen,
           msci,
           mor,
