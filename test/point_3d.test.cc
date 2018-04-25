@@ -4,7 +4,7 @@
 #include <cmath>
 #include <limits>
 
-using y3_cluster::is_equivalent;
+using fpsupport::is_equivalent;
 using y3_cluster::Point3D;
 using y3_cluster::Point3DLess;
 

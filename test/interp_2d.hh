@@ -18,6 +18,13 @@ namespace y3_cluster {
 
   class Interp2D {
   public:
+    /*
+     commented out awaiting implementation...
+
+    Interp2D(std::vector<double> const& xs, std::vector<double> const& ys,
+             cosmosis::ndarray<double> const& zs);
+    */
+
     // Interpolator created from two arrays; compiler assures they are of the
     // same length.
     template <std::size_t M, std::size_t N>

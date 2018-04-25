@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "test/fpsupport.hh"
+#include "test/point_3d.hh"
 
 #include <cmath>
 #include <limits>
@@ -49,7 +50,6 @@ TEST_CASE("subnormals behave as expected")
   CHECK(b != tiny());
   CHECK(b > tiny());
   CHECK(tiny() < b);
-  std::cout << a << '\n' << b << '\n' << tiny() << '\n';
 }
 
 TEST_CASE("squashing works")
@@ -59,7 +59,7 @@ TEST_CASE("squashing works")
     CHECK(not std::isnormal(x));
     CHECK(std::fpclassify(x) != FP_ZERO);
   }
-  fpsupport::squash_subnormals(p1);
+  y3_cluster::squash_subnormals(p1);
   CHECK(std::fpclassify(p1[0]) == FP_ZERO);
   CHECK(std::fpclassify(p1[1]) == FP_ZERO);
   CHECK(std::fpclassify(p1[2]) != FP_ZERO);
@@ -69,8 +69,7 @@ TEST_CASE("squashing works")
     CHECK(not std::isnormal(x));
     CHECK(std::fpclassify(x) != FP_ZERO);
   }
-  fpsupport::squash_subnormals(p2);
-  fpsupport::squash_subnormals(p1);
+  y3_cluster::squash_subnormals(p2);
   CHECK(std::fpclassify(p2[0]) == FP_ZERO);
   CHECK(std::fpclassify(p2[1]) == FP_ZERO);
   CHECK(std::fpclassify(p2[2]) != FP_ZERO);
