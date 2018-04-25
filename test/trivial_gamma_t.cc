@@ -58,10 +58,16 @@ public:
   HMF_t(Interp1D const* nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
 
   explicit HMF_t(cosmosis::DataBlock& sample)
+    // TODO: test once Interp2D implementation is finished
+    //: _lambda([](cosmosis::DataBlock& x) {
+    //  std::vector<double> const& xs, ys;
+    //  cosmosis::ndarray<double> const& zs;
+    //  x.get_val<std::vector<double>>("HMF_params", "xs", xs);
+    //  x.get_val<std::vector<double>>("HMF_params", "ys", ys);
+    //  x.get_val<cosmosis::ndarray<double>>("HMF_params", "zs", zs);
+    //  return Interp2D{xs, ys, zs};
+    //}(sample)) 
   {
-    // TODO: Need to handle Interpolator once we have Interp2D
-    // sample.get_val   
-    // auto interp_table = make_fake_array<double, d, d>(data);
     sample.get_val<double>("HMF_params", "s", _s);
     sample.get_val<double>("HMF_params", "q", _q);
   }
