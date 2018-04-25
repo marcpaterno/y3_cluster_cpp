@@ -3,6 +3,7 @@
 
 #include "integration_range.hh"
 
+#include <array>
 #include <cmath>
 #include <iostream>
 
@@ -53,7 +54,7 @@ private:
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
 
-  double *r;
+  std::array<double, 10> r;
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -82,7 +83,7 @@ public:
                     y3_cluster::IntegrationRange zt_ir, 
                     y3_cluster::IntegrationRange R_ir, 
                     y3_cluster::IntegrationRange A_ir, 
-		    double *rarray)
+		                std::array<double, 10> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -163,7 +164,7 @@ public:
     
     // puttign together the return vector
     double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
-    double const Nw = N;
+    double const Nw = N * w;
     double const gamma_t = (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen + gamma_t_mis);
 
     return {{N*jacob, Nw*jacob, gamma_t*jacob}};
@@ -223,8 +224,8 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange zt_ir{0., 1.0};    
    y3_cluster::IntegrationRange R_ir{0., 1.0};    
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
-   double rarray[10];
-   for ( int i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*i;}
+   std::array<double, 10> rarray;
+   for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*i;}
    return {fcen,
           msci,
           mor,

@@ -275,7 +275,7 @@ struct A_MIS_t {
 class DEL_SIG_CEN_y1{
 public:
  double
- operator() (double r, double lnM) const
+ operator() (double, double lnM) const
  { return std::exp(lnM);
  }	 
 };
