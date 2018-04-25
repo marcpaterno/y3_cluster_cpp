@@ -48,6 +48,10 @@ private:
   y3_cluster::IntegrationRange lo_ir_;
   y3_cluster::IntegrationRange lt_ir_;
   y3_cluster::IntegrationRange lc_ir_;
+  y3_cluster::IntegrationRange zo_ir_;
+  y3_cluster::IntegrationRange zt_ir_;
+  y3_cluster::IntegrationRange R_ir_;
+  y3_cluster::IntegrationRange A_ir_;
 
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
@@ -72,7 +76,11 @@ public:
                     y3_cluster::IntegrationRange lnM_ir, 
                     y3_cluster::IntegrationRange lo_ir, 
                     y3_cluster::IntegrationRange lt_ir, 
-                    y3_cluster::IntegrationRange lc_ir)
+                    y3_cluster::IntegrationRange lc_ir, 
+                    y3_cluster::IntegrationRange zo_ir, 
+                    y3_cluster::IntegrationRange zt_ir, 
+                    y3_cluster::IntegrationRange R_ir, 
+                    y3_cluster::IntegrationRange A_ir)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -93,6 +101,10 @@ public:
     , lo_ir_(lo_ir)
     , lt_ir_(lt_ir)
     , lc_ir_(lc_ir)
+    , zo_ir_(zo_ir)
+    , zt_ir_(zt_ir)
+    , R_ir_(R_ir)
+    , A_ir_(A_ir)
   {}
 
   // The function call operator -- this is the function to be integrated.
@@ -100,12 +112,12 @@ public:
   operator()(double scaled_lo,
              double scaled_lc,
              double scaled_lt,
-             double zo,
-             double zt,
+             double scaled_zo,
+             double scaled_zt,
              double r,
-             double R,
+             double scaled_R,
              double scaled_lnM,
-             double A) const
+             double scaled_A) const
   {
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
@@ -115,6 +127,11 @@ public:
     auto const lo = lo_ir_.transform(scaled_lo);
     auto const lt = lt_ir_.transform(scaled_lt);
     auto const lc = lc_ir_.transform(scaled_lc);
+    auto const zo = zo_ir_.transform(scaled_zo);
+    auto const zt = zt_ir_.transform(scaled_zt);
+    auto const R = R_ir_.transform(scaled_R);
+    auto const A = A_ir_.transform(scaled_A);
+
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt, zt);
@@ -123,8 +140,6 @@ public:
     auto const omega_z_v = omega_z(zt);
 
     // These will eventually be passed by CosmoSIS
-    // double omega_zt = 1.0;
-    // double dv_do_dz = 1.0;
     double m_shear = 1.0;
     double sig_crit_inv = 1.0;
 
@@ -153,7 +168,7 @@ public:
     double const gamma_t = ((1.0 + m_shear) / (Nw * sig_crit_inv)) *
                            gamma_t_int * (gamma_t_cen + gamma_t_mis);
 
-    return gamma_t * lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian();
+    return gamma_t * lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian();
   }
 };
 
@@ -201,12 +216,16 @@ make_gamma_t_integrand(double fcen,
                        DEL_SIG_MIS del_sig_mis,
                        DV_DO_DZ dv_do_dz,
                        OMEGA_Z omega_z,
-                       y3_cluster::IntegrationRange lnM_ir, 
                        y3_cluster::IntegrationRange lo_ir, 
-                       y3_cluster::IntegrationRange lt_ir, 
-                       y3_cluster::IntegrationRange lc_ir)
+                       y3_cluster::IntegrationRange zo_ir)
 {
-  return {fcen,
+   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};    
+   y3_cluster::IntegrationRange lt_ir{1.0, 1000};    
+   y3_cluster::IntegrationRange lc_ir{1.0, 1000};    
+   y3_cluster::IntegrationRange zt_ir{0, 1.0};    
+   y3_cluster::IntegrationRange R_ir{0, 1.0};    
+   y3_cluster::IntegrationRange A_ir{0, 1.0};    
+   return {fcen,
           msci,
           mor,
           lo_lc,
@@ -225,7 +244,11 @@ make_gamma_t_integrand(double fcen,
           lnM_ir, 
           lo_ir, 
           lt_ir, 
-          lc_ir}; 
+          lc_ir,
+	  zo_ir, 
+	  zt_ir,
+	  R_ir,
+          A_ir }; 
 }
 
 #endif
