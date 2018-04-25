@@ -53,6 +53,7 @@ private:
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
 
+  double r;
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -80,7 +81,8 @@ public:
                     y3_cluster::IntegrationRange zo_ir, 
                     y3_cluster::IntegrationRange zt_ir, 
                     y3_cluster::IntegrationRange R_ir, 
-                    y3_cluster::IntegrationRange A_ir)
+                    y3_cluster::IntegrationRange A_ir, 
+		    double rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -105,6 +107,7 @@ public:
     , zt_ir_(zt_ir)
     , R_ir_(R_ir)
     , A_ir_(A_ir)
+    , r(rarray)
   {}
 
   // The function call operator -- this is the function to be integrated.
@@ -114,7 +117,6 @@ public:
              double scaled_lt,
              double scaled_zo,
              double scaled_zt,
-             double r,
              double scaled_R,
              double scaled_lnM,
              double scaled_A) const
@@ -138,6 +140,7 @@ public:
     auto const mor_v = mor(lt, lnM, zt);
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
+
 
     // These will eventually be passed by CosmoSIS
     double m_shear = 1.0;
@@ -219,6 +222,7 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange zt_ir{0., 1.0};    
    y3_cluster::IntegrationRange R_ir{0., 1.0};    
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
+   double rarray=0.4;
    return {fcen,
           msci,
           mor,
@@ -242,7 +246,8 @@ make_gamma_t_integrand(double fcen,
 	  zo_ir, 
 	  zt_ir,
 	  R_ir,
-          A_ir }; 
+          A_ir,
+          rarray }; 
 }
 
 #endif
