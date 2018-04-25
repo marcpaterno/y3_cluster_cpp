@@ -102,7 +102,7 @@ public:
     double const x = lt - ltm;
     double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
     double const erfterm = std::erfc(erfarg);
-    return gaussian(x, 0.0, _sigma) ;//* erfterm;
+    return gaussian(x, 0.0, _sigma) * erfterm;
   }
 
 private:
@@ -272,6 +272,14 @@ struct A_MIS_t {
 };
 
 /* NFW Profile , in h*M_solar*Mpc^-2 */
+class DEL_SIG_CEN_y1{
+public:
+ double
+ operator() (double r, double lnM) const
+ { return std::exp(lnM);
+ }	 
+};
+
 class DEL_SIG_CEN_t {
 public:
   explicit DEL_SIG_CEN_t(double c, double z_cl)
@@ -449,8 +457,11 @@ main(int argc, char* argv[])
   A_MIS_t a_mis;
   Interp1D f{mh, dndlnmh};
   HMF_t hmf{&f, 0.037, 1.008};
-  DEL_SIG_CEN_t dsc{5., 0.5};
+  //DEL_SIG_CEN_t dsc{5., 0.5};
+  DEL_SIG_CEN_y1 dsc;
+  //DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
+
   Interp1D da_f{zz, da_arr};
   DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
