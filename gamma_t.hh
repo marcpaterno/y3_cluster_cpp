@@ -149,18 +149,19 @@ public:
     double w = 1.0;
 
     // The evaluation below follows the convention set in main overleaf document
+    //The evaluation is for Y3 likelihood
     double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
-
     double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    double const gamma_t_cen =fcen_ * del_sig_cen(r, lnM) * exp(A * T_cen(r, lnM));
+    double const gamma_t_mis = (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r, lnM, R) *  exp(A * T_cen(r, lnM));
 
-    double const gamma_t_cen =fcen_ * exp(A * T_cen(r, lnM))*del_sig_cen(r, lnM);
-    double const gamma_t_mis = (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * exp(A * T_cen(r, lnM)) * del_sig_mis(r, lnM, R);
-
-    // TODO: Actually calculate Nw. It is itself a multi-dimensional integral
-    // for each sampling, so this will take some thought.
-    // MFP: If "each sampling" means each sample in the CosmoSIS MCMC, then
-    // we can calculate the value of Nw for the current sample, and store
-    // that value as a data member in the Gamma_T_Integrand object.
+    // this is for y1 likelihood
+    //double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v ;//*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
+    //double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    //double const gamma_t_cen =del_sig_cen(r, lnM);//fcen_ * del_sig_cen(r, lnM) * exp(A * T_cen(r, lnM));
+    //double const gamma_t_mis = 0.;//(1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r, lnM, R) *  exp(A * T_cen(r, lnM));
+    
+    // puttign together the return vector
     double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
     double const Nw = N;
     double const gamma_t = (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen + gamma_t_mis);
