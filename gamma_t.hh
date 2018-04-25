@@ -3,6 +3,7 @@
 
 #include "integration_range.hh"
 
+#include <array>
 #include <cmath>
 #include <iostream>
 
@@ -48,7 +49,12 @@ private:
   y3_cluster::IntegrationRange lo_ir_;
   y3_cluster::IntegrationRange lt_ir_;
   y3_cluster::IntegrationRange lc_ir_;
+  y3_cluster::IntegrationRange zo_ir_;
+  y3_cluster::IntegrationRange zt_ir_;
+  y3_cluster::IntegrationRange R_ir_;
+  y3_cluster::IntegrationRange A_ir_;
 
+  std::array<double, 10> r;
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -72,7 +78,12 @@ public:
                     y3_cluster::IntegrationRange lnM_ir, 
                     y3_cluster::IntegrationRange lo_ir, 
                     y3_cluster::IntegrationRange lt_ir, 
-                    y3_cluster::IntegrationRange lc_ir)
+                    y3_cluster::IntegrationRange lc_ir, 
+                    y3_cluster::IntegrationRange zo_ir, 
+                    y3_cluster::IntegrationRange zt_ir, 
+                    y3_cluster::IntegrationRange R_ir, 
+                    y3_cluster::IntegrationRange A_ir, 
+		                std::array<double, 10> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -93,19 +104,23 @@ public:
     , lo_ir_(lo_ir)
     , lt_ir_(lt_ir)
     , lc_ir_(lc_ir)
+    , zo_ir_(zo_ir)
+    , zt_ir_(zt_ir)
+    , R_ir_(R_ir)
+    , A_ir_(A_ir)
+    , r(rarray)
   {}
 
   // The function call operator -- this is the function to be integrated.
-  double
+  std::array<double, 3>
   operator()(double scaled_lo,
              double scaled_lc,
              double scaled_lt,
-             double zo,
-             double zt,
-             double r,
-             double R,
+             double scaled_zo,
+             double scaled_zt,
+             double scaled_R,
              double scaled_lnM,
-             double A) const
+             double scaled_A) const
   {
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
@@ -115,6 +130,11 @@ public:
     auto const lo = lo_ir_.transform(scaled_lo);
     auto const lt = lt_ir_.transform(scaled_lt);
     auto const lc = lc_ir_.transform(scaled_lc);
+    auto const zo = zo_ir_.transform(scaled_zo);
+    auto const zt = zt_ir_.transform(scaled_zt);
+    auto const R = R_ir_.transform(scaled_R);
+    auto const A = A_ir_.transform(scaled_A);
+
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const lc_lt_v = lc_lt(lc, lt, zt);
@@ -122,38 +142,32 @@ public:
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
 
+
     // These will eventually be passed by CosmoSIS
-    // double omega_zt = 1.0;
-    // double dv_do_dz = 1.0;
     double m_shear = 1.0;
     double sig_crit_inv = 1.0;
-
     // This is the lambda-redshift bin weight that we don't fully understand
-    // yet...
     double w = 1.0;
 
     // The evaluation below follows the convention set in main overleaf document
+    //The evaluation is for Y3 likelihood
+    double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
+    double  gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    double const gamma_t_cen =fcen_ * del_sig_cen(r[1], lnM) * exp(A * T_cen(r[1], lnM)); 
+    double const gamma_t_mis = (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r[1], lnM, R) *  exp(A * T_cen(r[1], lnM));
 
-    double const gamma_t_int =
-      omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    // this is for y1 likelihood
+    //double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v ;//*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
+    //double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    //double const gamma_t_cen =del_sig_cen(r, lnM);//fcen_ * del_sig_cen(r, lnM) * exp(A * T_cen(r, lnM));
+    //double const gamma_t_mis = 0.;//(1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r, lnM, R) *  exp(A * T_cen(r, lnM));
+    
+    // puttign together the return vector
+    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
+    double const Nw = N * w;
+    double const gamma_t = (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen + gamma_t_mis);
 
-    double const gamma_t_cen =
-      fcen_ * exp(A * T_cen(r, lnM)) * del_sig_cen(r, lnM);
-
-    double const gamma_t_mis = (1.0 - fcen_) * exp(A * T_mis(r, lnM, R)) *
-                               del_sig_mis(r, lnM, R) * roffset(R) *
-                               lo_lc(lo, lc, R);
-
-    // TODO: Actually calculate Nw. It is itself a multi-dimensional integral
-    // for each sampling, so this will take some thought.
-    // MFP: If "each sampling" means each sample in the CosmoSIS MCMC, then
-    // we can calculate the value of Nw for the current sample, and store
-    // that value as a data member in the Gamma_T_Integrand object.
-    double const Nw = 1.0;
-    double const gamma_t = ((1.0 + m_shear) / (Nw * sig_crit_inv)) *
-                           gamma_t_int * (gamma_t_cen + gamma_t_mis);
-
-    return gamma_t * lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian();
+    return {{N*jacob, Nw*jacob, gamma_t*jacob}};
   }
 };
 
@@ -201,12 +215,18 @@ make_gamma_t_integrand(double fcen,
                        DEL_SIG_MIS del_sig_mis,
                        DV_DO_DZ dv_do_dz,
                        OMEGA_Z omega_z,
-                       y3_cluster::IntegrationRange lnM_ir, 
                        y3_cluster::IntegrationRange lo_ir, 
-                       y3_cluster::IntegrationRange lt_ir, 
-                       y3_cluster::IntegrationRange lc_ir)
+                       y3_cluster::IntegrationRange zo_ir)
 {
-  return {fcen,
+   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};    
+   y3_cluster::IntegrationRange lt_ir{1.0, 100};    
+   y3_cluster::IntegrationRange lc_ir{1.0, 100};    
+   y3_cluster::IntegrationRange zt_ir{0., 1.0};    
+   y3_cluster::IntegrationRange R_ir{0., 1.0};    
+   y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
+   std::array<double, 10> rarray;
+   for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*i;}
+   return {fcen,
           msci,
           mor,
           lo_lc,
@@ -225,7 +245,12 @@ make_gamma_t_integrand(double fcen,
           lnM_ir, 
           lo_ir, 
           lt_ir, 
-          lc_ir}; 
+          lc_ir,
+	  zo_ir, 
+	  zt_ir,
+	  R_ir,
+          A_ir,
+          rarray }; 
 }
 
 #endif

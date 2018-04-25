@@ -5,7 +5,7 @@ enable_testing()
 # These flags are used by everything in the project. Put anything that affects
 # the ABI here -- e.g., the standard level.
 add_compile_options(-W -Wall) # -Werror)
-SET ( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math -march=native -mtune=native" )
+SET ( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno  -fno-signaling-nans -fexcess-precision=fast -march=native -mtune=native" )
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

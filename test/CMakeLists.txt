@@ -43,9 +43,32 @@ target_include_directories(interp_1d_test
                            ${GSL_INCLUDE_DIR})
 add_test(interp_1d_test interp_1d_test)
 
+add_executable(interp_2d_test main.cc interp_2d.cc interp_2d.test.cc)
+target_link_libraries(interp_2d_test PRIVATE ${GSL_LIBRARIES})
+target_include_directories(interp_2d_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${GSL_INCLUDE_DIR})
+add_test(interp_2d_test interp_2d_test)
+
 add_executable(mz_power_law_test main.cc mz_power_law.test.cc)
 target_include_directories(mz_power_law_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(mz_power_law_test mz_power_law_test)
+
+add_executable(point_3d_test main.cc point_3d.test.cc)
+target_include_directories(point_3d_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(point_3d_test point_3d_test)
+
+add_executable(fpsupport_test main.cc fpsupport.test.cc)
+target_include_directories(fpsupport_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(fpsupport_test fpsupport_test)
