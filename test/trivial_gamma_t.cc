@@ -102,7 +102,7 @@ public:
     double const x = lt - ltm;
     double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
     double const erfterm = std::erfc(erfarg);
-    return gaussian(x, 0.0, _sigma) * erfterm;
+    return gaussian(x, 0.0, _sigma) ;//* erfterm;
   }
 
 private:
@@ -142,6 +142,11 @@ private:
   double _R_lambda;
 };
 
+class LC_LT_t2 {
+public:
+ double operator()( double lc, double lt, double /* zt */) const
+ {return gaussian(lc-lt, 0.0, 10.0);}
+};
 class LC_LT_t {
 public:
   explicit LC_LT_t(double tau,
@@ -333,10 +338,8 @@ public:
   double
   operator()(double zt) const
   {
-    double const log2_res = 2.0 * std::log2(1.0 + zt) +
-                            2.0 * std::log2(_da->eval(zt)) -
-                            std::log2(_ezt(zt));
-    return 3000.0 * std::exp2(log2_res);
+    double const _da_z=_da->eval(zt);
+    return 3000.0*(1.0 + zt)*(1.0+zt)*_da_z*_da_z/_ezt(zt);
   }
 
 private:
@@ -426,7 +429,7 @@ main(int argc, char* argv[])
   if (zz.empty())
     return 1;
 
-  std::vector<double> da_arr;
+  std::vector<double> da_arr; // in h inverse Mpc
   std::ifstream file4(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/d_a.txt");
   while (file4 >> num)
@@ -438,7 +441,7 @@ main(int argc, char* argv[])
   MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
   LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
-  ZO_ZT_t zo_zt{0.1};
+  ZO_ZT_t zo_zt{0.05};
   ROFFSET_t roffset{0.2};
   T_CEN_t t_cen;
   T_MIS_t t_mis;

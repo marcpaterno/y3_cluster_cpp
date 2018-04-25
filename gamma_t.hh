@@ -108,7 +108,7 @@ public:
   {}
 
   // The function call operator -- this is the function to be integrated.
-  double
+  std::array<double, 3>
   operator()(double scaled_lo,
              double scaled_lc,
              double scaled_lt,
@@ -142,12 +142,11 @@ public:
     // These will eventually be passed by CosmoSIS
     double m_shear = 1.0;
     double sig_crit_inv = 1.0;
-
     // This is the lambda-redshift bin weight that we don't fully understand
-    // yet...
     double w = 1.0;
 
     // The evaluation below follows the convention set in main overleaf document
+    double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v;
 
     double const gamma_t_int =
       omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
@@ -164,11 +163,12 @@ public:
     // MFP: If "each sampling" means each sample in the CosmoSIS MCMC, then
     // we can calculate the value of Nw for the current sample, and store
     // that value as a data member in the Gamma_T_Integrand object.
-    double const Nw = 1.0;
+    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
+    double const Nw = N;
     double const gamma_t = ((1.0 + m_shear) / (Nw * sig_crit_inv)) *
                            gamma_t_int * (gamma_t_cen + gamma_t_mis);
 
-    return gamma_t * lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian();
+    return {{N*jacob, Nw*jacob, gamma_t*jacob}};
   }
 };
 
@@ -220,11 +220,11 @@ make_gamma_t_integrand(double fcen,
                        y3_cluster::IntegrationRange zo_ir)
 {
    y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};    
-   y3_cluster::IntegrationRange lt_ir{1.0, 1000};    
-   y3_cluster::IntegrationRange lc_ir{1.0, 1000};    
-   y3_cluster::IntegrationRange zt_ir{0, 1.0};    
-   y3_cluster::IntegrationRange R_ir{0, 1.0};    
-   y3_cluster::IntegrationRange A_ir{0, 1.0};    
+   y3_cluster::IntegrationRange lt_ir{1.0, 100};    
+   y3_cluster::IntegrationRange lc_ir{1.0, 100};    
+   y3_cluster::IntegrationRange zt_ir{0., 1.0};    
+   y3_cluster::IntegrationRange R_ir{0., 1.0};    
+   y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
    return {fcen,
           msci,
           mor,
