@@ -19,7 +19,6 @@ namespace fpsupport {
     auto const code = std::fpclassify(x);
     return (code == FP_NAN) || (code == FP_INFINITE);
   }
-
 }
 
 #endif

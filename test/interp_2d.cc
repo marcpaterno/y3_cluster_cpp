@@ -45,7 +45,7 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
   std::sort(data.begin(), data.end(), comp);
 
   // determine length of first block of points (how many y values for that x).
-  auto not_equal = [reltol, abstol](Point3D const& a, Point3D const& b){
+  auto not_equal = [reltol, abstol](Point3D const& a, Point3D const& b) {
     return fpsupport::is_equivalent(a[0], b[0], reltol, abstol);
   };
   auto block_1_end = std::adjacent_find(data.begin(), data.end(), not_equal);

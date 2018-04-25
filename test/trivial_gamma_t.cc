@@ -144,8 +144,11 @@ private:
 
 class LC_LT_t2 {
 public:
- double operator()( double lc, double lt, double /* zt */) const
- {return gaussian(lc-lt, 0.0, 10.0);}
+  double
+  operator()(double lc, double lt, double /* zt */) const
+  {
+    return gaussian(lc - lt, 0.0, 10.0);
+  }
 };
 class LC_LT_t {
 public:
@@ -272,19 +275,18 @@ struct A_MIS_t {
 };
 
 /* NFW Profile , in h*M_solar*Mpc^-2 */
-class DEL_SIG_CEN_y1{
+class DEL_SIG_CEN_y1 {
 public:
- double
- operator() (double, double lnM) const
- { return std::exp(lnM);
- }	 
+  double
+  operator()(double, double lnM) const
+  {
+    return std::exp(lnM);
+  }
 };
 
 class DEL_SIG_CEN_t {
 public:
-  explicit DEL_SIG_CEN_t(double c, double z_cl)
-    : _c(c), _z_cl(z_cl)
-  {}
+  explicit DEL_SIG_CEN_t(double c, double z_cl) : _c(c), _z_cl(z_cl) {}
 
   explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
   {
@@ -292,39 +294,43 @@ public:
     sample.get_val<double>("del_sig_cen_params", "z_cl", _z_cl);
   }
 
-  double
-  operator()(double r, double lnM) const /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
+  double operator()(double r, double lnM) const
+    /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
   {
-    EZ ez{0.3,0.7,0.};
+    EZ ez{0.3, 0.7, 0.};
 
-    double delta_c = 200.*_c*_c*_c / (3.*(std::log(1.+ _c) - _c/(1.+ _c)));
-    double rho_crit = 2.77526157E11*ez(_z_cl)*ez(_z_cl);
+    double delta_c =
+      200. * _c * _c * _c / (3. * (std::log(1. + _c) - _c / (1. + _c)));
+    double rho_crit = 2.77526157E11 * ez(_z_cl) * ez(_z_cl);
     /* EZ*EZ would be a little bit slower than direct definition */
 
-    double r_200 = std::pow(3.*std::exp(lnM)/(800.*pi()*rho_crit) , 1./3.);
+    double r_200 =
+      std::pow(3. * std::exp(lnM) / (800. * pi() * rho_crit), 1. / 3.);
     double r_s = r_200 / _c;
 
     double r_ratio = r / r_s;
     double coeff = r_s * delta_c * rho_crit;
 
-    if(r_ratio<1.){
-      return coeff * ( 8.* std::atanh(std::sqrt((1.-r_ratio)/(1.+r_ratio)))/
-              (r_ratio*r_ratio*std::sqrt(1.-r_ratio*r_ratio))
-              +4.*std::log(r_ratio/2.)/(r_ratio*r_ratio)
-              -2./(r_ratio*r_ratio-1.)
-              +4.*std::atanh(std::sqrt((1.-r_ratio)/(1.+r_ratio)))/
-              ((r_ratio*r_ratio-1.)*std::sqrt(1.-r_ratio*r_ratio)) );
-    }else if(r_ratio==1.){
-      return coeff * (10./3. + 4.*std::log(0.5));
-    }else{
-      return coeff * (8.* std::atan(std::sqrt((r_ratio-1.)/(r_ratio+1.)))/
-              (r_ratio*r_ratio*std::sqrt(r_ratio*r_ratio-1.))
-              +4.*std::log(r_ratio/2.)/(r_ratio*r_ratio)
-              -2./(r_ratio*r_ratio-1.)
-              +4.*std::atan(std::sqrt((r_ratio-1.)/(r_ratio+1.)))/
-              (std::pow(r_ratio*r_ratio-1.,1.5)) );
+    if (r_ratio < 1.) {
+      return coeff *
+             (8. * std::atanh(std::sqrt((1. - r_ratio) / (1. + r_ratio))) /
+                (r_ratio * r_ratio * std::sqrt(1. - r_ratio * r_ratio)) +
+              4. * std::log(r_ratio / 2.) / (r_ratio * r_ratio) -
+              2. / (r_ratio * r_ratio - 1.) +
+              4. * std::atanh(std::sqrt((1. - r_ratio) / (1. + r_ratio))) /
+                ((r_ratio * r_ratio - 1.) * std::sqrt(1. - r_ratio * r_ratio)));
+    } else if (r_ratio == 1.) {
+      return coeff * (10. / 3. + 4. * std::log(0.5));
+    } else {
+      return coeff *
+             (8. * std::atan(std::sqrt((r_ratio - 1.) / (r_ratio + 1.))) /
+                (r_ratio * r_ratio * std::sqrt(r_ratio * r_ratio - 1.)) +
+              4. * std::log(r_ratio / 2.) / (r_ratio * r_ratio) -
+              2. / (r_ratio * r_ratio - 1.) +
+              4. * std::atan(std::sqrt((r_ratio - 1.) / (r_ratio + 1.))) /
+                (std::pow(r_ratio * r_ratio - 1., 1.5)));
     }
-  } 
+  }
 
 private:
   double _c;
@@ -346,8 +352,8 @@ public:
   double
   operator()(double zt) const
   {
-    double const _da_z=_da->eval(zt);
-    return 3000.0*(1.0 + zt)*(1.0+zt)*_da_z*_da_z/_ezt(zt);
+    double const _da_z = _da->eval(zt);
+    return 3000.0 * (1.0 + zt) * (1.0 + zt) * _da_z * _da_z / _ezt(zt);
   }
 
 private:
@@ -411,9 +417,9 @@ main(int argc, char* argv[])
   double num{0};
   std::ifstream file1(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
-  for (int a =1; a< 970;a=a+1){
-     file1 >> num;
-     dndlnmh.push_back(num);
+  for (int a = 1; a < 970; a = a + 1) {
+    file1 >> num;
+    dndlnmh.push_back(num);
   }
   if (dndlnmh.empty())
     return 1;
@@ -421,9 +427,9 @@ main(int argc, char* argv[])
   std::vector<double> mh;
   std::ifstream file2(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
-  for (int a =1; a< 970;a=a+1){
-     file2 >> num;
-     mh.push_back(std::log(num));
+  for (int a = 1; a < 970; a = a + 1) {
+    file2 >> num;
+    mh.push_back(std::log(num));
   }
   if (mh.empty())
     return 1;
@@ -457,9 +463,9 @@ main(int argc, char* argv[])
   A_MIS_t a_mis;
   Interp1D f{mh, dndlnmh};
   HMF_t hmf{&f, 0.037, 1.008};
-  //DEL_SIG_CEN_t dsc{5., 0.5};
+  // DEL_SIG_CEN_t dsc{5., 0.5};
   DEL_SIG_CEN_y1 dsc;
-  //DEL_SIG_MIS_t dsc{5., 0.5};
+  // DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
 
   Interp1D da_f{zz, da_arr};
@@ -485,7 +491,6 @@ main(int argc, char* argv[])
                                     omega_z,
                                     lo_ir,
                                     zo_ir);
-
 
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
