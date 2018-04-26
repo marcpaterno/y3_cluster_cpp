@@ -153,7 +153,7 @@ public:
     //The evaluation is for Y3 likelihood
     double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
     double  gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    double const gamma_t_cen =fcen_ * del_sig_cen(r[1], lnM) * exp(A * T_cen(r[1], lnM)); 
+    double const gamma_t_cen =fcen_ * del_sig_cen(r[1], lnM, zt) * exp(A * T_cen(r[1], lnM)); 
     double const gamma_t_mis = (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r[1], lnM, R) *  exp(A * T_cen(r[1], lnM));
 
     // this is for y1 likelihood

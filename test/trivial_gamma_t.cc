@@ -46,6 +46,24 @@ private:
   double _omega_k;
 };
 
+class EZ_sq {
+public:
+  explicit EZ_sq(double omega_m, double omega_l, double omega_k)
+    : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
+  {}
+  double
+  operator()(double z) const
+  {
+    return (_omega_m * (1.0 + z) * (1.0 + z) * (1.0 + z) +
+              _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
+  }
+
+private:
+  double _omega_m;
+  double _omega_l;
+  double _omega_k;
+};
+
 inline double
 gaussian(double x, double mu, double sigma)
 {
@@ -295,22 +313,21 @@ public:
 
 class DEL_SIG_CEN_t {
 public:
-  explicit DEL_SIG_CEN_t(double c, double z_cl) : _c(c), _z_cl(z_cl) {}
+  explicit DEL_SIG_CEN_t(double c ) : _c(c) {}
 
   explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
   {
     sample.get_val<double>("del_sig_cen_params", "c", _c);
-    sample.get_val<double>("del_sig_cen_params", "z_cl", _z_cl);
   }
 
-  double operator()(double r, double lnM) const
+  double operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
   {
-    EZ ez{0.3, 0.7, 0.};
+    EZ_sq ez_sq{0.3, 0.7, 0.};
 
     double delta_c =
       200. * _c * _c * _c / (3. * (std::log(1. + _c) - _c / (1. + _c)));
-    double rho_crit = 2.77526157E11 * ez(_z_cl) * ez(_z_cl);
+    double rho_crit = 2.77526157E11 * ez_sq(zt ) ;
     /* EZ*EZ would be a little bit slower than direct definition */
 
     double r_200 =
@@ -343,7 +360,6 @@ public:
 
 private:
   double _c;
-  double _z_cl;
 };
 
 struct DEL_SIG_MIS_t {
@@ -473,7 +489,7 @@ main(int argc, char* argv[])
   Interp1D f{mh, dndlnmh};
   HMF_t hmf{&f, 0.037, 1.008};
   // DEL_SIG_CEN_t dsc{5., 0.5};
-  DEL_SIG_CEN_y1 dsc;
+  DEL_SIG_CEN_t dsc{5. };
   // DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
 
