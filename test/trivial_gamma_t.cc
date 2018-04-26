@@ -200,13 +200,13 @@ public:
   operator()(double lc, double lt, double /* zt */) const
   {
     return (1.0 - _fmsk) * (1.0 - _fprj) * invsqrt2pi() *
-             std::exp(-std::pow((lc - _mu), 2.0) / (2.0 * _sigma * _sigma)) /
+             std::exp(-(lc - _mu) * (lc - _mu) / (2.0 * _sigma * _sigma)) /
              _sigma +
            0.5 * ((1.0 - _fmsk) * _fprj * _tau + _fmsk * _fprj / lt) *
              std::exp(_tau *
-                      (2.0 * _mu + _tau * std::pow(_sigma, 2.0) - 2.0 * lc) /
+                      (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
                       2.0) *
-             std::erfc((_mu + _tau * std::pow(_sigma, 2.0) - lc) /
+             std::erfc((_mu + _tau * _sigma * _sigma - lc) /
                        (std::sqrt(2.0) * _sigma)) +
            _fmsk *
              (std::erfc((_mu - lc - lt) / (std::sqrt(2.0) * _sigma)) -
@@ -215,9 +215,9 @@ public:
            _fmsk * _fprj *
              (std::exp(-_tau * lt) *
               std::exp(_tau *
-                       (2.0 * _mu + _tau * std::pow(_sigma, 2.0) - 2.0 * lc) /
+                       (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
                        2.0) *
-              std::erfc((_mu + _tau * std::pow(_sigma, 2.0) - lc - lt) /
+              std::erfc((_mu + _tau * _sigma * _sigma - lc - lt) /
                         (std::sqrt(2.0) * _sigma))) /
              (2.0 * lt);
   }
