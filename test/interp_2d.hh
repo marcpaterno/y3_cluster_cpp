@@ -28,9 +28,12 @@ namespace y3_cluster {
     // Interpolator created from two arrays; compiler assures they are of the
     // same length.
     template <std::size_t M, std::size_t N>
+    using matrix = std::array<std::array<double, N>, M>;
+
+    template <std::size_t M, std::size_t N>
     Interp2D(std::array<double, M> const& xs,
              std::array<double, N> const& ys,
-             std::array<std::array<double, M>, N> const& zs);
+             matrix<M, N> const& zs);
 
     // Interpolator created from vector of triplets: throws std::logic_error if
     // the points do not lie on a grid in (x,y) space, or if any values are NaN
@@ -72,14 +75,20 @@ namespace y3_cluster {
 }
 
 template <std::size_t M, std::size_t N>
-inline y3_cluster::Interp2D::Interp2D(
-  std::array<double, M> const& xs,
-  std::array<double, N> const& ys,
-  std::array<std::array<double, M>, N> const& zs)
-  : xs_(begin(xs), end(xs))
-  , ys_(begin(ys), end(ys))
-  , zs_(&zs[0][0], &zs[M - 1][N - 1])
-{}
+inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
+                                      std::array<double, N> const& ys,
+                                      matrix<M, N> const& zs)
+  : xs_(cbegin(xs), cend(xs)), ys_(cbegin(ys), cend(ys)), zs_(M * N)
+{
+  for (std::size_t i = 0; i != M; ++i) {
+    std::array<double, N> const& row = zs[i];
+    for (std::size_t j = 0; j != N; ++j) {
+      zs_[i + j * M] = row[j];
+    }
+  }
+  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
+  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+}
 
 inline std::size_t
 y3_cluster::Interp2D::nx() const

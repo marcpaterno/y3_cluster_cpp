@@ -1,6 +1,6 @@
+#include "/cosmosis/cosmosis/datablock/c_datablock.h"
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "/cosmosis/cosmosis/datablock/section_names.h"
-#include "/cosmosis/cosmosis/datablock/c_datablock.h"
 #include "cubacpp/cubacpp.hh"
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
@@ -55,7 +55,7 @@ public:
   operator()(double z) const
   {
     return (_omega_m * (1.0 + z) * (1.0 + z) * (1.0 + z) +
-              _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
+            _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
   }
 
 private:
@@ -85,7 +85,7 @@ public:
     //  x.get_val<cosmosis::ndarray<double>>("HMF_params", "zs", zs);
     //  return Interp2D{xs, ys, zs};
     //}(sample)) 
-  {
+ {
     sample.get_val<double>("HMF_params", "s", _s);
     sample.get_val<double>("HMF_params", "q", _q);
   }
@@ -204,8 +204,7 @@ public:
              std::exp(-(lc - _mu) * (lc - _mu) / (2.0 * _sigma * _sigma)) /
              _sigma +
            0.5 * ((1.0 - _fmsk) * _fprj * _tau + _fmsk * _fprj / lt) *
-             std::exp(_tau *
-                      (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
+             std::exp(_tau * (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
                       2.0) *
              std::erfc((_mu + _tau * _sigma * _sigma - lc) /
                        (std::sqrt(2.0) * _sigma)) +
@@ -215,8 +214,7 @@ public:
              (2.0 * lt) -
            _fmsk * _fprj *
              (std::exp(-_tau * lt) *
-              std::exp(_tau *
-                       (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
+              std::exp(_tau * (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
                        2.0) *
               std::erfc((_mu + _tau * _sigma * _sigma - lc - lt) /
                         (std::sqrt(2.0) * _sigma))) /
@@ -314,21 +312,22 @@ public:
 
 class DEL_SIG_CEN_t {
 public:
-  explicit DEL_SIG_CEN_t(double c ) : _c(c) {}
+  explicit DEL_SIG_CEN_t(double c) : _c(c) {}
 
   explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
   {
     sample.get_val<double>("del_sig_cen_params", "c", _c);
   }
 
-  double operator()(double r, double lnM, double zt) const
-    /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
+  double
+  operator()(double r, double lnM, double zt) const
+  /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
   {
     EZ_sq ez_sq{0.3, 0.7, 0.};
 
     double delta_c =
       200. * _c * _c * _c / (3. * (std::log(1. + _c) - _c / (1. + _c)));
-    double rho_crit = 2.77526157E11 * ez_sq(zt ) ;
+    double rho_crit = 2.77526157E11 * ez_sq(zt);
     /* EZ*EZ would be a little bit slower than direct definition */
 
     double r_200 =
@@ -512,7 +511,7 @@ main(int argc, char* argv[])
   Interp1D f{mh, dndlnmh};
   HMF_t hmf{&f, 0.037, 1.008};
   // DEL_SIG_CEN_t dsc{5., 0.5};
-  DEL_SIG_CEN_t dsc{5. };
+  DEL_SIG_CEN_t dsc{5.};
   // DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
 
