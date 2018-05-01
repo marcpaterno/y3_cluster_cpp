@@ -53,15 +53,25 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
 
   auto const row_1_end = std::find_if_not(data.begin(), data.end(), equal);
   if (row_1_end == data.end())
-    throw std::domain_error("Only one row");
+    throw std::domain_error("Interp2D -- Only one row");
 
   auto const candidate_ncolumns = std::distance(data.begin(), row_1_end);
+  ys_.resize(candidate_ncolumns);
+  
+  // Capture the y values; if the constructor completes, these will have been
+  // the correct values.
+  for (std::size_t i = 0; i != static_cast<std::size_t>(candidate_ncolumns); ++i)
+  {
+    ys_[i] = data[i][1];
+  }
 
   // Make sure the number of points is appropriate; determine the number of
   // rows.
-  auto const candidate_M = data.size() / candidate_ncolumns;
-  if (candidate_M * candidate_ncolumns != data.size())
-    throw std::domain_error("Not an integral number of rows");
+  auto const candidate_nrows = data.size() / candidate_ncolumns;
+  if (candidate_nrows * candidate_ncolumns != data.size())
+    throw std::domain_error("Interp2D -- Not an integral number of rows");
+  
+  xs_.resize(candidate_nrows);
 
   // Make sure remaining rows conform: right number of columns, matching
   // y values.
@@ -70,14 +80,14 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
                                               Point3D const& b) {
     return fpsupport::is_equivalent(a[1], b[1], reltol, abstol);
   };
-  for (std::size_t row = 1; row != candidate_M; ++row) {
+  for (std::size_t row = 1; row != candidate_nrows; ++row) {
     auto res = std::mismatch(p_firstrow,
                              p_firstrow + candidate_ncolumns,
                              p_firstrow + row * candidate_ncolumns,
                              equivalent_y_values);
     if (res.first != p_firstrow + candidate_ncolumns)
-      throw std::domain_error("Points do not form a grid");
+      throw std::domain_error("Interp2D -- Points do not form a grid");
   }
   // Capture x-, y-arrays, and z-matrix.
-  throw std::logic_error("This function is not yet complete.");
+  throw std::logic_error("Interp2D -- This function is not yet complete.");
 }
