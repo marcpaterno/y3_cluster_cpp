@@ -53,32 +53,30 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
 
   auto const row_1_end = std::find_if_not(data.begin(), data.end(), equal);
   if (row_1_end == data.end())
-    throw std::logic_error("Only one row");
+    throw std::domain_error("Only one row");
 
-  auto const candidate_N = std::distance(data.begin(), row_1_end);
+  auto const candidate_ncolumns = std::distance(data.begin(), row_1_end);
 
   // Make sure the number of points is appropriate; determine the number of
-  // columns.
-  auto const candidate_M = data.size() / candidate_N;
-  if (candidate_M * candidate_N != data.size())
-    throw std::logic_error("Not an integral number of rows");
+  // rows.
+  auto const candidate_M = data.size() / candidate_ncolumns;
+  if (candidate_M * candidate_ncolumns != data.size())
+    throw std::domain_error("Not an integral number of rows");
 
-  // Capture first row's version of column values, for comparison with later
-  // candidate rows.
+  // Make sure remaining rows conform: right number of columns, matching
+  // y values.
   auto const p_firstrow = data.cbegin();
   auto equivalent_y_values = [reltol, abstol](Point3D const& a,
                                               Point3D const& b) {
     return fpsupport::is_equivalent(a[1], b[1], reltol, abstol);
   };
-
-  // Make sure remaining rows all carry appropriately matching y values.
   for (std::size_t row = 1; row != candidate_M; ++row) {
     auto res = std::mismatch(p_firstrow,
-                             p_firstrow + candidate_N,
-                             p_firstrow + row * candidate_N,
+                             p_firstrow + candidate_ncolumns,
+                             p_firstrow + row * candidate_ncolumns,
                              equivalent_y_values);
-    if (res.first != p_firstrow + candidate_N)
-      throw std::logic_error("Points do not form a grid");
+    if (res.first != p_firstrow + candidate_ncolumns)
+      throw std::domain_error("Points do not form a grid");
   }
   // Capture x-, y-arrays, and z-matrix.
   throw std::logic_error("This function is not yet complete.");
