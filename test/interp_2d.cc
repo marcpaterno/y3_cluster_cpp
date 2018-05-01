@@ -74,8 +74,10 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
   xs_.resize(candidate_nrows);
 
   // Make sure remaining rows conform: right number of columns, matching
-  // y values.
+  // y values. Capture the x values.
   auto const p_firstrow = data.cbegin();
+  xs_[0] = (*p_firstrow)[0];
+  
   auto equivalent_y_values = [reltol, abstol](Point3D const& a,
                                               Point3D const& b) {
     return fpsupport::is_equivalent(a[1], b[1], reltol, abstol);
@@ -87,7 +89,10 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
                              equivalent_y_values);
     if (res.first != p_firstrow + candidate_ncolumns)
       throw std::domain_error("Interp2D -- Points do not form a grid");
+    xs_[row] = (*(p_firstrow + row * candidate_ncolumns))[0]; // ugh
   }
-  // Capture x-, y-arrays, and z-matrix.
-  throw std::logic_error("Interp2D -- This function is not yet complete.");
+  // Capture the z-matrix. Since the points are sorted, the order of the points
+  // is the correct order for the zs_ vector.
+  zs_.reserve(candidate_nrows * candidate_ncolumns);
+  for (auto const& p : data) zs_.push_back(p[2]);
 }

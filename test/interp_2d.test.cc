@@ -95,7 +95,7 @@ TEST_CASE("construction from Point3Ds")
       }
     }
     CHECK(points.size() == 4);
-    CHECK_THROWS_AS(Interp2D(points), std::logic_error);
+    CHECK_NOTHROW(Interp2D(points));
   }
   SECTION("from a correct grid")
   {
@@ -107,10 +107,10 @@ TEST_CASE("construction from Point3Ds")
     std::vector<Point3D> points;
     points.reserve(xs.size() * ys.size());
     for (std::size_t i = 0; i != xs.size(); ++i) {
-      double x = xs[i];
+      double const x = xs[i];
       for (std::size_t j = 0; j != ys.size(); ++j) {
-        double y = ys[j];
-        Point3D newguy{x, y, fcn(x, y)};
+        double const y = ys[j];
+        Point3D const newguy{x, y, fcn(x, y)};
         points.push_back(newguy);
         // points.emplace_back({x, y, fcn(x,y)});
       }
