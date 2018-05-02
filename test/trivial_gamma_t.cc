@@ -28,24 +28,6 @@ double constexpr invsqrt2pi()
   return 1. / std::sqrt(2. * pi());
 };
 
-class EZ {
-public:
-  explicit EZ(double omega_m, double omega_l, double omega_k)
-    : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
-  {}
-  double
-  operator()(double z) const
-  {
-    return std::sqrt(_omega_m * (1.0 + z) * (1.0 + z) * (1.0 + z) +
-                     _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
-  }
-
-private:
-  double _omega_m;
-  double _omega_l;
-  double _omega_k;
-};
-
 class EZ_sq {
 public:
   explicit EZ_sq(double omega_m, double omega_l, double omega_k)
@@ -62,6 +44,23 @@ private:
   double _omega_m;
   double _omega_l;
   double _omega_k;
+};
+
+class EZ {
+public:
+  explicit EZ(double omega_m, double omega_l, double omega_k)
+    : _ez(omega_m, omega_l, omega_k)
+  {}
+
+  double
+  operator()(double z) const
+  {
+    auto const sqr = _ez(z);
+    return std::sqrt(sqr);
+  }
+
+private:
+  EZ_sq _ez;
 };
 
 inline double
