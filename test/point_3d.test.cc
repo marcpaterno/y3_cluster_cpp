@@ -30,9 +30,9 @@ TEST_CASE("sorting stuff")
   Point3DLess p3dless{1.e-6, 1.e-20, 1.e-6, 1.e-20};
 
   // Construct so that a < b < c.
-  Point3D const a{1.25, 1.0, -100.};
-  Point3D const b{1.50, -100, -200.};
-  Point3D const c{1.50, -20, -300.};
+  Point3D const a{2.25, -5.0, -100.};
+  Point3D const b{1.5,  2.0, -200.};
+  Point3D const c{1.25, 4.0, -300.};
 
   SECTION("ordering")
   {
