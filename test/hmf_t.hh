@@ -4,11 +4,15 @@
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "test/interp_1d.hh"
 
+#include <memory>
+
 namespace y3_cluster {
 
   class HMF_t {
   public:
-    HMF_t(Interp1D const* nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
+    HMF_t(std::shared_ptr<Interp1D const> nmz, double s, double q)
+      : _nmz(nmz), _s(s), _q(q)
+    {}
 
     explicit HMF_t(cosmosis::DataBlock& sample)
     // TODO: test once Interp2D implementation is finished
@@ -34,7 +38,7 @@ namespace y3_cluster {
 
   private:
     // TODO: change to Interp2D once implementation is finished
-    Interp1D const* _nmz;
+    std::shared_ptr<Interp1D const> _nmz;
     double _s;
     double _q;
   };

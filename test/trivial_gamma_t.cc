@@ -16,6 +16,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -366,8 +367,7 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  Interp1D f{mh, dndlnmh};
-  y3_cluster::HMF_t hmf{&f, 0.037, 1.008};
+  y3_cluster::HMF_t hmf{std::make_shared<Interp1D const>(mh, dndlnmh), 0.037, 1.008};
   // DEL_SIG_CEN_t dsc{5., 0.5};
   DEL_SIG_CEN_t dsc{5.};
   // DEL_SIG_MIS_t dsc{5., 0.5};
