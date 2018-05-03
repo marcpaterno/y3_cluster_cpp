@@ -18,7 +18,7 @@ target_include_directories(integration_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(integration_test integration_test)
 
-add_executable(trivial_gamma_t trivial_gamma_t.cc interp_1d.cc)
+add_executable(trivial_gamma_t trivial_gamma_t.cc interp_1d.cc interp_2d.cc)
 target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
 target_include_directories(trivial_gamma_t
                            PRIVATE

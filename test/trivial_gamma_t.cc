@@ -26,6 +26,7 @@
 
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
+using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
 class LC_LT_t2 {
@@ -367,7 +368,9 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  y3_cluster::HMF_t hmf{std::make_shared<Interp1D const>(mh, dndlnmh), 0.037, 1.008};
+  std::vector<double> silly_values {1., 2., 3.};
+  y3_cluster::HMF_t hmf(
+    std::make_shared<Interp2D const>(mh, silly_values, dndlnmh), 0.037, 1.008);
   // DEL_SIG_CEN_t dsc{5., 0.5};
   DEL_SIG_CEN_t dsc{5.};
   // DEL_SIG_MIS_t dsc{5., 0.5};
