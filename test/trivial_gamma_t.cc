@@ -10,6 +10,7 @@
 #include "test/primitives.hh"
 #include "test/hmf_t.hh"
 #include "test/mor_t.hh"
+#include "test/lo_lc_t.hh"
 
 #include <chrono>
 #include <cmath>
@@ -26,36 +27,7 @@ using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::mz_power_law;
 
-class LO_LC_t {
-public:
-  explicit LO_LC_t(double alpha, double a, double b, double R_lambda)
-    : _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda)
-  {}
 
-  explicit LO_LC_t(cosmosis::DataBlock& sample)
-  {
-    sample.get_val<double>("LO_LC_params", "alpha", _alpha);
-    sample.get_val<double>("LO_LC_params", "a", _a);
-    sample.get_val<double>("LO_LC_params", "b", _b);
-    sample.get_val<double>("LO_LC_params", "R_lambda", _R_lambda);
-  }
-
-  double
-  operator()(double lo, double lc, double R_mis) const
-  {
-    double x = R_mis / _R_lambda;
-    double y = lo / lc;
-    double mu_y = std::exp(-x * x / _alpha * _alpha);
-    double sigma_y = _a * std::atan(_b * x);
-    return y3_cluster::gaussian(y, mu_y, sigma_y);
-  }
-
-private:
-  double _alpha;
-  double _a;
-  double _b;
-  double _R_lambda;
-};
 
 class LC_LT_t2 {
 public:
@@ -387,7 +359,7 @@ main(int argc, char* argv[])
 
   long long maxeval = std::stoll(args[0]);
   y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
-  LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
+  y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.05};
   ROFFSET_t roffset{0.2};
