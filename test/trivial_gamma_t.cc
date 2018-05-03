@@ -5,20 +5,20 @@
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
 
-#include "test/ez_sq.hh"
 #include "test/ez.hh"
-#include "test/primitives.hh"
+#include "test/ez_sq.hh"
 #include "test/hmf_t.hh"
-#include "test/mor_t.hh"
 #include "test/lo_lc_t.hh"
+#include "test/mor_t.hh"
+#include "test/primitives.hh"
 
 #include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 #include "test/interp_1d.hh"
 #include "test/transform.hh"
@@ -26,8 +26,6 @@
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::mz_power_law;
-
-
 
 class LC_LT_t2 {
 public:
@@ -189,8 +187,8 @@ public:
     double rho_crit = 2.77526157E11 * ez_sq(zt);
     /* EZ*EZ would be a little bit slower than direct definition */
 
-    double r_200 =
-      std::pow(3. * std::exp(lnM) / (800. * y3_cluster::pi() * rho_crit), 1. / 3.);
+    double r_200 = std::pow(
+      3. * std::exp(lnM) / (800. * y3_cluster::pi() * rho_crit), 1. / 3.);
     double r_s = r_200 / _c;
 
     double r_ratio = r / r_s;
@@ -233,27 +231,28 @@ struct DEL_SIG_MIS_t {
 class DV_DO_DZ_t {
 public:
   DV_DO_DZ_t(Interp1D const* da, y3_cluster::EZ ezt) : _da(da), _ezt(ezt) {}
-  
+
   explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
     : _da([](cosmosis::DataBlock& x) {
-        std::vector<double> xs, ys;
-        x.get_val<std::vector<double>>("DV_D0_DZ_params", "xs", xs);
-        x.get_val<std::vector<double>>("DV_D0_DZ_params", "ys", ys);
-        // NOTE: This is required as inputs to Interp1D must be const's
-        std::vector<double> const cxs(xs), cys(ys);
-	Interp1D const interp{cxs, cys};
-	Interp1D const* pinterp = &interp;
-	return pinterp;
-      }(sample)), _ezt(y3_cluster::EZ{1.0, 1.0, 1.0})
-      //  _ezt([](cosmosis::DataBlock& x) {
-      //    double omega_m, omega_l, omega_k
-      //    // TODO: I'm not sure if this is the correct header name
-      //    x.get_val<double>(section_names::cosmo, "omega_m", omega_m);
-      //    x.get_val<double>(section_names::cosmo, "omega_l", omega_l);
-      //    x.get_val<double>(section_names::cosmo, "omega_k", omega_k);
-      //    return EZ(omega_m, omega_l, omega_k);
-      //}(sample))
-      {}
+      std::vector<double> xs, ys;
+      x.get_val<std::vector<double>>("DV_D0_DZ_params", "xs", xs);
+      x.get_val<std::vector<double>>("DV_D0_DZ_params", "ys", ys);
+      // NOTE: This is required as inputs to Interp1D must be const's
+      std::vector<double> const cxs(xs), cys(ys);
+      Interp1D const interp{cxs, cys};
+      Interp1D const* pinterp = &interp;
+      return pinterp;
+    }(sample))
+    , _ezt(y3_cluster::EZ{1.0, 1.0, 1.0})
+  //  _ezt([](cosmosis::DataBlock& x) {
+  //    double omega_m, omega_l, omega_k
+  //    // TODO: I'm not sure if this is the correct header name
+  //    x.get_val<double>(section_names::cosmo, "omega_m", omega_m);
+  //    x.get_val<double>(section_names::cosmo, "omega_l", omega_l);
+  //    x.get_val<double>(section_names::cosmo, "omega_k", omega_k);
+  //    return EZ(omega_m, omega_l, omega_k);
+  //}(sample))
+  {}
 
   double
   operator()(double zt) const

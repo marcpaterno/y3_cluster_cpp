@@ -1,8 +1,8 @@
 #ifndef Y3_CLUSTER_CPP_MOR_T_HH
 #define Y3_CLUSTER_CPP_MOR_T_HH
 
-#include "test/mz_power_law.hh"
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "test/mz_power_law.hh"
 
 #include <cmath>
 

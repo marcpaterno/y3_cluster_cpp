@@ -31,7 +31,7 @@ TEST_CASE("sorting stuff")
 
   // Construct so that a < b < c.
   Point3D const a{2.25, -5.0, -100.};
-  Point3D const b{1.5,  2.0, -200.};
+  Point3D const b{1.5, 2.0, -200.};
   Point3D const c{1.25, 4.0, -300.};
 
   SECTION("ordering")

@@ -1,8 +1,8 @@
 #ifndef Y3_CLUSTER_CPP_LO_LC_T_HH
 #define Y3_CLUSTER_CPP_LO_LC_T_HH
 
-#include "test/primitives.hh"
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "test/primitives.hh"
 
 #include <cmath>
 
