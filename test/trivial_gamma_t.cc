@@ -4,6 +4,10 @@
 #include "cubacpp/cubacpp.hh"
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
+
+#include "test/ez_sq.hh"
+#include "test/ez.hh"
+
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -26,41 +30,6 @@ double constexpr pi()
 double constexpr invsqrt2pi()
 {
   return 1. / std::sqrt(2. * pi());
-};
-
-class EZ_sq {
-public:
-  explicit EZ_sq(double omega_m, double omega_l, double omega_k)
-    : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
-  {}
-  double
-  operator()(double z) const
-  {
-    return (_omega_m * (1.0 + z) * (1.0 + z) * (1.0 + z) +
-            _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
-  }
-
-private:
-  double _omega_m;
-  double _omega_l;
-  double _omega_k;
-};
-
-class EZ {
-public:
-  explicit EZ(double omega_m, double omega_l, double omega_k)
-    : _ez(omega_m, omega_l, omega_k)
-  {}
-
-  double
-  operator()(double z) const
-  {
-    auto const sqr = _ez(z);
-    return std::sqrt(sqr);
-  }
-
-private:
-  EZ_sq _ez;
 };
 
 inline double
@@ -322,7 +291,7 @@ public:
   operator()(double r, double lnM, double zt) const
   /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
   {
-    EZ_sq ez_sq{0.3, 0.7, 0.};
+    y3_cluster::EZ_sq ez_sq{0.3, 0.7, 0.};
 
     double delta_c =
       200. * _c * _c * _c / (3. * (std::log(1. + _c) - _c / (1. + _c)));
@@ -372,7 +341,7 @@ struct DEL_SIG_MIS_t {
 
 class DV_DO_DZ_t {
 public:
-  DV_DO_DZ_t(Interp1D const* da, EZ ezt) : _da(da), _ezt(ezt) {}
+  DV_DO_DZ_t(Interp1D const* da, y3_cluster::EZ ezt) : _da(da), _ezt(ezt) {}
   
   explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
     : _da([](cosmosis::DataBlock& x) {
@@ -384,7 +353,7 @@ public:
 	Interp1D const interp{cxs, cys};
 	Interp1D const* pinterp = &interp;
 	return pinterp;
-      }(sample)), _ezt(EZ{1.0, 1.0, 1.0})
+      }(sample)), _ezt(y3_cluster::EZ{1.0, 1.0, 1.0})
       //  _ezt([](cosmosis::DataBlock& x) {
       //    double omega_m, omega_l, omega_k
       //    // TODO: I'm not sure if this is the correct header name
@@ -404,7 +373,7 @@ public:
 
 private:
   Interp1D const* _da;
-  EZ _ezt;
+  y3_cluster::EZ _ezt;
 };
 
 class OMEGA_Z_t {
@@ -515,7 +484,7 @@ main(int argc, char* argv[])
   DEL_SIG_MIS_t dsm;
 
   Interp1D da_f{zz, da_arr};
-  DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
+  DV_DO_DZ_t dvdodz(&da_f, y3_cluster::EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
