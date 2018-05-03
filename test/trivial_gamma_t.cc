@@ -7,6 +7,7 @@
 
 #include "test/ez_sq.hh"
 #include "test/ez.hh"
+#include "test/primitives.hh"
 
 #include <chrono>
 #include <cmath>
@@ -14,30 +15,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 #include "test/interp_1d.hh"
 #include "test/transform.hh"
-#include <stdexcept>
 
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::mz_power_law;
-
-double constexpr pi()
-{
-  return 4. * std::atan(1.0);
-};
-double constexpr invsqrt2pi()
-{
-  return 1. / std::sqrt(2. * pi());
-};
-
-inline double
-gaussian(double x, double mu, double sigma)
-{
-  double const z = (x - mu) / sigma;
-  return std::exp(-z * z / 2.) * 0.3989422804014327 / sigma;
-}
 
 class HMF_t {
 public:
@@ -98,7 +83,7 @@ public:
     double const x = lt - ltm;
     double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
     double const erfterm = std::erfc(erfarg);
-    return gaussian(x, 0.0, _sigma) * erfterm;
+    return y3_cluster::gaussian(x, 0.0, _sigma) * erfterm;
   }
 
 private:
@@ -128,7 +113,7 @@ public:
     double y = lo / lc;
     double mu_y = std::exp(-x * x / _alpha * _alpha);
     double sigma_y = _a * std::atan(_b * x);
-    return gaussian(y, mu_y, sigma_y);
+    return y3_cluster::gaussian(y, mu_y, sigma_y);
   }
 
 private:
@@ -143,7 +128,7 @@ public:
   double
   operator()(double lc, double lt, double /* zt */) const
   {
-    return gaussian(lc - lt, 0.0, 10.0);
+    return y3_cluster::gaussian(lc - lt, 0.0, 10.0);
   }
 };
 class LC_LT_t {
@@ -168,7 +153,7 @@ public:
   double
   operator()(double lc, double lt, double /* zt */) const
   {
-    return (1.0 - _fmsk) * (1.0 - _fprj) * invsqrt2pi() *
+    return (1.0 - _fmsk) * (1.0 - _fprj) * y3_cluster::invsqrt2pi() *
              std::exp(-(lc - _mu) * (lc - _mu) / (2.0 * _sigma * _sigma)) /
              _sigma +
            0.5 * ((1.0 - _fmsk) * _fprj * _tau + _fmsk * _fprj / lt) *
@@ -210,7 +195,7 @@ public:
   operator()(double zo, double zt) const
   {
     double const x = zo - zt;
-    return gaussian(x, 0., _sigma);
+    return y3_cluster::gaussian(x, 0., _sigma);
   }
 
 private:
@@ -299,7 +284,7 @@ public:
     /* EZ*EZ would be a little bit slower than direct definition */
 
     double r_200 =
-      std::pow(3. * std::exp(lnM) / (800. * pi() * rho_crit), 1. / 3.);
+      std::pow(3. * std::exp(lnM) / (800. * y3_cluster::pi() * rho_crit), 1. / 3.);
     double r_s = r_200 / _c;
 
     double r_ratio = r / r_s;
