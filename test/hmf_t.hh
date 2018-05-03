@@ -26,11 +26,9 @@ namespace y3_cluster {
     {}
 
     double
-    operator()(double lnM, double /*zt*/) const
+    operator()(double lnM, double zt) const
     {
-      // TODO: This is clearly worng!
-      double constexpr stupid_value = 3.0;
-      return _nmz->eval(lnM, stupid_value) * (_s * (lnM - 37.5) + _q);
+      return _nmz->eval(lnM, zt) * (_s * (lnM - 37.5) + _q);
     }
 
   private:
