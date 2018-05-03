@@ -9,6 +9,7 @@
 #include "test/ez.hh"
 #include "test/primitives.hh"
 #include "test/hmf_t.hh"
+#include "test/mor_t.hh"
 
 #include <chrono>
 #include <cmath>
@@ -24,43 +25,6 @@
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::mz_power_law;
-
-
-
-class MOR_t {
-public:
-  MOR_t(mz_power_law lambda, double sigma, double alpha)
-    : _lambda(lambda), _sigma(sigma), _alpha(alpha)
-  {}
-
-  explicit MOR_t(cosmosis::DataBlock& sample)
-    : _lambda([](cosmosis::DataBlock& x) {
-      double A, B, C;
-      x.get_val<double>("MOR_params", "A", A);
-      x.get_val<double>("MOR_params", "B", B);
-      x.get_val<double>("MOR_params", "C", C);
-      return mz_power_law{A, B, C};
-    }(sample))
-  {
-    sample.get_val<double>("MOR_params", "sigma", _sigma);
-    sample.get_val<double>("MOR_params", "alpha", _alpha);
-  }
-
-  double
-  operator()(double lt, double lnM, double zt) const
-  {
-    double const ltm = _lambda(lnM, zt);
-    double const x = lt - ltm;
-    double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
-    double const erfterm = std::erfc(erfarg);
-    return y3_cluster::gaussian(x, 0.0, _sigma) * erfterm;
-  }
-
-private:
-  mz_power_law _lambda;
-  double _sigma;
-  double _alpha;
-};
 
 class LO_LC_t {
 public:
@@ -422,7 +386,7 @@ main(int argc, char* argv[])
     return 1;
 
   long long maxeval = std::stoll(args[0]);
-  MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
+  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
   LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.05};
