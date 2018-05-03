@@ -1,6 +1,8 @@
 #ifndef Y3_CLUSTER_CPP_EZ_HH
 #define Y3_CLUSTER_CPP_EZ_HH
 
+#include <cmath>
+
 namespace y3_cluster {
   class EZ {
   public:
