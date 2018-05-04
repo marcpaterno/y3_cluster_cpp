@@ -16,6 +16,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -25,6 +26,7 @@
 
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
+using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
 class LC_LT_t2 {
@@ -230,37 +232,29 @@ struct DEL_SIG_MIS_t {
 
 class DV_DO_DZ_t {
 public:
-  DV_DO_DZ_t(Interp1D const* da, y3_cluster::EZ ezt) : _da(da), _ezt(ezt) {}
+  DV_DO_DZ_t(std::shared_ptr<Interp1D const> da, y3_cluster::EZ ezt) : _da(da), _ezt(ezt) {}
+
+  using doubles = std::vector<double>;
 
   explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
-    : _da([](cosmosis::DataBlock& x) {
-        std::vector<double> xs, ys;
-        x.get_val("DV_D0_DZ_params", "xs", xs);
-        x.get_val("DV_D0_DZ_params", "ys", ys);
-        // NOTE: This is required as inputs to Interp1D must be const's
-        std::vector<double> const cxs(xs), cys(ys);
-	Interp1D const interp{cxs, cys};
-	Interp1D const* pinterp = &interp;
-	return pinterp;
-      }(sample)), _ezt(EZ{1.0, 1.0, 1.0})
-      //  _ezt([](cosmosis::DataBlock& x) {
-      //    double omega_m, omega_l, omega_k
-      //    x.get_val<double>("", "omega_m", omega_m);
-      //    x.get_val<double>("", "omega_l", omega_l);
-      //    x.get_val<double>("", "omega_k", omega_k);
-      //    return EZ(omega_m, omega_l, omega_k);
-      //}(sample))
-      {}
+    : _da( std::make_shared<Interp1D const> ( 
+           sample.view<doubles>("DV_D0_DZ_params", "xs"),
+	   sample.view<doubles>("DV_D0_DZ_params", "ys")))
+    , _ezt( y3_cluster::EZ (
+	    sample.view<double>("", "omega_m"),
+	    sample.view<double>("", "omega_l"),
+	    sample.view<double>("", "omega_k")))
+  {}
 
   double
   operator()(double zt) const
   {
-    double const _da_z = _da->eval(zt);
-    return 3000.0 * (1.0 + zt) * (1.0 + zt) * _da_z * _da_z / _ezt(zt);
+    double const da_z = _da->eval(zt);
+    return 3000.0 * (1.0 + zt) * (1.0 + zt) * da_z * da_z / _ezt(zt);
   }
 
 private:
-  Interp1D const* _da;
+  std::shared_ptr<Interp1D const> _da;
   y3_cluster::EZ _ezt;
 };
 
@@ -320,8 +314,7 @@ main(int argc, char* argv[])
   double num{0};
   std::ifstream file1(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
-  for (int a = 1; a < 970; a = a + 1) {
-    file1 >> num;
+  while  (file1 >> num){
     dndlnmh.push_back(num);
   }
   if (dndlnmh.empty())
@@ -330,8 +323,7 @@ main(int argc, char* argv[])
   std::vector<double> mh;
   std::ifstream file2(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
-  for (int a = 1; a < 970; a = a + 1) {
-    file2 >> num;
+  while  (file2 >> num){
     mh.push_back(std::log(num));
   }
   if (mh.empty())
@@ -364,15 +356,15 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  Interp1D f{mh, dndlnmh};
-  y3_cluster::HMF_t hmf{&f, 0.037, 1.008};
+  auto p1=std::make_shared<Interp2D const>(mh, zz, dndlnmh);
+  y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
   // DEL_SIG_CEN_t dsc{5., 0.5};
   DEL_SIG_CEN_t dsc{5.};
   // DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
 
-  Interp1D da_f{zz, da_arr};
-  DV_DO_DZ_t dvdodz(&da_f, y3_cluster::EZ(0.3, 0.7, 0));
+  auto da_f=std::make_shared<Interp1D const>(zz, da_arr);
+  DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};

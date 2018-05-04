@@ -6,6 +6,7 @@
 #include "gsl/gsl_interp2d.h"
 #include <array>
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 
 // Interp2D is used for linear interpolation in 1 dimension.
@@ -34,6 +35,14 @@ namespace y3_cluster {
     Interp2D(std::array<double, M> const& xs,
              std::array<double, N> const& ys,
              matrix<M, N> const& zs);
+
+    // Interpolator created from 3 vectors, specifying the x-axis, the y-axis,
+    // and the column-major (N.B: not the natural-for-C++ row-major) storage of
+    // the z values. We require the column-major ordering
+    // because that is what is used by GSL.
+    Interp2D(std::vector<double> const& xs,
+             std::vector<double> const& ys,
+             std::vector<double> const& zs);
 
     // Interpolator created from vector of triplets: throws std::logic_error if
     // the points do not lie on a grid in (x,y) space, or if any values are NaN
@@ -86,6 +95,17 @@ inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
       zs_[i + j * M] = row[j];
     }
   }
+  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
+  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+}
+
+inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
+                                      std::vector<double> const& ys,
+                                      std::vector<double> const& zs)
+  : xs_(xs), ys_(ys), zs_(zs)
+{
+  if (zs_.size() != nx() * ny())
+    throw std::domain_error("Interp2D -- wrong number of z values passed");
   interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
   gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
 }
