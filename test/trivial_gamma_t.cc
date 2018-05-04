@@ -1,181 +1,38 @@
+#include "/cosmosis/cosmosis/datablock/c_datablock.h"
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "/cosmosis/cosmosis/datablock/section_names.h"
-#include "/cosmosis/cosmosis/datablock/c_datablock.h"
 #include "cubacpp/cubacpp.hh"
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
+
+#include "test/ez.hh"
+#include "test/ez_sq.hh"
+#include "test/hmf_t.hh"
+#include "test/lo_lc_t.hh"
+#include "test/mor_t.hh"
+#include "test/primitives.hh"
+
 #include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 #include "test/interp_1d.hh"
 #include "test/transform.hh"
-#include <stdexcept>
 
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::mz_power_law;
-
-double constexpr pi()
-{
-  return 4. * std::atan(1.0);
-};
-double constexpr invsqrt2pi()
-{
-  return 1. / std::sqrt(2. * pi());
-};
-
-class EZ {
-public:
-  explicit EZ(double omega_m, double omega_l, double omega_k)
-    : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
-  {}
-  double
-  operator()(double z) const
-  {
-    return std::sqrt(_omega_m * (1.0 + z) * (1.0 + z) * (1.0 + z) +
-                     _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
-  }
-
-private:
-  double _omega_m;
-  double _omega_l;
-  double _omega_k;
-};
-
-class EZ_sq {
-public:
-  explicit EZ_sq(double omega_m, double omega_l, double omega_k)
-    : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
-  {}
-  double
-  operator()(double z) const
-  {
-    return (_omega_m * (1.0 + z) * (1.0 + z) * (1.0 + z) +
-              _omega_k * (1.0 + z) * (1.0 + z) + _omega_l);
-  }
-
-private:
-  double _omega_m;
-  double _omega_l;
-  double _omega_k;
-};
-
-inline double
-gaussian(double x, double mu, double sigma)
-{
-  double const z = (x - mu) / sigma;
-  return std::exp(-z * z / 2.) * 0.3989422804014327 / sigma;
-}
-
-class HMF_t {
-public:
-  HMF_t(Interp1D const* nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
-
-  explicit HMF_t(cosmosis::DataBlock& sample)
-    // TODO: test once Interp2D implementation is finished
-    //: _nmz([](cosmosis::DataBlock& x) {
-    //  std::vector<double> const& xs, ys;
-    //  cosmosis::ndarray<double> const& zs;
-    //  x.get_val<std::vector<double>>("HMF_params", "xs", xs);
-    //  x.get_val<std::vector<double>>("HMF_params", "ys", ys);
-    //  x.get_val<cosmosis::ndarray<double>>("HMF_params", "zs", zs);
-    //  return Interp2D{xs, ys, zs};
-    //}(sample)) 
-  {
-    sample.get_val<double>("HMF_params", "s", _s);
-    sample.get_val<double>("HMF_params", "q", _q);
-  }
-
-  double
-  operator()(double lnM, double /*zt*/) const
-  {
-    // TODO: This is clearly worng!
-    return _nmz->eval(lnM) * (_s * (lnM - 37.5) + _q);
-  }
-
-private:
-  // TODO: change to Interp2D once implementation is finished
-  Interp1D const* _nmz;
-  double _s;
-  double _q;
-};
-
-class MOR_t {
-public:
-  MOR_t(mz_power_law lambda, double sigma, double alpha)
-    : _lambda(lambda), _sigma(sigma), _alpha(alpha)
-  {}
-
-  explicit MOR_t(cosmosis::DataBlock& sample)
-    : _lambda([](cosmosis::DataBlock& x) {
-      double A, B, C;
-      x.get_val<double>("MOR_params", "A", A);
-      x.get_val<double>("MOR_params", "B", B);
-      x.get_val<double>("MOR_params", "C", C);
-      return mz_power_law{A, B, C};
-    }(sample))
-  {
-    sample.get_val<double>("MOR_params", "sigma", _sigma);
-    sample.get_val<double>("MOR_params", "alpha", _alpha);
-  }
-
-  double
-  operator()(double lt, double lnM, double zt) const
-  {
-    double const ltm = _lambda(lnM, zt);
-    double const x = lt - ltm;
-    double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
-    double const erfterm = std::erfc(erfarg);
-    return gaussian(x, 0.0, _sigma) * erfterm;
-  }
-
-private:
-  mz_power_law _lambda;
-  double _sigma;
-  double _alpha;
-};
-
-class LO_LC_t {
-public:
-  explicit LO_LC_t(double alpha, double a, double b, double R_lambda)
-    : _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda)
-  {}
-
-  explicit LO_LC_t(cosmosis::DataBlock& sample)
-  {
-    sample.get_val<double>("LO_LC_params", "alpha", _alpha);
-    sample.get_val<double>("LO_LC_params", "a", _a);
-    sample.get_val<double>("LO_LC_params", "b", _b);
-    sample.get_val<double>("LO_LC_params", "R_lambda", _R_lambda);
-  }
-
-  double
-  operator()(double lo, double lc, double R_mis) const
-  {
-    double x = R_mis / _R_lambda;
-    double y = lo / lc;
-    double mu_y = std::exp(-x * x / _alpha * _alpha);
-    double sigma_y = _a * std::atan(_b * x);
-    return gaussian(y, mu_y, sigma_y);
-  }
-
-private:
-  double _alpha;
-  double _a;
-  double _b;
-  double _R_lambda;
-};
 
 class LC_LT_t2 {
 public:
   double
   operator()(double lc, double lt, double /* zt */) const
   {
-    return gaussian(lc - lt, 0.0, 10.0);
+    return y3_cluster::gaussian(lc - lt, 0.0, 10.0);
   }
 };
 class LC_LT_t {
@@ -200,12 +57,11 @@ public:
   double
   operator()(double lc, double lt, double /* zt */) const
   {
-    return (1.0 - _fmsk) * (1.0 - _fprj) * invsqrt2pi() *
+    return (1.0 - _fmsk) * (1.0 - _fprj) * y3_cluster::invsqrt2pi() *
              std::exp(-(lc - _mu) * (lc - _mu) / (2.0 * _sigma * _sigma)) /
              _sigma +
            0.5 * ((1.0 - _fmsk) * _fprj * _tau + _fmsk * _fprj / lt) *
-             std::exp(_tau *
-                      (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
+             std::exp(_tau * (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
                       2.0) *
              std::erfc((_mu + _tau * _sigma * _sigma - lc) /
                        (std::sqrt(2.0) * _sigma)) +
@@ -215,8 +71,7 @@ public:
              (2.0 * lt) -
            _fmsk * _fprj *
              (std::exp(-_tau * lt) *
-              std::exp(_tau *
-                       (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
+              std::exp(_tau * (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
                        2.0) *
               std::erfc((_mu + _tau * _sigma * _sigma - lc - lt) /
                         (std::sqrt(2.0) * _sigma))) /
@@ -244,7 +99,7 @@ public:
   operator()(double zo, double zt) const
   {
     double const x = zo - zt;
-    return gaussian(x, 0., _sigma);
+    return y3_cluster::gaussian(x, 0., _sigma);
   }
 
 private:
@@ -314,25 +169,26 @@ public:
 
 class DEL_SIG_CEN_t {
 public:
-  explicit DEL_SIG_CEN_t(double c ) : _c(c) {}
+  explicit DEL_SIG_CEN_t(double c) : _c(c) {}
 
   explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
   {
     sample.get_val<double>("del_sig_cen_params", "c", _c);
   }
 
-  double operator()(double r, double lnM, double zt) const
-    /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
+  double
+  operator()(double r, double lnM, double zt) const
+  /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
   {
-    EZ_sq ez_sq{0.3, 0.7, 0.};
+    y3_cluster::EZ_sq ez_sq{0.3, 0.7, 0.};
 
     double delta_c =
       200. * _c * _c * _c / (3. * (std::log(1. + _c) - _c / (1. + _c)));
-    double rho_crit = 2.77526157E11 * ez_sq(zt ) ;
+    double rho_crit = 2.77526157E11 * ez_sq(zt);
     /* EZ*EZ would be a little bit slower than direct definition */
 
-    double r_200 =
-      std::pow(3. * std::exp(lnM) / (800. * pi() * rho_crit), 1. / 3.);
+    double r_200 = std::pow(
+      3. * std::exp(lnM) / (800. * y3_cluster::pi() * rho_crit), 1. / 3.);
     double r_s = r_200 / _c;
 
     double r_ratio = r / r_s;
@@ -374,8 +230,8 @@ struct DEL_SIG_MIS_t {
 
 class DV_DO_DZ_t {
 public:
-  DV_DO_DZ_t(Interp1D const* da, EZ ezt) : _da(da), _ezt(ezt) {}
-  
+  DV_DO_DZ_t(Interp1D const* da, y3_cluster::EZ ezt) : _da(da), _ezt(ezt) {}
+
   explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
     : _da([](cosmosis::DataBlock& x) {
         std::vector<double> xs, ys;
@@ -405,7 +261,7 @@ public:
 
 private:
   Interp1D const* _da;
-  EZ _ezt;
+  y3_cluster::EZ _ezt;
 };
 
 class OMEGA_Z_t {
@@ -499,8 +355,8 @@ main(int argc, char* argv[])
     return 1;
 
   long long maxeval = std::stoll(args[0]);
-  MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
-  LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
+  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
+  y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.05};
   ROFFSET_t roffset{0.2};
@@ -509,14 +365,14 @@ main(int argc, char* argv[])
   A_CEN_t a_cen;
   A_MIS_t a_mis;
   Interp1D f{mh, dndlnmh};
-  HMF_t hmf{&f, 0.037, 1.008};
+  y3_cluster::HMF_t hmf{&f, 0.037, 1.008};
   // DEL_SIG_CEN_t dsc{5., 0.5};
-  DEL_SIG_CEN_t dsc{5. };
+  DEL_SIG_CEN_t dsc{5.};
   // DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
 
   Interp1D da_f{zz, da_arr};
-  DV_DO_DZ_t dvdodz(&da_f, EZ(0.3, 0.7, 0));
+  DV_DO_DZ_t dvdodz(&da_f, y3_cluster::EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};

@@ -4,6 +4,14 @@
 #include <algorithm>
 #include <stdexcept>
 
+y3_cluster::Interp2D::Interp2D(std::vector<Point3D> data)
+  : xs_(), ys_(), zs_(), interp_(nullptr)
+{
+  make_grid_(data);
+  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
+  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+}
+
 double
 y3_cluster::Interp2D::operator()(double x, double y) const
 {
@@ -14,14 +22,6 @@ y3_cluster::Interp2D::operator()(double x, double y) const
     interp_, xs_.data(), ys_.data(), zs_.data(), x, y, nullptr, nullptr);
 }
 
-y3_cluster::Interp2D::Interp2D(std::vector<Point3D> data)
-  : xs_(), ys_(), interp_(nullptr)
-{
-  make_grid_(data);
-  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
-  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
-}
-
 y3_cluster::Interp2D::~Interp2D() noexcept
 {
   gsl_interp2d_free(interp_);
@@ -30,13 +30,16 @@ y3_cluster::Interp2D::~Interp2D() noexcept
 void
 y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
 {
+  if (data.empty())
+    throw std::domain_error("Interp2D -- no points provided");
   // Discover the (x,y) grid implied by the points we are given -- or reject
   // them as not a grid. Points in x are equivalent if they differ by an
   // absolute value less than xfuzz, and similarly for points in y.
   assure_clean_floats(data);
 
-  // Sort first by x, then y, then z, within equivalence classes determined
-  // by given relative and absolute tolerances.
+  // Sort first by y, then x, then z, within equivalence classes determined
+  // by given relative and absolute tolerances. This is so that we have the
+  // GSL-expected column-major ordering of the points.
   // TODO: Determine what tolerances are actually useful, and how they should
   // be exposed in the interface.
   double const reltol = 1.e-6;
@@ -44,11 +47,55 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
   Point3DLess comp{reltol, abstol, reltol, abstol};
   std::sort(data.begin(), data.end(), comp);
 
-  // determine length of first block of points (how many y values for that x).
-  auto not_equal = [reltol, abstol](Point3D const& a, Point3D const& b) {
+  // determine length of first block of points (how many x values for that y).
+  // This is determining the value of M, the length of a column, which is the
+  // number of rows.
+  auto equal = [reltol, abstol, pa = data.begin()](Point3D const& b) {
+    return fpsupport::is_equivalent((*pa)[1], b[1], reltol, abstol);
+  };
+
+  auto const column_1_end = std::find_if_not(data.begin(), data.end(), equal);
+  if (column_1_end == data.end())
+    throw std::domain_error("Interp2D -- Only one column");
+
+  auto const candidate_nrows = std::distance(data.begin(), column_1_end);
+  xs_.resize(candidate_nrows);
+
+  // Capture the x values; if the constructor completes, these will have been
+  // the correct values.
+  for (std::size_t i = 0; i != static_cast<std::size_t>(candidate_nrows); ++i) {
+    xs_[i] = data[i][0];
+  }
+
+  // Make sure the number of points is appropriate; determine the number of
+  // columns.
+  auto const candidate_ncolumns = data.size() / candidate_nrows;
+  if (candidate_ncolumns * candidate_nrows != data.size())
+    throw std::domain_error("Interp2D -- Not an integral number of columns");
+
+  ys_.resize(candidate_ncolumns);
+
+  // Make sure remaining columns conform: right number of rows, matching
+  // x values. Capture the y values.
+  auto const p_firstcolumn = data.cbegin();
+  ys_[0] = (*p_firstcolumn)[1];
+
+  auto equivalent_x_values = [reltol, abstol](Point3D const& a,
+                                              Point3D const& b) {
     return fpsupport::is_equivalent(a[0], b[0], reltol, abstol);
   };
-  auto block_1_end = std::adjacent_find(data.begin(), data.end(), not_equal);
-  // Make sure remaining blocks all carry appropriately matching y values.
-  // Capture x-, y-arrays, and z-matrix.
+  for (std::size_t column = 1; column != candidate_ncolumns; ++column) {
+    auto res = std::mismatch(p_firstcolumn,
+                             p_firstcolumn + candidate_nrows,
+                             p_firstcolumn + column * candidate_nrows,
+                             equivalent_x_values);
+    if (res.first != p_firstcolumn + candidate_nrows)
+      throw std::domain_error("Interp2D -- Points do not form a grid");
+    ys_[column] = (*(p_firstcolumn + column * candidate_nrows))[1]; // ugh
+  }
+  // Capture the z-matrix. Since the points are sorted, the order of the points
+  // is the correct order for the zs_ vector.
+  zs_.reserve(candidate_nrows * candidate_ncolumns);
+  for (auto const& p : data)
+    zs_.push_back(p[2]);
 }

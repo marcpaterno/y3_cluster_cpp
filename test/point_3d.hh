@@ -46,7 +46,8 @@ namespace y3_cluster {
   // identifying the x- and y-coordinates of the grid, approximate equality
   // testing is used. 'xabs' and 'xrel' are the absolute and relative tolerances
   // for evaluating the equality of the x-coordinates, and 'yabs' and 'yrel'
-  // those for the y-coordinates.
+  // those for the y-coordinates. We sort into column-major order, to satisfy
+  // GSL.
   class Point3DLess {
   public:
     Point3DLess(double xrel, double xabs, double yrel, double yabs) noexcept;
@@ -70,10 +71,10 @@ inline y3_cluster::Point3DLess::Point3DLess(double xrel,
 inline bool
 y3_cluster::Point3DLess::operator()(Point3D const& a, Point3D const& b) const
 {
-  if (not fpsupport::is_equivalent(a[0], b[0], xabs_, xrel_))
-    return a[0] < b[0];
   if (not fpsupport::is_equivalent(a[1], b[1], yabs_, yrel_))
     return a[1] < b[1];
+  if (not fpsupport::is_equivalent(a[0], b[0], xabs_, xrel_))
+    return a[0] < b[0];
   return a[2] < b[2];
 }
 
