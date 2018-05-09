@@ -6,7 +6,8 @@
 #include <array>
 #include <cmath>
 #include <iostream>
-
+#include <algorithm>
+#include <test/transform.hh>
 // This class template is based
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
 // provided by Spencer Everett.
@@ -54,7 +55,8 @@ private:
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
 
-  std::array<double, 10> r;
+  static const std::size_t NRADII = 10;
+  std::array <double, NRADII> r;
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -83,7 +85,7 @@ public:
                     y3_cluster::IntegrationRange zt_ir, 
                     y3_cluster::IntegrationRange R_ir, 
                     y3_cluster::IntegrationRange A_ir, 
-		                std::array<double, 10> const& rarray)
+		                std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -112,7 +114,7 @@ public:
   {}
 
   // The function call operator -- this is the function to be integrated.
-  std::array<double, 3>
+  std::array<double, NRADII+2>
   operator()(double scaled_lo,
              double scaled_lc,
              double scaled_lt,
@@ -151,23 +153,33 @@ public:
 
     // The evaluation below follows the convention set in main overleaf document
     //The evaluation is for Y3 likelihood
-    double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
-    double  gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    double const gamma_t_cen =fcen_ * del_sig_cen(r[1], lnM, zt) * exp(A * T_cen(r[1], lnM)); 
-    double const gamma_t_mis = (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r[1], lnM, R) *  exp(A * T_cen(r[1], lnM));
+    // puttign together the return vector
+    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
+    double const N = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
+    double const Nw = jacob * N * w;
+
+    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    auto  gamma_t_cen = [this, lnM, zt, A](double radius){ return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) ; };
+    auto gamma_t_mis = [this, lnM, A, R, lo, lc](double radius){ return (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(radius, lnM, R) *  exp(A * T_cen(radius, lnM)) ; } ;
+    auto const  gamma_t = y3_cluster::transform(r, 
+		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int](double radius){ return (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius)) ; } );
+
+    std::array<double, NRADII+2> return_arr;
+    std::copy_n( gamma_t.begin(), gamma_t.size(),  return_arr.begin() );
+    return_arr[NRADII]=N;
+    return_arr[NRADII+1]=Nw;
+
 
     // this is for y1 likelihood
     //double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v ;//*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
+    //double const Nw = jacob * N * w;
     //double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
     //double const gamma_t_cen =del_sig_cen(r, lnM);//fcen_ * del_sig_cen(r, lnM) * exp(A * T_cen(r, lnM));
     //double const gamma_t_mis = 0.;//(1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r, lnM, R) *  exp(A * T_cen(r, lnM));
-    
-    // puttign together the return vector
-    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
-    double const Nw = N * w;
-    double const gamma_t = (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen + gamma_t_mis);
-
-    return {{N*jacob, Nw*jacob, gamma_t*jacob}};
+    //gamma_t=(1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen + gamma_t_mis)
+    //double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
+    //return {N*jacob, Nw*jacob, gamma_t*jacob}
+    return return_arr;
   }
 };
 
@@ -224,7 +236,7 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange zt_ir{0., 1.0};    
    y3_cluster::IntegrationRange R_ir{0., 1.0};    
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
-   std::array<double, 10> rarray;
+   std::array<double, 10> rarray; // can I pass a vector here?
    for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*i;}
    return {fcen,
           msci,
