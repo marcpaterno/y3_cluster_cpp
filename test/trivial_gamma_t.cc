@@ -14,7 +14,7 @@
 #include "test/lc_lt_t2.hh"
 #include "test/lo_lc_t.hh"
 #include "test/mor_t.hh"
-#include "test/omega_z_t.hh"
+#include "test/omega_z_sdss.hh"
 #include "test/primitives.hh"
 #include "test/roffset_t.hh"
 #include "test/zo_zt_t.hh"
@@ -176,7 +176,7 @@ main(int argc, char* argv[])
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
-  y3_cluster::OMEGA_Z_t omega_z;
+  y3_cluster::OMEGA_Z_SDSS omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
   auto gti = make_gamma_t_integrand(2.0,

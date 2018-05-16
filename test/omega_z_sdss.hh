@@ -1,15 +1,16 @@
-#ifndef Y3_CLUSTER_OMEGA_Z_T_HH
+#ifndef Y3_CLUSTER_OMEGA_Z_SDSS_HH
 #define Y3_CLUSTER_OMEGA_Z_T_HH
 
+#include <array>
 #include <cmath>
 
 namespace y3_cluster {
-  class OMEGA_Z_t {
-  public:
+  struct  OMEGA_Z_SDSS {
+
     double
     operator()(double zt) const
     {
-      double poly_coeff_vol[12] = {-1.14293122E05,
+      std::array<double, 12> constexpr poly_coeff_vol = {-1.14293122E05,
                                    5.96846869E04,
                                    9.24239180E03,
                                    -2.23118813E03,
@@ -21,13 +22,12 @@ namespace y3_cluster {
                                    -3.11253383E-01,
                                    5.48481084E-03,
                                    3.12629987E00};
-      int poly_deg = 12;
       double omega_z = 0.0;
-      double zpivot = 0.2;
+      double constexpr zpivot = 0.2;
 
-      for (int i = 0; i < 12; i++) {
+      for (std::size_t i = 0; i < poly_coeff_vol.size(); ++i) {
         omega_z = omega_z +
-                  poly_coeff_vol[i] * std::pow(zt - zpivot, poly_deg - i - 1.);
+                  poly_coeff_vol[i] * std::pow(zt - zpivot,  poly_coeff_vol.size() - i - 1.);
       }
       return omega_z;
     }
