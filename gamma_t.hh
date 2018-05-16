@@ -233,11 +233,11 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};    
    y3_cluster::IntegrationRange lt_ir{1.0, 100};    
    y3_cluster::IntegrationRange lc_ir{1.0, 100};    
-   y3_cluster::IntegrationRange zt_ir{0., 1.0};    
+   y3_cluster::IntegrationRange zt_ir{0.1, 0.3};    
    y3_cluster::IntegrationRange R_ir{0., 1.0};    
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
    std::array<double, 10> rarray; // can I pass a vector here?
-   for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*i;}
+   for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,
           msci,
           mor,
