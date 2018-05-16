@@ -13,6 +13,7 @@
 #include "test/lc_lt_t2.hh"
 #include "test/mor_t.hh"
 #include "test/zo_zt_t.hh"
+#include "test/roffset_t.hh"
 #include "test/primitives.hh"
 
 #include <chrono>
@@ -33,22 +34,6 @@ using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
 
-
-
-class ROFFSET_t {
-public:
-  explicit ROFFSET_t(double tau) : _tau(tau) {}
-
-  double
-  operator()(double x) const
-  {
-    // return x - offset;
-    return x / _tau / _tau * std::exp(-x / _tau);
-  }
-
-private:
-  double _tau;
-};
 
 struct T_CEN_t {
   double
@@ -282,7 +267,7 @@ main(int argc, char* argv[])
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   y3_cluster::ZO_ZT_t zo_zt{0.05};
-  ROFFSET_t roffset{0.2};
+  y3_cluster::ROFFSET_t roffset{0.2};
   T_CEN_t t_cen;
   T_MIS_t t_mis;
   A_CEN_t a_cen;
