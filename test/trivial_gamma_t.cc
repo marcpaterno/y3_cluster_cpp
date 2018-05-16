@@ -14,6 +14,7 @@
 #include "test/mor_t.hh"
 #include "test/zo_zt_t.hh"
 #include "test/roffset_t.hh"
+#include "test/del_sig_cen_t.hh"
 #include "test/primitives.hh"
 
 #include <chrono>
@@ -85,57 +86,6 @@ private:
   double _c;
 };
 
-class DEL_SIG_CEN_t {
-public:
-  explicit DEL_SIG_CEN_t(double c) : _c(c) {}
-
-  explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
-  {
-    sample.get_val<double>("del_sig_cen_params", "c", _c);
-  }
-
-  double
-  operator()(double r, double lnM, double zt) const
-  /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
-  {
-    y3_cluster::EZ_sq ez_sq{0.3, 0.7, 0.};
-
-    double delta_c =
-      200. * _c * _c * _c / (3. * (std::log(1. + _c) - _c / (1. + _c)));
-    double rho_crit = 2.77526157E11 * ez_sq(zt);
-    /* EZ*EZ would be a little bit slower than direct definition */
-
-    double r_200 = std::pow(
-      3. * std::exp(lnM) / (800. * y3_cluster::pi() * rho_crit), 1. / 3.);
-    double r_s = r_200 / _c;
-
-    double r_ratio = r / r_s;
-    double coeff = r_s * delta_c * rho_crit;
-
-    if (r_ratio < 1.) {
-      return coeff *
-             (8. * std::atanh(std::sqrt((1. - r_ratio) / (1. + r_ratio))) /
-                (r_ratio * r_ratio * std::sqrt(1. - r_ratio * r_ratio)) +
-              4. * std::log(r_ratio / 2.) / (r_ratio * r_ratio) -
-              2. / (r_ratio * r_ratio - 1.) +
-              4. * std::atanh(std::sqrt((1. - r_ratio) / (1. + r_ratio))) /
-                ((r_ratio * r_ratio - 1.) * std::sqrt(1. - r_ratio * r_ratio)));
-    } else if (r_ratio == 1.) {
-      return coeff * (10. / 3. + 4. * std::log(0.5));
-    } else {
-      return coeff *
-             (8. * std::atan(std::sqrt((r_ratio - 1.) / (r_ratio + 1.))) /
-                (r_ratio * r_ratio * std::sqrt(r_ratio * r_ratio - 1.)) +
-              4. * std::log(r_ratio / 2.) / (r_ratio * r_ratio) -
-              2. / (r_ratio * r_ratio - 1.) +
-              4. * std::atan(std::sqrt((r_ratio - 1.) / (r_ratio + 1.))) /
-                (std::pow(r_ratio * r_ratio - 1., 1.5)));
-    }
-  }
-
-private:
-  double _c;
-};
 
 struct DEL_SIG_MIS_t {
   double
@@ -275,7 +225,7 @@ main(int argc, char* argv[])
   auto p1=std::make_shared<Interp2D const>(mh, zz, dndlnmh);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
   // DEL_SIG_CEN_t dsc{5., 0.5};
-  DEL_SIG_CEN_t dsc{5.};
+  y3_cluster::DEL_SIG_CEN_t dsc{5.};
   // DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
 
