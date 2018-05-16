@@ -9,6 +9,7 @@
 #include "test/ez_sq.hh"
 #include "test/hmf_t.hh"
 #include "test/lo_lc_t.hh"
+#include "test/lc_lt_t.hh"
 #include "test/lc_lt_t2.hh"
 #include "test/mor_t.hh"
 #include "test/primitives.hh"
@@ -31,56 +32,7 @@ using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
 
-class LC_LT_t {
-public:
-  explicit LC_LT_t(double tau,
-                   double mu,
-                   double sigma,
-                   double fmsk,
-                   double fprj)
-    : _tau(tau), _mu(mu), _sigma(sigma), _fmsk(fmsk), _fprj(fprj)
-  {}
 
-  explicit LC_LT_t(cosmosis::DataBlock& sample)
-  {
-    sample.get_val<double>("LC_LT_params", "tau", _tau);
-    sample.get_val<double>("LC_LT_params", "mu", _mu);
-    sample.get_val<double>("LC_LT_params", "sigma", _sigma);
-    sample.get_val<double>("LC_LT_params", "fmsk", _fmsk);
-    sample.get_val<double>("LC_LT_params", "fprj", _fprj);
-  }
-
-  double
-  operator()(double lc, double lt, double /* zt */) const
-  {
-    return (1.0 - _fmsk) * (1.0 - _fprj) * y3_cluster::invsqrt2pi() *
-             std::exp(-(lc - _mu) * (lc - _mu) / (2.0 * _sigma * _sigma)) /
-             _sigma +
-           0.5 * ((1.0 - _fmsk) * _fprj * _tau + _fmsk * _fprj / lt) *
-             std::exp(_tau * (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
-                      2.0) *
-             std::erfc((_mu + _tau * _sigma * _sigma - lc) /
-                       (std::sqrt(2.0) * _sigma)) +
-           _fmsk *
-             (std::erfc((_mu - lc - lt) / (std::sqrt(2.0) * _sigma)) -
-              std::erfc((_mu - lc) / (std::sqrt(2.0) * _sigma))) /
-             (2.0 * lt) -
-           _fmsk * _fprj *
-             (std::exp(-_tau * lt) *
-              std::exp(_tau * (2.0 * _mu + _tau * _sigma * _sigma - 2.0 * lc) /
-                       2.0) *
-              std::erfc((_mu + _tau * _sigma * _sigma - lc - lt) /
-                        (std::sqrt(2.0) * _sigma))) /
-             (2.0 * lt);
-  }
-
-private:
-  double _tau;
-  double _mu;
-  double _sigma;
-  double _fmsk;
-  double _fprj;
-};
 
 class ZO_ZT_t {
 public:
@@ -347,7 +299,7 @@ main(int argc, char* argv[])
   long long maxeval = std::stoll(args[0]);
   y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
-  LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
+  y3_cluster::LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   ZO_ZT_t zo_zt{0.05};
   ROFFSET_t roffset{0.2};
   T_CEN_t t_cen;
