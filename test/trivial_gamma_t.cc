@@ -5,18 +5,18 @@
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
 
+#include "test/del_sig_cen_t.hh"
+#include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
 #include "test/ez_sq.hh"
 #include "test/hmf_t.hh"
-#include "test/lo_lc_t.hh"
 #include "test/lc_lt_t.hh"
 #include "test/lc_lt_t2.hh"
+#include "test/lo_lc_t.hh"
 #include "test/mor_t.hh"
-#include "test/zo_zt_t.hh"
-#include "test/roffset_t.hh"
-#include "test/del_sig_cen_t.hh"
 #include "test/primitives.hh"
-#include "test/dv_do_dz_t.hh"
+#include "test/roffset_t.hh"
+#include "test/zo_zt_t.hh"
 
 #include <chrono>
 #include <cmath>
@@ -34,8 +34,6 @@ using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
-
-
 
 struct T_CEN_t {
   double
@@ -83,10 +81,10 @@ public:
   {
     return std::exp(lnM);
   }
+
 private:
   double _c;
 };
-
 
 struct DEL_SIG_MIS_t {
   double
@@ -96,7 +94,6 @@ struct DEL_SIG_MIS_t {
     return 1.0;
   }
 };
-
 
 class OMEGA_Z_t {
 public:
@@ -154,7 +151,7 @@ main(int argc, char* argv[])
   double num{0};
   std::ifstream file1(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
-  while  (file1 >> num){
+  while (file1 >> num) {
     dndlnmh.push_back(num);
   }
   if (dndlnmh.empty())
@@ -163,7 +160,7 @@ main(int argc, char* argv[])
   std::vector<double> mh;
   std::ifstream file2(
     "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
-  while  (file2 >> num){
+  while (file2 >> num) {
     mh.push_back(std::log(num));
   }
   if (mh.empty())
@@ -196,14 +193,14 @@ main(int argc, char* argv[])
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
-  auto p1=std::make_shared<Interp2D const>(mh, zz, dndlnmh);
+  auto p1 = std::make_shared<Interp2D const>(mh, zz, dndlnmh);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
   // DEL_SIG_CEN_t dsc{5., 0.5};
   y3_cluster::DEL_SIG_CEN_t dsc{5.};
   // DEL_SIG_MIS_t dsc{5., 0.5};
   DEL_SIG_MIS_t dsm;
 
-  auto da_f=std::make_shared<Interp1D const>(zz, da_arr);
+  auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
   IntegrationRange lo_ir{10, 30};
