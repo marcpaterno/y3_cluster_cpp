@@ -14,6 +14,7 @@
 #include "test/lc_lt_t2.hh"
 #include "test/lo_lc_t.hh"
 #include "test/mor_t.hh"
+#include "test/omega_z_t.hh"
 #include "test/primitives.hh"
 #include "test/roffset_t.hh"
 #include "test/zo_zt_t.hh"
@@ -95,34 +96,7 @@ struct DEL_SIG_MIS_t {
   }
 };
 
-class OMEGA_Z_t {
-public:
-  double
-  operator()(double zt) const
-  {
-    double poly_coeff_vol[12] = {-1.14293122E05,
-                                 5.96846869E04,
-                                 9.24239180E03,
-                                 -2.23118813E03,
-                                 -4.52580713E03,
-                                 1.18404878E03,
-                                 1.27951911E02,
-                                 -5.05716847E01,
-                                 1.01744577E00,
-                                 -3.11253383E-01,
-                                 5.48481084E-03,
-                                 3.12629987E00};
-    int poly_deg = 12;
-    double omega_z = 0.0;
-    double zpivot = 0.2;
 
-    for (int i = 0; i < 12; i++) {
-      omega_z =
-        omega_z + poly_coeff_vol[i] * std::pow(zt - zpivot, poly_deg - i - 1.);
-    }
-    return omega_z;
-  }
-};
 
 template <class ALG, class F>
 void
@@ -202,7 +176,7 @@ main(int argc, char* argv[])
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
-  OMEGA_Z_t omega_z;
+  y3_cluster::OMEGA_Z_t omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
   auto gti = make_gamma_t_integrand(2.0,
