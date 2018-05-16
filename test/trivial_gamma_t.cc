@@ -16,6 +16,7 @@
 #include "test/roffset_t.hh"
 #include "test/del_sig_cen_t.hh"
 #include "test/primitives.hh"
+#include "test/dv_do_dz_t.hh"
 
 #include <chrono>
 #include <cmath>
@@ -96,33 +97,6 @@ struct DEL_SIG_MIS_t {
   }
 };
 
-class DV_DO_DZ_t {
-public:
-  DV_DO_DZ_t(std::shared_ptr<Interp1D const> da, y3_cluster::EZ ezt) : _da(da), _ezt(ezt) {}
-
-  using doubles = std::vector<double>;
-
-  explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
-    : _da( std::make_shared<Interp1D const> ( 
-           sample.view<doubles>("DV_D0_DZ_params", "xs"),
-	   sample.view<doubles>("DV_D0_DZ_params", "ys")))
-    , _ezt( y3_cluster::EZ (
-	    sample.view<double>("", "omega_m"),
-	    sample.view<double>("", "omega_l"),
-	    sample.view<double>("", "omega_k")))
-  {}
-
-  double
-  operator()(double zt) const
-  {
-    double const da_z = _da->eval(zt);
-    return 3000.0 * (1.0 + zt) * (1.0 + zt) * da_z * da_z / _ezt(zt);
-  }
-
-private:
-  std::shared_ptr<Interp1D const> _da;
-  y3_cluster::EZ _ezt;
-};
 
 class OMEGA_Z_t {
 public:
@@ -230,7 +204,7 @@ main(int argc, char* argv[])
   DEL_SIG_MIS_t dsm;
 
   auto da_f=std::make_shared<Interp1D const>(zz, da_arr);
-  DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
+  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
   OMEGA_Z_t omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
