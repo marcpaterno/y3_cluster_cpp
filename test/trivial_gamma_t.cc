@@ -9,6 +9,7 @@
 #include "test/ez_sq.hh"
 #include "test/hmf_t.hh"
 #include "test/lo_lc_t.hh"
+#include "test/lc_lt_t2.hh"
 #include "test/mor_t.hh"
 #include "test/primitives.hh"
 
@@ -29,14 +30,7 @@ using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
-class LC_LT_t2 {
-public:
-  double
-  operator()(double lc, double lt, double /* zt */) const
-  {
-    return y3_cluster::gaussian(lc - lt, 0.0, 10.0);
-  }
-};
+
 class LC_LT_t {
 public:
   explicit LC_LT_t(double tau,
