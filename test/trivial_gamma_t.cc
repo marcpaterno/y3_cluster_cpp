@@ -12,6 +12,7 @@
 #include "test/lc_lt_t.hh"
 #include "test/lc_lt_t2.hh"
 #include "test/mor_t.hh"
+#include "test/zo_zt_t.hh"
 #include "test/primitives.hh"
 
 #include <chrono>
@@ -33,26 +34,6 @@ using y3_cluster::mz_power_law;
 
 
 
-
-class ZO_ZT_t {
-public:
-  explicit ZO_ZT_t(double sigma) : _sigma(sigma) {}
-
-  explicit ZO_ZT_t(cosmosis::DataBlock& sample)
-  {
-    sample.get_val<double>("ZO_ZT_params", "sigma", _sigma);
-  }
-
-  double
-  operator()(double zo, double zt) const
-  {
-    double const x = zo - zt;
-    return y3_cluster::gaussian(x, 0., _sigma);
-  }
-
-private:
-  double _sigma;
-};
 
 class ROFFSET_t {
 public:
@@ -300,7 +281,7 @@ main(int argc, char* argv[])
   y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
-  ZO_ZT_t zo_zt{0.05};
+  y3_cluster::ZO_ZT_t zo_zt{0.05};
   ROFFSET_t roffset{0.2};
   T_CEN_t t_cen;
   T_MIS_t t_mis;
