@@ -5,6 +5,7 @@
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
 
+#include "test/a_cen_t.hh"
 #include "test/del_sig_cen_t.hh"
 #include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
@@ -37,15 +38,6 @@ using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
-
-struct A_CEN_t {
-  double
-  operator()(double, double, double, double) const
-  {
-    // return (a + b) * (c + d);
-    return 1.0;
-  }
-};
 
 struct A_MIS_t {
   double
@@ -198,7 +190,7 @@ main(int argc, char* argv[])
   y3_cluster::ROFFSET_t roffset{0.2};
   y3_cluster::T_CEN_t t_cen;
   y3_cluster::T_MIS_t t_mis;
-  A_CEN_t a_cen;
+  y3_cluster::A_CEN_t a_cen;
   A_MIS_t a_mis;
   auto p1 = std::make_shared<Interp2D const>(mh, zz, dndlnmh);
   auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
