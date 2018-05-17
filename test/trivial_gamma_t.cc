@@ -18,6 +18,7 @@
 #include "test/primitives.hh"
 #include "test/roffset_t.hh"
 #include "test/t_cen_t.hh"
+#include "test/t_mis_t.hh"
 #include "test/zo_zt_t.hh"
 
 #include <chrono>
@@ -36,17 +37,6 @@ using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
-
-
-
-struct T_MIS_t {
-  double
-  operator()(double, double, double) const
-  {
-    // return x + y * z;
-    return 1.0;
-  }
-};
 
 struct A_CEN_t {
   double
@@ -207,7 +197,7 @@ main(int argc, char* argv[])
   y3_cluster::ZO_ZT_t zo_zt{0.05};
   y3_cluster::ROFFSET_t roffset{0.2};
   y3_cluster::T_CEN_t t_cen;
-  T_MIS_t t_mis;
+  y3_cluster::T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
   auto p1 = std::make_shared<Interp2D const>(mh, zz, dndlnmh);
