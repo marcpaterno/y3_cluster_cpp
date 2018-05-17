@@ -66,20 +66,7 @@ struct A_MIS_t {
   }
 };
 
-/* NFW Profile , in h*M_solar*Mpc^-2 */
-class DEL_SIG_CEN_y1 {
-public:
-  explicit DEL_SIG_CEN_y1(double c) : _c(c) {}
 
-  double
-  operator()(double, double lnM, double) const
-  {
-    return std::exp(lnM);
-  }
-
-private:
-  double _c;
-};
 
 struct DEL_SIG_MIS_t {
   double
