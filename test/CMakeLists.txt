@@ -72,3 +72,10 @@ target_include_directories(fpsupport_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(fpsupport_test fpsupport_test)
+
+add_executable(omega_z_sdss_test main.cc omega_z_sdss.test.cc)
+target_include_directories(omega_z_sdss_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(omega_z_sdss_test omega_z_sdss_test)
