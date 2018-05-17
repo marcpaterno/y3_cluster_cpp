@@ -11,3 +11,4 @@ mz_power_law_test
 interp_2d_test
 point_3d_test
 fpsupport_test
+omega_z_sdss_test
