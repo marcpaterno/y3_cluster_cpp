@@ -17,6 +17,7 @@
 #include "test/omega_z_sdss.hh"
 #include "test/primitives.hh"
 #include "test/roffset_t.hh"
+#include "test/t_cen_t.hh"
 #include "test/zo_zt_t.hh"
 
 #include <chrono>
@@ -36,14 +37,7 @@ using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
-struct T_CEN_t {
-  double
-  operator()(double, double) const
-  {
-    // return x + y;
-    return 1.0;
-  }
-};
+
 
 struct T_MIS_t {
   double
@@ -225,7 +219,7 @@ main(int argc, char* argv[])
   y3_cluster::LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
   y3_cluster::ZO_ZT_t zo_zt{0.05};
   y3_cluster::ROFFSET_t roffset{0.2};
-  T_CEN_t t_cen;
+  y3_cluster::T_CEN_t t_cen;
   T_MIS_t t_mis;
   A_CEN_t a_cen;
   A_MIS_t a_mis;
