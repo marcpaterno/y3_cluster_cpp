@@ -6,7 +6,9 @@
 #include "mz_power_law.hh"
 
 #include "test/a_cen_t.hh"
+#include "test/a_mis_t.hh"
 #include "test/del_sig_cen_t.hh"
+#include "test/del_sig_mis_t.hh"
 #include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
 #include "test/ez_sq.hh"
@@ -38,28 +40,6 @@ using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
-
-struct A_MIS_t {
-  double
-  operator()(double, double, double, double, double) const
-  {
-    // return (a + b + c) * (d + e);
-    return 1.0;
-  }
-};
-
-
-
-struct DEL_SIG_MIS_t {
-  double
-  operator()(double, double, double) const
-  {
-    // return (2. * x + 0.5 * y) * z;
-    return 1.0;
-  }
-};
-
-
 
 template <class ALG, class F>
 void
@@ -191,7 +171,7 @@ main(int argc, char* argv[])
   y3_cluster::T_CEN_t t_cen;
   y3_cluster::T_MIS_t t_mis;
   y3_cluster::A_CEN_t a_cen;
-  A_MIS_t a_mis;
+  y3_cluster::A_MIS_t a_mis;
   auto p1 = std::make_shared<Interp2D const>(mh, zz, dndlnmh);
   auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
@@ -200,7 +180,7 @@ main(int argc, char* argv[])
   // DEL_SIG_CEN_t dsc{5., 0.5};
   y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4, 5.);
   // DEL_SIG_MIS_t dsc{5., 0.5};
-  DEL_SIG_MIS_t dsm;
+  y3_cluster::DEL_SIG_MIS_t dsm;
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
