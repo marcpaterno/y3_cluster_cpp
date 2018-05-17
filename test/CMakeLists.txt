@@ -79,3 +79,10 @@ target_include_directories(omega_z_sdss_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(omega_z_sdss_test omega_z_sdss_test)
+
+add_executable(lo_lc_t_test main.cc lo_lc_t.test.cc)
+target_include_directories(lo_lc_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(lo_lc_t_test lo_lc_t_test)
