@@ -57,11 +57,10 @@ def execute(block,config):
 
 	#concentration (double): concentration coeffient in miscentering
 	concentration = 5
-
+	print(M)
 	for i in range(M_bins):
-		xi_nfw = ct.xi.xi_nfw_at_R(Radii, M[i], concentration, omega_m)
-		Sigma1 = ct.deltasigma.Sigma_at_R(R_perp, Radii, xi_nfw, M[i], concentration, omega_m)
-		Deltasigma1 = ct.deltasigma.DeltaSigma_at_R(R_perp, Radii, Sigma1, M[i], concentration, omega_m)
+		Sigma1 = ct.deltasigma.Sigma_nfw_at_R(R_perp, M[i], concentration, omega_m)
+		Deltasigma1 = ct.deltasigma.DeltaSigma_at_R(R_perp, R_perp, Sigma1, M[i], concentration, omega_m)
 		Deltasigma_1[i] = Deltasigma1
 	
 	Size2 = nz * R_perp_bins
@@ -71,7 +70,7 @@ def execute(block,config):
 	for i in range(nz):
 		xi_mm = ct.xi.xi_mm_at_R(Radii, k_nl, P_k_nl[i]) 
 		Sigma2 = ct.deltasigma.Sigma_at_R(R_perp, Radii, xi_mm, M[0], concentration, omega_m)
-		Deltasigma2 = ct.deltasigma.DeltaSigma_at_R(R_perp, Radii, Sigma2, M[0], concentration, omega_m)
+		Deltasigma2 = ct.deltasigma.DeltaSigma_at_R(R_perp, R_perp, Sigma2, M[0], concentration, omega_m)
 		Deltasigma_2[i] = Deltasigma2
 
 	Size3 = nz * M_bins
