@@ -3,48 +3,35 @@
 
 #include "integration_range.hh"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
-#include <algorithm>
 #include <test/transform.hh>
 // This class template is based
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
 // provided by Spencer Everett.
 
-template <typename MOR,
-          typename LO_LC,
-          typename LC_LT,
-          typename ZO_ZT,
-          typename ROFFSET,
-          typename T_CEN,
-          typename T_MIS,
-          typename A_CEN,
-          typename A_MIS,
-          typename HMF,
-          typename DEL_SIG_CEN,
-          typename DEL_SIG_MIS,
-          typename DV_DO_DZ,
-          typename OMEGA_Z>
+template <typename MODELS>
 class Gamma_T_Integrand {
 private:
   double fcen_;
   double msci_;
 
-  MOR mor;
-  LO_LC lo_lc;
-  LC_LT lc_lt;
-  ZO_ZT zo_zt;
-  ROFFSET roffset;
-  T_CEN T_cen;
-  T_MIS T_mis;
-  A_CEN A_cen;
-  A_MIS A_mis;
-  HMF hmf;
-  DEL_SIG_CEN del_sig_cen;
-  DEL_SIG_MIS del_sig_mis;
-  DV_DO_DZ dv_do_dz;
-  OMEGA_Z omega_z;
+  MODELS::MOR mor;
+  MODELS::LO_LC lo_lc;
+  MODELS::LC_LT lc_lt;
+  MODELS::ZO_ZT zo_zt;
+  MODELS::ROFFSET roffset;
+  MODELS::T_CEN T_cen;
+  MODELS::T_MIS T_mis;
+  MODELS::A_CEN A_cen;
+  MODELS::A_MIS A_mis;
+  MODELS::HMF hmf;
+  MODELS::DEL_SIG_CEN del_sig_cen;
+  MODELS::DEL_SIG_MIS del_sig_mis;
+  MODELS::DV_DO_DZ dv_do_dz;
+  MODELS::OMEGA_Z omega_z;
 
   y3_cluster::IntegrationRange lnM_ir_;
   y3_cluster::IntegrationRange lo_ir_;
@@ -56,36 +43,37 @@ private:
   y3_cluster::IntegrationRange A_ir_;
 
   static const std::size_t NRADII = 10;
-  std::array <double, NRADII> r;
+  std::array<double, NRADII> r;
+
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
   // specify the various terms of the integrand.
   Gamma_T_Integrand(double fcen,
                     double msci,
-                    MOR mor,
-                    LO_LC lo_lc,
-                    LC_LT lc_lt,
-                    ZO_ZT zo_zt,
-                    ROFFSET roffset,
-                    T_CEN T_cen,
-                    T_MIS T_mis,
-                    A_CEN A_cen,
-                    A_MIS A_mis,
-                    HMF hmf,
-                    DEL_SIG_CEN del_sig_cen,
-                    DEL_SIG_MIS del_sig_mis,
-                    DV_DO_DZ dv_do_dz,
-                    OMEGA_Z omega_z,
-                    y3_cluster::IntegrationRange lnM_ir, 
-                    y3_cluster::IntegrationRange lo_ir, 
-                    y3_cluster::IntegrationRange lt_ir, 
-                    y3_cluster::IntegrationRange lc_ir, 
-                    y3_cluster::IntegrationRange zo_ir, 
-                    y3_cluster::IntegrationRange zt_ir, 
-                    y3_cluster::IntegrationRange R_ir, 
-                    y3_cluster::IntegrationRange A_ir, 
-		                std::array<double, NRADII> const& rarray)
+                    MODELS::MOR mor,
+                    MODELS::LO_LC lo_lc,
+                    MODELS::LC_LT lc_lt,
+                    MODELS::ZO_ZT zo_zt,
+                    MODELS::ROFFSET roffset,
+                    MODELS::T_CEN T_cen,
+                    MODELS::T_MIS T_mis,
+                    MODELS::A_CEN A_cen,
+                    MODELS::A_MIS A_mis,
+                    MODELS::HMF hmf,
+                    MODELS::DEL_SIG_CEN del_sig_cen,
+                    MODELS::DEL_SIG_MIS del_sig_mis,
+                    MODELS::DV_DO_DZ dv_do_dz,
+                    MODELS::OMEGA_Z omega_z,
+                    y3_cluster::IntegrationRange lnM_ir,
+                    y3_cluster::IntegrationRange lo_ir,
+                    y3_cluster::IntegrationRange lt_ir,
+                    y3_cluster::IntegrationRange lc_ir,
+                    y3_cluster::IntegrationRange zo_ir,
+                    y3_cluster::IntegrationRange zt_ir,
+                    y3_cluster::IntegrationRange R_ir,
+                    y3_cluster::IntegrationRange A_ir,
+                    std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -114,7 +102,7 @@ public:
   {}
 
   // The function call operator -- this is the function to be integrated.
-  std::array<double, NRADII+2>
+  std::array<double, NRADII + 2>
   operator()(double scaled_lo,
              double scaled_lc,
              double scaled_lt,
@@ -144,7 +132,6 @@ public:
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
 
-
     // These will eventually be passed by CosmoSIS
     double m_shear = 1.0;
     double sig_crit_inv = 1.0;
@@ -152,117 +139,78 @@ public:
     double w = 1.0;
 
     // The evaluation below follows the convention set in main overleaf document
-    //The evaluation is for Y3 likelihood
+    // The evaluation is for Y3 likelihood
     // puttign together the return vector
-    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
-    double const N = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
+    double const jacob = lnM_ir_.jacobian() * lo_ir_.jacobian() *
+                         lt_ir_.jacobian() * lc_ir_.jacobian() *
+                         zo_ir_.jacobian() * zt_ir_.jacobian() *
+                         R_ir_.jacobian() * A_ir_.jacobian();
+    double const N = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v *
+                     lc_lt_v *
+                     (fcen_ + (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R));
     double const Nw = jacob * N * w;
 
-    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    auto  gamma_t_cen = [this, lnM, zt, A](double radius){ return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) ; };
-    auto gamma_t_mis = [this, lnM, A, R, lo, lc](double radius){ return (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(radius, lnM, R) *  exp(A * T_cen(radius, lnM)) ; } ;
-    auto const  gamma_t = y3_cluster::transform(r, 
-		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int](double radius){ return (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius)) ; } );
+    auto const gamma_t_int =
+      jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    auto gamma_t_cen = [this, lnM, zt, A](double radius) {
+      return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM));
+    };
+    auto gamma_t_mis = [this, lnM, A, R, lo, lc](double radius) {
+      return (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R) *
+             del_sig_mis(radius, lnM, R) * exp(A * T_cen(radius, lnM));
+    };
+    auto const gamma_t = y3_cluster::transform(
+      r,
+      [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int](
+        double radius) {
+        return (1.0 + m_shear) / sig_crit_inv * gamma_t_int *
+               (gamma_t_cen(radius) + gamma_t_mis(radius));
+      });
 
-    std::array<double, NRADII+2> return_arr;
-    std::copy_n( gamma_t.begin(), gamma_t.size(),  return_arr.begin() );
-    return_arr[NRADII]=N;
-    return_arr[NRADII+1]=Nw;
+    std::array<double, NRADII + 2> return_arr;
+    std::copy_n(gamma_t.begin(), gamma_t.size(), return_arr.begin());
+    return_arr[NRADII] = N;
+    return_arr[NRADII + 1] = Nw;
 
-
-    // this is for y1 likelihood
-    //double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v ;//*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
-    //double const Nw = jacob * N * w;
-    //double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    //double const gamma_t_cen =del_sig_cen(r, lnM);//fcen_ * del_sig_cen(r, lnM) * exp(A * T_cen(r, lnM));
-    //double const gamma_t_mis = 0.;//(1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r, lnM, R) *  exp(A * T_cen(r, lnM));
-    //gamma_t=(1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen + gamma_t_mis)
-    //double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
-    //return {N*jacob, Nw*jacob, gamma_t*jacob}
     return return_arr;
   }
 };
 
-template <typename MOR,
-          typename LO_LC,
-          typename LC_LT,
-          typename ZO_ZT,
-          typename ROFFSET,
-          typename T_CEN,
-          typename T_MIS,
-          typename A_CEN,
-          typename A_MIS,
-          typename HMF,
-          typename DEL_SIG_CEN,
-          typename DEL_SIG_MIS,
-          typename DV_DO_DZ,
-          typename OMEGA_Z>
-Gamma_T_Integrand<MOR,
-                  LO_LC,
-                  LC_LT,
-                  ZO_ZT,
-                  ROFFSET,
-                  T_CEN,
-                  T_MIS,
-                  A_CEN,
-                  A_MIS,
-                  HMF,
-                  DEL_SIG_CEN,
-                  DEL_SIG_MIS,
-                  DV_DO_DZ,
-                  OMEGA_Z>
+template <typename MODELS>
+Gamma_T_Integrand<MODELS>
 make_gamma_t_integrand(double fcen,
                        double msci,
-                       MOR mor,
-                       LO_LC lo_lc,
-                       LC_LT lc_lt,
-                       ZO_ZT zo_zt,
-                       ROFFSET roffset,
-                       T_CEN t_cen,
-                       T_MIS t_mis,
-                       A_CEN a_cen,
-                       A_MIS a_mis,
-                       HMF hmf,
-                       DEL_SIG_CEN del_sig_cen,
-                       DEL_SIG_MIS del_sig_mis,
-                       DV_DO_DZ dv_do_dz,
-                       OMEGA_Z omega_z,
-                       y3_cluster::IntegrationRange lo_ir, 
+                       MODELS::MOR mor,
+                       MODELS::LO_LC lo_lc,
+                       MODELS::LC_LT lc_lt,
+                       MODELS::ZO_ZT zo_zt,
+                       MODELS::ROFFSET roffset,
+                       MODELS::T_CEN t_cen,
+                       MODELS::T_MIS t_mis,
+                       MODELS::A_CEN a_cen,
+                       MODELS::A_MIS a_mis,
+                       MODELS::HMF hmf,
+                       MODELS::DEL_SIG_CEN del_sig_cen,
+                       MODELS::DEL_SIG_MIS del_sig_mis,
+                       MODELS::DV_DO_DZ dv_do_dz,
+                       MODELS::OMEGA_Z omega_z,
+                       y3_cluster::IntegrationRange lo_ir,
                        y3_cluster::IntegrationRange zo_ir)
 {
-   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};    
-   y3_cluster::IntegrationRange lt_ir{1.0, 100};    
-   y3_cluster::IntegrationRange lc_ir{1.0, 100};    
-   y3_cluster::IntegrationRange zt_ir{0.1, 0.3};    
-   y3_cluster::IntegrationRange R_ir{0., 1.0};    
-   y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
-   std::array<double, 10> rarray; // can I pass a vector here?
-   for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
-   return {fcen,
-          msci,
-          mor,
-          lo_lc,
-          lc_lt,
-          zo_zt,
-          roffset,
-          t_cen,
-          t_mis,
-          a_cen,
-          a_mis,
-          hmf,
-          del_sig_cen,
-          del_sig_mis,
-          dv_do_dz,
-          omega_z,
-          lnM_ir, 
-          lo_ir, 
-          lt_ir, 
-          lc_ir,
-	  zo_ir, 
-	  zt_ir,
-	  R_ir,
-          A_ir,
-          rarray }; 
+  y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
+  y3_cluster::IntegrationRange lt_ir{1.0, 100};
+  y3_cluster::IntegrationRange lc_ir{1.0, 100};
+  y3_cluster::IntegrationRange zt_ir{0.1, 0.3};
+  y3_cluster::IntegrationRange R_ir{0., 1.0};
+  y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
+  std::array<double, 10> rarray; // can I pass a vector here?
+  for (std::size_t i = 0; i < 10; i++) {
+    rarray[i] = 5.0 * (i + 0.01);
+  }
+  return {fcen,     msci,    mor,    lo_lc, lc_lt, zo_zt,       roffset,
+          t_cen,    t_mis,   a_cen,  a_mis, hmf,   del_sig_cen, del_sig_mis,
+          dv_do_dz, omega_z, lnM_ir, lo_ir, lt_ir, lc_ir,       zo_ir,
+          zt_ir,    R_ir,    A_ir,   rarray};
 }
 
 #endif
