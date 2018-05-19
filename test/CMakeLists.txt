@@ -86,3 +86,10 @@ target_include_directories(lo_lc_t_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(lo_lc_t_test lo_lc_t_test)
+
+add_executable(ez_sq_test main.cc ez_sq.test.cc)
+target_include_directories(ez_sq_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ez_sq_test ez_sq_test)
