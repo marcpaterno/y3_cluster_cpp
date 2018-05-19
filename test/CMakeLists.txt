@@ -93,3 +93,10 @@ target_include_directories(ez_sq_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ez_sq_test ez_sq_test)
+
+add_executable(ez_test main.cc ez.test.cc)
+target_include_directories(ez_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ez_test ez_test)
