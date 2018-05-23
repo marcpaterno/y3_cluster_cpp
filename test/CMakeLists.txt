@@ -100,3 +100,10 @@ target_include_directories(ez_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ez_test ez_test)
+
+add_executable(roffset_t_test main.cc roffset_t.test.cc)
+target_include_directories(roffset_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(roffset_t_test roffset_t_test)
