@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <iostream>
 
 using y3_cluster::LO_LC_t;
 TEST_CASE("Lo_Lc_t works")
@@ -17,6 +18,7 @@ TEST_CASE("Lo_Lc_t works")
   std::string dummyline;
   std::getline (infile, dummyline);
   std::getline (infile, dummyline);
+  while (infile)
   {
     // We aren't bothering to test that the reading worked, because we're
     // careful to make sure the data file is not mal-formed when we write the
@@ -39,7 +41,7 @@ TEST_CASE("Lo_Lc_t works")
   for (std::size_t i = 0, sy = ys.size(); i != sy; ++i)
   {
     double const fz = lolc(los[i], lcs[i], Rs[i]);
-    double constexpr epsrel = 1.0e-6;
+    double constexpr epsrel = 1.0e-3;
     CHECK(fz == Approx(ys[i]).epsilon(epsrel));
   }
 }
