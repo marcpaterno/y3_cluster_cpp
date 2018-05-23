@@ -3,7 +3,6 @@
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "test/primitives.hh"
-
 #include <cmath>
 
 namespace y3_cluster {
@@ -27,7 +26,7 @@ namespace y3_cluster {
     {
       double x = R_mis / _R_lambda;
       double y = lo / lc;
-      double mu_y = std::exp(-x * x / _alpha * _alpha);
+      double mu_y = std::exp(-x * x / _alpha / _alpha);
       double sigma_y = _a * std::atan(_b * x);
       return y3_cluster::gaussian(y, mu_y, sigma_y);
     }

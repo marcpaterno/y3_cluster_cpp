@@ -41,6 +41,7 @@ using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
+// Helper template, to automate the timing of integration.
 template <class ALG, class F>
 void
 time_integration(ALG alg,
@@ -56,111 +57,52 @@ time_integration(ALG alg,
   std::cout << algname << ": " << res << " (" << diff.count() << "s)\n";
 }
 
+// Helper function to read a vector<double> from a file with the given filename.
+template <class XFORM>
+std::vector<double>
+read_vector(char const* filename, XFORM xform)
+{
+  std::string fname =
+    std::string("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/") +
+    filename;
+  std::ifstream file(fname);
+  if (!file) {
+    std::string errmsg("Failed to open file: ");
+    errmsg += fname;
+    throw std::runtime_error(errmsg);
+  }
+  double tmp;
+  std::vector<double> res;
+  while (file >> tmp)
+    res.push_back(xform(tmp));
+  return res;
+}
+
+// The main function for exercising our integrand.
 int
 main(int argc, char* argv[])
 {
   std::vector<std::string> args{argv + 1, argv + argc};
   if (args.size() != 1) {
     std::cerr << "Please specify an integer maxeval\n";
+    return 1;
   }
 
-  std::vector<double> dndlnmh;
-  double num{0};
-  std::ifstream file1(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/dndlnmh.txt");
-  while (file1 >> num) {
-    dndlnmh.push_back(num);
-  }
-  if (dndlnmh.empty())
-    return 1;
+  auto identity = [](double x) { return x; };
+  auto log = [](double x) { return std::log(x); };
 
-  std::vector<double> mh;
-  std::ifstream file2(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/m_h.txt");
-  while (file2 >> num) {
-    mh.push_back(std::log(num));
-  }
-  if (mh.empty())
-    return 1;
+  auto const dndlnmh = read_vector("dndlnmh.txt", identity);
+  auto const mh = read_vector("m_h.txt", log);
+  auto const zz = read_vector("z.txt", identity);
+  // da_arr in h inverse Mpc
+  auto const da_arr = read_vector("d_a.txt", identity);
 
-  std::vector<double> zz;
-  std::ifstream file3(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/z.txt");
-  while (file3 >> num) {
-    zz.push_back(num);
-  }
-  if (zz.empty())
-    return 1;
-
-  std::vector<double> da_arr; // in h inverse Mpc
-  std::ifstream file4(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/d_a.txt");
-  while (file4 >> num)
-    da_arr.push_back(num);
-  if (da_arr.empty())
-    return 1;
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // TEST CODE FOR DELTA SIGMA////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  std::vector<double> del_sig_1;
-  std::ifstream file5(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/deltasigma/deltasigma/cosmological_parameters/deltasigma_1.txt");
-  while (file5 >> num) {
-    del_sig_1.push_back(num);
-  }
-  if (del_sig_1.empty())
-    return 1;
-
-  std::vector<double> del_sig_2;
-  std::ifstream file6(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/deltasigma/deltasigma/cosmological_parameters/deltasigma_2.txt");
-  while (file6 >> num) {
-    del_sig_2.push_back(num);
-  }
-  if (del_sig_2.empty())
-    return 1;
-
-  std::vector<double> bm;
-  std::ifstream file7(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/deltasigma/deltasigma/cosmological_parameters/bias.txt");
-  while (file7 >> num) {
-    bm.push_back(num);
-  }
-  if (bm.empty())
-    return 1;
-
-  std::vector<double> mh1;
-  std::ifstream file8(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/deltasigma/deltasigma/cosmological_parameters/m_h.txt");
-  while (file8 >> num) {
-    mh1.push_back(std::log(num));
-  }
-  if (mh1.empty())
-    return 1;
-
-  std::vector<double> r_perp;
-  std::ifstream file9(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/deltasigma/deltasigma/cosmological_parameters/r_perp.txt");
-  while (file9 >> num) {
-    r_perp.push_back(num);
-  }
-  if (r_perp.empty())
-    return 1;
-
-  std::vector<double> zz1;
-  std::ifstream file10(
-    "/cosmosis/cosmosis-standard-library/y3_cluster_cpp/deltasigma/deltasigma/matter_power_lin/z.txt");
-  while (file10 >> num) {
-    zz1.push_back(num);
-  }
-  if (zz1.empty())
-    return 1;
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  auto const del_sig_1 = read_vector("deltasigma_1.txt", identity);
+  auto const del_sig_2 = read_vector("deltasigma_2.txt", identity);
+  auto const bm = read_vector("deltasigma_bias.txt", identity);
+  auto const mh1 = read_vector("deltasigma_m_h.txt", log);
+  auto const r_perp = read_vector("deltasigma_r_perp.txt", identity);
+  auto const zz1 = read_vector("deltasigma_z.txt", identity);
 
   long long maxeval = std::stoll(args[0]);
   y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};

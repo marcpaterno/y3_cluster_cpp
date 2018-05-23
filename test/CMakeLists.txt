@@ -79,3 +79,31 @@ target_include_directories(omega_z_sdss_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(omega_z_sdss_test omega_z_sdss_test)
+
+add_executable(lo_lc_t_test main.cc lo_lc_t.test.cc)
+target_include_directories(lo_lc_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(lo_lc_t_test lo_lc_t_test)
+
+add_executable(ez_sq_test main.cc ez_sq.test.cc)
+target_include_directories(ez_sq_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ez_sq_test ez_sq_test)
+
+add_executable(ez_test main.cc ez.test.cc)
+target_include_directories(ez_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ez_test ez_test)
+
+add_executable(roffset_t_test main.cc roffset_t.test.cc)
+target_include_directories(roffset_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(roffset_t_test roffset_t_test)

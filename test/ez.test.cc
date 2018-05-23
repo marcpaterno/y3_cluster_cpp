@@ -1,0 +1,37 @@
+#include "catch2/catch.hpp"
+#include "test/ez.hh"
+
+#include <fstream>
+
+using y3_cluster::EZ;
+
+double ez_valid(double z, double omega_m, double omega_l, double omega_k)
+{
+    double const zplus1 = 1.0 + z;
+    return sqrt( (omega_m * zplus1 + omega_k ) * zplus1 * zplus1 +
+              omega_l);
+}
+
+TEST_CASE("ez works")
+{
+    double omega_m, omega_l, omega_k;
+    omega_m = 0.27;
+    omega_l = 0.63;
+    omega_k = 1. - omega_m -omega_l;
+
+    EZ ez(omega_m, omega_l, omega_k);
+
+    double z = 0;
+    const double dz = 0.01;
+    const int nmax = 10000;
+
+    double constexpr epsrel = 1.0e-6;
+
+    for(int i = 0; i < nmax; i++)
+    {
+        double valid = ez_valid(z, omega_m, omega_l, omega_k);
+        CHECK(ez(z) == Approx(valid).epsilon(epsrel));
+        z += dz;
+    }
+        
+}
