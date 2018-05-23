@@ -165,7 +165,7 @@ main(int argc, char* argv[])
   long long maxeval = std::stoll(args[0]);
   y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
-  y3_cluster::LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
+  y3_cluster::LC_LT_t lc_lt;
   y3_cluster::ZO_ZT_t zo_zt{0.05};
   y3_cluster::ROFFSET_t roffset{0.2};
   y3_cluster::T_CEN_t t_cen;
@@ -208,6 +208,7 @@ main(int argc, char* argv[])
 
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
+
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
   time_integration(c, gti, epsrel, epsabs, "cuhre");
