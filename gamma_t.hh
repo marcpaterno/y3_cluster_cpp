@@ -18,20 +18,20 @@ private:
   double fcen_;
   double msci_;
 
-  MODELS::MOR mor;
-  MODELS::LO_LC lo_lc;
-  MODELS::LC_LT lc_lt;
-  MODELS::ZO_ZT zo_zt;
-  MODELS::ROFFSET roffset;
-  MODELS::T_CEN T_cen;
-  MODELS::T_MIS T_mis;
-  MODELS::A_CEN A_cen;
-  MODELS::A_MIS A_mis;
-  MODELS::HMF hmf;
-  MODELS::DEL_SIG_CEN del_sig_cen;
-  MODELS::DEL_SIG_MIS del_sig_mis;
-  MODELS::DV_DO_DZ dv_do_dz;
-  MODELS::OMEGA_Z omega_z;
+  typename MODELS::MOR mor;
+  typename MODELS::LO_LC lo_lc;
+  typename MODELS::LC_LT lc_lt;
+  typename MODELS::ZO_ZT zo_zt;
+  typename MODELS::ROFFSET roffset;
+  typename MODELS::T_CEN T_cen;
+  typename MODELS::T_MIS T_mis;
+  typename MODELS::A_CEN A_cen;
+  typename MODELS::A_MIS A_mis;
+  typename MODELS::HMF hmf;
+  typename MODELS::DEL_SIG_CEN del_sig_cen;
+  typename MODELS::DEL_SIG_MIS del_sig_mis;
+  typename MODELS::DV_DO_DZ dv_do_dz;
+  typename MODELS::OMEGA_Z omega_z;
 
   y3_cluster::IntegrationRange lnM_ir_;
   y3_cluster::IntegrationRange lo_ir_;
@@ -51,20 +51,20 @@ public:
   // specify the various terms of the integrand.
   Gamma_T_Integrand(double fcen,
                     double msci,
-                    MODELS::MOR mor,
-                    MODELS::LO_LC lo_lc,
-                    MODELS::LC_LT lc_lt,
-                    MODELS::ZO_ZT zo_zt,
-                    MODELS::ROFFSET roffset,
-                    MODELS::T_CEN T_cen,
-                    MODELS::T_MIS T_mis,
-                    MODELS::A_CEN A_cen,
-                    MODELS::A_MIS A_mis,
-                    MODELS::HMF hmf,
-                    MODELS::DEL_SIG_CEN del_sig_cen,
-                    MODELS::DEL_SIG_MIS del_sig_mis,
-                    MODELS::DV_DO_DZ dv_do_dz,
-                    MODELS::OMEGA_Z omega_z,
+                    typename MODELS::MOR mor,
+                    typename MODELS::LO_LC lo_lc,
+                    typename MODELS::LC_LT lc_lt,
+                    typename MODELS::ZO_ZT zo_zt,
+                    typename MODELS::ROFFSET roffset,
+                    typename MODELS::T_CEN T_cen,
+                    typename MODELS::T_MIS T_mis,
+                    typename MODELS::A_CEN A_cen,
+                    typename MODELS::A_MIS A_mis,
+                    typename MODELS::HMF hmf,
+                    typename MODELS::DEL_SIG_CEN del_sig_cen,
+                    typename MODELS::DEL_SIG_MIS del_sig_mis,
+                    typename MODELS::DV_DO_DZ dv_do_dz,
+                    typename MODELS::OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir,
                     y3_cluster::IntegrationRange lo_ir,
                     y3_cluster::IntegrationRange lt_ir,
@@ -180,20 +180,20 @@ template <typename MODELS>
 Gamma_T_Integrand<MODELS>
 make_gamma_t_integrand(double fcen,
                        double msci,
-                       MODELS::MOR mor,
-                       MODELS::LO_LC lo_lc,
-                       MODELS::LC_LT lc_lt,
-                       MODELS::ZO_ZT zo_zt,
-                       MODELS::ROFFSET roffset,
-                       MODELS::T_CEN t_cen,
-                       MODELS::T_MIS t_mis,
-                       MODELS::A_CEN a_cen,
-                       MODELS::A_MIS a_mis,
-                       MODELS::HMF hmf,
-                       MODELS::DEL_SIG_CEN del_sig_cen,
-                       MODELS::DEL_SIG_MIS del_sig_mis,
-                       MODELS::DV_DO_DZ dv_do_dz,
-                       MODELS::OMEGA_Z omega_z,
+                       typename MODELS::MOR mor,
+                       typename MODELS::LO_LC lo_lc,
+                       typename MODELS::LC_LT lc_lt,
+                       typename MODELS::ZO_ZT zo_zt,
+                       typename MODELS::ROFFSET roffset,
+                       typename MODELS::T_CEN t_cen,
+                       typename MODELS::T_MIS t_mis,
+                       typename MODELS::A_CEN a_cen,
+                       typename MODELS::A_MIS a_mis,
+                       typename MODELS::HMF hmf,
+                       typename MODELS::DEL_SIG_CEN del_sig_cen,
+                       typename MODELS::DEL_SIG_MIS del_sig_mis,
+                       typename MODELS::DV_DO_DZ dv_do_dz,
+                       typename MODELS::OMEGA_Z omega_z,
                        y3_cluster::IntegrationRange lo_ir,
                        y3_cluster::IntegrationRange zo_ir)
 {
