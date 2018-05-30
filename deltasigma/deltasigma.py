@@ -28,10 +28,12 @@ def setup(options):
 	M_max = options[section,"M_max"]
 	M_bins = int(options[section,"M_bins"])
 
-	return  R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins
+	concentration = options[section,"concentration"]
+
+	return  R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins, concentration
 
 def execute(block,config):
-	R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins = config 
+	R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins, concentration = config 
 
 	omega_m = block[cosmo,"omega_m"]
 	n_s = block[cosmo,"n_s"]
@@ -55,9 +57,6 @@ def execute(block,config):
 	Deltasigma_1 = np.ndarray(Size1)
 	Deltasigma_1.shape = (M_bins,R_perp_bins)
 
-	#concentration (double): concentration coeffient in miscentering
-	concentration = 5
-	print(M)
 	for i in range(M_bins):
 		Sigma1 = ct.deltasigma.Sigma_nfw_at_R(R_perp, M[i], concentration, omega_m)
 		Deltasigma1 = ct.deltasigma.DeltaSigma_at_R(R_perp, R_perp, Sigma1, M[i], concentration, omega_m)
@@ -81,10 +80,12 @@ def execute(block,config):
 		for j in range(nz):
 			Bias[i][j] = ct.bias.bias_at_M(M[i], k, P_k[j], omega_m)
 
+	logM = np.log(M)
 	block[cosmo, "deltasigma_1"] = Deltasigma_1
 	block[cosmo, "deltasigma_2"] = Deltasigma_2
 	block[cosmo, "bias"] = Bias
 	block[cosmo, "m_h"] = M
+	block[cosmo, "lnM"] = logM
 	block[cosmo, "R_perp"] = R_perp
 	return 0
 
