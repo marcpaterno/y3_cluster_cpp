@@ -120,7 +120,7 @@ main(int argc, char* argv[])
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
   // DEL_SIG_CEN_t dsc{5., 0.5};
-  y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4, 5.);
+  y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4/*,5*/);
   // DEL_SIG_MIS_t dsc{5., 0.5};
   y3_cluster::DEL_SIG_MIS_t dsm;
 

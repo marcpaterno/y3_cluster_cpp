@@ -72,36 +72,42 @@ namespace y3_cluster
   public:
     DEL_SIG_CEN_t(std::shared_ptr<Interp2D const> dsigma1, 
                   std::shared_ptr<Interp2D const> dsigma2, 
-                  std::shared_ptr<Interp2D const> bias,
-                  double c) 
-                  : _dsigma1(dsigma1), _dsigma2(dsigma2), _bias(bias), _c(c) {}
+                  std::shared_ptr<Interp2D const> bias
+                  /*,double c*/) 
+                  : _dsigma1(dsigma1), _dsigma2(dsigma2), _bias(bias)/*, _c(c)*/ {}
 
     using doubles = std::vector<double>;
-
+    /****************************************************************************************************************************************/
+    /*******************************IMPORTANT: REMEMBER TO CHECK THE ORIENTATION OF THESE VARIABLES!!!!!***********************************************/
+    /****************************************************************************************************************************************/
+    
+    /* R_perp is r*/
     explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
       : _dsigma1(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "x1"),
-          sample.view<doubles>("del_sig_cen_params", "y1"),
-          sample.view<doubles>("del_sig_cen_params", "z1")))
+          sample.view<doubles>("del_sig_cen_params", "R_perp"),
+          sample.view<doubles>("del_sig_cen_params", "lnM"),
+          sample.view<doubles>("del_sig_cen_params", "deltasigma_1")))
       , _dsigma2(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "x2"),
-          sample.view<doubles>("del_sig_cen_params", "y2"),
-          sample.view<doubles>("del_sig_cen_params", "z2")))
+          sample.view<doubles>("del_sig_cen_params", "z"),
+          sample.view<doubles>("del_sig_cen_params", "lnM"),
+          sample.view<doubles>("del_sig_cen_params", "deltasigma_2")))
       , _bias(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "x3"),
-          sample.view<doubles>("del_sig_cen_params", "y3"),
-          sample.view<doubles>("del_sig_cen_params", "z3")))
-      , _c(sample.view<double>("del_sig_cen_params", "c"))
+          sample.view<doubles>("del_sig_cen_params", "R_perp"),
+          sample.view<doubles>("del_sig_cen_params", "z"),
+          sample.view<doubles>("del_sig_cen_params", "bias")))
+      /*, _c(sample.view<double>("del_sig_cen_params", "c"))*/
     {}
 
     double
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
-    {
-      if (_dsigma1->eval(r,lnM) >= _bias->eval(zt,lnM) * _dsigma2->eval(r,zt)) {
-        return (1.+zt)*(1.+zt)*(1.+zt)*_dsigma1->eval(r,lnM);
+    { 
+      double del_sig_1 = _dsigma1->eval(r,lnM);
+      double del_sig_2 = _bias->eval(zt,lnM) * _dsigma2->eval(r,zt);
+      if (del_sig_1 >= del_sig_2) {
+        return (1.+zt)*(1.+zt)*(1.+zt)*del_sig_1;
       }else{
-        return (1.+zt)*(1.+zt)*(1.+zt)*_bias->eval(zt,lnM)*_dsigma2->eval(r,zt);
+        return (1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
       }
     }
 
@@ -109,7 +115,7 @@ namespace y3_cluster
     std::shared_ptr<Interp2D const> _dsigma1;
     std::shared_ptr<Interp2D const> _dsigma2;
     std::shared_ptr<Interp2D const> _bias;
-    double _c;
+    /*double _c;*/
   };
 }
 
