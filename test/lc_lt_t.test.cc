@@ -1,46 +1,43 @@
 #include "catch2/catch.hpp"
-#include "test/lo_lc_t.hh"
+#include "test/lc_lt_t.hh"
 
 #include <fstream>
 #include <string>
 #include <iostream>
 
-using y3_cluster::LO_LC_t;
-TEST_CASE("Lo_Lc_t works")
+using y3_cluster::LC_LT_t;
+TEST_CASE("Lc_Lt_t works")
 {
-  std::ifstream infile {"test_lolc_t.txt"};
+  std::ifstream infile {"test_lc_lt_t_SDSS.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
-  std::vector<double> los;
+  std::vector<double> zs;
+  std::vector<double> lts;
   std::vector<double> lcs;
-  std::vector<double> Rs;
   std::vector<double> ys;
-  std::string dummyline;
-  std::getline (infile, dummyline);
-  std::getline (infile, dummyline);
   while (infile)
   {
     // We aren't bothering to test that the reading worked, because we're
     // careful to make sure the data file is not mal-formed when we write the
     // test.
-    double lo, lc, R, y;
-    infile >> lo >> lc >> R >> y;
-    los.push_back(lo);
+    double z, lt, lc, y;
+    infile >> z >> lt >> lc >> y;
+    zs.push_back(z);
+    lts.push_back(lt);
     lcs.push_back(lc);
-    Rs.push_back(R);
     ys.push_back(y);
   }
   // If the file is well-formed, we have the same number of z-values as
   // y(z)-values.
-  REQUIRE(los.size() == lcs.size());
-  REQUIRE(lcs.size() == Rs.size());
-  REQUIRE(Rs.size() == ys.size());
+  REQUIRE(zs.size() == lts.size());
+  REQUIRE(lts.size() == lcs.size());
+  REQUIRE(lcs.size() == ys.size());
   
-  LO_LC_t lolc(1.66, 0.26, 1.43, 1.0);
+  LC_LT_t lclt;
   
   for (std::size_t i = 0, sy = ys.size(); i != sy; ++i)
   {
-    double const fz = lolc(los[i], lcs[i], Rs[i]);
+    double const fz = lclt(lcs[i], lts[i], zs[i]);
     double constexpr epsrel = 1.0e-6;
     CHECK(fz == Approx(ys[i]).epsilon(epsrel));
   }

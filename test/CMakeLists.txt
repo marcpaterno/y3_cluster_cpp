@@ -107,3 +107,10 @@ target_include_directories(roffset_t_test
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(roffset_t_test roffset_t_test)
+
+add_executable(lc_lt_t_test main.cc lc_lt_t.test.cc)
+target_include_directories(lc_lt_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(lc_lt_t_test lc_lt_t_test)

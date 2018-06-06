@@ -42,7 +42,7 @@ TEST_CASE("roffset_t works")
     for (std::size_t i = 0, sz = rmis.size(); i != sz; ++i)
     {
         double const fz = roffset(rmis[i]);
-        double constexpr epsrel = 1.0e-5;
+        double constexpr epsrel = 1.0e-6;
         CHECK(fz == Approx(prob[i]).epsilon(epsrel));
     }
 }
