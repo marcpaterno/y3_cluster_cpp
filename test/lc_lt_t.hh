@@ -8,25 +8,28 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-using y3_cluster::Interp2D;
 
 namespace y3_cluster {
   struct LC_LT_t {
 
     /* Define zt_max and l_max large enough to be safe*/
-    double const zt_max = 2.0;
-    double const lt_max = 300.0;
-    std::array<double, 6> const zt_bins = {0.1, 0.15, 0.2, 0.25, 0.3, zt_max};
-    std::array<double, 23> const lt_bins = {
+    static double constexpr zt_max = 2.0;
+    static double constexpr lt_max = 300.0;
+
+    static std::array<double, 6> constexpr zt_bins =
+      {0.1, 0.15, 0.2, 0.25, 0.3, zt_max};
+
+    static std::array<double, 23> constexpr lt_bins = {
       1.,          3.,          5.,          7.,          9.,
       12.,         15.55555534, 20.,         24.,         26.11111069,
       30.,         36.66666412, 40.,         47.22222137, 57.77777863,
       68.33332825, 78.8888855,  89.44444275, 100.,        120.,
       140.,        160.,        lt_max};
-    const std::size_t zt_len = zt_bins.size() - 1;
-    const std::size_t lt_len = lt_bins.size() - 1;
 
-    std::array<double, 110> const tau_arr = {
+    static std::size_t constexpr zt_len = zt_bins.size() - 1;
+    static std::size_t constexpr lt_len = lt_bins.size() - 1;
+
+    static std::array<double, 110> constexpr tau_arr = {
       3.87497099e+00, 2.87383279e+00, 2.89974546e+00, 8.05299747e-01,
       5.82079679e-01, 4.25342329e-01, 3.16631643e-01, 2.31794166e-01,
       1.87431347e-01, 1.68846430e-01, 1.48897918e-01, 1.23155603e-01,
@@ -55,7 +58,8 @@ namespace y3_cluster {
       9.52075683e-02, 8.44257008e-02, 7.10884458e-02, 6.04151374e-02,
       5.41311947e-02, 4.53025254e-02, 4.20917211e-02, 3.90545806e-02,
       5.22777255e-02, 6.61080543e-02};
-    std::array<double, 110> const mu_arr = {
+
+    static std::array<double, 110> constexpr mu_arr = {
       5.11728114e-01,  2.45073138e+00, 4.52629062e+00,  6.16461776e+00,
       8.18578476e+00,  1.05000674e+01, 1.46462484e+01,  1.84203262e+01,
       2.23414249e+01,  2.50654122e+01, 2.87599971e+01,  3.52318878e+01,
@@ -84,7 +88,8 @@ namespace y3_cluster {
       4.00361881e+01,  4.85963348e+01, 6.00490004e+01,  7.16379982e+01,
       8.48249508e+01,  9.56848225e+01, 1.09524905e+02,  1.35669400e+02,
       1.67234082e+02,  1.98382845e+02};
-    std::array<double, 110> const sigma_arr = {
+
+    static std::array<double, 110> constexpr sigma_arr = {
       8.12748540e-01, 1.32292795e+00, 1.70726638e+00, 1.74780086e+00,
       2.01806368e+00, 2.23657343e+00, 2.40010333e+00, 2.70710073e+00,
       3.12735013e+00, 3.21122400e+00, 3.39146912e+00, 3.74153501e+00,
@@ -113,7 +118,8 @@ namespace y3_cluster {
       6.16994764e+00, 7.02731129e+00, 7.68272673e+00, 8.76098853e+00,
       9.89865696e+00, 1.04363822e+01, 1.22443047e+01, 1.56979618e+01,
       2.19841273e+01, 2.53251473e+01};
-    std::array<double, 110> const fmsk_arr = {
+
+    static std::array<double, 110> constexpr fmsk_arr = {
       3.27308389e-01, 3.12345575e-01, 3.00618261e-01, 2.57318771e-01,
       2.39648376e-01, 2.05210932e-01, 1.47652380e-01, 1.25691770e-01,
       1.06213660e-01, 9.42416400e-02, 8.31716990e-02, 6.29795509e-02,
@@ -142,7 +148,8 @@ namespace y3_cluster {
       5.13631282e-02, 4.41356887e-02, 3.26416460e-02, 3.24171668e-02,
       2.49491123e-02, 1.76920787e-02, 1.17437463e-02, 5.64348319e-03,
       1.17441933e-05, 7.27777308e-04};
-    std::array<double, 110> const fprj_arr = {
+
+    static std::array<double, 110> constexpr fprj_arr = {
       3.13611172e-03, 3.15339208e-03, 3.14040215e-03, 4.60751243e-01,
       4.84238370e-01, 9.30276933e-01, 6.54314508e-01, 8.86566453e-01,
       9.98820926e-01, 8.43829346e-01, 9.98926922e-01, 9.46901308e-01,
@@ -171,6 +178,7 @@ namespace y3_cluster {
       9.49714955e-01, 9.27425036e-01, 9.38354502e-01, 9.99154603e-01,
       9.64462792e-01, 9.99220744e-01, 9.99288785e-01, 9.99252874e-01,
       9.98562896e-01, 9.77664929e-01};
+
     // std::vector<double> const xxs (lt_bins.begin(), lt_bins.end()-1);
     // std::vector<double> const yys (zt_bins.begin(), zt_bins.end()-1);
     // std::vector<double> const taus (tau_arr.begin(), tau_arr.end());
