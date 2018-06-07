@@ -179,24 +179,20 @@ namespace y3_cluster {
       9.64462792e-01, 9.99220744e-01, 9.99288785e-01, 9.99252874e-01,
       9.98562896e-01, 9.77664929e-01};
 
-    // std::vector<double> const xxs (lt_bins.begin(), lt_bins.end()-1);
-    // std::vector<double> const yys (zt_bins.begin(), zt_bins.end()-1);
-    // std::vector<double> const taus (tau_arr.begin(), tau_arr.end());
-    // Interp2D tau_p(xxs, yys, taus);
+    static Interp2D const tau_interp;
+    static Interp2D const mu_interp;
+    static Interp2D const sigma_interp;
+    static Interp2D const fmsk_interp;
+    static Interp2D const fprj_interp;
 
     double
     operator()(double lc, double lt, double zt) const
     {
-      const auto i_zt = std::upper_bound(zt_bins.begin(), zt_bins.end(), zt);
-      const auto j_lt = std::upper_bound(lt_bins.begin(), lt_bins.end(), lt);
-      auto const index =
-        (i_zt - zt_bins.begin() - 1) * lt_len + (j_lt - lt_bins.begin() - 1);
-
-      const auto tau = tau_arr[index];
-      const auto mu = mu_arr[index];
-      const auto sigma = sigma_arr[index];
-      const auto fmsk = fmsk_arr[index];
-      const auto fprj = fprj_arr[index];
+      const auto tau = tau_interp(lt, zt);
+      const auto mu = mu_interp(lt, zt);
+      const auto sigma = sigma_interp(lt, zt);
+      const auto fmsk = fmsk_interp(lt, zt);
+      const auto fprj = fprj_interp(lt, zt);
 
       const auto exptau =
         std::exp(tau * (2.0 * mu + tau * sigma * sigma - 2.0 * lc) / 2.0);

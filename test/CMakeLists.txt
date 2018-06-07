@@ -18,7 +18,7 @@ target_include_directories(integration_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(integration_test integration_test)
 
-add_executable(trivial_gamma_t trivial_gamma_t.cc interp_1d.cc interp_2d.cc)
+add_executable(trivial_gamma_t trivial_gamma_t.cc interp_1d.cc interp_2d.cc lc_lt_t.cc)
 target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
 target_include_directories(trivial_gamma_t
                            PRIVATE
@@ -108,7 +108,8 @@ target_include_directories(roffset_t_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(roffset_t_test roffset_t_test)
 
-add_executable(lc_lt_t_test main.cc lc_lt_t.test.cc)
+add_executable(lc_lt_t_test main.cc lc_lt_t.test.cc lc_lt_t.cc interp_2d.cc)
+target_link_libraries(lc_lt_t_test PRIVATE ${GSL_LIBRARIES})
 target_include_directories(lc_lt_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
