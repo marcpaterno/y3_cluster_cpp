@@ -2,21 +2,20 @@
 #include "test/lc_lt_t.hh"
 
 #include <fstream>
-#include <string>
 #include <iostream>
+#include <string>
 
 using y3_cluster::LC_LT_t;
 TEST_CASE("Lc_Lt_t works")
 {
-  std::ifstream infile {"test_lc_lt_t_SDSS.txt"};
+  std::ifstream infile{"test_lc_lt_t_SDSS.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> zs;
   std::vector<double> lts;
   std::vector<double> lcs;
   std::vector<double> ys;
-  while (infile)
-  {
+  while (infile) {
     // We aren't bothering to test that the reading worked, because we're
     // careful to make sure the data file is not mal-formed when we write the
     // test.
@@ -32,13 +31,13 @@ TEST_CASE("Lc_Lt_t works")
   REQUIRE(zs.size() == lts.size());
   REQUIRE(lts.size() == lcs.size());
   REQUIRE(lcs.size() == ys.size());
-  
+
   LC_LT_t lclt;
-  
-  for (std::size_t i = 0, sy = ys.size(); i != sy; ++i)
-  {
+
+  for (std::size_t i = 0, sy = ys.size(); i != sy; ++i) {
     double const fz = lclt(lcs[i], lts[i], zs[i]);
     double constexpr epsrel = 1.0e-6;
-    CHECK(fz == Approx(ys[i]).epsilon(epsrel));
+    double constexpr epsabs = 1.0e-12;
+    CHECK(fz == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
   }
 }
