@@ -23,7 +23,7 @@ template <typename MOR,
           typename A_MIS,
           typename HMF,
           typename DEL_SIG_CEN,
-          typename DEL_SIG_MIS,
+          /* typename DEL_SIG_MIS,*/
           typename DV_DO_DZ,
           typename OMEGA_Z>
 class Gamma_T_Integrand {
@@ -42,7 +42,7 @@ private:
   A_MIS A_mis;
   HMF hmf;
   DEL_SIG_CEN del_sig_cen;
-  DEL_SIG_MIS del_sig_mis;
+  /*DEL_SIG_MIS del_sig_mis;*/
   DV_DO_DZ dv_do_dz;
   OMEGA_Z omega_z;
 
@@ -54,6 +54,7 @@ private:
   y3_cluster::IntegrationRange zt_ir_;
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
+  y3_cluster::IntegrationRange theta_ir_; /* */
 
   static const std::size_t NRADII = 10;
   std::array <double, NRADII> r;
@@ -74,7 +75,7 @@ public:
                     A_MIS A_mis,
                     HMF hmf,
                     DEL_SIG_CEN del_sig_cen,
-                    DEL_SIG_MIS del_sig_mis,
+                    /*DEL_SIG_MIS del_sig_mis,*/
                     DV_DO_DZ dv_do_dz,
                     OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir, 
@@ -84,8 +85,9 @@ public:
                     y3_cluster::IntegrationRange zo_ir, 
                     y3_cluster::IntegrationRange zt_ir, 
                     y3_cluster::IntegrationRange R_ir, 
-                    y3_cluster::IntegrationRange A_ir, 
-		                std::array<double, NRADII> const& rarray)
+                    y3_cluster::IntegrationRange A_ir,
+		    y3_cluster::IntegrationRange theta_ir, 
+		    std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -99,7 +101,7 @@ public:
     , A_mis(A_mis)
     , hmf(hmf)
     , del_sig_cen(del_sig_cen)
-    , del_sig_mis(del_sig_mis)
+    /*, del_sig_mis(del_sig_mis)*/
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
     , lnM_ir_(lnM_ir)
@@ -110,6 +112,7 @@ public:
     , zt_ir_(zt_ir)
     , R_ir_(R_ir)
     , A_ir_(A_ir)
+    , theta_ir_(theta_ir)	
     , r(rarray)
   {}
 
@@ -122,7 +125,8 @@ public:
              double scaled_zt,
              double scaled_R,
              double scaled_lnM,
-             double scaled_A) const
+             double scaled_A,
+	     double scaled_theta) const
   {
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
@@ -136,6 +140,7 @@ public:
     auto const zt = zt_ir_.transform(scaled_zt);
     auto const R = R_ir_.transform(scaled_R);
     auto const A = A_ir_.transform(scaled_A);
+    auto const theta = theta_ir_.transform(scaled_theta);
 
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
@@ -154,13 +159,13 @@ public:
     // The evaluation below follows the convention set in main overleaf document
     //The evaluation is for Y3 likelihood
     // puttign together the return vector
-    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
+    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian() * theta_ir_.jacobian();
     double const N = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
     double const Nw = jacob * N * w;
 
     auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
     auto  gamma_t_cen = [this, lnM, zt, A](double radius){ return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) ; };
-    auto gamma_t_mis = [this, lnM, A, R, lo, lc](double radius){ return (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(radius, lnM, R) *  exp(A * T_cen(radius, lnM)) ; } ;
+    auto gamma_t_mis = [this, lnM, zt, A, R, lo, lc, theta](double radius){ return (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt) *  exp(A * T_cen(radius, lnM))/(6.28318530718) ; } ;
     auto const  gamma_t = y3_cluster::transform(r, 
 		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int](double radius){ return (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius)) ; } );
 
@@ -194,7 +199,7 @@ template <typename MOR,
           typename A_MIS,
           typename HMF,
           typename DEL_SIG_CEN,
-          typename DEL_SIG_MIS,
+          /*typename DEL_SIG_MIS,*/
           typename DV_DO_DZ,
           typename OMEGA_Z>
 Gamma_T_Integrand<MOR,
@@ -208,7 +213,7 @@ Gamma_T_Integrand<MOR,
                   A_MIS,
                   HMF,
                   DEL_SIG_CEN,
-                  DEL_SIG_MIS,
+                  /*DEL_SIG_MIS,*/
                   DV_DO_DZ,
                   OMEGA_Z>
 make_gamma_t_integrand(double fcen,
@@ -224,7 +229,7 @@ make_gamma_t_integrand(double fcen,
                        A_MIS a_mis,
                        HMF hmf,
                        DEL_SIG_CEN del_sig_cen,
-                       DEL_SIG_MIS del_sig_mis,
+                       /*DEL_SIG_MIS del_sig_mis,*/
                        DV_DO_DZ dv_do_dz,
                        OMEGA_Z omega_z,
                        y3_cluster::IntegrationRange lo_ir, 
@@ -235,7 +240,9 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange lc_ir{1.0, 100};    
    y3_cluster::IntegrationRange zt_ir{0.1, 0.3};    
    y3_cluster::IntegrationRange R_ir{0., 1.0};    
-   y3_cluster::IntegrationRange A_ir{-1.0, 1.0};    
+   y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
+   y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
+
    std::array<double, 10> rarray; // can I pass a vector here?
    for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,
@@ -251,7 +258,7 @@ make_gamma_t_integrand(double fcen,
           a_mis,
           hmf,
           del_sig_cen,
-          del_sig_mis,
+          /*del_sig_mis,*/
           dv_do_dz,
           omega_z,
           lnM_ir, 
@@ -262,6 +269,7 @@ make_gamma_t_integrand(double fcen,
 	  zt_ir,
 	  R_ir,
           A_ir,
+	  theta_ir,
           rarray }; 
 }
 

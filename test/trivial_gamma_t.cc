@@ -122,7 +122,7 @@ main(int argc, char* argv[])
   // DEL_SIG_CEN_t dsc{5., 0.5};
   y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4/*,5*/);
   // DEL_SIG_MIS_t dsc{5., 0.5};
-  y3_cluster::DEL_SIG_MIS_t dsm;
+  /*y3_cluster::DEL_SIG_MIS_t dsm;*/
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
@@ -142,7 +142,7 @@ main(int argc, char* argv[])
                                     a_mis,
                                     hmf,
                                     dsc,
-                                    dsm,
+                                    /*dsm,*/
                                     dvdodz,
                                     omega_z,
                                     lo_ir,
