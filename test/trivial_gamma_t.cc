@@ -23,7 +23,7 @@
 #include "test/t_cen_t.hh"
 #include "test/t_mis_t.hh"
 #include "test/zo_zt_t.hh"
-
+#include "test/read_vector.hh"
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -55,27 +55,6 @@ time_integration(ALG alg,
   auto stop = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = stop - start;
   std::cout << algname << ": " << res << " (" << diff.count() << "s)\n";
-}
-
-// Helper function to read a vector<double> from a file with the given filename.
-template <class XFORM>
-std::vector<double>
-read_vector(char const* filename, XFORM xform)
-{
-  std::string fname =
-    std::string("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/") +
-    filename;
-  std::ifstream file(fname);
-  if (!file) {
-    std::string errmsg("Failed to open file: ");
-    errmsg += fname;
-    throw std::runtime_error(errmsg);
-  }
-  double tmp;
-  std::vector<double> res;
-  while (file >> tmp)
-    res.push_back(xform(tmp));
-  return res;
 }
 
 // The main function for exercising our integrand.
