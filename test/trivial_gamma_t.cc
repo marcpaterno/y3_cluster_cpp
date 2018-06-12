@@ -104,7 +104,7 @@ main(int argc, char* argv[])
   /*y3_cluster::DEL_SIG_MIS_t dsm;*/
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
-  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
+  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
   y3_cluster::OMEGA_Z_SDSS omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
