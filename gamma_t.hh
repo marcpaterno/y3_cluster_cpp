@@ -158,13 +158,13 @@ public:
 
     // The evaluation below follows the convention set in main overleaf document
     //The evaluation is for Y3 likelihood
-    // puttign together the return vector
+    // putting together the return vector
     double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian() * theta_ir_.jacobian();
-    double const N = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
-    double const Nw = jacob * N * w;
+    double const N = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_/lc_ir_.jacobian() + (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R))/(A_ir_.jacobian() * theta_ir_.jacobian());
+    double const Nw = N * w;//Why times jacob again?
 
-    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    auto  gamma_t_cen = [this, lnM, zt, A](double radius){ return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) ; };
+    auto const  gamma_t_int =jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    auto  gamma_t_cen = [this, lnM, zt, A](double radius){ return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM))/(lc_ir_.jacobian()*theta_ir_.jacobian()) ; };
     auto gamma_t_mis = [this, lnM, zt, A, R, lo, lc, theta](double radius){ return (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt) *  exp(A * T_cen(radius, lnM))/(6.28318530718) ; } ;
     auto const  gamma_t = y3_cluster::transform(r, 
 		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int](double radius){ return (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius)) ; } );
