@@ -162,7 +162,7 @@ public:
 
     // These will eventually be passed by CosmoSIS
     double m_shear = 1.0;
-    double sig_crit_inv = 1.0;
+    double sig_crit = 1.0;
     // This is the lambda-redshift bin weight that we don't fully understand
     double w = 1.0;
 
@@ -201,10 +201,10 @@ public:
 
     /* eq. (28) */
     auto const  gamma_t = y3_cluster::transform(r, 
-		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int]
+		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit, gamma_t_int]
                     (double radius) {
                     /* Q: should this be * sig_crit_inv? (if it is 1/sig_crit?) */
-                        return (1.0 + m_shear) / sig_crit_inv
+                        return (1.0 + m_shear) / (Nw * sig_crit)
                                 * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius));
                     });
 
