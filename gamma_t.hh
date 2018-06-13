@@ -201,7 +201,7 @@ public:
 
     /* eq. (28) */
     auto const  gamma_t = y3_cluster::transform(r, 
-		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit, gamma_t_int]
+		    [m_shear, Nw, sig_crit, gamma_t_int, gamma_t_cen, gamma_t_mis]
                     (double radius) {
                     /* Q: should this be * sig_crit_inv? (if it is 1/sig_crit?) */
                         return (1.0 + m_shear) / (Nw * sig_crit)
