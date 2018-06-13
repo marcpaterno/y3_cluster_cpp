@@ -117,6 +117,16 @@ public:
   {}
 
   // The function call operator -- this is the function to be integrated.
+  /* Term dictionary -
+   * * lo - \lambda^{obs}
+   * * lc - \lambda^{cen}
+   * * lt - \lambda^{true}
+   * * zo - z^{obs}
+   * * zt - z^{true}
+   * * R - R
+   * * lnM - ln(M)   // (why log???)
+   * * A - ???
+   * */
   std::array<double, NRADII+2>
   operator()(double scaled_lo,
              double scaled_lc,
@@ -152,7 +162,7 @@ public:
 
     // These will eventually be passed by CosmoSIS
     double m_shear = 1.0;
-    double sig_crit_inv = 1.0;
+    double sig_crit = 1.0;
     // This is the lambda-redshift bin weight that we don't fully understand
     double w = 1.0;
 
@@ -160,21 +170,48 @@ public:
     //The evaluation is for Y3 likelihood
     // putting together the return vector
     // double const lc_jacob = lc_ir_.jacobian();
-    double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian()* R_ir_.jacobian();
-    double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian() * theta_ir_.jacobian();
-    double const N = jacob_N * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v*(fcen_/99. + (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R)); //99. = lc_ir_.jacobian()
+    double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
+                        * lt_ir_.jacobian() * lc_ir_.jacobian() 
+                        * zo_ir_.jacobian() * zt_ir_.jacobian()
+                        * R_ir_.jacobian();
+    double const jacob = lnM_ir_.jacobian() * lo_ir_.jacobian()
+                       * lt_ir_.jacobian() * lc_ir_.jacobian()
+                       * zo_ir_.jacobian() * zt_ir_.jacobian()
+                       * R_ir_.jacobian() * A_ir_.jacobian()
+                       * theta_ir_.jacobian();
+    double const N = jacob_N * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v
+                   * (fcen_ / 99. + (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R)); //99. = lc_ir_.jacobian()
     double const Nw = N * w;//Why times jacob again?
 
-    auto const  gamma_t_int =jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    auto gamma_t_cen = [this, lnM, zt, A](double radius){ return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM))/(99.*6.28318530718); };
-    auto gamma_t_mis = [this, lnM, zt, A, R, lo, lc, theta](double radius){ return (1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt) *  exp(A * T_cen(radius, lnM))/(6.28318530718) ; } ;
+    /* eq. (29) */
+    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+
+    /* eq. (30) */
+    auto gamma_t_cen = [this, lnM, zt, A](double radius) {
+        /* what is the magic 6.283...? at the end about? */
+        return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) / (99. * 6.28318530718);
+    };
+
+    /* eq. (31) */
+    auto gamma_t_mis = [this, lnM, zt, A, R, lo, lc, theta](double radius) {
+        return (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R)
+            * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt)
+            * exp(A * T_cen(radius, lnM)) / (6.28318530718);
+    };
+
+    /* eq. (28) */
     auto const  gamma_t = y3_cluster::transform(r, 
-		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int](double radius){ return (1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen(radius)+ gamma_t_mis(radius)) ; } );
+		    [gamma_t_cen, gamma_t_mis, m_shear, sig_crit_inv, gamma_t_int]
+                    (double radius) {
+                    /* Q: should this be * sig_crit_inv? (if it is 1/sig_crit?) */
+                        return (1.0 + m_shear) / (Nw * sig_crit)
+                                * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius));
+                    });
 
     std::array<double, NRADII+2> return_arr;
     std::copy_n( gamma_t.begin(), gamma_t.size(),  return_arr.begin() );
-    return_arr[NRADII]=N;
-    return_arr[NRADII+1]=Nw;
+    return_arr[NRADII] = N;
+    return_arr[NRADII+1] = Nw;
 
 
     // this is for y1 likelihood
