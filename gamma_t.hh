@@ -182,24 +182,28 @@ public:
                        * theta_ir_.jacobian();
 
     // eq. (25)
-    double const N = jacob_N * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v
+    double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
+    double const N = jacob_N * N_int
                    // eq. (26) + eq. (27)
                    * (lo_lt_v * fcen_ / lc_jacob + (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R));
     double const Nw = N * w;//Why times jacob again?
 
     // eq. (29)
-    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    auto const  gamma_t_int = jacob * N_int * w * lc_lt_v;
 
     // eq. (30)
     auto gamma_t_cen = [this, lnM, zt, A, lo_lt_v, lc_jacob](double radius) {
-        return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) * lo_lt_v / (lc_jacob * 6.28318530718);
+        // Q: Does this properly handle delta function?
+        return fcen_ * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt) * lo_lt_v / (lc_jacob * 6.28318530718);
     };
 
     // eq. (31)
     auto gamma_t_mis = [this, lnM, zt, A, R, lo, lc, theta, lc_lt_v](double radius) {
-        return (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R)
-            * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt)
-            * exp(A * T_cen(radius, lnM)) * lc_lt_v / (6.28318530718);
+        return (1.0 - fcen_) * lc_lt_v * lo_lc(lo, lc, R) * roffset(R)
+            // Should this be T_mis?
+            * exp(A * T_cen(radius, lnM)) / (6.28318530718)
+            // Assuming this is del_sig_mis
+            * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt);
     };
 
     // eq. (28)
