@@ -183,23 +183,29 @@ public:
 
     // eq. (25)
     double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
-    double const N = jacob_N * N_int
-                   // eq. (26) + eq. (27)
-                   * (lo_lt_v * fcen_ / lc_jacob + (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R));
+    // eq. (26)
+    double const N_cen = lo_lt_v * fcen_ / lc_jacob;
+    // eq. (27)
+    double const N_mis = (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R);
+    // eq. (24)
+    double const N = jacob_N * N_int * (n_cen + N_mis);
     double const Nw = N * w;//Why times jacob again?
 
     // eq. (29)
     auto const  gamma_t_int = jacob * N_int * w * lc_lt_v;
 
     // eq. (30)
-    auto gamma_t_cen = [this, lnM, zt, A, lo_lt_v, lc_jacob](double radius) {
+    // For the following lambda functions, `radius` corresponds to what is called
+    // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
+    // paper
+    auto gamma_t_cen = [this, N_cen, lnM, zt, A](double radius) {
         // Q: Does this properly handle delta function?
-        return fcen_ * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt) * lo_lt_v / (lc_jacob * 6.28318530718);
+        return (N_cen / 6.28318530718) * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
     };
 
     // eq. (31)
-    auto gamma_t_mis = [this, lnM, zt, A, R, lo, lc, theta, lc_lt_v](double radius) {
-        return (1.0 - fcen_) * lc_lt_v * lo_lc(lo, lc, R) * roffset(R)
+    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
+        return N_mis
             // Should this be T_mis?
             * exp(A * T_cen(radius, lnM)) / (6.28318530718)
             // Assuming this is del_sig_mis
