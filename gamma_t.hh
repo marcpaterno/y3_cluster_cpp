@@ -184,7 +184,7 @@ public:
     // eq. (25)
     double const N = jacob_N * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v
                    // eq. (26) + eq. (27)
-                   * (lo_lt_v * fcen_ / lc_jacob + lc_lt_v * (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R));
+                   * (lo_lt_v * fcen_ / lc_jacob + (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R));
     double const Nw = N * w;//Why times jacob again?
 
     // eq. (29)
