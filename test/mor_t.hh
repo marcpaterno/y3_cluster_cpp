@@ -30,6 +30,7 @@ namespace y3_cluster {
     double
     operator()(double lt, double lnM, double zt) const
     {
+      /* eq. (34) */
       double const ltm = _lambda(lnM, zt);
       double const x = lt - ltm;
       double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);

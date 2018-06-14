@@ -15,6 +15,7 @@ namespace y3_cluster {
     double
     operator()(double zo, double zt) const
     {
+      /* eq. (32) */
       double const x = zo - zt;
       return y3_cluster::gaussian(x, 0., _sigma);
     }

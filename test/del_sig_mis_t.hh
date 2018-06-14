@@ -6,6 +6,8 @@ namespace y3_cluster {
     double
     operator()(double, double, double) const
     {
+      /* eq. (49) */
+      // TODO
       return 1.0;
     }
   };

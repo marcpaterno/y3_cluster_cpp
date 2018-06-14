@@ -24,6 +24,7 @@ namespace y3_cluster {
     double
     operator()(double lo, double lc, double R_mis) const
     {
+      /* eq. (35) */
       double x = R_mis / _R_lambda;
       double y = lo / lc;
       double mu_y = std::exp(-x * x / _alpha / _alpha);
