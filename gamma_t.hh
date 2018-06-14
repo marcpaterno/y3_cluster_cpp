@@ -180,7 +180,10 @@ public:
                        * zo_ir_.jacobian() * zt_ir_.jacobian()
                        * R_ir_.jacobian() * A_ir_.jacobian()
                        * theta_ir_.jacobian();
+
+    /* eq. (25) */
     double const N = jacob_N * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v
+                   /* eq. (26) + eq. (27) */
                    * (lo_lt_v * fcen_ / lc_jacob + lc_lt_v * (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R));
     double const Nw = N * w;//Why times jacob again?
 
@@ -189,7 +192,6 @@ public:
 
     /* eq. (30) */
     auto gamma_t_cen = [this, lnM, zt, A, lo_lt_v, lc_jacob](double radius) {
-        /* what is the magic 6.283...? at the end about? */
         return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) * lo_lt_v / (lc_jacob * 6.28318530718);
     };
 
