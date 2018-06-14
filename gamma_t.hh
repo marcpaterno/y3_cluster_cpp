@@ -188,7 +188,7 @@ public:
     // eq. (27)
     double const N_mis = (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R);
     // eq. (24)
-    double const N = jacob_N * N_int * (n_cen + N_mis);
+    double const N = jacob_N * N_int * (N_cen + N_mis);
     double const Nw = N * w;//Why times jacob again?
 
     // eq. (29)
@@ -213,13 +213,13 @@ public:
     };
 
     // eq. (28)
-    auto const  gamma_t = y3_cluster::transform(r, 
-		    [m_shear, Nw, sig_crit, gamma_t_int, gamma_t_cen, gamma_t_mis]
-                    (double radius) {
-                        // Nw intentionally left out - returned in return_arr to be used further on
-                        return (1.0 + m_shear) / sig_crit
-                                * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius));
-                    });
+    auto const gamma_t = y3_cluster::transform(r, 
+	           [m_shear, sig_crit, gamma_t_int, gamma_t_cen, gamma_t_mis]
+                   (double radius) {
+                       // Nw intentionally left out - returned in return_arr to be used further on
+                       return (1.0 + m_shear) / sig_crit
+                               * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius));
+                   });
 
     std::array<double, NRADII+2> return_arr;
     std::copy_n( gamma_t.begin(), gamma_t.size(),  return_arr.begin() );
