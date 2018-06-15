@@ -28,7 +28,11 @@ template <typename MOR,
           typename OMEGA_Z>
 class Gamma_T_Integrand {
 public:
+#ifndef OVERRIDE_NRADII
   static const std::size_t NRADII = 10;
+#else
+  static const std::size_t NRADII = OVERRIDE_NRADII;
+#endif
 private:
   double fcen_;
   double msci_;
