@@ -192,13 +192,13 @@ public:
     double const Nw = N * w;//Why times jacob again?
 
     // eq. (29)
-    auto const  gamma_t_int = jacob * N_int * w * lc_lt_v;
+    auto const  gamma_t_int = jacob * N_int * w;
 
     // eq. (30)
     // For the following lambda functions, `radius` corresponds to what is called
     // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
     // paper
-    auto gamma_t_cen = [this, N_cen, lnM, zt, A](double radius) {
+    auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
         // Q: Does this properly handle delta function?
         return (N_cen / 6.28318530718) * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
     };
