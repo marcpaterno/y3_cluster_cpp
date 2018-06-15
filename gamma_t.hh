@@ -27,6 +27,8 @@ template <typename MOR,
           typename DV_DO_DZ,
           typename OMEGA_Z>
 class Gamma_T_Integrand {
+public:
+  static const std::size_t NRADII = 10;
 private:
   double fcen_;
   double msci_;
@@ -56,7 +58,6 @@ private:
   y3_cluster::IntegrationRange A_ir_;
   y3_cluster::IntegrationRange theta_ir_; /* */
 
-  static const std::size_t NRADII = 10;
   std::array <double, NRADII> r;
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
@@ -285,8 +286,22 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
-   std::array<double, 10> rarray; // can I pass a vector here?
-   for ( std::size_t i = 0; i < 10; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
+   std::size_t const NRADII = Gamma_T_Integrand<MOR,
+                                                LO_LC,
+                                                LC_LT,
+                                                ZO_ZT,
+                                                ROFFSET,
+                                                T_CEN,
+                                                T_MIS,
+                                                A_CEN,
+                                                A_MIS,
+                                                HMF,
+                                                DEL_SIG_CEN,
+                                                /*DEL_SIG_MIS,*/
+                                                DV_DO_DZ,
+                                                OMEGA_Z>::NRADII;
+   std::array<double, NRADII> rarray; // can I pass a vector here?
+   for ( std::size_t i = 0; i < NRADII; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,
           msci,
           mor,
