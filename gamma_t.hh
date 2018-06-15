@@ -188,7 +188,7 @@ public:
     double const Nw = N * w;//Why times jacob again?
 
     // eq. (29)
-    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
+    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w;
 
     // eq. (30)
     auto gamma_t_cen = [this, lnM, zt, A, lo_lt_v, lc_jacob](double radius) {
