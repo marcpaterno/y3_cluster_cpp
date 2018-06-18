@@ -12,6 +12,7 @@ namespace y3_cluster {
     double
     operator()(double x) const
     {
+      // eq. 36
       return x / _tau / _tau * std::exp(-x / _tau);
     }
 

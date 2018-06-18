@@ -187,34 +187,44 @@ public:
                        * theta_ir_.jacobian();
 
     // eq. (25)
-    double const N = jacob_N * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v
-                   // eq. (26) + eq. (27)
-                   * (lo_lt_v * fcen_ / lc_jacob + lc_lt_v * (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R));
+    double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
+    // eq. (26)
+    double const N_cen = lo_lt_v * fcen_ / lc_jacob;
+    // eq. (27)
+    double const N_mis = (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R);
+    // eq. (24)
+    double const N = jacob_N * N_int * (N_cen + N_mis);
     double const Nw = N * w;//Why times jacob again?
 
     // eq. (29)
-    auto const  gamma_t_int = jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w;
+    auto const  gamma_t_int = jacob * N_int * w;
 
     // eq. (30)
-    auto gamma_t_cen = [this, lnM, zt, A, lo_lt_v, lc_jacob](double radius) {
-        return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM)) * lo_lt_v / (lc_jacob * 6.28318530718);
+    // For the following lambda functions, `radius` corresponds to what is called
+    // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
+    // paper
+    auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
+        // Q: Does this properly handle delta function?
+        return (N_cen / 6.28318530718) * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
     };
 
     // eq. (31)
-    auto gamma_t_mis = [this, lnM, zt, A, R, lo, lc, theta, lc_lt_v](double radius) {
-        return (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R)
-            * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt)
-            * exp(A * T_cen(radius, lnM)) * lc_lt_v / (6.28318530718);
+    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
+        return N_mis
+            // Should this be T_mis?
+            * exp(A * T_cen(radius, lnM)) / (6.28318530718)
+            // Assuming this is del_sig_mis
+            * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt);
     };
 
     // eq. (28)
-    auto const  gamma_t = y3_cluster::transform(r, 
-		    [m_shear, Nw, sig_crit, gamma_t_int, gamma_t_cen, gamma_t_mis]
-                    (double radius) {
-                        // Nw intentionally left out - returned in return_arr to be used further on
-                        return (1.0 + m_shear) / sig_crit
-                                * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius));
-                    });
+    auto const gamma_t = y3_cluster::transform(r, 
+	           [m_shear, sig_crit, gamma_t_int, gamma_t_cen, gamma_t_mis]
+                   (double radius) {
+                       // Nw intentionally left out - returned in return_arr to be used further on
+                       return (1.0 + m_shear) / sig_crit
+                               * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius));
+                   });
 
     std::array<double, NRADII+2> return_arr;
     std::copy_n( gamma_t.begin(), gamma_t.size(),  return_arr.begin() );
