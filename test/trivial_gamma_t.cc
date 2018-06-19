@@ -84,7 +84,7 @@ main(int argc, char* argv[])
   auto const zz1 = read_vector("deltasigma_z.txt", identity);
 
   long long maxeval = std::stoll(args[0]);
-  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
+  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};//y3_cluster::MOR_t mor{1., 1.};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt;
   y3_cluster::ZO_ZT_t zo_zt{0.05};
