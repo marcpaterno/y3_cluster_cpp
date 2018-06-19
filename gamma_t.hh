@@ -205,10 +205,11 @@ public:
 
     // eq. (31)
     auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
+        double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
         return (N_mis / 6.28318530718)
                // Should this be T_mis?
-               * exp(A * T_cen(radius, lnM))
-               * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt);
+               * exp(A * T_cen(adjusted_R, lnM))
+               * del_sig_cen(adjusted_R, lnM, zt);
     };
 
     // eq. (28)
