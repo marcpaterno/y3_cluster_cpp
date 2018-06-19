@@ -23,7 +23,6 @@ template <typename MOR,
           typename A_MIS,
           typename HMF,
           typename DEL_SIG_CEN,
-          /* typename DEL_SIG_MIS,*/
           typename DV_DO_DZ,
           typename OMEGA_Z>
 class Gamma_T_Integrand {
@@ -48,7 +47,6 @@ private:
   A_MIS A_mis;
   HMF hmf;
   DEL_SIG_CEN del_sig_cen;
-  /*DEL_SIG_MIS del_sig_mis;*/
   DV_DO_DZ dv_do_dz;
   OMEGA_Z omega_z;
 
@@ -60,7 +58,7 @@ private:
   y3_cluster::IntegrationRange zt_ir_;
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
-  y3_cluster::IntegrationRange theta_ir_; /* */
+  y3_cluster::IntegrationRange theta_ir_;
 
   std::array <double, NRADII> r;
 public:
@@ -80,7 +78,6 @@ public:
                     A_MIS A_mis,
                     HMF hmf,
                     DEL_SIG_CEN del_sig_cen,
-                    /*DEL_SIG_MIS del_sig_mis,*/
                     DV_DO_DZ dv_do_dz,
                     OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir, 
@@ -106,7 +103,6 @@ public:
     , A_mis(A_mis)
     , hmf(hmf)
     , del_sig_cen(del_sig_cen)
-    /*, del_sig_mis(del_sig_mis)*/
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
     , lnM_ir_(lnM_ir)
@@ -194,7 +190,7 @@ public:
     double const N_mis = (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R);
     // eq. (24)
     double const N = jacob_N * N_int * (N_cen + N_mis);
-    double const Nw = N * w;//Why times jacob again?
+    double const Nw = N * w;
 
     // eq. (29)
     auto const  gamma_t_int = jacob * N_int * w;
@@ -204,17 +200,15 @@ public:
     // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
     // paper
     auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
-        // Q: Does this properly handle delta function?
         return (N_cen / 6.28318530718) * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
     };
 
     // eq. (31)
     auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
-        return N_mis
-            // Should this be T_mis?
-            * exp(A * T_cen(radius, lnM)) / (6.28318530718)
-            // Assuming this is del_sig_mis
-            * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt);
+        return (N_mis / 6.28318530718)
+               // Should this be T_mis?
+               * exp(A * T_cen(radius, lnM))
+               * del_sig_cen(std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta)), lnM, zt);
     };
 
     // eq. (28)
@@ -231,6 +225,10 @@ public:
     return_arr[NRADII] = N;
     return_arr[NRADII+1] = Nw;
 
+
+    // ================================================================ //
+    // ===== Can I remove these comments? Are they irrelevent now? ==== //
+    // ================================================================ //
 
     // this is for y1 likelihood
     //double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v ;//*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
