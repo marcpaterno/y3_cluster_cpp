@@ -98,10 +98,7 @@ main(int argc, char* argv[])
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
-  // DEL_SIG_CEN_t dsc{5., 0.5};
   y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4/*,5*/);
-  // DEL_SIG_MIS_t dsc{5., 0.5};
-  /*y3_cluster::DEL_SIG_MIS_t dsm;*/
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
