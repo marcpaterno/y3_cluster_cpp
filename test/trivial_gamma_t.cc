@@ -121,7 +121,6 @@ main(int argc, char* argv[])
                                     a_mis,
                                     hmf,
                                     dsc,
-                                    /*dsm,*/
                                     dvdodz,
                                     omega_z,
                                     lo_ir,
@@ -130,10 +129,28 @@ main(int argc, char* argv[])
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
-  cubacpp::Cuhre c;
-  c.maxeval = maxeval;
-  time_integration(c, gti, epsrel, epsabs, "cuhre");
+  cubacpp::Cuhre cm;
+  cm.maxeval = maxeval;
+  // Won't allow integrating gti.miscentered directly :(
+  time_integration(cm,
+                   [&gti](double a, double b, double c,
+                          double d, double e, double f,
+                          double g, double h, double i) {
+                        return gti.miscentered(a, b, c, d, e, f, g, h, i);
+                   },
+                   epsrel, epsabs, "cuhre");
 
+  cubacpp::Cuhre cc;
+  cc.maxeval = maxeval;
+  // same deal as above
+  time_integration(cm,
+                   [&gti](double a, double b, double c,
+                          double d, double e, double f) {
+                        return gti.centered(a, b, c, d, e, f);
+                   },
+                   epsrel, epsabs, "cuhre");
+
+  /*
   cubacpp::Vegas v;
   v.maxeval = maxeval;
   time_integration(v, gti, epsrel, epsabs, "vegas");
@@ -142,4 +159,5 @@ main(int argc, char* argv[])
   s.maxeval = maxeval;
   s.flatness = 100.0;
   time_integration(s, gti, epsrel, epsabs, "suave");
+  */
 };
