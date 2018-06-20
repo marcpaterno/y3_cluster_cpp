@@ -138,10 +138,10 @@ public:
 
   template<typename F>
   std::array<double, NRADII+2>
-  integrand_common(double scaled_lt,
-                   double scaled_zo,
-                   double scaled_zt,
-                   double scaled_lnM,
+  integrand_common(double lt,
+                   double zo,
+                   double zt,
+                   double lnM,
                    // Jacobian for N term
                    double jacob_N,
                    // Jacobian for Gamma term
@@ -151,12 +151,6 @@ public:
                    F gamma_radial_dep
                    ) const
   {
-    using std::exp;
-    auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const lt = lt_ir_.transform(scaled_lt);
-    auto const zo = zo_ir_.transform(scaled_zo);
-    auto const zt = zt_ir_.transform(scaled_zt);
-
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zo, zt);
     auto const mor_v = mor(lt, lnM, zt);
@@ -204,7 +198,7 @@ public:
    * * zo - z^{obs}
    * * zt - z^{true}
    * * R - R
-   * * lnM - ln(M)   // (why log???)
+   * * lnM - ln(M)
    * * A - ???
    * */
   std::array<double, NRADII+2>
@@ -221,7 +215,6 @@ public:
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
-    using std::exp;
     auto const lnM = lnM_ir_.transform(scaled_lnM);
     auto const lo = lo_ir_.transform(scaled_lo);
     auto const lt = lt_ir_.transform(scaled_lt);
@@ -231,10 +224,6 @@ public:
     auto const A = A_ir_.transform(scaled_A);
     auto const theta = theta_ir_.transform(scaled_theta);
 
-    // The evaluation below follows the convention set in main overleaf document
-    //The evaluation is for Y3 likelihood
-    // putting together the return vector
-    // double const lc_jacob = lc_ir_.jacobian();
     double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
                          * zo_ir_.jacobian() * zt_ir_.jacobian()
@@ -249,7 +238,7 @@ public:
     double const N_mis = (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt(lc, lt, zt) * roffset(R);
 
     // eq. (30)
-    // For the following lambda functions, `radius` corresponds to what is called
+    // For the following lambda function, `radius` corresponds to what is called
     // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
     // paper
     // eq. (31)
@@ -260,10 +249,10 @@ public:
                * del_sig_cen(adjusted_R, lnM, zt);
     };
 
-    return integrand_common(scaled_lt,
-                            scaled_zo,
-                            scaled_zt,
-                            scaled_lnM,
+    return integrand_common(lt,
+                            zo_ir_.transform(scaled_zo),
+                            zt,
+                            lnM,
                             jacob_N,
                             jacob_G,
                             N_mis,
@@ -278,7 +267,7 @@ public:
    * * zo - z^{obs}
    * * zt - z^{true}
    * * R - R
-   * * lnM - ln(M)   // (why log???)
+   * * lnM - ln(M)
    * * A - ???
    * */
   std::array<double, NRADII+2>
@@ -287,8 +276,7 @@ public:
            double scaled_zo,
            double scaled_zt,
            double scaled_lnM,
-           double scaled_A
-           ) const
+           double scaled_A) const
   {
     // Necessary terms
     auto const lnM = lnM_ir_.transform(scaled_lnM);
@@ -310,17 +298,16 @@ public:
     double const N_cen = lo_lt_v * fcen_;
 
     // eq. (30)
-    // For the following lambda functions, `radius` corresponds to what is called
-    // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
-    // paper
+    // For the following lambda function, `radius` corresponds to what is called
+    // `R` in the paper
     auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
         return N_cen * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
     };
 
-    return integrand_common(scaled_lt,
-                            scaled_zo,
-                            scaled_zt,
-                            scaled_lnM,
+    return integrand_common(lt,
+                            zo_ir_.transform(scaled_zo),
+                            zt,
+                            lnM,
                             jacob_N,
                             jacob_G,
                             N_cen,
