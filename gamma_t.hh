@@ -12,19 +12,38 @@
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
 // provided by Spencer Everett.
 
-template <typename MOR,
-          typename LO_LC,
-          typename LC_LT,
-          typename ZO_ZT,
-          typename ROFFSET,
-          typename T_CEN,
-          typename T_MIS,
-          typename A_CEN,
-          typename A_MIS,
-          typename HMF,
-          typename DEL_SIG_CEN,
-          typename DV_DO_DZ,
-          typename OMEGA_Z>
+
+
+template<typename MOR_,
+         typename LO_LC_,
+         typename LC_LT_,
+         typename ZO_ZT_,
+         typename ROFFSET_,
+         typename T_CEN_,
+         typename T_MIS_,
+         typename A_CEN_,
+         typename A_MIS_,
+         typename HMF_,
+         typename DEL_SIG_CEN_,
+         typename DV_DO_DZ_,
+         typename OMEGA_Z_>
+struct Models {
+    using MOR = MOR_;
+    using LO_LC = LO_LC_;
+    using LC_LT = LC_LT_;
+    using ZO_ZT = ZO_ZT_;
+    using ROFFSET = ROFFSET_;
+    using T_CEN = T_CEN_;
+    using T_MIS = T_MIS_;
+    using A_CEN = A_CEN_;
+    using A_MIS = A_MIS_;
+    using HMF = HMF_;
+    using DEL_SIG_CEN = DEL_SIG_CEN_;
+    using DV_DO_DZ = DV_DO_DZ_;
+    using OMEGA_Z = OMEGA_Z_;
+};
+
+template <typename MODELS>
 class Gamma_T_Integrand {
 public:
 #ifndef OVERRIDE_NRADII
@@ -36,19 +55,19 @@ private:
   double fcen_;
   double msci_;
 
-  MOR mor;
-  LO_LC lo_lc;
-  LC_LT lc_lt;
-  ZO_ZT zo_zt;
-  ROFFSET roffset;
-  T_CEN T_cen;
-  T_MIS T_mis;
-  A_CEN A_cen;
-  A_MIS A_mis;
-  HMF hmf;
-  DEL_SIG_CEN del_sig_cen;
-  DV_DO_DZ dv_do_dz;
-  OMEGA_Z omega_z;
+  typename MODELS::MOR mor;
+  typename MODELS::LO_LC lo_lc;
+  typename MODELS::LC_LT lc_lt;
+  typename MODELS::ZO_ZT zo_zt;
+  typename MODELS::ROFFSET roffset;
+  typename MODELS::T_CEN T_cen;
+  typename MODELS::T_MIS T_mis;
+  typename MODELS::A_CEN A_cen;
+  typename MODELS::A_MIS A_mis;
+  typename MODELS::HMF hmf;
+  typename MODELS::DEL_SIG_CEN del_sig_cen;
+  typename MODELS::DV_DO_DZ dv_do_dz;
+  typename MODELS::OMEGA_Z omega_z;
 
   y3_cluster::IntegrationRange lnM_ir_;
   y3_cluster::IntegrationRange lo_ir_;
@@ -67,19 +86,19 @@ public:
   // specify the various terms of the integrand.
   Gamma_T_Integrand(double fcen,
                     double msci,
-                    MOR mor,
-                    LO_LC lo_lc,
-                    LC_LT lc_lt,
-                    ZO_ZT zo_zt,
-                    ROFFSET roffset,
-                    T_CEN T_cen,
-                    T_MIS T_mis,
-                    A_CEN A_cen,
-                    A_MIS A_mis,
-                    HMF hmf,
-                    DEL_SIG_CEN del_sig_cen,
-                    DV_DO_DZ dv_do_dz,
-                    OMEGA_Z omega_z,
+                    typename MODELS::MOR mor,
+                    typename MODELS::LO_LC lo_lc,
+                    typename MODELS::LC_LT lc_lt,
+                    typename MODELS::ZO_ZT zo_zt,
+                    typename MODELS::ROFFSET roffset,
+                    typename MODELS::T_CEN T_cen,
+                    typename MODELS::T_MIS T_mis,
+                    typename MODELS::A_CEN A_cen,
+                    typename MODELS::A_MIS A_mis,
+                    typename MODELS::HMF hmf,
+                    typename MODELS::DEL_SIG_CEN del_sig_cen,
+                    typename MODELS::DV_DO_DZ dv_do_dz,
+                    typename MODELS::OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir, 
                     y3_cluster::IntegrationRange lo_ir, 
                     y3_cluster::IntegrationRange lt_ir, 
@@ -328,47 +347,23 @@ public:
   }
 };
 
-template <typename MOR,
-          typename LO_LC,
-          typename LC_LT,
-          typename ZO_ZT,
-          typename ROFFSET,
-          typename T_CEN,
-          typename T_MIS,
-          typename A_CEN,
-          typename A_MIS,
-          typename HMF,
-          typename DEL_SIG_CEN,
-          typename DV_DO_DZ,
-          typename OMEGA_Z>
-Gamma_T_Integrand<MOR,
-                  LO_LC,
-                  LC_LT,
-                  ZO_ZT,
-                  ROFFSET,
-                  T_CEN,
-                  T_MIS,
-                  A_CEN,
-                  A_MIS,
-                  HMF,
-                  DEL_SIG_CEN,
-                  DV_DO_DZ,
-                  OMEGA_Z>
+template <typename MODELS>
+Gamma_T_Integrand<MODELS>
 make_gamma_t_integrand(double fcen,
                        double msci,
-                       MOR mor,
-                       LO_LC lo_lc,
-                       LC_LT lc_lt,
-                       ZO_ZT zo_zt,
-                       ROFFSET roffset,
-                       T_CEN t_cen,
-                       T_MIS t_mis,
-                       A_CEN a_cen,
-                       A_MIS a_mis,
-                       HMF hmf,
-                       DEL_SIG_CEN del_sig_cen,
-                       DV_DO_DZ dv_do_dz,
-                       OMEGA_Z omega_z,
+                       typename MODELS::MOR mor,
+                       typename MODELS::LO_LC lo_lc,
+                       typename MODELS::LC_LT lc_lt,
+                       typename MODELS::ZO_ZT zo_zt,
+                       typename MODELS::ROFFSET roffset,
+                       typename MODELS::T_CEN t_cen,
+                       typename MODELS::T_MIS t_mis,
+                       typename MODELS::A_CEN a_cen,
+                       typename MODELS::A_MIS a_mis,
+                       typename MODELS::HMF hmf,
+                       typename MODELS::DEL_SIG_CEN del_sig_cen,
+                       typename MODELS::DV_DO_DZ dv_do_dz,
+                       typename MODELS::OMEGA_Z omega_z,
                        y3_cluster::IntegrationRange lo_ir, 
                        y3_cluster::IntegrationRange zo_ir)
 {
@@ -380,19 +375,7 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
-   std::size_t const NRADII = Gamma_T_Integrand<MOR,
-                                                LO_LC,
-                                                LC_LT,
-                                                ZO_ZT,
-                                                ROFFSET,
-                                                T_CEN,
-                                                T_MIS,
-                                                A_CEN,
-                                                A_MIS,
-                                                HMF,
-                                                DEL_SIG_CEN,
-                                                DV_DO_DZ,
-                                                OMEGA_Z>::NRADII;
+   std::size_t const NRADII = Gamma_T_Integrand<MODELS>::NRADII;
    std::array<double, NRADII> rarray; // can I pass a vector here?
    for ( std::size_t i = 0; i < NRADII; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,

@@ -108,7 +108,20 @@ main(int argc, char* argv[])
   y3_cluster::OMEGA_Z_SDSS omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
-  auto gti = make_gamma_t_integrand(0.7,
+  using MODELS = Models<decltype(mor),
+                        decltype(lo_lc),
+                        decltype(lc_lt),
+                        decltype(zo_zt),
+                        decltype(roffset),
+                        decltype(t_cen),
+                        decltype(t_mis),
+                        decltype(a_cen),
+                        decltype(a_mis),
+                        decltype(hmf),
+                        decltype(dsc),
+                        decltype(dvdodz),
+                        decltype(omega_z)>;
+  auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                     0.11,
                                     mor,
                                     lo_lc,
