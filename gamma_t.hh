@@ -278,21 +278,24 @@ public:
     // The evaluation below follows the convention set in main overleaf document
     //The evaluation is for Y3 likelihood
     // putting together the return vector
-    double const lc_jacob = lc_ir_.jacobian();
+    // double const lc_jacob = lc_ir_.jacobian();
     double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
-                        * lt_ir_.jacobian() * lc_ir_.jacobian()
+                        * lt_ir_.jacobian() // * lc_ir_.jacobian()
                         * zo_ir_.jacobian() * zt_ir_.jacobian()
-                        * R_ir_.jacobian();
+                        // * R_ir_.jacobian()
+                        ;
     double const jacob = lnM_ir_.jacobian() * lo_ir_.jacobian()
-                       * lt_ir_.jacobian() * lc_ir_.jacobian()
+                       * lt_ir_.jacobian() // * lc_ir_.jacobian()
                        * zo_ir_.jacobian() * zt_ir_.jacobian()
-                       * R_ir_.jacobian() * A_ir_.jacobian()
-                       * theta_ir_.jacobian();
+                       // * R_ir_.jacobian()
+                       * A_ir_.jacobian()
+                       //* theta_ir_.jacobian()
+                       ;
 
     // eq. (25)
     double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
     // eq. (26)
-    double const N_cen = lo_lt_v * fcen_ / lc_jacob;
+    double const N_cen = lo_lt_v * fcen_;
     // eq. (24)
     double const N = jacob_N * N_int * N_cen;
     double const Nw = N * w;
@@ -305,7 +308,7 @@ public:
     // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
     // paper
     auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
-        return (N_cen / 6.28318530718) * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
+        return N_cen * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
     };
 
     // eq. (28)
@@ -336,7 +339,6 @@ template <typename MOR,
           typename A_MIS,
           typename HMF,
           typename DEL_SIG_CEN,
-          /*typename DEL_SIG_MIS,*/
           typename DV_DO_DZ,
           typename OMEGA_Z>
 Gamma_T_Integrand<MOR,
@@ -350,7 +352,6 @@ Gamma_T_Integrand<MOR,
                   A_MIS,
                   HMF,
                   DEL_SIG_CEN,
-                  /*DEL_SIG_MIS,*/
                   DV_DO_DZ,
                   OMEGA_Z>
 make_gamma_t_integrand(double fcen,
@@ -366,17 +367,16 @@ make_gamma_t_integrand(double fcen,
                        A_MIS a_mis,
                        HMF hmf,
                        DEL_SIG_CEN del_sig_cen,
-                       /*DEL_SIG_MIS del_sig_mis,*/
                        DV_DO_DZ dv_do_dz,
                        OMEGA_Z omega_z,
                        y3_cluster::IntegrationRange lo_ir, 
                        y3_cluster::IntegrationRange zo_ir)
 {
-   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};    
-   y3_cluster::IntegrationRange lt_ir{1.0, 100};    
-   y3_cluster::IntegrationRange lc_ir{1.0, 100};    
-   y3_cluster::IntegrationRange zt_ir{0.1, 0.3};    
-   y3_cluster::IntegrationRange R_ir{0., 1.0};    
+   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
+   y3_cluster::IntegrationRange lt_ir{1.0, 100};
+   y3_cluster::IntegrationRange lc_ir{1.0, 100};
+   y3_cluster::IntegrationRange zt_ir{0.1, 0.3};
+   y3_cluster::IntegrationRange R_ir{0., 1.0};
    y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
@@ -391,37 +391,35 @@ make_gamma_t_integrand(double fcen,
                                                 A_MIS,
                                                 HMF,
                                                 DEL_SIG_CEN,
-                                                /*DEL_SIG_MIS,*/
                                                 DV_DO_DZ,
                                                 OMEGA_Z>::NRADII;
    std::array<double, NRADII> rarray; // can I pass a vector here?
    for ( std::size_t i = 0; i < NRADII; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,
-          msci,
-          mor,
-          lo_lc,
-          lc_lt,
-          zo_zt,
-          roffset,
-          t_cen,
-          t_mis,
-          a_cen,
-          a_mis,
-          hmf,
-          del_sig_cen,
-          /*del_sig_mis,*/
-          dv_do_dz,
-          omega_z,
-          lnM_ir, 
-          lo_ir, 
-          lt_ir, 
-          lc_ir,
-	  zo_ir, 
-	  zt_ir,
-	  R_ir,
-          A_ir,
-	  theta_ir,
-          rarray }; 
+           msci,
+           mor,
+           lo_lc,
+           lc_lt,
+           zo_zt,
+           roffset,
+           t_cen,
+           t_mis,
+           a_cen,
+           a_mis,
+           hmf,
+           del_sig_cen,
+           dv_do_dz,
+           omega_z,
+           lnM_ir,
+           lo_ir,
+           lt_ir,
+           lc_ir,
+           zo_ir,
+           zt_ir,
+           R_ir,
+           A_ir,
+           theta_ir,
+           rarray };
 }
 
 #endif

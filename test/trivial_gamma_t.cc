@@ -129,24 +129,24 @@ main(int argc, char* argv[])
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
+  cubacpp::Cuhre cc;
+  cc.maxeval = maxeval;
+  // Won't allow integrating gti.centered directly :(
+  time_integration(cc,
+                   [&gti](double a, double b, double c,
+                          double d, double e, double f) {
+                        return gti.centered(a, b, c, d, e, f);
+                   },
+                   epsrel, epsabs, "cuhre");
+
   cubacpp::Cuhre cm;
   cm.maxeval = maxeval;
-  // Won't allow integrating gti.miscentered directly :(
+  // same deal as above
   time_integration(cm,
                    [&gti](double a, double b, double c,
                           double d, double e, double f,
                           double g, double h, double i) {
                         return gti.miscentered(a, b, c, d, e, f, g, h, i);
-                   },
-                   epsrel, epsabs, "cuhre");
-
-  cubacpp::Cuhre cc;
-  cc.maxeval = maxeval;
-  // same deal as above
-  time_integration(cm,
-                   [&gti](double a, double b, double c,
-                          double d, double e, double f) {
-                        return gti.centered(a, b, c, d, e, f);
                    },
                    epsrel, epsabs, "cuhre");
 
