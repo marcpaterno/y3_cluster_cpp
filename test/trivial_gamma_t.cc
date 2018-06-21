@@ -139,6 +139,34 @@ main(int argc, char* argv[])
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
+  cubacpp::Vegas v;
+  v.maxeval = maxeval;
+
+  IntegrationRange lc_ir{1.0, 200.0};
+  IntegrationRange lt_ir{1.0, 100.0};
+  IntegrationRange zt_ir{0.1, 0.3};
+
+  std::cout << "lt,zt,integral,err,prob\n";
+
+  const std::size_t width = 3;
+  for (auto i = 0u; i < width; i++) {
+      for (auto j = 0u; j < width; j++) {
+          const double lt = lt_ir.transform((i + 1) / ((double) width + 1));
+          const double zt = zt_ir.transform((j + 1) / ((double) width + 1));
+          const auto res = v.integrate([lt, zt, lc_ir, lc_lt](double scaled_lc) {
+                      const double lc = lc_ir.transform(scaled_lc);
+                      return lc_ir.jacobian() *
+                             lc_lt(lc, lt, zt);
+                  },
+                  epsrel, epsabs);
+          std::cout << lt << ", "
+                    << zt << ", "
+                    << res.value << ", "
+                    << res.error << ", "
+                    << res.prob << '\n';
+      }
+  }
+  /*
   cubacpp::Cuhre cc;
   cc.maxeval = maxeval;
   // Won't allow integrating gti.centered directly :(
@@ -159,6 +187,7 @@ main(int argc, char* argv[])
                         return gti.miscentered(a, b, c, d, e, f, g, h, i);
                    },
                    epsrel, epsabs, "cuhre");
+                   */
 
   /*
   cubacpp::Vegas v;
