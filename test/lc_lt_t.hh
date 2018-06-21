@@ -29,18 +29,24 @@ namespace y3_cluster {
 
       const auto exptau =
         std::exp(tau * (2.0 * mu + tau * sigma * sigma - 2.0 * lc) / 2.0);
-      const auto invsqrt_sigma = std::sqrt(2.0) * sigma;
-      return (1.0 - fmsk) * (1.0 - fprj) * y3_cluster::invsqrt2pi() / sigma *
-               std::exp(-(lc - mu) * (lc - mu) / (2.0 * sigma * sigma)) +
+      const auto root_two_sigma = std::sqrt(2.0) * sigma;
+      const auto mu_tau_sig_sqr = mu + tau * sigma * sigma;
+
+      // Helper function for common pattern
+      const auto erfc_scaled = [root_two_sigma](double a, double b) {
+          return std::erfc((a - b) / root_two_sigma);
+      };
+
+      // eq. (33)
+      return (1.0 - fmsk) * (1.0 - fprj) *
+               y3_cluster::gaussian(lc, mu, sigma) +
              0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lt) * exptau *
-               std::erfc((mu + tau * sigma * sigma - lc) / invsqrt_sigma) +
+               erfc_scaled(mu_tau_sig_sqr, lc) +
              0.5 * fmsk / lt *
-               (std::erfc((lc - mu) / invsqrt_sigma) -
-                std::erfc((lc + lt - mu) / invsqrt_sigma)) -
-             0.5 * fmsk / lt * fprj *
+               (erfc_scaled(lc, mu) - erfc_scaled(lc + lt, mu)) -
+             0.5 * fmsk * fprj / lt *
                (std::exp(-tau * lt) * exptau *
-                std::erfc((mu + tau * sigma * sigma - lc - lt) /
-                          invsqrt_sigma));
+                erfc_scaled(mu_tau_sig_sqr, lc + lt));
     }
   };
 }
