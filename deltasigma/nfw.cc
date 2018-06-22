@@ -27,7 +27,7 @@ public:
     double r_s = r_200 / _c;
 
     double r_ratio = r / r_s;
-    
+
     double coeff = r_s * delta_c * rho_crit;
 
     if(r_ratio<1.){

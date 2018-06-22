@@ -99,15 +99,15 @@ public:
                     typename MODELS::DEL_SIG_CEN del_sig_cen,
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
-                    y3_cluster::IntegrationRange lnM_ir, 
-                    y3_cluster::IntegrationRange lo_ir, 
-                    y3_cluster::IntegrationRange lt_ir, 
-                    y3_cluster::IntegrationRange lc_ir, 
-                    y3_cluster::IntegrationRange zo_ir, 
-                    y3_cluster::IntegrationRange zt_ir, 
-                    y3_cluster::IntegrationRange R_ir, 
+                    y3_cluster::IntegrationRange lnM_ir,
+                    y3_cluster::IntegrationRange lo_ir,
+                    y3_cluster::IntegrationRange lt_ir,
+                    y3_cluster::IntegrationRange lc_ir,
+                    y3_cluster::IntegrationRange zo_ir,
+                    y3_cluster::IntegrationRange zt_ir,
+                    y3_cluster::IntegrationRange R_ir,
                     y3_cluster::IntegrationRange A_ir,
-		    y3_cluster::IntegrationRange theta_ir, 
+		    y3_cluster::IntegrationRange theta_ir,
 		    std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
@@ -332,7 +332,7 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::DEL_SIG_CEN del_sig_cen,
                        typename MODELS::DV_DO_DZ dv_do_dz,
                        typename MODELS::OMEGA_Z omega_z,
-                       y3_cluster::IntegrationRange lo_ir, 
+                       y3_cluster::IntegrationRange lo_ir,
                        y3_cluster::IntegrationRange zo_ir)
 {
    y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};

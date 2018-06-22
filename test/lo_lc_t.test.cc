@@ -35,9 +35,9 @@ TEST_CASE("Lo_Lc_t works")
   REQUIRE(los.size() == lcs.size());
   REQUIRE(lcs.size() == Rs.size());
   REQUIRE(Rs.size() == ys.size());
-  
+
   LO_LC_t lolc(1.66, 0.26, 1.43, 1.0);
-  
+
   for (std::size_t i = 0, sy = ys.size(); i != sy; ++i)
   {
     double const fz = lolc(los[i], lcs[i], Rs[i]);
