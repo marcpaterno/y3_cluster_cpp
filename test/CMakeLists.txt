@@ -109,9 +109,10 @@ target_include_directories(roffset_t_test
 add_test(roffset_t_test roffset_t_test)
 
 add_executable(lc_lt_t_test main.cc lc_lt_t.test.cc lc_lt_t.cc interp_2d.cc)
-target_link_libraries(lc_lt_t_test PRIVATE ${GSL_LIBRARIES})
+target_link_libraries(lc_lt_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
 target_include_directories(lc_lt_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
-                           ${CMAKE_SOURCE_DIR}/externals)
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(lc_lt_t_test lc_lt_t_test)

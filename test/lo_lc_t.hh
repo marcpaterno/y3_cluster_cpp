@@ -29,7 +29,8 @@ namespace y3_cluster {
       double y = lo / lc;
       double mu_y = std::exp(-x * x / _alpha / _alpha);
       double sigma_y = _a * std::atan(_b * x);
-      return y3_cluster::gaussian(y, mu_y, sigma_y);
+      // Need 1/lc scaling for total probability = 1
+      return y3_cluster::gaussian(y, mu_y, sigma_y) / lc;
     }
 
   private:
