@@ -1,6 +1,8 @@
 #ifndef Y3_CLUSTER_ZO_ZT_HH
 #define Y3_CLUSTER_ZO_ZT_HH
 
+#include <cmath>
+
 namespace y3_cluster {
 
   class ZO_ZT_t {
@@ -13,11 +15,17 @@ namespace y3_cluster {
     }
 
     double
-    operator()(double zo, double zt) const
+    operator()(double zomin, double zomax, double zt) const
     {
-      /* eq. (32) */
-      double const x = zo - zt;
-      return y3_cluster::gaussian(x, 0., _sigma);
+      // P(zo | zt) := (1.0 / sqrt(2pi) / sigma) * exp(- (zo - zt) * (zo - zt) / (2 * sigma * sigma))
+      //    (i.e., a standard gaussian)
+      // So,
+      //    \int P(zo|zt) d(zo), zo in [zomin, zomax]
+      //     == (erf((zomax - zt) / base) - erf((zomin - zt) / base)) / 2
+      using std::erf;
+      double base = std::sqrt(2) * _sigma;
+      return (erf((zomax - zt) / base) -
+              erf((zomin - zt) / base)) / 2.0;
     }
 
   private:

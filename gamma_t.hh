@@ -139,7 +139,7 @@ public:
   template<typename F>
   std::array<double, NRADII+2>
   integrand_common(double lt,
-                   double zo,
+                   // double zo,
                    double zt,
                    double lnM,
                    // Jacobian for N term
@@ -151,8 +151,12 @@ public:
                    F gamma_radial_dep
                    ) const
   {
+    // Zo does not actually need to be integrated over
+    double const zomin = zo_ir_.transform(0.0);
+    double const zomax = zo_ir_.transform(1.0);
+
     auto const hmf_v = hmf(lnM, zt);
-    auto const zo_zt_v = zo_zt(zo, zt);
+    auto const zo_zt_v = zo_zt(zomin, zomax, zt);
     auto const mor_v = mor(lt, lnM, zt);
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
@@ -205,7 +209,7 @@ public:
   miscentered(double scaled_lo,
               double scaled_lc,
               double scaled_lt,
-              double scaled_zo,
+              // double scaled_zo,
               double scaled_zt,
               double scaled_R,
               double scaled_lnM,
@@ -226,11 +230,13 @@ public:
 
     double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
-                         * zo_ir_.jacobian() * zt_ir_.jacobian()
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian()
                          * R_ir_.jacobian();
     double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
-                         * zo_ir_.jacobian() * zt_ir_.jacobian()
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian()
                          * R_ir_.jacobian() * A_ir_.jacobian()
                          * theta_ir_.jacobian();
 
@@ -250,7 +256,7 @@ public:
     };
 
     return integrand_common(lt,
-                            zo_ir_.transform(scaled_zo),
+                            // zo_ir_.transform(scaled_zo),
                             zt,
                             lnM,
                             jacob_N,
@@ -273,7 +279,7 @@ public:
   std::array<double, NRADII+2>
   centered(double scaled_lo,
            double scaled_lt,
-           double scaled_zo,
+           // double scaled_zo,
            double scaled_zt,
            double scaled_lnM,
            double scaled_A) const
@@ -287,10 +293,12 @@ public:
 
     double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian()
-                         * zo_ir_.jacobian() * zt_ir_.jacobian();
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian();
     double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian()
-                         * zo_ir_.jacobian() * zt_ir_.jacobian()
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian()
                          * A_ir_.jacobian();
 
     // eq. (26)
@@ -305,7 +313,7 @@ public:
     };
 
     return integrand_common(lt,
-                            zo_ir_.transform(scaled_zo),
+                            // zo_ir_.transform(scaled_zo),
                             zt,
                             lnM,
                             jacob_N,

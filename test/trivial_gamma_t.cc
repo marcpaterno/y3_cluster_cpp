@@ -166,14 +166,14 @@ main(int argc, char* argv[])
                     << res.prob << '\n';
       }
   }
-  /*
+
   cubacpp::Cuhre cc;
   cc.maxeval = maxeval;
   // Won't allow integrating gti.centered directly :(
   time_integration(cc,
                    [&gti](double a, double b, double c,
-                          double d, double e, double f) {
-                        return gti.centered(a, b, c, d, e, f);
+                          double d, double e) {
+                        return gti.centered(a, b, c, d, e);
                    },
                    epsrel, epsabs, "cuhre");
 
@@ -183,11 +183,10 @@ main(int argc, char* argv[])
   time_integration(cm,
                    [&gti](double a, double b, double c,
                           double d, double e, double f,
-                          double g, double h, double i) {
-                        return gti.miscentered(a, b, c, d, e, f, g, h, i);
+                          double g, double h) {
+                        return gti.miscentered(a, b, c, d, e, f, g, h);
                    },
                    epsrel, epsabs, "cuhre");
-                   */
 
   /*
   cubacpp::Vegas v;
