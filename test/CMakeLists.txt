@@ -116,10 +116,3 @@ target_include_directories(lc_lt_t_test
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(lc_lt_t_test lc_lt_t_test)
-
-add_executable(mor_t_test main.cc mor_t.test.cc)
-target_include_directories(mor_t_test
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}
-                           ${CMAKE_SOURCE_DIR}/externals)
-add_test(mor_t_test mor_t_test)

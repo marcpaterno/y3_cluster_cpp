@@ -13,11 +13,11 @@ TEST_CASE("roffset_t works")
     std::vector<double> rmis;
     std::vector<double> prob;
     std::string line;
-    
+
     // Remove the two lines of header
     getline(infile, line);
     getline(infile, line);
-    
+
     while (infile)
     {
         double r, p;
@@ -25,20 +25,20 @@ TEST_CASE("roffset_t works")
         rmis.push_back(r);
         prob.push_back(p);
     }
-    
+
     infile.close();
-    
+
     // Remove the extra copy of the last line
     rmis.pop_back();
     prob.pop_back();
-    
+
     // If the file is well-formed, we have the same number of z-values as
     // y(z)-values.
     REQUIRE(rmis.size() == prob.size());
-    
+
     const double tau = 0.150000;
     ROFFSET_t roffset(tau);
-    
+
     for (std::size_t i = 0, sz = rmis.size(); i != sz; ++i)
     {
         double const fz = roffset(rmis[i]);

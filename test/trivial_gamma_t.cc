@@ -84,7 +84,7 @@ main(int argc, char* argv[])
   auto const zz1 = read_vector("deltasigma_z.txt", identity);
 
   long long maxeval = std::stoll(args[0]);
-  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};//y3_cluster::MOR_t mor{1., 1.};
+  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt;
   y3_cluster::ZO_ZT_t zo_zt{0.05};
@@ -98,17 +98,27 @@ main(int argc, char* argv[])
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
-  // DEL_SIG_CEN_t dsc{5., 0.5};
   y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4/*,5*/);
-  // DEL_SIG_MIS_t dsc{5., 0.5};
-  /*y3_cluster::DEL_SIG_MIS_t dsm;*/
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
   y3_cluster::OMEGA_Z_SDSS omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
-  auto gti = make_gamma_t_integrand(0.7,
+  using MODELS = Models<decltype(mor),
+                        decltype(lo_lc),
+                        decltype(lc_lt),
+                        decltype(zo_zt),
+                        decltype(roffset),
+                        decltype(t_cen),
+                        decltype(t_mis),
+                        decltype(a_cen),
+                        decltype(a_mis),
+                        decltype(hmf),
+                        decltype(dsc),
+                        decltype(dvdodz),
+                        decltype(omega_z)>;
+  auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                     0.11,
                                     mor,
                                     lo_lc,
@@ -121,7 +131,6 @@ main(int argc, char* argv[])
                                     a_mis,
                                     hmf,
                                     dsc,
-                                    /*dsm,*/
                                     dvdodz,
                                     omega_z,
                                     lo_ir,
@@ -130,10 +139,56 @@ main(int argc, char* argv[])
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
-  cubacpp::Cuhre c;
-  c.maxeval = maxeval;
-  time_integration(c, gti, epsrel, epsabs, "cuhre");
+  cubacpp::Vegas v;
+  v.maxeval = maxeval;
 
+  IntegrationRange lc_ir{1.0, 200.0};
+  IntegrationRange lt_ir{1.0, 100.0};
+  IntegrationRange zt_ir{0.1, 0.3};
+
+  std::cout << "lt,zt,integral,err,prob\n";
+
+  const std::size_t width = 3;
+  for (auto i = 0u; i < width; i++) {
+      for (auto j = 0u; j < width; j++) {
+          const double lt = lt_ir.transform((i + 1) / ((double) width + 1));
+          const double zt = zt_ir.transform((j + 1) / ((double) width + 1));
+          const auto res = v.integrate([lt, zt, lc_ir, lc_lt](double scaled_lc) {
+                      const double lc = lc_ir.transform(scaled_lc);
+                      return lc_ir.jacobian() *
+                             lc_lt(lc, lt, zt);
+                  },
+                  epsrel, epsabs);
+          std::cout << lt << ", "
+                    << zt << ", "
+                    << res.value << ", "
+                    << res.error << ", "
+                    << res.prob << '\n';
+      }
+  }
+
+  cubacpp::Cuhre cc;
+  cc.maxeval = maxeval;
+  // Won't allow integrating gti.centered directly :(
+  time_integration(cc,
+                   [&gti](double a, double b, double c,
+                          double d, double e) {
+                        return gti.centered(a, b, c, d, e);
+                   },
+                   epsrel, epsabs, "cuhre");
+
+  cubacpp::Cuhre cm;
+  cm.maxeval = maxeval;
+  // same deal as above
+  time_integration(cm,
+                   [&gti](double a, double b, double c,
+                          double d, double e, double f,
+                          double g, double h) {
+                        return gti.miscentered(a, b, c, d, e, f, g, h);
+                   },
+                   epsrel, epsabs, "cuhre");
+
+  /*
   cubacpp::Vegas v;
   v.maxeval = maxeval;
   time_integration(v, gti, epsrel, epsabs, "vegas");
@@ -142,4 +197,5 @@ main(int argc, char* argv[])
   s.maxeval = maxeval;
   s.flatness = 100.0;
   time_integration(s, gti, epsrel, epsabs, "suave");
+  */
 };

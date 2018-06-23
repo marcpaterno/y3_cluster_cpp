@@ -33,5 +33,5 @@ TEST_CASE("ez works")
         CHECK(ez(z) == Approx(valid).epsilon(epsrel));
         z += dz;
     }
-        
+
 }

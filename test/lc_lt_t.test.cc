@@ -72,7 +72,7 @@ TEST_CASE("Lc_Lt_t works")
           // In reality - since we are integration [1, 200] not [0, +inf] - it
           // won't be exactly 1.0. So, arbitrary wiggle room 1e-2
           // TODO: should this epsilon be changed?
-          CHECK(res.value == Approx(1.0).epsilon(2e-3).margin(2e-3));
+          CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(1e-2));
       }
   }
 }

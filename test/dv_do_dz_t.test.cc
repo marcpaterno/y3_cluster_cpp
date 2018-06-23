@@ -29,7 +29,7 @@ TEST_CASE("dv_do_dz_t works")
   // y(z)-values.
   REQUIRE(zs.size() == ys.size());
 
-  auto identity = [](double x) { return x; };  
+  auto identity = [](double x) { return x; };
   auto const zz = read_vector("z.txt", identity);
   // da_arr in h inverse Mpc
   auto const da_arr = read_vector("d_a.txt", identity);
@@ -37,7 +37,7 @@ TEST_CASE("dv_do_dz_t works")
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
 
-  
+
   for (std::size_t i = 0, sz = zs.size(); i != sz; ++i)
   {
     double const fz = dvdodz(zs[i]);

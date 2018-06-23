@@ -3,7 +3,6 @@
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "test/mz_power_law.hh"
-#include "test/primitives.hh"
 
 #include <cmath>
 
@@ -29,13 +28,12 @@ namespace y3_cluster {
     }
 
     double
-    //operator()(double lt, double lnM, double zt) const // Need to check/fix the ltm relation 
-    operator()(double lt, double lnM, double ) const
+    operator()(double lt, double lnM, double zt) const
     {
-      double ltm = pow(( pow(10,lnM) - pow(10,11.2))/(pow(10,12.42) - pow(10,11.2)),_alpha); //_lambda(lnM, zt);
-      if (lnM<11.2) ltm=0.; //written on the paper
+      /* eq. (34) */
+      double const ltm = _lambda(lnM, zt);
       double const x = lt - ltm;
-      double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2. * pow(_sigma,2))); //(std::sqrt(2.) * _sigma)
+      double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
       double const erfterm = std::erfc(erfarg);
       return y3_cluster::gaussian(x, 0.0, _sigma) * erfterm;
     }
