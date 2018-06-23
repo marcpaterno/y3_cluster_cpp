@@ -1,14 +1,13 @@
 #include "catch2/catch.hpp"
-#include "test/lc_lt_t.hh"
-#include "integration_range.hh"
 #include "cubacpp/cubacpp.hh"
+#include "integration_range.hh"
+#include "test/lc_lt_t.hh"
 
 #include <fstream>
 #include <iostream>
 #include <string>
 
-using y3_cluster::LC_LT_t,
-      y3_cluster::IntegrationRange;
+using y3_cluster::LC_LT_t, y3_cluster::IntegrationRange;
 TEST_CASE("Lc_Lt_t works")
 {
   std::ifstream infile{"test_lc_lt_t_SDSS.txt"};
@@ -54,25 +53,27 @@ TEST_CASE("Lc_Lt_t works")
 
   cubacpp::Vegas v;
   v.maxeval = 9999999;
-  const double epsrel = 1.0e-6;
+  const double epsrel = 1.0e-4;
   const double epsabs = 1.0e-12;
 
   const std::size_t width = 2;
   for (auto i = 0u; i < width; i++) {
-      for (auto j = 0u; j < width; j++) {
-          const double lt = lt_ir.transform((i + 1) / ((double) width + 1));
-          const double zt = zt_ir.transform((j + 1) / ((double) width + 1));
-          const auto res = v.integrate([lt, zt, lc_ir, lc_lt](double scaled_lc) {
-                    const double lc = lc_ir.transform(scaled_lc);
-                    return lc_ir.jacobian() *
-                           lc_lt(lc, lt, zt);
-                  },
-                  epsrel, epsabs);
+    for (auto j = 0u; j < width; j++) {
+      const double lt = lt_ir.transform((i + 1) / ((double)width + 1));
+      const double zt = zt_ir.transform((j + 1) / ((double)width + 1));
+      const auto res = v.integrate(
+        [lt, zt, lc_ir, lc_lt](double scaled_lc) {
+          const double lc = lc_ir.transform(scaled_lc);
+          return lc_ir.jacobian() * lc_lt(lc, lt, zt);
+        },
+        epsrel,
+        epsabs);
 
-          // In reality - since we are integration [1, 200] not [0, +inf] - it
-          // won't be exactly 1.0. So, arbitrary wiggle room 1e-2
-          // TODO: should this epsilon be changed?
-          CHECK(res.value == Approx(1.0).epsilon(2e-3).margin(2e-3));
-      }
+      // In reality - since we are integration [1, 200] not [0, +inf] - it
+      // won't be exactly 1.0. So, arbitrary wiggle room 1e-2
+      // TODO: should this epsilon be changed?
+      CHECK(res.status == 0);
+      CHECK(res.value == Approx(1.0).epsilon(2e-3).margin(2e-3));
+    }
   }
 }
