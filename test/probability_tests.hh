@@ -17,13 +17,13 @@ namespace y3_cluster {
                          IntegrationRange zt_ir,
                          std::size_t lt_width,
                          std::size_t zt_width,
-                         const double epsrel=1.0e-6,
+                         const double epsrel=1.0e-4,
                          const double epsabs=1.0e-12,
                          bool print=false,
                          bool test=true)
     {
         if (print)
-            std::cout << "lt,zt,lc_lt_integrated,error,prob\n";
+            std::cout << "lt,zt,lc_lt_integrated,status,error,prob\n";
 
         LC_LT_t lc_lt;
         for (auto i = 0u; i < lt_width; i++) {
@@ -32,8 +32,7 @@ namespace y3_cluster {
                 const double zt = zt_ir.transform((j + 1) / ((double) zt_width + 1));
                 const auto res = I.integrate([lt, zt, lc_ir, lc_lt](double scaled_lc) {
                           const double lc = lc_ir.transform(scaled_lc);
-                          return lc_ir.jacobian() *
-                                 lc_lt(lc, lt, zt);
+                          return lc_ir.jacobian() * lc_lt(lc, lt, zt);
                         },
                         epsrel, epsabs);
 
@@ -41,6 +40,7 @@ namespace y3_cluster {
                     std::cout << lt << ", "
                               << zt << ", "
                               << res.value << ", "
+                              << res.status << ", "
                               << res.error << ", "
                               << res.prob << '\n';
 
@@ -48,6 +48,7 @@ namespace y3_cluster {
                     // In reality - since we are integrating [1, 200] not [0, +inf] - it
                     // won't be exactly 1.0. So, arbitrary wiggle room 1e-2
                     // TODO: should this epsilon be changed?
+                    CHECK(res.status == 0);
                     CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(1e-2));
                 }
             }
@@ -62,13 +63,13 @@ namespace y3_cluster {
                          IntegrationRange R_ir,
                          std::size_t lc_width,
                          std::size_t R_width,
-                         const double epsrel=1.0e-6,
+                         const double epsrel=1.0e-4,
                          const double epsabs=1.0e-12,
                          bool print=false,
                          bool test=true)
     {
         if (print)
-            std::cout << "lc,R,lc_lt_integrated,error,prob\n";
+            std::cout << "lc,R,lc_lt_integrated,status,error,prob\n";
 
         // Values from trivial_gamma_t
         LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
@@ -79,8 +80,7 @@ namespace y3_cluster {
                 const double R = R_ir.transform((j + 1) / ((double) R_width + 1));
                 const auto res = I.integrate([lc, R, lo_ir, lo_lc](double scaled_lo) {
                           const double lo = lo_ir.transform(scaled_lo);
-                          return lo_ir.jacobian() *
-                                 lo_lc(lo, lc, R);
+                          return lo_ir.jacobian() * lo_lc(lo, lc, R);
                         },
                         epsrel, epsabs);
 
@@ -88,11 +88,14 @@ namespace y3_cluster {
                     std::cout << lc << ", "
                               << R << ", "
                               << res.value << ", "
+                              << res.status << ", "
                               << res.error << ", "
                               << res.prob << '\n';
 
-                if (test)
+                if (test) {
+                    CHECK(res.status == 0);
                     CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(5e-2));
+                }
             }
         }
     }
@@ -102,31 +105,33 @@ namespace y3_cluster {
     test_integrate_roffset(Integrator I,
                            IntegrationRange R_ir,
                            double tau,
-                           const double epsrel=1.0e-6,
+                           const double epsrel=1.0e-4,
                            const double epsabs=1.0e-12,
                            bool print=false,
                            bool test=true)
     {
         if (print)
-            std::cout << "roffset_integrand,error,prob\n";
+            std::cout << "roffset_integrand,status,error,prob\n";
 
         // Values from trivial_gamma_t
         ROFFSET_t roffset(tau);
 
         const auto res = I.integrate([R_ir, roffset](double scaled_R) {
                   const double R = R_ir.transform(scaled_R);
-                  return R_ir.jacobian() *
-                         roffset(R);
+                  return R_ir.jacobian() * roffset(R);
                 },
                 epsrel, epsabs);
 
         if (print)
             std::cout << res.value << ", "
+                      << res.status << ", "
                       << res.error << ", "
                       << res.prob << '\n';
 
-        if (test)
+        if (test) {
+            CHECK(res.status == 0);
             CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(5e-2));
+        }
     }
 
 }

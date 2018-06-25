@@ -1,12 +1,4 @@
-#include "catch2/catch.hpp"
-#include "integration_range.hh"
-#include "cubacpp/cubacpp.hh"
-#include "test/lc_lt_t.hh"
 #include "test/probability_tests.hh"
-
-#include <fstream>
-#include <iostream>
-#include <string>
 
 using y3_cluster::LC_LT_t,
       y3_cluster::IntegrationRange,
