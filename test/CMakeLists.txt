@@ -109,10 +109,39 @@ target_include_directories(roffset_t_test
 add_test(roffset_t_test roffset_t_test)
 
 add_executable(lc_lt_t_test main.cc lc_lt_t.test.cc lc_lt_t.cc interp_2d.cc)
-target_link_libraries(lc_lt_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_link_libraries(lc_lt_t_test PRIVATE ${GSL_LIBRARIES})
 target_include_directories(lc_lt_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
-                           ${CMAKE_SOURCE_DIR}/externals
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(lc_lt_t_test lc_lt_t_test)
+
+add_executable(lc_lt_probability_test main.cc lc_lt_probability_unity.test.cc lc_lt_t.cc interp_2d.cc)
+target_link_libraries(lc_lt_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(lc_lt_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(lc_lt_probability_test lc_lt_probability_test)
+
+add_executable(lo_lc_probability_test main.cc lo_lc_probability_unity.test.cc interp_2d.cc)
+target_link_libraries(lo_lc_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(lo_lc_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(lo_lc_probability_test lo_lc_probability_test)
+
+add_executable(roffset_probability_test main.cc roffset_probability_unity.test.cc interp_2d.cc)
+target_link_libraries(roffset_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(roffset_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(roffset_probability_test roffset_probability_test)
