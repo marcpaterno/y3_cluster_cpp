@@ -4,14 +4,42 @@
 
 using y3_cluster::IntegrationRange,
       y3_cluster::test_integrate_roffset;
-int main(void)
+int main(int argc, char **argv)
 {
-    IntegrationRange R_ir{0.0, 1.0};
+    double R_min = 0.0;
+    double R_max = 1.0;
+    double tau = 0.2;
+    int maxeval = 9999999;
+    bool help = false;
+
+    using namespace Catch::clara;
+    auto args_parser = Opt(R_min, "Rmin")
+                          ["--rmin"]
+                          ("Lower bound of R integration")
+                     | Opt(R_max, "Rmax")
+                          ["--rmax"]
+                          ("Upper bound of R integration")
+                     | Opt(tau, "tau")
+                          ["--tau"]
+                          ("Width parameter of roffset")
+                     | Opt(maxeval, "maxeval")
+                          ["--maxeval"]
+                          ("Maximum number of evaluations for integration algorithm")
+                     | Help(help);
+
+    auto result = args_parser.parse(Args(argc, argv));
+
+    if (help || !result) {
+        std::cerr << args_parser;
+        return 0;
+    }
+
+    IntegrationRange R_ir{R_min, R_max};
 
     cubacpp::Vegas v;
-    v.maxeval = 9999999;
+    v.maxeval = maxeval;
 
-    test_integrate_roffset(v, R_ir, 0.2,
+    test_integrate_roffset(v, R_ir, tau,
                            1.0e-4, 1.0e-12,
                            // print = true, test = false
                            true, false);
