@@ -8,6 +8,30 @@
 
 #include <iostream>
 
+
+/******************************************
+ *      Probability Integration Tests
+ ******************************************
+ *
+ * For any dependent probability P(x|A,B,...), the following should hold:
+ *
+ *      \int_{xrange} P(x|A,B,...) dx = 1
+ *
+ * The total probability should, naturally be 1.
+ *
+ *   The following functions test that this holds for each probability
+ * distribution, across a range of A, B, etc. values.
+ *
+ *   Naturally, the above equality cannot be expected to hold _exactly_, due to
+ * both the precision of the integrator and the fact that the `xrange`s used
+ * are generally not the complete range of possible x values. On account of
+ * this each function uses a different acceptable margin.
+ *
+ *   Each of the below functions take the boolean flags `print` and `test`. If
+ * `test` is true, it will run catch2 tests, if `print` is true, it will output
+ * a CSV formatted table of results of each integration.
+ */
+
 /* TODO:
  * These argument lists are starting to get byzantine - may be simpler to pass
  * a Cosmosis data block with everything specified instead.
@@ -15,6 +39,12 @@
 
 namespace y3_cluster {
 
+    /* Computes:
+     *      \int_{lc_ir} P(\lc|\lt, \zt) d\lc
+     *
+     * Using `lt_width` distinct \lt values, and `zt_width` distinct \zt values in
+     * the range `lt_ir` and `zt_ir`, respectively.
+     */
     template<typename Integrator>
     void
     test_integrate_lc_lt(Integrator I,
@@ -61,6 +91,12 @@ namespace y3_cluster {
         }
     }
 
+    /* Computes:
+     *      \int_{lo_ir} P(\lo|\lc, R) d\lo
+     *
+     * Using `lc_width` distinct \lc values, and `R_width` distinct R values in
+     * the range `lc_ir` and `R_ir`, respectively.
+     */
     template<typename Integrator>
     void
     test_integrate_lo_lc(Integrator I,
@@ -106,6 +142,11 @@ namespace y3_cluster {
         }
     }
 
+    /* Computes:
+     *      \int_{R_ir} P(R_{mis}) dR_{mis}
+     *
+     * The only parameter is the width value `tau`. Only one `tau` value is used.
+     */
     template<typename Integrator>
     void
     test_integrate_roffset(Integrator I,
@@ -140,6 +181,12 @@ namespace y3_cluster {
         }
     }
 
+    /* Computes:
+     *      \int_{lt_ir} P(\lt| ln(M), zt) d\lt
+     *
+     * Using `lnM_width` distinct ln(M) values, and `zt_width` distinct zt values
+     * in the range `lnM_ir` and `zt_ir`, respectively.
+     */
     template<typename Integrator>
     void
     test_integrate_mor(Integrator I,
