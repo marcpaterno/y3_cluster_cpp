@@ -74,6 +74,7 @@ main(int argc, char* argv[])
   auto const mh = read_vector("m_h.txt", log);
   auto const zz = read_vector("z.txt", identity);
   // da_arr in h inverse Mpc
+  auto const zz_da = read_vector("z_da.txt", identity);
   auto const da_arr = read_vector("d_a.txt", identity);
 
   auto const del_sig_1 = read_vector("deltasigma_1.txt", identity);
@@ -103,7 +104,7 @@ main(int argc, char* argv[])
   // DEL_SIG_MIS_t dsc{5., 0.5};
   /*y3_cluster::DEL_SIG_MIS_t dsm;*/
 
-  auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
+  auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
   y3_cluster::OMEGA_Z_SDSS omega_z;
   IntegrationRange lo_ir{10, 30};
