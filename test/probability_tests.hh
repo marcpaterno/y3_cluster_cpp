@@ -1,11 +1,17 @@
 #include "catch2/catch.hpp"
 #include "test/lc_lt_t.hh"
 #include "test/lo_lc_t.hh"
+#include "test/mor_t.hh"
 #include "test/roffset_t.hh"
 #include "cubacpp/cubacpp.hh"
 #include "integration_range.hh"
 
 #include <iostream>
+
+/* TODO:
+ * These argument lists are starting to get byzantine - may be simpler to pass
+ * a Cosmosis data block with everything specified instead.
+ */
 
 namespace y3_cluster {
 
@@ -131,6 +137,53 @@ namespace y3_cluster {
         if (test) {
             CHECK(res.status == 0);
             CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(5e-2));
+        }
+    }
+
+    template<typename Integrator>
+    void
+    test_integrate_mor(Integrator I,
+                       IntegrationRange lt_ir,
+                       IntegrationRange lnM_ir,
+                       IntegrationRange zt_ir,
+                       std::size_t lnM_width,
+                       std::size_t zt_width,
+                       const double epsrel=1.0e-4,
+                       const double epsabs=1.0e-12,
+                       bool print=false,
+                       bool test=true)
+    {
+        if (print)
+            std::cout << "lnM,M,zt,mor_integrated,status,error,prob\n";
+
+        // Values from trivial_gamma_t
+        MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
+
+        for (auto i = 0u; i < lnM_width; i++) {
+            for (auto j = 0u; j < zt_width; j++) {
+                const double lnM = lnM_ir.transform((i + 1) / ((double) lnM_width + 1));
+                const double zt = zt_ir.transform((j + 1) / ((double) zt_width + 1));
+
+                const auto res = I.integrate([lnM, zt, lt_ir, mor](double scaled_lt) {
+                          const double lt = lt_ir.transform(scaled_lt);
+                          return lt_ir.jacobian() * mor(lt, lnM, zt);
+                        },
+                        epsrel, epsabs);
+
+                if (print)
+                    std::cout << lnM << ", "
+                              << std::exp(lnM) << ", "
+                              << zt << ", "
+                              << res.value << ", "
+                              << res.status << ", "
+                              << res.error << ", "
+                              << res.prob << '\n';
+
+                if (test) {
+                    CHECK(res.status == 0);
+                    CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(0.15));
+                }
+            }
         }
     }
 
