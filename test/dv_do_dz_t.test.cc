@@ -29,8 +29,8 @@ TEST_CASE("dv_do_dz_t works")
   // y(z)-values.
   REQUIRE(zs.size() == ys.size());
 
-  auto identity = [](double x) { return x; };
-  auto const zz = read_vector("z.txt", identity);
+  auto identity = [](double x) { return x; };  
+  auto const zz = read_vector("z_da.txt", identity);
   // da_arr in h inverse Mpc
   auto const da_arr = read_vector("d_a.txt", identity);
   REQUIRE(zz.size() == da_arr.size());
@@ -41,7 +41,7 @@ TEST_CASE("dv_do_dz_t works")
   for (std::size_t i = 0, sz = zs.size(); i != sz; ++i)
   {
     double const fz = dvdodz(zs[i]);
-    double constexpr epsrel = 1.0e-6;
+    double constexpr epsrel = 1.0e-2;
     CHECK(fz == Approx(ys[i]).epsilon(epsrel));
   }
 }
