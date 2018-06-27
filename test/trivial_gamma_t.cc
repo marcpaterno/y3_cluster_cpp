@@ -69,9 +69,10 @@ main(int argc, char* argv[])
 
   auto identity = [](double x) { return x; };
   auto log = [](double x) { return std::log(x); };
+  auto log03 = [](double x) { return std::log(x*0.3); };
 
   auto const dndlnmh = read_vector("dndlnmh.txt", identity);
-  auto const mh = read_vector("m_h.txt", log);
+  auto mh = read_vector("m_h.txt", log03);
   auto const zz = read_vector("z.txt", identity);
   // da_arr in h inverse Mpc
   auto const zz_da = read_vector("z_da.txt", identity);
@@ -85,7 +86,7 @@ main(int argc, char* argv[])
   auto const zz1 = read_vector("deltasigma_z.txt", identity);
 
   long long maxeval = std::stoll(args[0]);
-  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
+  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 5, 1.};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt;
   y3_cluster::ZO_ZT_t zo_zt{0.05};
@@ -104,8 +105,8 @@ main(int argc, char* argv[])
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
   y3_cluster::OMEGA_Z_SDSS omega_z;
-  IntegrationRange lo_ir{10, 30};
-  IntegrationRange zo_ir{0.2, 0.3};
+  IntegrationRange lo_ir{20, 28};
+  IntegrationRange zo_ir{0.1, 0.3};
   using MODELS = Models<decltype(mor),
                         decltype(lo_lc),
                         decltype(lc_lt),
