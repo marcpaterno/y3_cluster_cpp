@@ -67,12 +67,25 @@ main(int argc, char* argv[])
     return 1;
   }
 
+  // ============ Cosmological Parameters ============
+  //            (to be passed by CosmoSIS)
+  const double Omega_M = 0.3;
+  const double Omega_L = 1.0 - Omega_M;
+  const double Omega_K = 0.0;
+  const double h = 0.7;
+
+  // ============ Scaling Functions ============
   auto identity = [](double x) { return x; };
   auto log = [](double x) { return std::log(x); };
-  auto log03 = [](double x) { return std::log(x*0.3); };
+  auto log_omega_m = [Omega_M](double x) { return std::log(x*Omega_M); };
 
+  // ============ Input Data Tables ============
   auto const dndlnmh = read_vector("dndlnmh.txt", identity);
-  auto mh = read_vector("m_h.txt", log03);
+  // m_h.txt is in units of: 
+  //    \Omega_M M_{solar} h^{-1}
+  // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
+  // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
+  auto mh = read_vector("m_h.txt", log_omega_m);
   auto const zz = read_vector("z.txt", identity);
   // da_arr in h inverse Mpc
   auto const zz_da = read_vector("z_da.txt", identity);
@@ -85,6 +98,9 @@ main(int argc, char* argv[])
   auto const r_perp = read_vector("deltasigma_r_perp.txt", identity);
   auto const zz1 = read_vector("deltasigma_z.txt", identity);
 
+  // ============ Integral Components ============
+  // Create each term which will comprise the gamma_t integral
+  // TODO: remove magic numbers
   long long maxeval = std::stoll(args[0]);
   y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 5, 1.};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
@@ -100,10 +116,10 @@ main(int argc, char* argv[])
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
-  y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4/*,5*/);
+  y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
 
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
-  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
+  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
   y3_cluster::OMEGA_Z_SDSS omega_z;
   IntegrationRange lo_ir{20, 28};
   IntegrationRange zo_ir{0.1, 0.3};
@@ -141,63 +157,22 @@ main(int argc, char* argv[])
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
-  cubacpp::Vegas v;
-  v.maxeval = maxeval;
-
-  IntegrationRange lc_ir{1.0, 200.0};
-  IntegrationRange lt_ir{1.0, 100.0};
-  IntegrationRange zt_ir{0.1, 0.3};
-
-  std::cout << "lt,zt,integral,err,prob\n";
-
-  const std::size_t width = 3;
-  for (auto i = 0u; i < width; i++) {
-      for (auto j = 0u; j < width; j++) {
-          const double lt = lt_ir.transform((i + 1) / ((double) width + 1));
-          const double zt = zt_ir.transform((j + 1) / ((double) width + 1));
-          const auto res = v.integrate([lt, zt, lc_ir, lc_lt](double scaled_lc) {
-                      const double lc = lc_ir.transform(scaled_lc);
-                      return lc_ir.jacobian() *
-                             lc_lt(lc, lt, zt);
-                  },
-                  epsrel, epsabs);
-          std::cout << lt << ", "
-                    << zt << ", "
-                    << res.value << ", "
-                    << res.error << ", "
-                    << res.prob << '\n';
-      }
-  }
-
-  cubacpp::Cuhre cc;
-  cc.maxeval = maxeval;
+  cubacpp::Cuhre c;
+  c.maxeval = maxeval;
   // Won't allow integrating gti.centered directly :(
-  time_integration(cc,
+  time_integration(c,
                    [&gti](double a, double b, double c,
                           double d, double e) {
                         return gti.centered(a, b, c, d, e);
                    },
-                   epsrel, epsabs, "cuhre");
+                   epsrel, epsabs, "centered-cuhre");
 
-  cubacpp::Cuhre cm;
-  cm.maxeval = maxeval;
   // same deal as above
-  time_integration(cm,
+  time_integration(c,
                    [&gti](double a, double b, double c,
                           double d, double e, double f,
                           double g, double h) {
                         return gti.miscentered(a, b, c, d, e, f, g, h);
                    },
-                   epsrel, epsabs, "cuhre");
-
-  /*
-  cubacpp::Vegas v;
-  v.maxeval = maxeval;
-  time_integration(v, gti, epsrel, epsabs, "vegas");
-
-  cubacpp::Suave s;
-  s.maxeval = maxeval;
-  s.flatness = 100.0;
-  time_integration(s, gti, epsrel, epsabs, "suave");
-  */
+                   epsrel, epsabs, "miscentered-cuhre");
 };
