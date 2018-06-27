@@ -85,9 +85,10 @@ main(int argc, char* argv[])
   //    \Omega_M M_{solar} h^{-1}
   // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
   // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
+  // dndlnmh is in unit of (h^3 Mpc^{-3})
   auto mh = read_vector("m_h.txt", log_omega_m);
   auto const zz = read_vector("z.txt", identity);
-  // da_arr in h inverse Mpc
+  // da_arr in Mpc
   auto const zz_da = read_vector("z_da.txt", identity);
   auto const da_arr = read_vector("d_a.txt", identity);
 
@@ -119,7 +120,8 @@ main(int argc, char* argv[])
   y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
 
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
-  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
+  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
+  // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc 
   y3_cluster::OMEGA_Z_SDSS omega_z;
   IntegrationRange lo_ir{20, 28};
   IntegrationRange zo_ir{0.1, 0.3};
