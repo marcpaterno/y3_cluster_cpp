@@ -80,6 +80,8 @@ main(int argc, char* argv[])
   auto log_omega_m = [Omega_M](double x) { return std::log(x*Omega_M); };
 
   // ============ Input Data Tables ============
+  // dndlnmh.txt, m_h.txt, z.txt came from the cosmosis tinker_mf_module.so
+  // d_a.txt, z_da.txt came from the cosmosis camb.so
   auto const dndlnmh = read_vector("dndlnmh.txt", identity);
   // m_h.txt is in units of: 
   //    \Omega_M M_{solar} h^{-1}
