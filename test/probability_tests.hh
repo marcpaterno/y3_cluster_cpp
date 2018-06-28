@@ -204,7 +204,7 @@ namespace y3_cluster {
             std::cout << "lnM,M,zt,mor_integrated,status,error,prob\n";
 
         // Values from trivial_gamma_t
-        MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
+        MOR_t mor{mz_power_law{9.1e-9, 0.65, 0.1}, 0.15, 0.65};
 
         for (auto i = 0u; i < lnM_width; i++) {
             for (auto j = 0u; j < zt_width; j++) {

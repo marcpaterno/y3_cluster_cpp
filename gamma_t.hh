@@ -251,7 +251,7 @@ public:
     auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
         double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
         return (N_mis / 6.28318530718)
-               * exp(A * T_cen(adjusted_R, lnM))
+               * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
                * del_sig_cen(adjusted_R, lnM, zt);
     };
 
@@ -309,7 +309,7 @@ public:
     // For the following lambda function, `radius` corresponds to what is called
     // `R` in the paper
     auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
-        return N_cen * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
+        return N_cen * exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig_cen(radius, lnM, zt);
     };
 
     return integrand_common(lt,
@@ -343,16 +343,16 @@ make_gamma_t_integrand(double fcen,
                        y3_cluster::IntegrationRange lo_ir,
                        y3_cluster::IntegrationRange zo_ir)
 {
-   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
-   y3_cluster::IntegrationRange lt_ir{1.0, 100};
-   y3_cluster::IntegrationRange lc_ir{1.0, 100};
+   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e16)};
+   y3_cluster::IntegrationRange lt_ir{2.0, 50}; // we should adjust lt, lc and lnM ranges according to the bin
+   y3_cluster::IntegrationRange lc_ir{2.0, 50};
    y3_cluster::IntegrationRange zt_ir{0.1, 0.3};
    y3_cluster::IntegrationRange R_ir{0., 1.0};
-   y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
+   y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
    std::size_t const NRADII = Gamma_T_Integrand<MODELS>::NRADII;
-   std::array<double, NRADII> rarray; // can I pass a vector here?
+   std::array<double, NRADII> rarray; 
    for ( std::size_t i = 0; i < NRADII; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,
            msci,

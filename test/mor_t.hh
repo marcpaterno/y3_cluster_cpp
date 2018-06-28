@@ -10,8 +10,8 @@ namespace y3_cluster {
 
   class MOR_t {
   public:
-    MOR_t(mz_power_law lambda, double sigma, double alpha)
-      : _lambda(lambda), _sigma(sigma), _alpha(alpha)
+    MOR_t(mz_power_law lambda, double sigma_i, double alpha)
+      : _lambda(lambda), _sigma_intr(sigma_i), _alpha(alpha)
     {}
 
     explicit MOR_t(cosmosis::DataBlock& sample)
@@ -23,7 +23,7 @@ namespace y3_cluster {
         return mz_power_law{A, B, C};
       }(sample))
     {
-      sample.get_val<double>("MOR_params", "sigma", _sigma);
+      sample.get_val<double>("MOR_params", "sigma", _sigma_intr);
       sample.get_val<double>("MOR_params", "alpha", _alpha);
     }
 
@@ -32,6 +32,7 @@ namespace y3_cluster {
     {
       /* eq. (34) */
       double const ltm = _lambda(lnM, zt);
+      double const _sigma=std::max(std::sqrt(_sigma_intr*_sigma_intr*ltm*ltm+ltm), 4.0);
       double const x = lt - ltm;
       double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
       double const erfterm = std::erfc(erfarg);
@@ -40,7 +41,7 @@ namespace y3_cluster {
 
   private:
     mz_power_law _lambda;
-    double _sigma;
+    double _sigma_intr;
     double _alpha;
   };
 }

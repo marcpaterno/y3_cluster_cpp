@@ -8,6 +8,7 @@
 #include "test/a_cen_t.hh"
 #include "test/a_mis_t.hh"
 #include "test/del_sig_cen_t.hh"
+#include "test/del_sig_cen_y1.hh"
 #include "test/del_sig_mis_t.hh"
 #include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
@@ -105,7 +106,9 @@ main(int argc, char* argv[])
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
   long long maxeval = std::stoll(args[0]);
-  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 5, 1.};
+  double sigma_intr=0.15 ;//this is a parameter that should come from cosmosis
+  double alpha=0.65 ;//this is a parameter that should come from cosmosis
+  y3_cluster::MOR_t mor{mz_power_law{9.1e-9, alpha, 0.0}, sigma_intr, alpha};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt;
   y3_cluster::ZO_ZT_t zo_zt{0.05};
@@ -120,6 +123,7 @@ main(int argc, char* argv[])
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
   y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
+  //y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
 
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
