@@ -1,0 +1,65 @@
+# Tests Directory
+
+For the moment, this directory (`tests`) contains all of the code for `y3_cluster_cpp` - tests and otherwise. We recognize that is confusing; non-test code will be moved elsewhere once the repository is in a stable state.
+
+## Building and Running Tests
+
+Each test lives in a file called `<name>.test.cc`, where `<name>` is the name of the tests. To run the tests, build according to the `README` in the parent of this directory, and run `ctest` from that directory. Each test is compiled to an executable named `<name>_test`, which may be run on its own to check only that test and none other.
+
+If one of the tests is failing and you need to see the output of the failing test, run the following:
+
+```
+$ CTEST_OUTPUT_ON_FAILURE=1 ctest
+```
+
+And ctest will tell you what checks failed, where.
+
+## Adding Tests
+
+Please do add more tests! To do so is straightforward. Create a file in this directory named `your_test.test.cc`, and fill it with the following:
+
+```
+// This header is needed for the test framework
+#include "catch2/catch.hpp"
+// Than, any other headers you want - e.g.:
+#include "needed_header_file.hh"
+...
+
+using ...;
+TEST_CASE("Your test name")
+{
+    // Your code - any necessary initializations and setup
+
+    ...
+
+    // Add any number of checks you wish. Either exact:
+    CHECK(something == expected);
+    // Or approximate:
+    CHECK(value = Approx(expected).epsilon(1e-2).margin(1e-2);
+}
+```
+
+Next, add the commands to build your test to the end of `CMakeLists.txt` in this directory:
+
+```
+add_executable(<your_test>_test main.cc <your_test>.test.cc)
+target_link_libraries(<your_test>_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(<your_test>_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(<your_test>_test <your_test>_test)
+```
+
+Where `<your_test>` has been replaced with a descriptive name. Now, simply fire up docker and run `make` in the parent directory, and your test should automatically be built! (No need to rerun `cmake`.) If you are unsure how to write your test or are having trouble, look in the other `*.test.cc` files, and don't hesitate to ask for help.
+
+## Diagnostic Executables
+
+In addition, there are several non-test executables, intended to ease examining the behavior of specific terms of the integral. These include:
+
+*  `trivial_gamma_t`
+    * Integrates `N` and `gamma_t`, and prints statistics - including convergence, errors, and elapsed time. Takes a single argument of the maximum number of evaluations allowed for the integration routines, an integer.
+*  `integrate_(lc_lt|lo_lc|mor|roffset)`
+    * Integrate, respectively, the probability distributions $P(\lc|\lt)$, $P(\lo|\lt)$, $P(\lt|M,\zt)$, and $P_{mis}(R_{mis}$, over respective ranges. This is to check whether the distributions integrate properly to 1.0, within acceptable limits.
+    * Each executable emits CSV-formatted results tables of the resulting integration value, as well as the values of extra parameters used.
+    * Each executable takes a number of command-line arguments for customization. Obtain a list with `./integrate_<whatever> -h` or `--help`.
