@@ -19,3 +19,12 @@ point_3d_test
 roffset_t_test
 transform_test
 trivial_gamma_t
+integrate_lc_lt
+integrate_lo_l
+integrate_mor
+integrate_lo_lc
+integrate_roffset
+lc_lt_probability_test
+lo_lc_probability_test
+mor_probability_test
+roffset_probability_test
