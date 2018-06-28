@@ -9,3 +9,6 @@ cmake_install.cmake
 ez_sq_test
 ez_test
 *~
+*.pdf
+*.ps
+gmon.out
