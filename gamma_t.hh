@@ -133,7 +133,6 @@ public:
   template<typename F>
   std::array<double, NRADII+2>
   integrand_common(double lt,
-                   // double zo,
                    double zt,
                    double lnM,
                    // Jacobian for N term
@@ -203,7 +202,6 @@ public:
   miscentered(double scaled_lo,
               double scaled_lc,
               double scaled_lt,
-              // double scaled_zo,
               double scaled_zt,
               double scaled_R,
               double scaled_lnM,
@@ -224,12 +222,9 @@ public:
 
     double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
-                         //* zo_ir_.jacobian()
-                         * zt_ir_.jacobian()
                          * R_ir_.jacobian();
     double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
-                         //* zo_ir_.jacobian()
                          * zt_ir_.jacobian()
                          * R_ir_.jacobian() * A_ir_.jacobian()
                          * theta_ir_.jacobian();
@@ -250,7 +245,6 @@ public:
     };
 
     return integrand_common(lt,
-                            // zo_ir_.transform(scaled_zo),
                             zt,
                             lnM,
                             jacob_N,
@@ -273,7 +267,6 @@ public:
   std::array<double, NRADII+2>
   centered(double scaled_lo,
            double scaled_lt,
-           // double scaled_zo,
            double scaled_zt,
            double scaled_lnM,
            double scaled_A) const
@@ -287,11 +280,9 @@ public:
 
     double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian()
-                         //* zo_ir_.jacobian()
                          * zt_ir_.jacobian();
     double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian()
-                         //* zo_ir_.jacobian()
                          * zt_ir_.jacobian()
                          * A_ir_.jacobian();
 
@@ -307,7 +298,6 @@ public:
     };
 
     return integrand_common(lt,
-                            // zo_ir_.transform(scaled_zo),
                             zt,
                             lnM,
                             jacob_N,
