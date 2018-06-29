@@ -43,14 +43,8 @@ struct Models {
     using OMEGA_Z = OMEGA_Z_;
 };
 
-template <typename MODELS>
+template <typename MODELS, std::size_t NRADII>
 class Gamma_T_Integrand {
-public:
-#ifndef OVERRIDE_NRADII
-  static const std::size_t NRADII = 10;
-#else
-  static const std::size_t NRADII = OVERRIDE_NRADII;
-#endif
 private:
   double fcen_;
   double msci_;
@@ -323,8 +317,8 @@ public:
   }
 };
 
-template <typename MODELS>
-Gamma_T_Integrand<MODELS>
+template <typename MODELS, std::size_t NRADII=10>
+Gamma_T_Integrand<MODELS, NRADII>
 make_gamma_t_integrand(double fcen,
                        double msci,
                        typename MODELS::MOR mor,
@@ -351,7 +345,6 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
-   std::size_t const NRADII = Gamma_T_Integrand<MODELS>::NRADII;
    std::array<double, NRADII> rarray; 
    for ( std::size_t i = 0; i < NRADII; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,
