@@ -44,18 +44,19 @@ using y3_cluster::mz_power_law;
 
 // Helper template, to automate the timing of integration.
 template <class ALG, class F>
-void
+auto
 time_integration(ALG alg,
                  F f,
                  double epsrel,
                  double epsabs,
-                 char const* algname)
+                 char const* algname) -> decltype(alg.integrate(f, epsrel, epsabs))
 {
   auto start = std::chrono::high_resolution_clock::now();
   auto res = alg.integrate(f, epsrel, epsabs);
   auto stop = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = stop - start;
   std::cout << algname << ": " << res << " (" << diff.count() << "s)\n";
+  return res;
 }
 
 // The main function for exercising our integrand.
@@ -144,7 +145,7 @@ main(int argc, char* argv[])
                         decltype(dsc),
                         decltype(dvdodz),
                         decltype(omega_z)>;
-  auto gti = make_gamma_t_integrand<MODELS>(0.7,
+  auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
                                     0.11,
                                     mor,
                                     lo_lc,
@@ -159,8 +160,8 @@ main(int argc, char* argv[])
                                     dsc,
                                     dvdodz,
                                     omega_z,
-                                    {lo_ir},
-                                    {zo_ir});
+                                    {lo_ir, {30, 40}},
+                                    {zo_ir, {0.3, 0.4}});
 
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
@@ -168,19 +169,35 @@ main(int argc, char* argv[])
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
   // Won't allow integrating gti.centered directly :(
-  time_integration(c,
-                   [&gti](double a, double b, double c,
-                          double d, double e) {
-                        return gti.centered(a, b, c, d, e);
-                   },
-                   epsrel, epsabs, "centered-cuhre");
+  auto centered_res = time_integration(c,
+                                       [&gti](double a, double b, double c,
+                                              double d, double e) {
+                                            return gti.centered(a, b, c, d, e);
+                                       },
+                                       epsrel, epsabs, "centered-cuhre");
+
+  auto centered_bins = make_gamma_t_integrated_bins(gti, centered_res);
+
+  for (auto& bin : centered_bins) {
+      std::cout << "lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
+                << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
+                << bin.Nw << " +/- " << bin.Nw_error << ")\n";
+  }
 
   // same deal as above
-  time_integration(c,
-                   [&gti](double a, double b, double c,
-                          double d, double e, double f,
-                          double g, double h) {
-                        return gti.miscentered(a, b, c, d, e, f, g, h);
-                   },
-                   epsrel, epsabs, "miscentered-cuhre");
+  auto miscentered_res = time_integration(c,
+                                          [&gti](double a, double b, double c,
+                                                 double d, double e, double f,
+                                                 double g, double h) {
+                                               return gti.miscentered(a, b, c, d, e, f, g, h);
+                                          },
+                                          epsrel, epsabs, "miscentered-cuhre");
+
+  auto miscentered_bins = make_gamma_t_integrated_bins(gti, miscentered_res);
+
+  for (auto& bin : miscentered_bins) {
+      std::cout << "lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
+                << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
+                << bin.Nw << " +/- " << bin.Nw_error << ")\n";
+  }
 };

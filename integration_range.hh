@@ -1,6 +1,7 @@
 #ifndef Y3_CLUSTER_INTEGRATION_RANGE_HH
 #define Y3_CLUSTER_INTEGRATION_RANGE_HH
 
+#include <iostream>
 #include <stdexcept>
 
 namespace y3_cluster {
@@ -24,10 +25,18 @@ namespace y3_cluster {
       return _range * x + _a;
     }
 
+    friend std::ostream& operator<<(std::ostream& os, const IntegrationRange&);
   private:
     double _a;
     double _range;
   };
+
+  std::ostream&
+  operator<<(std::ostream& os, const y3_cluster::IntegrationRange& ir)
+  {
+      return os << "[" << ir._a << ", " << ir._a + ir._range << "]";
+  }
 }
+
 
 #endif
