@@ -43,8 +43,13 @@ struct Models {
     using OMEGA_Z = OMEGA_Z_;
 };
 
+// Forward declaration so we can declare it friend
+template <std::size_t NRADII>
+struct Gamma_T_Integrated_Bin_Result;
+
 template <typename MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
 class Gamma_T_Integrand {
+  friend struct Gamma_T_Integrated_Bin_Result<NRADII>;
 private:
   double fcen_;
   double msci_;
@@ -383,6 +388,62 @@ make_gamma_t_integrand(double fcen,
            A_ir,
            theta_ir,
            rarray };
+}
+
+template <std::size_t NRADII>
+struct Gamma_T_Integrated_Bin_Result {
+    y3_cluster::IntegrationRange lo_ir, zo_ir;
+    std::array<double, NRADII> radius;
+    std::array<double, NRADII> gamma_ts;
+    std::array<double, NRADII> gamma_t_errors;
+    std::array<double, NRADII> gamma_t_probs;
+    double N, N_error, N_prob,
+           Nw, Nw_error, Nw_prob;
+
+    Gamma_T_Integrated_Bin_Result() : lo_ir{0.0, 1.0}, zo_ir{0.0, 1.0} {}
+
+    template<typename MODELS, std::size_t NRICHNESS, std::size_t NREDSHIFT>
+    Gamma_T_Integrated_Bin_Result(std::size_t which_richness,
+                                  std::size_t which_redshift,
+                                  const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>& gt,
+                                  const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 2)>& results)
+        : lo_ir(gt.lo_ir_[which_richness])
+        , zo_ir(gt.zo_ir_[which_redshift])
+        , radius(gt.r)
+    {
+        const auto base = (which_richness * NREDSHIFT + which_redshift) * (NRADII + 2);
+
+        for (auto i = 0u; i < NRADII; i++) {
+            gamma_ts[i] = results.value[base + i];
+            gamma_t_errors[i] = results.error[base + i];
+            gamma_t_probs[i] = results.prob[base + i];
+        }
+
+        N = results.value[base + NRADII];
+        Nw = results.value[base + NRADII + 1];
+
+        N_error = results.error[base + NRADII];
+        Nw_error = results.error[base + NRADII + 1];
+
+        N_prob = results.prob[base + NRADII];
+        Nw_prob = results.prob[base + NRADII + 1];
+    }
+};
+
+template<typename MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
+std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>
+make_gamma_t_integrated_bins(const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>& gt,
+                             const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 2)>& results)
+{
+    std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT> return_arr;
+
+    for (auto loi = 0u; loi < NRICHNESS; loi++) {
+        for (auto zoi = 0u; zoi < NREDSHIFT; zoi++) {
+            return_arr[loi * NREDSHIFT + zoi] = Gamma_T_Integrated_Bin_Result<NRADII>(loi, zoi, gt, results);
+        }
+    }
+
+    return return_arr;
 }
 
 #endif
