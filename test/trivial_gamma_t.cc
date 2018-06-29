@@ -159,8 +159,8 @@ main(int argc, char* argv[])
                                     dsc,
                                     dvdodz,
                                     omega_z,
-                                    lo_ir,
-                                    zo_ir);
+                                    {lo_ir},
+                                    {zo_ir});
 
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;

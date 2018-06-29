@@ -43,7 +43,7 @@ struct Models {
     using OMEGA_Z = OMEGA_Z_;
 };
 
-template <typename MODELS, std::size_t NRADII>
+template <typename MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
 class Gamma_T_Integrand {
 private:
   double fcen_;
@@ -64,10 +64,10 @@ private:
   typename MODELS::OMEGA_Z omega_z;
 
   y3_cluster::IntegrationRange lnM_ir_;
-  y3_cluster::IntegrationRange lo_ir_;
+  std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_ir_;
   y3_cluster::IntegrationRange lt_ir_;
   y3_cluster::IntegrationRange lc_ir_;
-  y3_cluster::IntegrationRange zo_ir_;
+  std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_ir_;
   y3_cluster::IntegrationRange zt_ir_;
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
@@ -94,15 +94,15 @@ public:
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir,
-                    y3_cluster::IntegrationRange lo_ir,
+                    std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_ir,
                     y3_cluster::IntegrationRange lt_ir,
                     y3_cluster::IntegrationRange lc_ir,
-                    y3_cluster::IntegrationRange zo_ir,
+                    std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_ir,
                     y3_cluster::IntegrationRange zt_ir,
                     y3_cluster::IntegrationRange R_ir,
                     y3_cluster::IntegrationRange A_ir,
-		    y3_cluster::IntegrationRange theta_ir,
-		    std::array<double, NRADII> const& rarray)
+                    y3_cluster::IntegrationRange theta_ir,
+                    std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -131,7 +131,7 @@ public:
   {}
 
   template<typename F>
-  std::array<double, NRADII+2>
+  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)>
   integrand_common(double lt,
                    // double zo,
                    double zt,
@@ -146,8 +146,8 @@ public:
                    ) const
   {
     // Zo does not actually need to be integrated over
-    double const zomin = zo_ir_.transform(0.0);
-    double const zomax = zo_ir_.transform(1.0);
+    double const zomin = zo_ir_[0].transform(0.0);
+    double const zomax = zo_ir_[0].transform(1.0);
 
     auto const hmf_v = hmf(lnM, zt);
     auto const zo_zt_v = zo_zt(zomin, zomax, zt);
@@ -180,7 +180,7 @@ public:
                                * gamma_t_int * gamma_radial_dep(radius);
                    });
 
-    std::array<double, NRADII+2> return_arr;
+    std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)> return_arr;
     std::copy_n( gamma_t.begin(), gamma_t.size(),  return_arr.begin() );
     return_arr[NRADII] = N;
     return_arr[NRADII+1] = Nw;
@@ -199,7 +199,7 @@ public:
    * * lnM - ln(M)
    * * A - ???
    * */
-  std::array<double, NRADII+2>
+  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)>
   miscentered(double scaled_lo,
               double scaled_lc,
               double scaled_lt,
@@ -214,7 +214,7 @@ public:
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
     auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const lo = lo_ir_.transform(scaled_lo);
+    auto const lo = lo_ir_[0].transform(scaled_lo);
     auto const lt = lt_ir_.transform(scaled_lt);
     auto const lc = lc_ir_.transform(scaled_lc);
     auto const zt = zt_ir_.transform(scaled_zt);
@@ -222,12 +222,12 @@ public:
     auto const A = A_ir_.transform(scaled_A);
     auto const theta = theta_ir_.transform(scaled_theta);
 
-    double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
+    double const jacob_N = lnM_ir_.jacobian() * lo_ir_[0].jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
                          //* zo_ir_.jacobian()
                          * zt_ir_.jacobian()
                          * R_ir_.jacobian();
-    double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
+    double const jacob_G = lnM_ir_.jacobian() * lo_ir_[0].jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
                          //* zo_ir_.jacobian()
                          * zt_ir_.jacobian()
@@ -270,7 +270,7 @@ public:
    * * lnM - ln(M)
    * * A - ???
    * */
-  std::array<double, NRADII+2>
+  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)>
   centered(double scaled_lo,
            double scaled_lt,
            // double scaled_zo,
@@ -280,16 +280,16 @@ public:
   {
     // Necessary terms
     auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const lo = lo_ir_.transform(scaled_lo);
+    auto const lo = lo_ir_[0].transform(scaled_lo);
     auto const lt = lt_ir_.transform(scaled_lt);
     auto const zt = zt_ir_.transform(scaled_zt);
     auto const A = A_ir_.transform(scaled_A);
 
-    double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
+    double const jacob_N = lnM_ir_.jacobian() * lo_ir_[0].jacobian()
                          * lt_ir_.jacobian()
                          //* zo_ir_.jacobian()
                          * zt_ir_.jacobian();
-    double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
+    double const jacob_G = lnM_ir_.jacobian() * lo_ir_[0].jacobian()
                          * lt_ir_.jacobian()
                          //* zo_ir_.jacobian()
                          * zt_ir_.jacobian()
@@ -317,8 +317,8 @@ public:
   }
 };
 
-template <typename MODELS, std::size_t NRADII=10>
-Gamma_T_Integrand<MODELS, NRADII>
+template <typename MODELS, std::size_t NRADII=10, std::size_t NRICHNESS=1, std::size_t NREDSHIFT=1>
+Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>
 make_gamma_t_integrand(double fcen,
                        double msci,
                        typename MODELS::MOR mor,
@@ -334,8 +334,8 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::DEL_SIG_CEN del_sig_cen,
                        typename MODELS::DV_DO_DZ dv_do_dz,
                        typename MODELS::OMEGA_Z omega_z,
-                       y3_cluster::IntegrationRange lo_ir,
-                       y3_cluster::IntegrationRange zo_ir)
+                       std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_ir,
+                       std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_ir)
 {
    y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e16)};
    y3_cluster::IntegrationRange lt_ir{2.0, 50}; // we should adjust lt, lc and lnM ranges according to the bin
