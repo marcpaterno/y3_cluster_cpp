@@ -33,7 +33,7 @@ namespace y3_cluster
     using DEL_SIG_CEN = DEL_SIG_CEN_t,
     using DEL_SIG_MIS = DEL_SIG_MIS_t,
     using DV_DO_DZ = DV_DO_DZ_t,
-    using OMEGA_Z = OMEGA_Z_t,
+    using OMEGA_Z = OMEGA_Z_SDSS,
   };
 }
 

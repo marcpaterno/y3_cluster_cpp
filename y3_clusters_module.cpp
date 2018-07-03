@@ -9,7 +9,7 @@ extern "C" {
 
 void * setup(DataBlock * options)
 {
-	return static_cast<void *>(new ClustersModule<Models>(cosmosis::DataBlock& config));
+	return new ClustersModule<Models>(cosmosis::DataBlock& config);
 }
 
 DATABLOCK_STATUS execute(DataBlock * block, void * config)

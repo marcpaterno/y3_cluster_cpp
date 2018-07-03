@@ -26,7 +26,8 @@ void
 y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
 {
   auto val = integrand_.evaluate(sample);
-  sample.put_val("x", "y", val);
+  // Placeholder...
+  sample.put_val("gamma_t", "likelihood", val);
 }
 
 #endif
