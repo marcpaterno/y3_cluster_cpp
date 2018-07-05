@@ -129,7 +129,7 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
                                       {zo_ir, {0.3, 0.4}});
 
     cubacpp::Vegas v;
-    v.maxeval = 9999999;
+    v.maxeval = 999999999;
 
     test_simultaneous_bins(v, gti);
 }
