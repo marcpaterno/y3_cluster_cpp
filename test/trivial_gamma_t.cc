@@ -67,6 +67,8 @@ main(int argc, char* argv[])
     std::cerr << "Please specify an integer maxeval\n";
     return 1;
   }
+  // Make sure CUBA does not fork processes!
+  cubacores(0, 0);
 
   // ============ Cosmological Parameters ============
   //            (to be passed by CosmoSIS)
