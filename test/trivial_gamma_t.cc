@@ -23,6 +23,7 @@
 #include "test/t_cen_t.hh"
 #include "test/t_mis_t.hh"
 #include "test/zo_zt_t.hh"
+#include "test/default_models.hh"
 
 #include <chrono>
 #include <cmath>
@@ -104,32 +105,34 @@ main(int argc, char* argv[])
   auto const r_perp = read_vector("deltasigma_r_perp.txt", identity);
   auto const zz1 = read_vector("deltasigma_z.txt", identity);
 
+  using MODELS = y3_cluster::DefaultModels;
+
   long long maxeval = std::stoll(args[0]);
-  y3_cluster::MOR_t mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
-  y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
-  y3_cluster::LC_LT_t lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
-  y3_cluster::ZO_ZT_t zo_zt{0.05};
-  y3_cluster::ROFFSET_t roffset{0.2};
-  y3_cluster::T_CEN_t t_cen;
-  y3_cluster::T_MIS_t t_mis;
-  y3_cluster::A_CEN_t a_cen;
-  y3_cluster::A_MIS_t a_mis;
+  MODELS::MOR mor{mz_power_law{1.e-14, 1., 0.1}, 1., 1.};
+  MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
+  MODELS::LC_LT lc_lt{1.24, 4.19, 2.03, 0.32, 0.12};
+  MODELS::ZO_ZT zo_zt{0.05};
+  MODELS::ROFFSET roffset{0.2};
+  MODELS::T_CEN t_cen;
+  MODELS::T_MIS t_mis;
+  MODELS::A_CEN a_cen;
+  MODELS::A_MIS a_mis;
   auto p1 = std::make_shared<Interp2D const>(mh, zz, dndlnmh);
   auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
-  y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
+  MODELS::HMF hmf(p1, 0.037, 1.008);
   // DEL_SIG_CEN_t dsc{5., 0.5};
-  y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4, 5.);
+  MODELS::DEL_SIG_CEN dsc(p2, p3, p4, 5.);
   // DEL_SIG_MIS_t dsc{5., 0.5};
-  y3_cluster::DEL_SIG_MIS_t dsm;
+  MODELS::DEL_SIG_MIS dsm;
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
-  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
-  y3_cluster::OMEGA_Z_SDSS omega_z;
+  MODELS::DV_DO_DZ dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
+  MODELS::OMEGA_Z omega_z;
   IntegrationRange lo_ir{10, 30};
   IntegrationRange zo_ir{0.2, 0.3};
-  auto gti = make_gamma_t_integrand(2.0,
+  auto gti = make_gamma_t_integrand<MODELS>(2.0,
                                     0.11,
                                     mor,
                                     lo_lc,

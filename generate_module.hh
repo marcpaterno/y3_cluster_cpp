@@ -1,28 +1,29 @@
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "/cosmosis/cosmosis/datablock/section_names.h"
+#include "test/clusters_module.hh"
 #define GENERATE_Y3_COSMOSIS_MODULE(models) \
-#include "cosmosis/datablock/datablock.hh" \
-#include "cosmosis/datablock/section_names.h" \
-#include "my_calculation_code.h" \
 \
 extern "C" { \
 \
-void * setup(DataBlock * options) \
+void * setup(cosmosis::DataBlock * options) \
 { \
-    return new y3_cluster::ClustersModule<(models)>(cosmosis::DataBlock& options); \
+    return new y3_cluster::ClustersModule<y3_cluster::DefaultModels>(*options); \
 } \
 \
-DATABLOCK_STATUS execute(DataBlock * block, void * config) \
+DATABLOCK_STATUS execute(cosmosis::DataBlock * block, void * config) \
 { \
-    auto mod = static_cast<y3_cluster::ClustersModule<(models)>> *>(config); \
+    auto mod = static_cast<y3_cluster::ClustersModule<y3_cluster::DefaultModels> *>(config); \
     mod->execute(*block); \
 \
-    DATABLOCK_STATUS status = 0; \
+    DATABLOCK_STATUS status = DBS_SUCCESS; \
 \
     return status; \
 } \
 \
 int cleanup(void * config) \
 { \
-    delete static_cast<y3_cluster::ClustersModule<(models)> *>(config); \
+    delete static_cast<y3_cluster::ClustersModule<y3_cluster::DefaultModels> *>(config); \
+    return 0;\
 } \
 \
 }

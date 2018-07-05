@@ -243,26 +243,26 @@ make_gamma_t_integrand(double fcen,
           zt_ir,    R_ir,    A_ir,   rarray};
 }
 
-template <typename MODELS>
-Gamma_T_Integrand<MODELS>
-make_gamma_t_integrand(cosmosis::DataBlock& sample)
-{
-  // TODO: Allow for integration ranges from the datablock!
-  // Defaults?
-  y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
-  y3_cluster::IntegrationRange lt_ir{1.0, 100};
-  y3_cluster::IntegrationRange lc_ir{1.0, 100};
-  y3_cluster::IntegrationRange zt_ir{0.1, 0.3};
-  y3_cluster::IntegrationRange R_ir{0., 1.0};
-  y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
-  std::array<double, 10> rarray; // can I pass a vector here?
-  for (std::size_t i = 0; i < 10; i++) {
-    rarray[i] = 5.0 * (i + 0.01);
-  }
-  return {fcen,     msci,    mor,    lo_lc, lc_lt, zo_zt,       roffset,
-          t_cen,    t_mis,   a_cen,  a_mis, hmf,   del_sig_cen, del_sig_mis,
-          dv_do_dz, omega_z, lnM_ir, lo_ir, lt_ir, lc_ir,       zo_ir,
-          zt_ir,    R_ir,    A_ir,   rarray};
-}
+//template <typename MODELS>
+//Gamma_T_Integrand<MODELS>
+//make_gamma_t_integrand(cosmosis::DataBlock& sample)
+//{
+//  // TODO: Allow for integration ranges from the datablock!
+//  // Defaults?
+//  y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};
+//  y3_cluster::IntegrationRange lt_ir{1.0, 100};
+//  y3_cluster::IntegrationRange lc_ir{1.0, 100};
+//  y3_cluster::IntegrationRange zt_ir{0.1, 0.3};
+//  y3_cluster::IntegrationRange R_ir{0., 1.0};
+//  y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
+//  std::array<double, 10> rarray; // can I pass a vector here?
+//  for (std::size_t i = 0; i < 10; i++) {
+//    rarray[i] = 5.0 * (i + 0.01);
+//  }
+//  return {fcen,     msci,    mor,    lo_lc, lc_lt, zo_zt,       roffset,
+//          t_cen,    t_mis,   a_cen,  a_mis, hmf,   del_sig_cen, del_sig_mis,
+//          dv_do_dz, omega_z, lnM_ir, lo_ir, lt_ir, lc_ir,       zo_ir,
+//          zt_ir,    R_ir,    A_ir,   rarray};
+//}
 
 #endif

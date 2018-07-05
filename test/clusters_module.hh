@@ -12,7 +12,7 @@ namespace y3_cluster {
     void execute(cosmosis::DataBlock& sample) const;
 
   private:
-    gamma_t<MODELS> integrand_;
+    Gamma_T_Integrand<MODELS> integrand_;
   };
 }
 
@@ -23,11 +23,13 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
 
 template <class MODELS>
 void
-y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
+y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample) const
 {
-  auto val = integrand_.evaluate(sample);
+  // FIXME: evaluate isn't a thing, it should look like this from trivial_gamma_t.cc:
+  //    auto res = alg.integrate(f, epsrel, epsabs);
+  // auto val = integrand_.evaluate(sample);
   // Placeholder...
-  sample.put_val("gamma_t", "likelihood", val);
+  // sample.put_val("gamma_t", "likelihood", val);
 }
 
 #endif
