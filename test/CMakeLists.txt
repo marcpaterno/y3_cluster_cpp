@@ -210,3 +210,12 @@ target_include_directories(integrate_roffset
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_executable(simultaneous_bin_comparison simultaneous_bin_comparison.cc interp_1d.cc interp_2d.cc lc_lt_t.cc)
+target_link_libraries(simultaneous_bin_comparison PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(simultaneous_bin_comparison
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
