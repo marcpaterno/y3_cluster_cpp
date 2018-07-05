@@ -109,13 +109,22 @@ target_include_directories(roffset_t_test
 add_test(roffset_t_test roffset_t_test)
 
 add_executable(lc_lt_t_test main.cc lc_lt_t.test.cc lc_lt_t.cc interp_2d.cc)
-target_link_libraries(lc_lt_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_link_libraries(lc_lt_t_test PRIVATE ${GSL_LIBRARIES})
 target_include_directories(lc_lt_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
-                           ${CMAKE_SOURCE_DIR}/externals
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(lc_lt_t_test lc_lt_t_test)
+
+add_executable(lc_lt_probability_test main.cc lc_lt_probability_unity.test.cc lc_lt_t.cc interp_2d.cc)
+target_link_libraries(lc_lt_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(lc_lt_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(lc_lt_probability_test lc_lt_probability_test)
 
 add_executable(dv_do_dz_t_test main.cc dv_do_dz_t.test.cc  interp_1d.cc)
 target_link_libraries(dv_do_dz_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
@@ -126,9 +135,68 @@ target_include_directories(dv_do_dz_t_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(dv_do_dz_t_test dv_do_dz_t_test)
 
-add_executable(mor_t_test main.cc mor_t.test.cc)
-target_include_directories(mor_t_test
+add_executable(lo_lc_probability_test main.cc lo_lc_probability_unity.test.cc interp_2d.cc)
+target_link_libraries(lo_lc_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(lo_lc_probability_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
-                           ${CMAKE_SOURCE_DIR}/externals)
-add_test(mor_t_test mor_t_test)
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(lo_lc_probability_test lo_lc_probability_test)
+
+add_executable(mor_probability_test main.cc mor_probability_unity.test.cc interp_2d.cc)
+target_link_libraries(mor_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(mor_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(mor_probability_test mor_probability_test)
+
+add_executable(roffset_probability_test main.cc roffset_probability_unity.test.cc interp_2d.cc)
+target_link_libraries(roffset_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(roffset_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(roffset_probability_test roffset_probability_test)
+
+add_executable(integrate_lc_lt integrate_lc_lt.cc lc_lt_t.cc interp_2d.cc)
+target_link_libraries(integrate_lc_lt PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(integrate_lc_lt
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_executable(integrate_lo_lc integrate_lo_lc.cc interp_2d.cc)
+target_link_libraries(integrate_lo_lc PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(integrate_lo_lc
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_executable(integrate_mor integrate_mor.cc interp_2d.cc)
+target_link_libraries(integrate_mor PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(integrate_mor
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_executable(integrate_roffset integrate_roffset.cc interp_2d.cc)
+target_link_libraries(integrate_roffset PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(integrate_roffset
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)

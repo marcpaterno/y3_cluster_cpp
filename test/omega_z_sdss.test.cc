@@ -25,9 +25,9 @@ TEST_CASE("omega_z_sdss works")
   // If the file is well-formed, we have the same number of z-values as
   // y(z)-values.
   REQUIRE(zs.size() == ys.size());
-  
+
   OMEGA_Z_SDSS omega;
-  
+
   for (std::size_t i = 0, sz = zs.size(); i != sz; ++i)
   {
     double const fz = omega(zs[i]);

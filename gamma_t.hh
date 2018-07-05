@@ -12,43 +12,56 @@
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
 // provided by Spencer Everett.
 
-template <typename MOR,
-          typename LO_LC,
-          typename LC_LT,
-          typename ZO_ZT,
-          typename ROFFSET,
-          typename T_CEN,
-          typename T_MIS,
-          typename A_CEN,
-          typename A_MIS,
-          typename HMF,
-          typename DEL_SIG_CEN,
-          typename DV_DO_DZ,
-          typename OMEGA_Z>
+
+
+template<typename MOR_,
+         typename LO_LC_,
+         typename LC_LT_,
+         typename ZO_ZT_,
+         typename ROFFSET_,
+         typename T_CEN_,
+         typename T_MIS_,
+         typename A_CEN_,
+         typename A_MIS_,
+         typename HMF_,
+         typename DEL_SIG_CEN_,
+         typename DV_DO_DZ_,
+         typename OMEGA_Z_>
+struct Models {
+    using MOR = MOR_;
+    using LO_LC = LO_LC_;
+    using LC_LT = LC_LT_;
+    using ZO_ZT = ZO_ZT_;
+    using ROFFSET = ROFFSET_;
+    using T_CEN = T_CEN_;
+    using T_MIS = T_MIS_;
+    using A_CEN = A_CEN_;
+    using A_MIS = A_MIS_;
+    using HMF = HMF_;
+    using DEL_SIG_CEN = DEL_SIG_CEN_;
+    using DV_DO_DZ = DV_DO_DZ_;
+    using OMEGA_Z = OMEGA_Z_;
+};
+
+template <typename MODELS, std::size_t NRADII>
 class Gamma_T_Integrand {
-public:
-#ifndef OVERRIDE_NRADII
-  static const std::size_t NRADII = 10;
-#else
-  static const std::size_t NRADII = OVERRIDE_NRADII;
-#endif
 private:
   double fcen_;
   double msci_;
 
-  MOR mor;
-  LO_LC lo_lc;
-  LC_LT lc_lt;
-  ZO_ZT zo_zt;
-  ROFFSET roffset;
-  T_CEN T_cen;
-  T_MIS T_mis;
-  A_CEN A_cen;
-  A_MIS A_mis;
-  HMF hmf;
-  DEL_SIG_CEN del_sig_cen;
-  DV_DO_DZ dv_do_dz;
-  OMEGA_Z omega_z;
+  typename MODELS::MOR mor;
+  typename MODELS::LO_LC lo_lc;
+  typename MODELS::LC_LT lc_lt;
+  typename MODELS::ZO_ZT zo_zt;
+  typename MODELS::ROFFSET roffset;
+  typename MODELS::T_CEN T_cen;
+  typename MODELS::T_MIS T_mis;
+  typename MODELS::A_CEN A_cen;
+  typename MODELS::A_MIS A_mis;
+  typename MODELS::HMF hmf;
+  typename MODELS::DEL_SIG_CEN del_sig_cen;
+  typename MODELS::DV_DO_DZ dv_do_dz;
+  typename MODELS::OMEGA_Z omega_z;
 
   y3_cluster::IntegrationRange lnM_ir_;
   y3_cluster::IntegrationRange lo_ir_;
@@ -67,28 +80,28 @@ public:
   // specify the various terms of the integrand.
   Gamma_T_Integrand(double fcen,
                     double msci,
-                    MOR mor,
-                    LO_LC lo_lc,
-                    LC_LT lc_lt,
-                    ZO_ZT zo_zt,
-                    ROFFSET roffset,
-                    T_CEN T_cen,
-                    T_MIS T_mis,
-                    A_CEN A_cen,
-                    A_MIS A_mis,
-                    HMF hmf,
-                    DEL_SIG_CEN del_sig_cen,
-                    DV_DO_DZ dv_do_dz,
-                    OMEGA_Z omega_z,
-                    y3_cluster::IntegrationRange lnM_ir, 
-                    y3_cluster::IntegrationRange lo_ir, 
-                    y3_cluster::IntegrationRange lt_ir, 
-                    y3_cluster::IntegrationRange lc_ir, 
-                    y3_cluster::IntegrationRange zo_ir, 
-                    y3_cluster::IntegrationRange zt_ir, 
-                    y3_cluster::IntegrationRange R_ir, 
+                    typename MODELS::MOR mor,
+                    typename MODELS::LO_LC lo_lc,
+                    typename MODELS::LC_LT lc_lt,
+                    typename MODELS::ZO_ZT zo_zt,
+                    typename MODELS::ROFFSET roffset,
+                    typename MODELS::T_CEN T_cen,
+                    typename MODELS::T_MIS T_mis,
+                    typename MODELS::A_CEN A_cen,
+                    typename MODELS::A_MIS A_mis,
+                    typename MODELS::HMF hmf,
+                    typename MODELS::DEL_SIG_CEN del_sig_cen,
+                    typename MODELS::DV_DO_DZ dv_do_dz,
+                    typename MODELS::OMEGA_Z omega_z,
+                    y3_cluster::IntegrationRange lnM_ir,
+                    y3_cluster::IntegrationRange lo_ir,
+                    y3_cluster::IntegrationRange lt_ir,
+                    y3_cluster::IntegrationRange lc_ir,
+                    y3_cluster::IntegrationRange zo_ir,
+                    y3_cluster::IntegrationRange zt_ir,
+                    y3_cluster::IntegrationRange R_ir,
                     y3_cluster::IntegrationRange A_ir,
-		    y3_cluster::IntegrationRange theta_ir, 
+		    y3_cluster::IntegrationRange theta_ir,
 		    std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
@@ -117,46 +130,27 @@ public:
     , r(rarray)
   {}
 
-  // The function call operator -- this is the function to be integrated.
-  /* Term dictionary -
-   * * lo - \lambda^{obs}
-   * * lc - \lambda^{cen}
-   * * lt - \lambda^{true}
-   * * zo - z^{obs}
-   * * zt - z^{true}
-   * * R - R
-   * * lnM - ln(M)   // (why log???)
-   * * A - ???
-   * */
+  template<typename F>
   std::array<double, NRADII+2>
-  operator()(double scaled_lo,
-             double scaled_lc,
-             double scaled_lt,
-             double scaled_zo,
-             double scaled_zt,
-             double scaled_R,
-             double scaled_lnM,
-             double scaled_A,
-	     double scaled_theta) const
+  integrand_common(double lt,
+                   // double zo,
+                   double zt,
+                   double lnM,
+                   // Jacobian for N term
+                   double jacob_N,
+                   // Jacobian for Gamma term
+                   double jacob_G,
+                   double N_multiplier,
+                   // Radially dependent function
+                   F gamma_radial_dep
+                   ) const
   {
-    // We probably should factor out the common subexpressions, rather than
-    // relying upon the optimizer to do a perfect job of this for us. This
-    // seems to be the intent of the commented-out code below.
-    using std::exp;
-    auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const lo = lo_ir_.transform(scaled_lo);
-    auto const lt = lt_ir_.transform(scaled_lt);
-    auto const lc = lc_ir_.transform(scaled_lc);
-    auto const zo = zo_ir_.transform(scaled_zo);
-    auto const zt = zt_ir_.transform(scaled_zt);
-    auto const R = R_ir_.transform(scaled_R);
-    auto const A = A_ir_.transform(scaled_A);
-    auto const theta = theta_ir_.transform(scaled_theta);
+    // Zo does not actually need to be integrated over
+    double const zomin = zo_ir_.transform(0.0);
+    double const zomax = zo_ir_.transform(1.0);
 
     auto const hmf_v = hmf(lnM, zt);
-    auto const zo_zt_v = zo_zt(zo, zt);
-    auto const lc_lt_v = lc_lt(lc, lt, zt);
-    auto const lo_lt_v = lc_lt(lo, lt, zt);
+    auto const zo_zt_v = zo_zt(zomin, zomax, zt);
     auto const mor_v = mor(lt, lnM, zt);
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
@@ -168,57 +162,22 @@ public:
     // This is the lambda-redshift bin weight that we don't fully understand
     double w = 1.0;
 
-    // The evaluation below follows the convention set in main overleaf document
-    //The evaluation is for Y3 likelihood
-    // putting together the return vector
-    double const lc_jacob = lc_ir_.jacobian();
-    double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
-                        * lt_ir_.jacobian() * lc_ir_.jacobian()
-                        * zo_ir_.jacobian() * zt_ir_.jacobian()
-                        * R_ir_.jacobian();
-    double const jacob = lnM_ir_.jacobian() * lo_ir_.jacobian()
-                       * lt_ir_.jacobian() * lc_ir_.jacobian()
-                       * zo_ir_.jacobian() * zt_ir_.jacobian()
-                       * R_ir_.jacobian() * A_ir_.jacobian()
-                       * theta_ir_.jacobian();
-
     // eq. (25)
     double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
-    // eq. (26)
-    double const N_cen = lo_lt_v * fcen_ / lc_jacob;
-    // eq. (27)
-    double const N_mis = (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt_v * roffset(R);
     // eq. (24)
-    double const N = jacob_N * N_int * (N_cen + N_mis);
+    double const N = jacob_N * N_int * N_multiplier;
     double const Nw = N * w;
 
     // eq. (29)
-    auto const  gamma_t_int = jacob * N_int * w;
-
-    // eq. (30)
-    // For the following lambda functions, `radius` corresponds to what is called
-    // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
-    // paper
-    auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
-        return (N_cen / 6.28318530718) * exp(A * T_cen(radius, lnM)) * del_sig_cen(radius, lnM, zt);
-    };
-
-    // eq. (31)
-    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
-        double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
-        return (N_mis / 6.28318530718)
-               // Should this be T_mis?
-               * exp(A * T_cen(adjusted_R, lnM))
-               * del_sig_cen(adjusted_R, lnM, zt);
-    };
+    auto const gamma_t_int = jacob_G * N_int * w;
 
     // eq. (28)
-    auto const gamma_t = y3_cluster::transform(r, 
-	           [m_shear, sig_crit, gamma_t_int, gamma_t_cen, gamma_t_mis]
+    auto const gamma_t = y3_cluster::transform(r,
+	           [m_shear, sig_crit, gamma_t_int, gamma_radial_dep]
                    (double radius) {
                        // Nw intentionally left out - returned in return_arr to be used further on
                        return (1.0 + m_shear) / sig_crit
-                               * gamma_t_int * (gamma_t_cen(radius) + gamma_t_mis(radius));
+                               * gamma_t_int * gamma_radial_dep(radius);
                    });
 
     std::array<double, NRADII+2> return_arr;
@@ -226,121 +185,193 @@ public:
     return_arr[NRADII] = N;
     return_arr[NRADII+1] = Nw;
 
-
-    // ================================================================ //
-    // ===== Can I remove these comments? Are they irrelevent now? ==== //
-    // ================================================================ //
-
-    // this is for y1 likelihood
-    //double const N = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * lc_lt_v ;//*(fcen_+ (1.0-fcen_)*roffset(R)*lo_lc(lo, lc, R));
-    //double const Nw = jacob * N * w;
-    //double const gamma_t_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
-    //double const gamma_t_cen =del_sig_cen(r, lnM);//fcen_ * del_sig_cen(r, lnM) * exp(A * T_cen(r, lnM));
-    //double const gamma_t_mis = 0.;//(1.0 - fcen_) * roffset(R)*lo_lc(lo, lc, R) * del_sig_mis(r, lnM, R) *  exp(A * T_cen(r, lnM));
-    //gamma_t=(1.0 + m_shear)/sig_crit_inv * gamma_t_int * (gamma_t_cen + gamma_t_mis)
-    //double const jacob=lnM_ir_.jacobian() * lo_ir_.jacobian() * lt_ir_.jacobian() * lc_ir_.jacobian() * zo_ir_.jacobian() * zt_ir_.jacobian() * R_ir_.jacobian() * A_ir_.jacobian();
-    //return {N*jacob, Nw*jacob, gamma_t*jacob}
     return return_arr;
+  }
+
+  /* Miscentered part of integration
+   * Term dictionary -
+   * * lo - \lambda^{obs}
+   * * lc - \lambda^{cen}
+   * * lt - \lambda^{true}
+   * * zo - z^{obs}
+   * * zt - z^{true}
+   * * R - R
+   * * lnM - ln(M)
+   * * A - ???
+   * */
+  std::array<double, NRADII+2>
+  miscentered(double scaled_lo,
+              double scaled_lc,
+              double scaled_lt,
+              // double scaled_zo,
+              double scaled_zt,
+              double scaled_R,
+              double scaled_lnM,
+              double scaled_A,
+              double scaled_theta) const
+  {
+    // We probably should factor out the common subexpressions, rather than
+    // relying upon the optimizer to do a perfect job of this for us. This
+    // seems to be the intent of the commented-out code below.
+    auto const lnM = lnM_ir_.transform(scaled_lnM);
+    auto const lo = lo_ir_.transform(scaled_lo);
+    auto const lt = lt_ir_.transform(scaled_lt);
+    auto const lc = lc_ir_.transform(scaled_lc);
+    auto const zt = zt_ir_.transform(scaled_zt);
+    auto const R = R_ir_.transform(scaled_R);
+    auto const A = A_ir_.transform(scaled_A);
+    auto const theta = theta_ir_.transform(scaled_theta);
+
+    double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
+                         * lt_ir_.jacobian() * lc_ir_.jacobian()
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian()
+                         * R_ir_.jacobian();
+    double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
+                         * lt_ir_.jacobian() * lc_ir_.jacobian()
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian()
+                         * R_ir_.jacobian() * A_ir_.jacobian()
+                         * theta_ir_.jacobian();
+
+    // eq. (27)
+    double const N_mis = (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt(lc, lt, zt) * roffset(R);
+
+    // eq. (30)
+    // For the following lambda function, `radius` corresponds to what is called
+    // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
+    // paper
+    // eq. (31)
+    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
+        double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
+        return (N_mis / 6.28318530718)
+               * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
+               * del_sig_cen(adjusted_R, lnM, zt);
+    };
+
+    return integrand_common(lt,
+                            // zo_ir_.transform(scaled_zo),
+                            zt,
+                            lnM,
+                            jacob_N,
+                            jacob_G,
+                            N_mis,
+                            gamma_t_mis);
+  }
+
+  /* Centered part of integration
+   * Term dictionary -
+   * * lo - \lambda^{obs}
+   * * lc - \lambda^{cen}
+   * * lt - \lambda^{true}
+   * * zo - z^{obs}
+   * * zt - z^{true}
+   * * R - R
+   * * lnM - ln(M)
+   * * A - ???
+   * */
+  std::array<double, NRADII+2>
+  centered(double scaled_lo,
+           double scaled_lt,
+           // double scaled_zo,
+           double scaled_zt,
+           double scaled_lnM,
+           double scaled_A) const
+  {
+    // Necessary terms
+    auto const lnM = lnM_ir_.transform(scaled_lnM);
+    auto const lo = lo_ir_.transform(scaled_lo);
+    auto const lt = lt_ir_.transform(scaled_lt);
+    auto const zt = zt_ir_.transform(scaled_zt);
+    auto const A = A_ir_.transform(scaled_A);
+
+    double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
+                         * lt_ir_.jacobian()
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian();
+    double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
+                         * lt_ir_.jacobian()
+                         //* zo_ir_.jacobian()
+                         * zt_ir_.jacobian()
+                         * A_ir_.jacobian();
+
+    // eq. (26)
+    auto const lo_lt_v = lc_lt(lo, lt, zt);
+    double const N_cen = lo_lt_v * fcen_;
+
+    // eq. (30)
+    // For the following lambda function, `radius` corresponds to what is called
+    // `R` in the paper
+    auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
+        return N_cen * exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig_cen(radius, lnM, zt);
+    };
+
+    return integrand_common(lt,
+                            // zo_ir_.transform(scaled_zo),
+                            zt,
+                            lnM,
+                            jacob_N,
+                            jacob_G,
+                            N_cen,
+                            gamma_t_cen);
   }
 };
 
-template <typename MOR,
-          typename LO_LC,
-          typename LC_LT,
-          typename ZO_ZT,
-          typename ROFFSET,
-          typename T_CEN,
-          typename T_MIS,
-          typename A_CEN,
-          typename A_MIS,
-          typename HMF,
-          typename DEL_SIG_CEN,
-          /*typename DEL_SIG_MIS,*/
-          typename DV_DO_DZ,
-          typename OMEGA_Z>
-Gamma_T_Integrand<MOR,
-                  LO_LC,
-                  LC_LT,
-                  ZO_ZT,
-                  ROFFSET,
-                  T_CEN,
-                  T_MIS,
-                  A_CEN,
-                  A_MIS,
-                  HMF,
-                  DEL_SIG_CEN,
-                  /*DEL_SIG_MIS,*/
-                  DV_DO_DZ,
-                  OMEGA_Z>
+template <typename MODELS, std::size_t NRADII=10>
+Gamma_T_Integrand<MODELS, NRADII>
 make_gamma_t_integrand(double fcen,
                        double msci,
-                       MOR mor,
-                       LO_LC lo_lc,
-                       LC_LT lc_lt,
-                       ZO_ZT zo_zt,
-                       ROFFSET roffset,
-                       T_CEN t_cen,
-                       T_MIS t_mis,
-                       A_CEN a_cen,
-                       A_MIS a_mis,
-                       HMF hmf,
-                       DEL_SIG_CEN del_sig_cen,
-                       /*DEL_SIG_MIS del_sig_mis,*/
-                       DV_DO_DZ dv_do_dz,
-                       OMEGA_Z omega_z,
-                       y3_cluster::IntegrationRange lo_ir, 
+                       typename MODELS::MOR mor,
+                       typename MODELS::LO_LC lo_lc,
+                       typename MODELS::LC_LT lc_lt,
+                       typename MODELS::ZO_ZT zo_zt,
+                       typename MODELS::ROFFSET roffset,
+                       typename MODELS::T_CEN t_cen,
+                       typename MODELS::T_MIS t_mis,
+                       typename MODELS::A_CEN a_cen,
+                       typename MODELS::A_MIS a_mis,
+                       typename MODELS::HMF hmf,
+                       typename MODELS::DEL_SIG_CEN del_sig_cen,
+                       typename MODELS::DV_DO_DZ dv_do_dz,
+                       typename MODELS::OMEGA_Z omega_z,
+                       y3_cluster::IntegrationRange lo_ir,
                        y3_cluster::IntegrationRange zo_ir)
 {
-   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e17)};    
-   y3_cluster::IntegrationRange lt_ir{1.0, 100};    
-   y3_cluster::IntegrationRange lc_ir{1.0, 100};    
-   y3_cluster::IntegrationRange zt_ir{0.1, 0.3};    
-   y3_cluster::IntegrationRange R_ir{0., 1.0};    
-   y3_cluster::IntegrationRange A_ir{-1.0, 1.0};
+   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e16)};
+   y3_cluster::IntegrationRange lt_ir{2.0, 50}; // we should adjust lt, lc and lnM ranges according to the bin
+   y3_cluster::IntegrationRange lc_ir{2.0, 50};
+   y3_cluster::IntegrationRange zt_ir{0.1, 0.3};
+   y3_cluster::IntegrationRange R_ir{0., 1.0};
+   y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
-   std::size_t const NRADII = Gamma_T_Integrand<MOR,
-                                                LO_LC,
-                                                LC_LT,
-                                                ZO_ZT,
-                                                ROFFSET,
-                                                T_CEN,
-                                                T_MIS,
-                                                A_CEN,
-                                                A_MIS,
-                                                HMF,
-                                                DEL_SIG_CEN,
-                                                /*DEL_SIG_MIS,*/
-                                                DV_DO_DZ,
-                                                OMEGA_Z>::NRADII;
-   std::array<double, NRADII> rarray; // can I pass a vector here?
+   std::array<double, NRADII> rarray; 
    for ( std::size_t i = 0; i < NRADII; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
    return {fcen,
-          msci,
-          mor,
-          lo_lc,
-          lc_lt,
-          zo_zt,
-          roffset,
-          t_cen,
-          t_mis,
-          a_cen,
-          a_mis,
-          hmf,
-          del_sig_cen,
-          /*del_sig_mis,*/
-          dv_do_dz,
-          omega_z,
-          lnM_ir, 
-          lo_ir, 
-          lt_ir, 
-          lc_ir,
-	  zo_ir, 
-	  zt_ir,
-	  R_ir,
-          A_ir,
-	  theta_ir,
-          rarray }; 
+           msci,
+           mor,
+           lo_lc,
+           lc_lt,
+           zo_zt,
+           roffset,
+           t_cen,
+           t_mis,
+           a_cen,
+           a_mis,
+           hmf,
+           del_sig_cen,
+           dv_do_dz,
+           omega_z,
+           lnM_ir,
+           lo_ir,
+           lt_ir,
+           lc_ir,
+           zo_ir,
+           zt_ir,
+           R_ir,
+           A_ir,
+           theta_ir,
+           rarray };
 }
 
 #endif

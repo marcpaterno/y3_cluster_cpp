@@ -4,7 +4,7 @@
 namespace y3_cluster {
   // mz_power_law represents a commonly-used power law relationship, with the
   // form
-  //       A * m**B + (1+z)**C
+  //       A * m**B * (1+z)**C
   // with A, B and C being constants set in the construction of the power law
   // object.
 

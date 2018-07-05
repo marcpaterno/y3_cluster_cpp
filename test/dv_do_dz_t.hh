@@ -29,7 +29,7 @@ namespace y3_cluster {
     double
     operator()(double zt) const
     {
-      double const da_z = _da->eval(zt);
+      double const da_z = _da->eval(zt); // da_z needs to be in Mpc
       return 3000.0 * (1.0 + zt) * (1.0 + zt) * da_z*_h * da_z*_h / _ezt(zt);
     }
 
