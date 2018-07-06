@@ -4,6 +4,7 @@
 #include "integration_range.hh"
 
 #include <array>
+#include <cubacpp/cubacpp.hh>
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -314,6 +315,31 @@ public:
                             jacob_G,
                             N_cen,
                             gamma_t_cen);
+  }
+
+  template<typename Integrator>
+  cubacpp::integration_results<NRADII + 2>
+  integrate_centered(Integrator i, double epsrel, double epsabs)
+  {
+      return i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
+                                double scaled_lnM, double scaled_A) {
+                            return centered(scaled_lo, scaled_lt, scaled_zt, scaled_lnM, scaled_A);
+                         },
+                         epsrel, epsabs);
+  }
+
+  template<typename Integrator>
+  cubacpp::integration_results<NRADII + 2>
+  integrate_miscentered(Integrator i, double epsrel, double epsabs)
+  {
+      return i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
+                                double scaled_zt, double scaled_R, double scaled_lnM,
+                                double scaled_A, double scaled_theta) {
+                            return miscentered(scaled_lo, scaled_lc, scaled_lt,
+                                               scaled_zt, scaled_R, scaled_lnM,
+                                               scaled_A, scaled_theta);
+                         },
+                         epsrel, epsabs);
   }
 };
 
