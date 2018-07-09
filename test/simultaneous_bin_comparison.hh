@@ -11,7 +11,7 @@ namespace y3_cluster {
     void
     test_simultaneous_bins(Integrator I,
                            Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT> gti,
-                           const double epsrel=1e-4,
+                           const double epsrel=1e-3,
                            const double epsabs=1e-12,
                            bool print = false,
                            bool test = true)

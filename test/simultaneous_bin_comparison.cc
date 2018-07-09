@@ -128,11 +128,11 @@ int main()
                                       dsc,
                                       dvdodz,
                                       omega_z,
-                                      {lo_ir, {30, 40}},
+                                      {lo_ir, {28, 37.6}},
                                       {zo_ir, {0.3, 0.4}});
 
     cubacpp::Vegas v;
     v.maxeval = 999999999;
 
-    test_simultaneous_bins(v, gti, 1e-4, 1e-12, true, false);
+    test_simultaneous_bins(v, gti, 1e-3, 1e-12, true, false);
 }
