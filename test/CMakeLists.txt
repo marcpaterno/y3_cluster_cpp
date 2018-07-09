@@ -66,6 +66,13 @@ target_include_directories(point_3d_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(point_3d_test point_3d_test)
 
+add_executable(param_space_explorer_test main.cc param_space_explorer.test.cc)
+target_include_directories(param_space_explorer_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(param_space_explorer_test param_space_explorer_test)
+
 add_executable(fpsupport_test main.cc fpsupport.test.cc)
 target_include_directories(fpsupport_test
                            PRIVATE
