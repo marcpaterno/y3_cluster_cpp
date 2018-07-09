@@ -9,8 +9,8 @@ TEST_CASE("Lc_Lt_t probability weighted correctly")
   // integral of Lc_lt over $\lambda^{cen}$ = [0, +inf] should be unity
   // Since total probability = 1
   // In practice - $\lambda^{cen}$ from 1 to 200 should be good enough
-  IntegrationRange lc_ir{1.0, 200.0};
-  IntegrationRange lt_ir{1.0, 100.0};
+  IntegrationRange lc_ir{0.3, 200.0};
+  IntegrationRange lt_ir{20.0, 80.0};
   IntegrationRange zt_ir{0.1, 0.3};
 
   cubacpp::Vegas v;
