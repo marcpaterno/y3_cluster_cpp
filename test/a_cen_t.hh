@@ -2,13 +2,20 @@
 #define Y3_CLUSTER_A_CEN_T_HH
 
 namespace y3_cluster {
-  struct A_CEN_t {
-    double
-    operator()(double, double, double, double) const
-    {
-      return 1.0;
-    }
+
+  class A_CEN_t {
+  public:
+      A_CEN_t() {}
+      explicit A_CEN_t(cosmosis::DataBlock& sample) {}
+
+      double
+      operator()(double, double, double, double) const
+      {
+        // Will update with a model eventually!
+        return 1.0;
+      }
   };
+
 }
 
 #endif
