@@ -19,7 +19,7 @@ target_include_directories(integration_test
 add_test(integration_test integration_test)
 
 add_executable(trivial_gamma_t trivial_gamma_t.cc interp_1d.cc interp_2d.cc lc_lt_t.cc)
-target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} profiler)
 target_include_directories(trivial_gamma_t
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
