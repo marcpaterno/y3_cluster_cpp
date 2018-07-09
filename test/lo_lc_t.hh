@@ -14,12 +14,11 @@ namespace y3_cluster {
     {}
 
     explicit LO_LC_t(cosmosis::DataBlock& sample)
-    {
-      sample.get_val<double>("LO_LC_params", "alpha", _alpha);
-      sample.get_val<double>("LO_LC_params", "a", _a);
-      sample.get_val<double>("LO_LC_params", "b", _b);
-      sample.get_val<double>("LO_LC_params", "R_lambda", _R_lambda);
-    }
+      : _alpha(sample.view<double>("LO_LC_params", "alpha"))
+      , _a(sample.view<double>("LO_LC_params", "a"))
+      , _b(sample.view<double>("LO_LC_params", "b"))
+      , _R_lambda(sample.view<double>("LO_LC_params", "R_lambda"))
+    {}
 
     double
     operator()(double lo, double lc, double R_mis) const

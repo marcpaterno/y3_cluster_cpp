@@ -10,9 +10,8 @@ namespace y3_cluster {
     explicit ZO_ZT_t(double sigma) : _sigma(sigma) {}
 
     explicit ZO_ZT_t(cosmosis::DataBlock& sample)
-    {
-      sample.get_val<double>("ZO_ZT_params", "sigma", _sigma);
-    }
+      : _sigma(sample.view<double>("ZO_ZT_params", "sigma"))
+    {}
 
     double
     operator()(double zomin, double zomax, double zt) const

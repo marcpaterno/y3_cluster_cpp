@@ -15,17 +15,12 @@ namespace y3_cluster {
     {}
 
     explicit MOR_t(cosmosis::DataBlock& sample)
-      : _lambda([](cosmosis::DataBlock& x) {
-        double A, B, C;
-        x.get_val<double>("MOR_params", "A", A);
-        x.get_val<double>("MOR_params", "B", B);
-        x.get_val<double>("MOR_params", "C", C);
-        return mz_power_law{A, B, C};
-      }(sample))
-    {
-      sample.get_val<double>("MOR_params", "sigma", _sigma_intr);
-      sample.get_val<double>("MOR_params", "alpha", _alpha);
-    }
+      : _lambda(mz_power_law(sample.view<double>("MOR_params", "A"),
+                             sample.view<double>("MOR_params", "B"),
+                             sample.view<double>("MOR_params", "C")))
+      , _sigma_intr(sample.view<double>("MOR_params", "sigma"))
+      , _alpha(sample.view<double>("MOR_params", "alpha"))
+      {}
 
     double
     operator()(double lt, double lnM, double zt) const
