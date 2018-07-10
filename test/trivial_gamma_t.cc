@@ -104,7 +104,7 @@ main(int argc, char* argv[])
   // ============ Integral Components ============
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
-  using MODELS = y3_cluster::DefaultModels;
+  using MODELS = y3_cluster::DefaultModels<>;
   long long maxeval = std::stoll(args[0]);
   double sigma_intr = 0.15 ;//this is a parameter that should come from cosmosis
   double alpha = 0.65;//this is a parameter that should come from cosmosis
@@ -126,7 +126,8 @@ main(int argc, char* argv[])
 
   MODELS::HMF hmf(p1, 0.037, 1.008);
   // TODO: Change to DEL_SIG_Y1
-  MODELS::DEL_SIG ds(p2, p3, p4);
+  // MODELS::DEL_SIG ds(p2, p3, p4);
+  MODELS::DEL_SIG ds;
   // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc
   MODELS::DV_DO_DZ dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
   MODELS::OMEGA_Z omega_z;
