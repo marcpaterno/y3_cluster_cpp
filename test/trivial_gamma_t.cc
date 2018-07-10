@@ -104,7 +104,7 @@ main(int argc, char* argv[])
   // ============ Integral Components ============
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
-  using MODELS = y3_cluster::DefaultModels<>;
+  using MODELS = y3_cluster::DefaultModels;
   long long maxeval = std::stoll(args[0]);
   double sigma_intr = 0.15 ;//this is a parameter that should come from cosmosis
   double alpha = 0.65;//this is a parameter that should come from cosmosis
