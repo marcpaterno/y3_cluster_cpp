@@ -8,7 +8,7 @@ namespace y3_cluster {
   class T_MIS_t {
   public:
       T_MIS_t() {}
-      explicit T_MIS_t(cosmosis::DataBlock& sample) {}
+      explicit T_MIS_t(cosmosis::DataBlock&) {}
 
       double
       operator()(double) const

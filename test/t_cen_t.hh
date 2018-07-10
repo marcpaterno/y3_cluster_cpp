@@ -8,7 +8,7 @@ namespace y3_cluster {
   class T_CEN_t {
   public:
       T_CEN_t() {}
-      explicit T_CEN_t(cosmosis::DataBlock& sample) {}
+      explicit T_CEN_t(cosmosis::DataBlock&) {}
 
       double
       operator()(double, double) const
