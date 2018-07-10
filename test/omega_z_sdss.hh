@@ -10,6 +10,7 @@ namespace y3_cluster {
     double
     operator()(double zt) const
     {
+      // Coefficients are in reverse order - i.e. 11th power, 10th power, 9th power, etc
       std::array<double, 12> constexpr poly_coeff_vol = {-1.14293122E05,
                                    5.96846869E04,
                                    9.24239180E03,
@@ -25,10 +26,17 @@ namespace y3_cluster {
       double omega_z = 0.0;
       double constexpr zpivot = 0.2;
 
-      for (std::size_t i = 0; i < poly_coeff_vol.size(); ++i) {
-        omega_z = omega_z +
-                  poly_coeff_vol[i] * std::pow(zt - zpivot,  poly_coeff_vol.size() - i - 1.);
-      }
+      // Explanation:
+      //    Z = a_0 + a_1 * x + ... + a_N * x^{N}
+      //
+      //    z_{0}     := a_N
+      //    z_{i + 1} := x * z_i + a_{N - i}
+      //
+      // then, by induction,
+      //
+      //    Z = z_{N - 1}
+      for (std::size_t i = 0; i < poly_coeff_vol.size(); i++)
+          omega_z = (zt - zpivot) * omega_z + poly_coeff_vol[i];
       return omega_z;
     }
   };
