@@ -216,3 +216,18 @@ target_include_directories(integrate_roffset
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+
+add_library(example_module SHARED EXCLUDE_FROM_ALL example_module.cc)
+target_link_libraries(example_module PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(example_module
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_test(NAME ExampleModuleCompiles
+         COMMAND ${CMAKE_COMMAND} --build . --target example_module --config $<CONFIGURATION>
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )

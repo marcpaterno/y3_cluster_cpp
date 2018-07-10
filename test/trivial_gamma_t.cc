@@ -7,9 +7,8 @@
 
 #include "test/a_cen_t.hh"
 #include "test/a_mis_t.hh"
-#include "test/del_sig_cen_t.hh"
 #include "test/del_sig_cen_y1.hh"
-#include "test/del_sig_mis_t.hh"
+#include "test/del_sig_t.hh"
 #include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
 #include "test/ez_sq.hh"
@@ -25,6 +24,8 @@
 #include "test/t_mis_t.hh"
 #include "test/zo_zt_t.hh"
 #include "test/read_vector.hh"
+#include "test/default_models.hh"
+
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -103,45 +104,36 @@ main(int argc, char* argv[])
   // ============ Integral Components ============
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
+  using MODELS = y3_cluster::DefaultModels;
   long long maxeval = std::stoll(args[0]);
-  double sigma_intr=0.15 ;//this is a parameter that should come from cosmosis
-  double alpha=0.65 ;//this is a parameter that should come from cosmosis
-  y3_cluster::MOR_t mor{mz_power_law{9.1e-9, alpha, 0.0}, sigma_intr, alpha};
-  y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
-  y3_cluster::LC_LT_t lc_lt;
-  y3_cluster::ZO_ZT_t zo_zt{0.05};
-  y3_cluster::ROFFSET_t roffset{0.2};
-  y3_cluster::T_CEN_t t_cen;
-  y3_cluster::T_MIS_t t_mis;
-  y3_cluster::A_CEN_t a_cen;
-  y3_cluster::A_MIS_t a_mis;
+  double sigma_intr = 0.15 ;//this is a parameter that should come from cosmosis
+  double alpha = 0.65;//this is a parameter that should come from cosmosis
+  MODELS::MOR mor{mz_power_law{9.1e-9, alpha, 0.0}, sigma_intr, alpha};
+  MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
+  MODELS::LC_LT lc_lt;
+  MODELS::ZO_ZT zo_zt{0.05};
+  MODELS::ROFFSET roffset{0.2};
+  MODELS::T_CEN t_cen;
+  MODELS::T_MIS t_mis;
+  MODELS::A_CEN a_cen;
+  MODELS::A_MIS a_mis;
+
   auto p1 = std::make_shared<Interp2D const>(mh, zz, dndlnmh);
   auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
-  y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
-  // y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
-  y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
-
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
-  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
-  // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc 
-  y3_cluster::OMEGA_Z_SDSS omega_z;
+
+  MODELS::HMF hmf(p1, 0.037, 1.008);
+  // TODO: Change to DEL_SIG_Y1
+  MODELS::DEL_SIG ds(p2, p3, p4);
+  // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc
+  MODELS::DV_DO_DZ dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
+  MODELS::OMEGA_Z omega_z;
+
   IntegrationRange lo_ir{20, 28};
   IntegrationRange zo_ir{0.1, 0.3};
-  using MODELS = Models<decltype(mor),
-                        decltype(lo_lc),
-                        decltype(lc_lt),
-                        decltype(zo_zt),
-                        decltype(roffset),
-                        decltype(t_cen),
-                        decltype(t_mis),
-                        decltype(a_cen),
-                        decltype(a_mis),
-                        decltype(hmf),
-                        decltype(dsc),
-                        decltype(dvdodz),
-                        decltype(omega_z)>;
+
   auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                     0.11,
                                     mor,
@@ -154,7 +146,7 @@ main(int argc, char* argv[])
                                     a_cen,
                                     a_mis,
                                     hmf,
-                                    dsc,
+                                    ds,
                                     dvdodz,
                                     omega_z,
                                     lo_ir,

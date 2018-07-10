@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_DEL_SIG_CEN_T_HH
-#define Y3_CLUSTER_DEL_SIG_CEN_T_HH
+#ifndef Y3_CLUSTER_DEL_SIG_T_HH
+#define Y3_CLUSTER_DEL_SIG_T_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "test/ez.hh"
@@ -68,34 +68,30 @@
 
 namespace y3_cluster
 {
-  class DEL_SIG_CEN_t {
+  class DEL_SIG_t {
   public:
-    DEL_SIG_CEN_t(std::shared_ptr<Interp2D const> dsigma1, 
+    DEL_SIG_t(std::shared_ptr<Interp2D const> dsigma1, 
                   std::shared_ptr<Interp2D const> dsigma2, 
                   std::shared_ptr<Interp2D const> bias
                   /*,double c*/) 
                   : _dsigma1(dsigma1), _dsigma2(dsigma2), _bias(bias)/*, _c(c)*/ {}
 
     using doubles = std::vector<double>;
-    /****************************************************************************************************************************************/
-    /*******************************IMPORTANT: REMEMBER TO CHECK THE ORIENTATION OF THESE VARIABLES!!!!!***********************************************/
-    /****************************************************************************************************************************************/
-    
-    /* R_perp is r*/
-    explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
+
+    explicit DEL_SIG_t(cosmosis::DataBlock& sample)
       : _dsigma1(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "R_perp"),
-          sample.view<doubles>("del_sig_cen_params", "lnM"),
-          sample.view<doubles>("del_sig_cen_params", "deltasigma_1")))
+          sample.view<doubles>("del_sig_params", "x1"),
+          sample.view<doubles>("del_sig_params", "y1"),
+          sample.view<doubles>("del_sig_params", "z1")))
       , _dsigma2(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "z"),
-          sample.view<doubles>("del_sig_cen_params", "lnM"),
-          sample.view<doubles>("del_sig_cen_params", "deltasigma_2")))
+          sample.view<doubles>("del_sig_params", "x2"),
+          sample.view<doubles>("del_sig_params", "y2"),
+          sample.view<doubles>("del_sig_params", "z2")))
       , _bias(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "R_perp"),
-          sample.view<doubles>("del_sig_cen_params", "z"),
-          sample.view<doubles>("del_sig_cen_params", "bias")))
-      /*, _c(sample.view<double>("del_sig_cen_params", "c"))*/
+          sample.view<doubles>("del_sig_params", "x3"),
+          sample.view<doubles>("del_sig_params", "y3"),
+          sample.view<doubles>("del_sig_params", "z3")))
+      // , _c(sample.view<double>("del_sig_params", "c"))
     {}
 
     double

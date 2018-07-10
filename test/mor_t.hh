@@ -3,6 +3,7 @@
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "test/mz_power_law.hh"
+#include "test/primitives.hh"
 
 #include <cmath>
 
