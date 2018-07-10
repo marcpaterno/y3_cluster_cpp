@@ -24,7 +24,8 @@ namespace y3_cluster {
       , _ezt(y3_cluster::EZ(sample.view<double>("", "omega_m"),
                             sample.view<double>("", "omega_l"),
                             sample.view<double>("", "omega_k")))
-    {sample.get_val<double>("DV_D0_DZ_params", "h", _h);}
+      , _h(sample.view<double>("DV_D0_DZ_params", "h"))
+      {}
 
     double
     operator()(double zt) const

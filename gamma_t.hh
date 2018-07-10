@@ -4,6 +4,7 @@
 #include "integration_range.hh"
 
 #include <array>
+#include <cubacpp/cubacpp.hh>
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -101,8 +102,8 @@ public:
                     y3_cluster::IntegrationRange zt_ir,
                     y3_cluster::IntegrationRange R_ir,
                     y3_cluster::IntegrationRange A_ir,
-		    y3_cluster::IntegrationRange theta_ir,
-		    std::array<double, NRADII> const& rarray)
+                    y3_cluster::IntegrationRange theta_ir,
+                    std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
     , msci_(msci)
     , mor(mor)
@@ -144,16 +145,10 @@ public:
                    F gamma_radial_dep
                    ) const
   {
-    // Zo does not actually need to be integrated over
-    double const zomin = zo_ir_.transform(0.0);
-    double const zomax = zo_ir_.transform(1.0);
-
     auto const hmf_v = hmf(lnM, zt);
-    auto const zo_zt_v = zo_zt(zomin, zomax, zt);
     auto const mor_v = mor(lt, lnM, zt);
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
-
 
     // These will eventually be passed by CosmoSIS
     double m_shear = 1.0;
@@ -162,7 +157,7 @@ public:
     double w = 1.0;
 
     // eq. (25)
-    double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
+    double const N_int = omega_z_v * dv_do_dz_v * hmf_v * mor_v;
     // eq. (24)
     double const N = jacob_N * N_int * N_multiplier;
     double const Nw = N * w;
@@ -222,6 +217,7 @@ public:
 
     double const jacob_N = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
+                         * zt_ir_.jacobian()
                          * R_ir_.jacobian();
     double const jacob_G = lnM_ir_.jacobian() * lo_ir_.jacobian()
                          * lt_ir_.jacobian() * lc_ir_.jacobian()
@@ -287,8 +283,7 @@ public:
                          * A_ir_.jacobian();
 
     // eq. (26)
-    auto const lo_lt_v = lc_lt(lo, lt, zt);
-    double const N_cen = lo_lt_v * fcen_;
+    double const N_cen = lc_lt(lo, lt, zt) * fcen_;
 
     // eq. (30)
     // For the following lambda function, `radius` corresponds to what is called
@@ -304,6 +299,31 @@ public:
                             jacob_G,
                             N_cen,
                             gamma_t_cen);
+  }
+
+  template<typename Integrator>
+  cubacpp::integration_results<NRADII + 2>
+  integrate_centered(Integrator i, double epsrel, double epsabs)
+  {
+      return i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
+                                double scaled_lnM, double scaled_A) {
+                            return centered(scaled_lo, scaled_lt, scaled_zt, scaled_lnM, scaled_A);
+                         },
+                         epsrel, epsabs);
+  }
+
+  template<typename Integrator>
+  cubacpp::integration_results<NRADII + 2>
+  integrate_miscentered(Integrator i, double epsrel, double epsabs)
+  {
+      return i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
+                                double scaled_zt, double scaled_R, double scaled_lnM,
+                                double scaled_A, double scaled_theta) {
+                            return miscentered(scaled_lo, scaled_lc, scaled_lt,
+                                               scaled_zt, scaled_R, scaled_lnM,
+                                               scaled_A, scaled_theta);
+                         },
+                         epsrel, epsabs);
   }
 };
 
@@ -336,7 +356,9 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
    std::array<double, NRADII> rarray; 
-   for ( std::size_t i = 0; i < NRADII; i++ ) {rarray[ i ] = 0.1*(i+0.1);}
+   for (std::size_t i = 0; i < NRADII; i++)
+       rarray[i] = 0.1 * (i + 0.1);
+
    return {fcen,
            msci,
            mor,

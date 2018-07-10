@@ -66,6 +66,13 @@ target_include_directories(point_3d_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(point_3d_test point_3d_test)
 
+add_executable(param_space_explorer_test main.cc param_space_explorer.test.cc)
+target_include_directories(param_space_explorer_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(param_space_explorer_test param_space_explorer_test)
+
 add_executable(fpsupport_test main.cc fpsupport.test.cc)
 target_include_directories(fpsupport_test
                            PRIVATE
@@ -164,6 +171,15 @@ target_include_directories(roffset_probability_test
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(roffset_probability_test roffset_probability_test)
+
+add_executable(integrate_delta_sigma integrate_delta_sigma.cc lc_lt_t.cc interp_2d.cc)
+target_link_libraries(integrate_delta_sigma PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(integrate_delta_sigma
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
 add_executable(integrate_lc_lt integrate_lc_lt.cc lc_lt_t.cc interp_2d.cc)
 target_link_libraries(integrate_lc_lt PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})

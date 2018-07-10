@@ -43,16 +43,12 @@ using y3_cluster::Interp2D;
 using y3_cluster::mz_power_law;
 
 // Helper template, to automate the timing of integration.
-template <class ALG, class F>
+template <class F>
 void
-time_integration(ALG alg,
-                 F f,
-                 double epsrel,
-                 double epsabs,
-                 char const* algname)
+time_integration(F f, char const* algname)
 {
   auto start = std::chrono::high_resolution_clock::now();
-  auto res = alg.integrate(f, epsrel, epsabs);
+  auto res = f();
   auto stop = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = stop - start;
   std::cout << algname << ": " << res << " (" << diff.count() << "s)\n";
@@ -169,20 +165,9 @@ main(int argc, char* argv[])
 
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
-  // Won't allow integrating gti.centered directly :(
-  time_integration(c,
-                   [&gti](double a, double b, double c,
-                          double d, double e) {
-                        return gti.centered(a, b, c, d, e);
-                   },
-                   epsrel, epsabs, "centered-cuhre");
+  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs); },
+                   "centered-cuhre");
 
-  // same deal as above
-  time_integration(c,
-                   [&gti](double a, double b, double c,
-                          double d, double e, double f,
-                          double g, double h) {
-                        return gti.miscentered(a, b, c, d, e, f, g, h);
-                   },
-                   epsrel, epsabs, "miscentered-cuhre");
+  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
+                   "miscentered-cuhre");
 };

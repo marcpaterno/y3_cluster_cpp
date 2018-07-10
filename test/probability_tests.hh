@@ -2,6 +2,7 @@
 #include "test/lc_lt_t.hh"
 #include "test/lo_lc_t.hh"
 #include "test/mor_t.hh"
+#include "test/param_space_explorer.hh"
 #include "test/roffset_t.hh"
 #include "cubacpp/cubacpp.hh"
 #include "integration_range.hh"
@@ -62,33 +63,36 @@ namespace y3_cluster {
             std::cout << "lt,zt,lc_lt_integrated,status,error,prob\n";
 
         LC_LT_t lc_lt;
-        for (auto i = 0u; i < lt_width; i++) {
-            for (auto j = 0u; j < zt_width; j++) {
-                const double lt = lt_ir.transform((i + 1) / ((double) lt_width + 1));
-                const double zt = zt_ir.transform((j + 1) / ((double) zt_width + 1));
-                const auto res = I.integrate([lt, zt, lc_ir, lc_lt](double scaled_lc) {
-                          const double lc = lc_ir.transform(scaled_lc);
-                          return lc_ir.jacobian() * lc_lt(lc, lt, zt);
-                        },
-                        epsrel, epsabs);
+        double lt, zt;
+        // Vary lt and zt, in the ranges lt_ir and zt_ir, with lt_width and
+        // zt_width distinct values of each
+        ParamSpaceExplorer<2> pse{{&lt, &zt},
+                                  {lt_ir, zt_ir},
+                                  {lt_width, zt_width}};
 
-                if (print)
-                    std::cout << lt << ", "
-                              << zt << ", "
-                              << res.value << ", "
-                              << res.status << ", "
-                              << res.error << ", "
-                              << res.prob << '\n';
+        do {
+            const auto res = I.integrate([lt, zt, lc_ir, lc_lt](double scaled_lc) {
+                      const double lc = lc_ir.transform(scaled_lc);
+                      return lc_ir.jacobian() * lc_lt(lc, lt, zt);
+                    },
+                    epsrel, epsabs);
 
-                if (test) {
-                    // In reality - since we are integrating [1, 200] not [0, +inf] - it
-                    // won't be exactly 1.0. So, arbitrary wiggle room 1e-2
-                    // TODO: should this epsilon be changed?
-                    CHECK(res.status == 0);
-                    CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(1e-2));
-                }
+            if (print)
+                std::cout << lt << ", "
+                          << zt << ", "
+                          << res.value << ", "
+                          << res.status << ", "
+                          << res.error << ", "
+                          << res.prob << '\n';
+
+            if (test) {
+                // In reality - since we are integrating [1, 200] not [0, +inf] - it
+                // won't be exactly 1.0. So, arbitrary wiggle room 1e-2
+                // TODO: should this epsilon be changed?
+                CHECK(res.status == 0);
+                CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(1e-2));
             }
-        }
+        } while (pse.next());
     }
 
     /* Computes:
@@ -116,30 +120,31 @@ namespace y3_cluster {
         // Values from trivial_gamma_t
         LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
 
-        for (auto i = 0u; i < lc_width; i++) {
-            for (auto j = 0u; j < R_width; j++) {
-                const double lc = lc_ir.transform((i + 1) / ((double) lc_width + 1));
-                const double R = R_ir.transform((j + 1) / ((double) R_width + 1));
-                const auto res = I.integrate([lc, R, lo_ir, lo_lc](double scaled_lo) {
-                          const double lo = lo_ir.transform(scaled_lo);
-                          return lo_ir.jacobian() * lo_lc(lo, lc, R);
-                        },
-                        epsrel, epsabs);
+        double lc, R;
+        ParamSpaceExplorer<2> pse{{&lc, &R},
+                                  {lc_ir, R_ir},
+                                  {lc_width, R_width}};
 
-                if (print)
-                    std::cout << lc << ", "
-                              << R << ", "
-                              << res.value << ", "
-                              << res.status << ", "
-                              << res.error << ", "
-                              << res.prob << '\n';
+        do {
+            const auto res = I.integrate([lc, R, lo_ir, lo_lc](double scaled_lo) {
+                      const double lo = lo_ir.transform(scaled_lo);
+                      return lo_ir.jacobian() * lo_lc(lo, lc, R);
+                    },
+                    epsrel, epsabs);
 
-                if (test) {
-                    CHECK(res.status == 0);
-                    CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(5e-2));
-                }
+            if (print)
+                std::cout << lc << ", "
+                          << R << ", "
+                          << res.value << ", "
+                          << res.status << ", "
+                          << res.error << ", "
+                          << res.prob << '\n';
+
+            if (test) {
+                CHECK(res.status == 0);
+                CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(5e-2));
             }
-        }
+        } while (pse.next());
     }
 
     /* Computes:
@@ -206,32 +211,30 @@ namespace y3_cluster {
         // Values from trivial_gamma_t
         MOR_t mor{mz_power_law{9.1e-9, 0.65, 0.1}, 0.15, 0.65};
 
-        for (auto i = 0u; i < lnM_width; i++) {
-            for (auto j = 0u; j < zt_width; j++) {
-                const double lnM = lnM_ir.transform((i + 1) / ((double) lnM_width + 1));
-                const double zt = zt_ir.transform((j + 1) / ((double) zt_width + 1));
+        double lnM, zt;
+        ParamSpaceExplorer<2> pse{{&lnM, &zt},
+                                  {lnM_ir, zt_ir},
+                                  {lnM_width, zt_width}};
+        do {
+            const auto res = I.integrate([lnM, zt, lt_ir, mor](double scaled_lt) {
+                      const double lt = lt_ir.transform(scaled_lt);
+                      return lt_ir.jacobian() * mor(lt, lnM, zt);
+                    },
+                    epsrel, epsabs);
 
-                const auto res = I.integrate([lnM, zt, lt_ir, mor](double scaled_lt) {
-                          const double lt = lt_ir.transform(scaled_lt);
-                          return lt_ir.jacobian() * mor(lt, lnM, zt);
-                        },
-                        epsrel, epsabs);
+            if (print)
+                std::cout << lnM << ", "
+                          << std::exp(lnM) << ", "
+                          << zt << ", "
+                          << res.value << ", "
+                          << res.status << ", "
+                          << res.error << ", "
+                          << res.prob << '\n';
 
-                if (print)
-                    std::cout << lnM << ", "
-                              << std::exp(lnM) << ", "
-                              << zt << ", "
-                              << res.value << ", "
-                              << res.status << ", "
-                              << res.error << ", "
-                              << res.prob << '\n';
-
-                if (test) {
-                    CHECK(res.status == 0);
-                    CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(0.15));
-                }
+            if (test) {
+                CHECK(res.status == 0);
+                CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(0.15));
             }
-        }
+        } while (pse.next());
     }
-
 }
