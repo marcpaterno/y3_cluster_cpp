@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_DEL_SIG_CEN_T_HH
-#define Y3_CLUSTER_DEL_SIG_CEN_T_HH
+#ifndef Y3_CLUSTER_DEL_SIG_T_HH
+#define Y3_CLUSTER_DEL_SIG_T_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "test/ez.hh"
@@ -68,9 +68,9 @@
 
 namespace y3_cluster
 {
-  class DEL_SIG_CEN_t {
+  class DEL_SIG_t {
   public:
-    DEL_SIG_CEN_t(std::shared_ptr<Interp2D const> dsigma1, 
+    DEL_SIG_t(std::shared_ptr<Interp2D const> dsigma1, 
                   std::shared_ptr<Interp2D const> dsigma2, 
                   std::shared_ptr<Interp2D const> bias,
                   double c) 
@@ -78,20 +78,20 @@ namespace y3_cluster
 
     using doubles = std::vector<double>;
 
-    explicit DEL_SIG_CEN_t(cosmosis::DataBlock& sample)
+    explicit DEL_SIG_t(cosmosis::DataBlock& sample)
       : _dsigma1(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "x1"),
-          sample.view<doubles>("del_sig_cen_params", "y1"),
-          sample.view<doubles>("del_sig_cen_params", "z1")))
+          sample.view<doubles>("del_sig_params", "x1"),
+          sample.view<doubles>("del_sig_params", "y1"),
+          sample.view<doubles>("del_sig_params", "z1")))
       , _dsigma2(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "x2"),
-          sample.view<doubles>("del_sig_cen_params", "y2"),
-          sample.view<doubles>("del_sig_cen_params", "z2")))
+          sample.view<doubles>("del_sig_params", "x2"),
+          sample.view<doubles>("del_sig_params", "y2"),
+          sample.view<doubles>("del_sig_params", "z2")))
       , _bias(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_cen_params", "x3"),
-          sample.view<doubles>("del_sig_cen_params", "y3"),
-          sample.view<doubles>("del_sig_cen_params", "z3")))
-      , _c(sample.view<double>("del_sig_cen_params", "c"))
+          sample.view<doubles>("del_sig_params", "x3"),
+          sample.view<doubles>("del_sig_params", "y3"),
+          sample.view<doubles>("del_sig_params", "z3")))
+      , _c(sample.view<double>("del_sig_params", "c"))
     {}
 
     double

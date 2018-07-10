@@ -11,8 +11,7 @@
 #include <test/a_cen_t.hh>
 #include <test/a_mis_t.hh>
 #include <test/hmf_t.hh>
-#include <test/del_sig_cen_t.hh>
-#include <test/del_sig_mis_t.hh>
+#include <test/del_sig_t.hh>
 #include <test/dv_do_dz_t.hh>
 #include <test/omega_z_sdss.hh>
 
@@ -30,8 +29,7 @@ namespace y3_cluster
     using A_CEN = A_CEN_t;
     using A_MIS = A_MIS_t;
     using HMF = HMF_t;
-    using DEL_SIG_CEN = DEL_SIG_CEN_t;
-    using DEL_SIG_MIS = DEL_SIG_MIS_t;
+    using DEL_SIG = DEL_SIG_t;
     using DV_DO_DZ = DV_DO_DZ_t;
     using OMEGA_Z = OMEGA_Z_SDSS;
   };

@@ -7,8 +7,7 @@
 
 #include "test/a_cen_t.hh"
 #include "test/a_mis_t.hh"
-#include "test/del_sig_cen_t.hh"
-#include "test/del_sig_mis_t.hh"
+#include "test/del_sig_t.hh"
 #include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
 #include "test/ez_sq.hh"
@@ -123,9 +122,9 @@ main(int argc, char* argv[])
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   MODELS::HMF hmf(p1, 0.037, 1.008);
   // DEL_SIG_CEN_t dsc{5., 0.5};
-  MODELS::DEL_SIG_CEN dsc(p2, p3, p4, 5.);
+  MODELS::DEL_SIG ds(p2, p3, p4, 5.);
   // DEL_SIG_MIS_t dsc{5., 0.5};
-  MODELS::DEL_SIG_MIS dsm;
+  // MODELS::DEL_SIG_MIS dsm;
 
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   MODELS::DV_DO_DZ dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0));
@@ -144,8 +143,8 @@ main(int argc, char* argv[])
                                     a_cen,
                                     a_mis,
                                     hmf,
-                                    dsc,
-                                    dsm,
+                                    ds,
+                                    //dsm,
                                     dvdodz,
                                     omega_z,
                                     lo_ir,

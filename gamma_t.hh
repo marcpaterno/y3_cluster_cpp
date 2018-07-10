@@ -29,8 +29,8 @@ private:
   typename MODELS::A_CEN A_cen;
   typename MODELS::A_MIS A_mis;
   typename MODELS::HMF hmf;
-  typename MODELS::DEL_SIG_CEN del_sig_cen;
-  typename MODELS::DEL_SIG_MIS del_sig_mis;
+  typename MODELS::DEL_SIG del_sig;
+  //typename MODELS::DEL_SIG_MIS del_sig_mis;
   typename MODELS::DV_DO_DZ dv_do_dz;
   typename MODELS::OMEGA_Z omega_z;
 
@@ -63,8 +63,8 @@ public:
                     typename MODELS::A_CEN A_cen,
                     typename MODELS::A_MIS A_mis,
                     typename MODELS::HMF hmf,
-                    typename MODELS::DEL_SIG_CEN del_sig_cen,
-                    typename MODELS::DEL_SIG_MIS del_sig_mis,
+                    typename MODELS::DEL_SIG del_sig,
+                    //typename MODELS::DEL_SIG_MIS del_sig_mis,
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir,
@@ -88,8 +88,8 @@ public:
     , A_cen(A_cen)
     , A_mis(A_mis)
     , hmf(hmf)
-    , del_sig_cen(del_sig_cen)
-    , del_sig_mis(del_sig_mis)
+    , del_sig(del_sig)
+    //, del_sig_mis(del_sig_mis)
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
     , lnM_ir_(lnM_ir)
@@ -115,20 +115,26 @@ public:
     , A_cen(sample)
     , A_mis(sample)
     , hmf(sample)
-    , del_sig_cen(sample)
-    , del_sig_mis(sample)
+    , del_sig(sample)
+    //, del_sig_mis(sample)
     , dv_do_dz(sample)
-    , omega_z(sample)
-    , lnM_ir_(sample)
-    , lo_ir_(sample)
-    , lt_ir_(sample)
-    , lc_ir_(sample)
-    , zo_ir_(sample)
-    , zt_ir_(sample)
-    , R_ir_(sample)
-    , A_ir_(sample)
-    , r(sample)
-  {}
+    //, omega_z(sample)
+    , omega_z()
+    , lnM_ir_(sample, "lnM")
+    , lo_ir_(sample, "lo")
+    , lt_ir_(sample, "lt")
+    , lc_ir_(sample, "lc")
+    , zo_ir_(sample, "zo")
+    , zt_ir_(sample, "zt")
+    , R_ir_(sample, "R")
+    , A_ir_(sample, "A")
+    //, r(sample)
+  // TODO: Switch this out for a general method soon!
+  {
+  for (std::size_t i = 0; i < 10; i++) {
+    r[i] = 5.0 * (i + 0.01);
+  }
+  }
 
   // The function call operator -- this is the function to be integrated.
   std::array<double, NRADII + 2>
@@ -182,11 +188,12 @@ public:
     auto const gamma_t_int =
       jacob * omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v * w * lc_lt_v;
     auto gamma_t_cen = [this, lnM, zt, A](double radius) {
-      return fcen_ * del_sig_cen(radius, lnM, zt) * exp(A * T_cen(radius, lnM));
+      return fcen_ * del_sig(radius, lnM, zt) * exp(A * T_cen(radius, lnM));
     };
-    auto gamma_t_mis = [this, lnM, A, R, lo, lc](double radius) {
+    auto gamma_t_mis = [this, lnM, A, R, lo, lc, zt](double radius) {
+      // This is now incorrect - will make it work when merging w/ master!
       return (1.0 - fcen_) * roffset(R) * lo_lc(lo, lc, R) *
-             del_sig_mis(radius, lnM, R) * exp(A * T_cen(radius, lnM));
+             del_sig(radius, lnM, zt) * exp(A * T_cen(radius, lnM));
     };
     auto const gamma_t = y3_cluster::transform(
       r,
@@ -220,8 +227,8 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::A_CEN a_cen,
                        typename MODELS::A_MIS a_mis,
                        typename MODELS::HMF hmf,
-                       typename MODELS::DEL_SIG_CEN del_sig_cen,
-                       typename MODELS::DEL_SIG_MIS del_sig_mis,
+                       typename MODELS::DEL_SIG del_sig,
+                       // typename MODELS::DEL_SIG_MIS del_sig_mis,
                        typename MODELS::DV_DO_DZ dv_do_dz,
                        typename MODELS::OMEGA_Z omega_z,
                        y3_cluster::IntegrationRange lo_ir,
@@ -238,7 +245,7 @@ make_gamma_t_integrand(double fcen,
     rarray[i] = 5.0 * (i + 0.01);
   }
   return {fcen,     msci,    mor,    lo_lc, lc_lt, zo_zt,       roffset,
-          t_cen,    t_mis,   a_cen,  a_mis, hmf,   del_sig_cen, del_sig_mis,
+          t_cen,    t_mis,   a_cen,  a_mis, hmf,   del_sig, //del_sig_mis,
           dv_do_dz, omega_z, lnM_ir, lo_ir, lt_ir, lc_ir,       zo_ir,
           zt_ir,    R_ir,    A_ir,   rarray};
 }
