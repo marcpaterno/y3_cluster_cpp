@@ -37,9 +37,18 @@ y3_cluster::ClustersModule<MODELS, NRADII>::execute(cosmosis::DataBlock& sample)
   cubacpp::Cuhre c;
   c.maxeval = 100000000;
 
-  auto result = _integrand.integrate_centered(c, epsrel, epsabs);
+  auto centered_result = _integrand.integrate_centered(c, epsrel, epsabs);
+  auto miscentered_result = _integrand.integrate_miscentered(c, epsrel, epsabs);
 
-  std::cout << result;
+  std::cout << "Centered:\n" << centered_result;
+  std::cout << "Miscentered:\n" << miscentered_result;
+
+  // TODO:
+  // - Combine centered and miscentered terms
+  // - Compute covariance matrix
+  // - Compute likelihood
+  //
+  // Then you've got science!
 
   //sample.put_val("gamma_t", "likelihood", result);
 
