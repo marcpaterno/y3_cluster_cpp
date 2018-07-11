@@ -7,7 +7,7 @@
 #include <test/param_space_explorer.hh>
 #include <test/t_cen_t.hh>
 #include <test/roffset_t.hh>
-#include <test/del_sig_cen_y1.hh>
+#include <test/del_sig_y1.hh>
 
 struct delta_sigma_parameters {
     double lo, lt, zt, R, lnM;

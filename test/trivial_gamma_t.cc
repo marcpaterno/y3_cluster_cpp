@@ -7,7 +7,7 @@
 
 #include "test/a_cen_t.hh"
 #include "test/a_mis_t.hh"
-#include "test/del_sig_cen_y1.hh"
+#include "test/del_sig_y1.hh"
 #include "test/del_sig_t.hh"
 #include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
