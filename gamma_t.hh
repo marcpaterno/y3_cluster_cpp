@@ -353,11 +353,11 @@ make_gamma_t_integrand(double fcen,
                        std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_ir,
                        std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_ir)
 {
-   y3_cluster::IntegrationRange lnM_ir{std::log(5.e11), std::log(1.e16)};
-   y3_cluster::IntegrationRange lt_ir{2.0, 50}; // we should adjust lt, lc and lnM ranges according to the bin
-   y3_cluster::IntegrationRange lc_ir{2.0, 50};
-   y3_cluster::IntegrationRange zt_ir{0.1, 0.3};
-   y3_cluster::IntegrationRange R_ir{0., 1.0};
+   y3_cluster::IntegrationRange lnM_ir{std::log(5.e12), std::log(8.e16)};
+   y3_cluster::IntegrationRange lt_ir{2.0, 100}; // we should adjust lt, lc and lnM ranges according to the bin
+   y3_cluster::IntegrationRange lc_ir{2.0, 100};
+   y3_cluster::IntegrationRange zt_ir{0.05, 0.45};
+   y3_cluster::IntegrationRange R_ir{0., 2.0};
    y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
