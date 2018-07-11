@@ -71,10 +71,10 @@ main(int argc, char* argv[])
 
   // ============ Cosmological Parameters ============
   //            (to be passed by CosmoSIS)
-  const double Omega_M = 0.22;
+  const double Omega_M = 1.87518978e-01;
   const double Omega_L = 1.0 - Omega_M;
   const double Omega_K = 0.0;
-  const double h = 0.7;
+  const double h = 7.71358152e-01;
 
   // ============ Scaling Functions ============
   auto identity = [](double x) { return x; };
@@ -107,13 +107,13 @@ main(int argc, char* argv[])
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
   long long maxeval = std::stoll(args[0]);
-  double sigma_intr=0.10 ;//this is a parameter that should come from cosmosis
-  double alpha=0.65 ;//this is a parameter that should come from cosmosis
+  double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis
+  double alpha=6.91589257e-01 ;//this is a parameter that should come from cosmosis
   //y3_cluster::MOR_t mor{mz_power_law{8.8e-9, alpha, 0.0}, sigma_intr, alpha};
-  y3_cluster::MOR_t2 mor{pow(10,11.2), pow(10,12.42), alpha, sigma_intr};
+  y3_cluster::MOR_t2 mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt;
-  y3_cluster::ZO_ZT_t zo_zt{0.01};
+  y3_cluster::ZO_ZT_t zo_zt{0.005};
   y3_cluster::ROFFSET_t roffset{0.2};
   y3_cluster::T_CEN_t t_cen;
   y3_cluster::T_MIS_t t_mis;
@@ -123,7 +123,7 @@ main(int argc, char* argv[])
   auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
-  y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
+  y3_cluster::HMF_t hmf(p1, 4.50732047e-02, 1.01958078e+00);
   //y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
   y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
 
@@ -131,7 +131,7 @@ main(int argc, char* argv[])
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
   // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc 
   y3_cluster::OMEGA_Z_SDSS omega_z;
-  IntegrationRange lo_ir1{20, 28};
+  IntegrationRange lo_ir1{20, 27.9};
   IntegrationRange zo_ir1{0.1, 0.3};
   using MODELS = Models<decltype(mor),
                         decltype(lo_lc),
@@ -161,7 +161,7 @@ main(int argc, char* argv[])
                                     dsc,
                                     dvdodz,
                                     omega_z,
-                                    {lo_ir1, {28, 38}, {38, 50}, {50, 70}},
+                                    {lo_ir1, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
                                     {zo_ir1});
 
   // ============ Actual Integrations ============
