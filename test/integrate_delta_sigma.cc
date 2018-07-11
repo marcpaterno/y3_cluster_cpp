@@ -7,7 +7,7 @@
 #include <test/param_space_explorer.hh>
 #include <test/t_cen_t.hh>
 #include <test/roffset_t.hh>
-#include <test/del_sig_cen_y1.hh>
+#include <test/del_sig_y1.hh>
 
 struct delta_sigma_parameters {
     double lo, lt, zt, R, lnM;
@@ -25,7 +25,7 @@ using y3_cluster::LO_LC_t,
       y3_cluster::LC_LT_t,
       y3_cluster::ROFFSET_t,
       y3_cluster::T_CEN_t,
-      y3_cluster::DEL_SIG_CEN_y1,
+      y3_cluster::DEL_SIG_y1,
       y3_cluster::IntegrationRange;
 
 template<typename Integrator>
@@ -34,7 +34,7 @@ integrate_del_sig_cen(Integrator I,
                       delta_sigma_parameters& params,
                       LC_LT_t lc_lt,
                       T_CEN_t tcen,
-                      DEL_SIG_CEN_y1 dsc,
+                      DEL_SIG_y1 dsc,
                       IntegrationRange A_range,
                       double epsrel = 1e-3,
                       double epsabs = 1e-12)
@@ -65,7 +65,7 @@ integrate_del_sig_mis(Integrator I,
                       LO_LC_t lo_lc,
                       ROFFSET_t roffset,
                       T_CEN_t tcen,
-                      DEL_SIG_CEN_y1 dsc,
+                      DEL_SIG_y1 dsc,
                       IntegrationRange R_mis_range,
                       IntegrationRange theta_range,
                       IntegrationRange lc_range,
@@ -133,7 +133,7 @@ main()
     LC_LT_t lc_lt;
     ROFFSET_t roffset{0.2};
     T_CEN_t tcen;
-    DEL_SIG_CEN_y1 dsc;
+    DEL_SIG_y1 dsc;
 
     cubacpp::Vegas c;
     c.maxeval = 999999999;

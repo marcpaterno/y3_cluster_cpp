@@ -1,48 +1,18 @@
 #ifndef Y3_CLUSTER_GAMMA_T_HH
 #define Y3_CLUSTER_GAMMA_T_HH
 
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "integration_range.hh"
-
+#include <algorithm>
 #include <array>
 #include <cubacpp/cubacpp.hh>
 #include <cmath>
 #include <iostream>
-#include <algorithm>
 #include <test/transform.hh>
+
 // This class template is based
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
 // provided by Spencer Everett.
-
-
-
-template<typename MOR_,
-         typename LO_LC_,
-         typename LC_LT_,
-         typename ZO_ZT_,
-         typename ROFFSET_,
-         typename T_CEN_,
-         typename T_MIS_,
-         typename A_CEN_,
-         typename A_MIS_,
-         typename HMF_,
-         typename DEL_SIG_CEN_,
-         typename DV_DO_DZ_,
-         typename OMEGA_Z_>
-struct Models {
-    using MOR = MOR_;
-    using LO_LC = LO_LC_;
-    using LC_LT = LC_LT_;
-    using ZO_ZT = ZO_ZT_;
-    using ROFFSET = ROFFSET_;
-    using T_CEN = T_CEN_;
-    using T_MIS = T_MIS_;
-    using A_CEN = A_CEN_;
-    using A_MIS = A_MIS_;
-    using HMF = HMF_;
-    using DEL_SIG_CEN = DEL_SIG_CEN_;
-    using DV_DO_DZ = DV_DO_DZ_;
-    using OMEGA_Z = OMEGA_Z_;
-};
 
 template <typename MODELS, std::size_t NRADII>
 class Gamma_T_Integrand {
@@ -60,7 +30,7 @@ private:
   typename MODELS::A_CEN A_cen;
   typename MODELS::A_MIS A_mis;
   typename MODELS::HMF hmf;
-  typename MODELS::DEL_SIG_CEN del_sig_cen;
+  typename MODELS::DEL_SIG del_sig;
   typename MODELS::DV_DO_DZ dv_do_dz;
   typename MODELS::OMEGA_Z omega_z;
 
@@ -91,7 +61,7 @@ public:
                     typename MODELS::A_CEN A_cen,
                     typename MODELS::A_MIS A_mis,
                     typename MODELS::HMF hmf,
-                    typename MODELS::DEL_SIG_CEN del_sig_cen,
+                    typename MODELS::DEL_SIG del_sig,
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir,
@@ -116,7 +86,7 @@ public:
     , A_cen(A_cen)
     , A_mis(A_mis)
     , hmf(hmf)
-    , del_sig_cen(del_sig_cen)
+    , del_sig(del_sig)
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
     , lnM_ir_(lnM_ir)
@@ -130,6 +100,38 @@ public:
     , theta_ir_(theta_ir)	
     , r(rarray)
   {}
+
+  // Alternatively, can automatically construct each model component given a datablock.
+  Gamma_T_Integrand(cosmosis::DataBlock& sample)
+    : mor(sample)
+    , lo_lc(sample)
+    , lc_lt(sample)
+    , zo_zt(sample)
+    , roffset(sample)
+    , T_cen(sample)
+    , T_mis(sample)
+    , A_cen(sample)
+    , A_mis(sample)
+    , hmf(sample)
+    , del_sig(sample)
+    , dv_do_dz(sample)
+    , omega_z()
+    , lnM_ir_(sample, "lnM")
+    , lo_ir_(sample, "lo")
+    , lt_ir_(sample, "lt")
+    , lc_ir_(sample, "lc")
+    , zo_ir_(sample, "zo")
+    , zt_ir_(sample, "zt")
+    , R_ir_(sample, "R")
+    , A_ir_(sample, "A")
+    , theta_ir_(sample, "theta")
+    //, r(sample)
+  // TODO: Switch this out for a general method soon!
+  {
+    for (std::size_t i = 0; i < 10; i++) {
+      r[i] = 5.0 * (i + 0.01);
+    }
+  }
 
   template<typename F>
   std::array<double, NRADII+2>
@@ -237,7 +239,7 @@ public:
         double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
         return (N_mis / 6.28318530718)
                * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
-               * del_sig_cen(adjusted_R, lnM, zt);
+               * del_sig(adjusted_R, lnM, zt);
     };
 
     return integrand_common(lt,
@@ -289,7 +291,7 @@ public:
     // For the following lambda function, `radius` corresponds to what is called
     // `R` in the paper
     auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
-        return N_cen * exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig_cen(radius, lnM, zt);
+        return N_cen * exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig(radius, lnM, zt);
     };
 
     return integrand_common(lt,
@@ -341,7 +343,7 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::A_CEN a_cen,
                        typename MODELS::A_MIS a_mis,
                        typename MODELS::HMF hmf,
-                       typename MODELS::DEL_SIG_CEN del_sig_cen,
+                       typename MODELS::DEL_SIG del_sig,
                        typename MODELS::DV_DO_DZ dv_do_dz,
                        typename MODELS::OMEGA_Z omega_z,
                        y3_cluster::IntegrationRange lo_ir,
@@ -371,7 +373,7 @@ make_gamma_t_integrand(double fcen,
            a_cen,
            a_mis,
            hmf,
-           del_sig_cen,
+           del_sig,
            dv_do_dz,
            omega_z,
            lnM_ir,

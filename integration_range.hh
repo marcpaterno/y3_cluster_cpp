@@ -2,12 +2,25 @@
 #define Y3_CLUSTER_INTEGRATION_RANGE_HH
 
 #include <stdexcept>
+#include <string>
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
 
 namespace y3_cluster {
   class IntegrationRange {
   public:
     IntegrationRange(double a, double b) : _a(a), _range(b - a)
     {
+      if (_range == 0.0)
+        throw std::logic_error("zero-length IntegrationRange");
+    }
+
+    IntegrationRange(cosmosis::DataBlock& sample, std::string var) {
+      double b;
+      std::string min = var + "_min";
+      std::string max = var + "_max";
+      sample.get_val<double>("integration_ranges", min, _a);
+      sample.get_val<double>("integration_ranges", max, b);
+      _range = b - _a;
       if (_range == 0.0)
         throw std::logic_error("zero-length IntegrationRange");
     }

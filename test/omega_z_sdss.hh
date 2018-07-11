@@ -1,5 +1,5 @@
 #ifndef Y3_CLUSTER_OMEGA_Z_SDSS_HH
-#define Y3_CLUSTER_OMEGA_Z_T_HH
+#define Y3_CLUSTER_OMEGA_Z_SDSS_HH
 
 #include <array>
 #include <cmath>

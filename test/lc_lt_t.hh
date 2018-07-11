@@ -18,6 +18,9 @@ namespace y3_cluster {
     static Interp2D const fmsk_interp;
     static Interp2D const fprj_interp;
 
+    explicit LC_LT_t(const cosmosis::DataBlock&) {}
+    LC_LT_t() {}
+
     double
     operator()(double lc, double lt, double zt) const
     {
