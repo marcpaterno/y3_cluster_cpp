@@ -204,16 +204,26 @@ main(int argc, char* argv[])
 
       auto single_bin = make_gamma_t_integrated_bins(gti_single, single_res)[0];
 
-      std::cout << "(single - bin) status = " << single_res.status
-                << ", time = " << diff.count() << '\n';
-
       std::cout << "(simultaneous) lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
                 << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
                 << bin.Nw << " +/- " << bin.Nw_error << ")\n";
 
+      for (auto i = 0; i < 10; i++)
+          std::cout << "(simultaneous) value: " << bin.gamma_ts[i]
+                    << ", error: " << bin.gamma_t_errors[i]
+                    << ", prob: " << bin.gamma_t_probs[i] << '\n';
+
+      std::cout << "(single - bin) status = " << single_res.status
+                << ", time = " << diff.count() << '\n';
+
       std::cout << "(single - bin) lo = " << single_bin.lo_ir << ", zo = " << single_bin.zo_ir
                 << ", (N, Nw) = (" << single_bin.N << " +/- " << single_bin.N_error << ", "
                 << single_bin.Nw << " +/- " << single_bin.Nw_error << ")\n";
+
+      for (auto i = 0; i < 10; i++)
+          std::cout << "(single - bin) value: " << single_bin.gamma_ts[i]
+                    << ", error: " << single_bin.gamma_t_errors[i]
+                    << ", prob: " << single_bin.gamma_t_probs[i] << '\n';
 
       time_count += diff.count();
   }
@@ -253,6 +263,15 @@ main(int argc, char* argv[])
 
       auto single_bin = make_gamma_t_integrated_bins(gti_single, single_res)[0];
 
+      std::cout << "(simultaneous) lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
+                << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
+                << bin.Nw << " +/- " << bin.Nw_error << ")\n";
+
+      for (auto i = 0; i < 10; i++)
+          std::cout << "(simultaneous) value: " << bin.gamma_ts[i]
+                    << ", error: " << bin.gamma_t_errors[i]
+                    << ", prob: " << bin.gamma_t_probs[i] << '\n';
+
       std::cout << "(single - bin) status = " << single_res.status
                 << ", time = " << diff.count() << '\n';
 
@@ -260,9 +279,10 @@ main(int argc, char* argv[])
                 << ", (N, Nw) = (" << single_bin.N << " +/- " << single_bin.N_error << ", "
                 << single_bin.Nw << " +/- " << single_bin.Nw_error << ")\n";
 
-      std::cout << "(simultaneous) lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
-                << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
-                << bin.Nw << " +/- " << bin.Nw_error << ")\n";
+      for (auto i = 0; i < 10; i++)
+          std::cout << "(single - bin) value: " << single_bin.gamma_ts[i]
+                    << ", error: " << single_bin.gamma_t_errors[i]
+                    << ", prob: " << single_bin.gamma_t_probs[i] << '\n';
 
       time_count += diff.count();
   }
