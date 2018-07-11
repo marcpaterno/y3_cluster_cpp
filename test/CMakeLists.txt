@@ -145,6 +145,14 @@ target_include_directories(lo_lc_probability_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(lo_lc_probability_test lo_lc_probability_test)
 
+add_executable(mor_t2_test main.cc mor_t2.test.cc interp_2d.cc)
+target_link_libraries(mor_t2_test PRIVATE ${GSL_LIBRARIES})
+target_include_directories(mor_t2_test
+	                   PRIVATE
+		           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(mor_t2_test mor_t2_test)
+
 add_executable(mor_probability_test main.cc mor_probability_unity.test.cc interp_2d.cc)
 target_link_libraries(mor_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
 target_include_directories(mor_probability_test

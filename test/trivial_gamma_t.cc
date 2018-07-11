@@ -17,7 +17,7 @@
 #include "test/lc_lt_t.hh"
 #include "test/lc_lt_t2.hh"
 #include "test/lo_lc_t.hh"
-#include "test/mor_t.hh"
+#include "test/mor_t2.hh"
 #include "test/omega_z_sdss.hh"
 #include "test/primitives.hh"
 #include "test/roffset_t.hh"
@@ -71,7 +71,7 @@ main(int argc, char* argv[])
 
   // ============ Cosmological Parameters ============
   //            (to be passed by CosmoSIS)
-  const double Omega_M = 0.3;
+  const double Omega_M = 0.22;
   const double Omega_L = 1.0 - Omega_M;
   const double Omega_K = 0.0;
   const double h = 0.7;
@@ -93,7 +93,7 @@ main(int argc, char* argv[])
   auto mh = read_vector("m_h.txt", log_omega_m);
   auto const zz = read_vector("z.txt", identity);
   // da_arr in Mpc
-  auto const zz_da = read_vector("z_da.txt", identity);
+  auto const zz_da = read_vector("z.txt", identity);
   auto const da_arr = read_vector("d_a.txt", identity);
 
   auto const del_sig_1 = read_vector("deltasigma_1.txt", identity);
@@ -107,12 +107,13 @@ main(int argc, char* argv[])
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
   long long maxeval = std::stoll(args[0]);
-  double sigma_intr=0.15 ;//this is a parameter that should come from cosmosis
+  double sigma_intr=0.10 ;//this is a parameter that should come from cosmosis
   double alpha=0.65 ;//this is a parameter that should come from cosmosis
-  y3_cluster::MOR_t mor{mz_power_law{9.1e-9, alpha, 0.0}, sigma_intr, alpha};
+  //y3_cluster::MOR_t mor{mz_power_law{8.8e-9, alpha, 0.0}, sigma_intr, alpha};
+  y3_cluster::MOR_t2 mor{pow(10,11.2), pow(10,12.42), alpha, sigma_intr};
   y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
   y3_cluster::LC_LT_t lc_lt;
-  y3_cluster::ZO_ZT_t zo_zt{0.05};
+  y3_cluster::ZO_ZT_t zo_zt{0.01};
   y3_cluster::ROFFSET_t roffset{0.2};
   y3_cluster::T_CEN_t t_cen;
   y3_cluster::T_MIS_t t_mis;
@@ -123,8 +124,8 @@ main(int argc, char* argv[])
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
-  y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
-  //y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
+  //y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
+  y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
 
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
@@ -160,8 +161,8 @@ main(int argc, char* argv[])
                                     dsc,
                                     dvdodz,
                                     omega_z,
-                                    {lo_ir, {30, 40}},
-                                    {zo_ir, {0.3, 0.4}});
+                                    {lo_ir, {28, 38}}, 
+                                    {zo_ir, {0.1, 0.3}});
 
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
