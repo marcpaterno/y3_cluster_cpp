@@ -135,6 +135,40 @@ public:
     , r(rarray)
   {}
 
+  template<std::size_t NEW_NRICHNESS, std::size_t NEW_NREDSHIFT>
+  Gamma_T_Integrand<MODELS, NRADII, NEW_NRICHNESS, NEW_NREDSHIFT>
+  with_bins(std::array<y3_cluster::IntegrationRange, NEW_NRICHNESS> new_lir,
+            std::array<y3_cluster::IntegrationRange, NEW_NREDSHIFT> new_zir)
+  {
+      return {fcen_,
+              msci_,
+              mor,
+              lo_lc,
+              lc_lt,
+              zo_zt,
+              roffset,
+              T_cen,
+              T_mis,
+              A_cen,
+              A_mis,
+              hmf,
+              del_sig_cen,
+              dv_do_dz,
+              omega_z,
+              lnM_ir_,
+              // Different lir
+              new_lir,
+              lt_ir_,
+              lc_ir_,
+              // Different zir
+              new_zir,
+              zt_ir_,
+              R_ir_,
+              A_ir_,
+              theta_ir_,
+              r};
+  }
+
   template<typename Fjn, typename Fjg, typename Fnm, typename Fgr>
   std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)>
   integrand_common(double lt,

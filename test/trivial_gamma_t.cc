@@ -131,8 +131,8 @@ main(int argc, char* argv[])
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
   // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc 
   y3_cluster::OMEGA_Z_SDSS omega_z;
-  IntegrationRange lo_ir{20, 28};
-  IntegrationRange zo_ir{0.1, 0.3};
+  IntegrationRange lo_ir1{20, 28};
+  IntegrationRange zo_ir1{0.1, 0.3};
   using MODELS = Models<decltype(mor),
                         decltype(lo_lc),
                         decltype(lc_lt),
@@ -146,7 +146,7 @@ main(int argc, char* argv[])
                         decltype(dsc),
                         decltype(dvdodz),
                         decltype(omega_z)>;
-  auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
+  auto gti = make_gamma_t_integrand<MODELS, 10, 4, 1>(0.7,
                                     0.11,
                                     mor,
                                     lo_lc,
@@ -161,44 +161,110 @@ main(int argc, char* argv[])
                                     dsc,
                                     dvdodz,
                                     omega_z,
-                                    {lo_ir, {28, 38}}, 
-                                    {zo_ir, {0.1, 0.3}});
+                                    {lo_ir1, {28, 38}, {38, 50}, {50, 70}},
+                                    {zo_ir1});
 
+  // ============ Actual Integrations ============
+  // Integrate centered and miscentered, simultaneously over all bins,
+  // then each bin individually
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
   // Won't allow integrating gti.centered directly :(
-  auto centered_res = time_integration(c,
-                                       [&gti](double a, double b, double c,
-                                              double d, double e) {
-                                            return gti.centered(a, b, c, d, e);
-                                       },
-                                       epsrel, epsabs, "centered-cuhre");
+  auto start = std::chrono::high_resolution_clock::now();
+  auto centered_res = c.integrate([&gti](double a, double b, double c,
+                                         double d, double e) {
+                                      return gti.centered(a, b, c, d, e);
+                                 },
+                                 epsrel, epsabs);
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> diff = stop - start;
 
   auto centered_bins = make_gamma_t_integrated_bins(gti, centered_res);
 
+  std::cout << "****** CENTERED ******\n"
+            << "** status: " << centered_res.status << '\n'
+            << "** simultaneous time: " << diff.count() << '\n';
+  double time_count = 0.0;
   for (auto& bin : centered_bins) {
-      std::cout << "lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
+      std::array<y3_cluster::IntegrationRange, 1> new_lir = {bin.lo_ir};
+      std::array<y3_cluster::IntegrationRange, 1> new_zir = {bin.zo_ir};
+      auto gti_single = gti.with_bins(new_lir, new_zir);
+
+      start = std::chrono::high_resolution_clock::now();
+      auto single_res = c.integrate([&gti_single](double a, double b, double c,
+                                                    double d, double e) {
+                                                 return gti_single.centered(a, b, c, d, e);
+                                            },
+                                            epsrel, epsabs);
+      stop = std::chrono::high_resolution_clock::now();
+      diff = stop - start;
+
+      auto single_bin = make_gamma_t_integrated_bins(gti_single, single_res)[0];
+
+      std::cout << "(single - bin) status = " << single_res.status
+                << ", time = " << diff.count() << '\n';
+
+      std::cout << "(simultaneous) lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
                 << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
                 << bin.Nw << " +/- " << bin.Nw_error << ")\n";
+
+      std::cout << "(single - bin) lo = " << single_bin.lo_ir << ", zo = " << single_bin.zo_ir
+                << ", (N, Nw) = (" << single_bin.N << " +/- " << single_bin.N_error << ", "
+                << single_bin.Nw << " +/- " << single_bin.Nw_error << ")\n";
+
+      time_count += diff.count();
   }
+  std::cout << "** total single time: " << time_count << '\n';
 
   // same deal as above
-  auto miscentered_res = time_integration(c,
-                                          [&gti](double a, double b, double c,
-                                                 double d, double e, double f,
-                                                 double g, double h) {
-                                               return gti.miscentered(a, b, c, d, e, f, g, h);
-                                          },
-                                          epsrel, epsabs, "miscentered-cuhre");
+  start = std::chrono::high_resolution_clock::now();
+  auto miscentered_res = c.integrate([&gti](double a, double b, double c,
+                                            double d, double e, double f,
+                                            double g, double h) {
+                                         return gti.miscentered(a, b, c, d, e, f, g, h);
+                                    },
+                                    epsrel, epsabs);
+  stop = std::chrono::high_resolution_clock::now();
+  diff = stop - start;
 
   auto miscentered_bins = make_gamma_t_integrated_bins(gti, miscentered_res);
 
+  std::cout << "****** MISCENTERED ******\n"
+            << "** status: " << centered_res.status << '\n'
+            << "** simultaneous time: " << diff.count() << '\n';
+  time_count = 0.0;
   for (auto& bin : miscentered_bins) {
-      std::cout << "lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
+      std::array<y3_cluster::IntegrationRange, 1> new_lir = {bin.lo_ir};
+      std::array<y3_cluster::IntegrationRange, 1> new_zir = {bin.zo_ir};
+      auto gti_single = gti.with_bins(new_lir, new_zir);
+
+      start = std::chrono::high_resolution_clock::now();
+      auto single_res = c.integrate([&gti_single](double a, double b, double c,
+                                                    double d, double e, double f,
+                                                    double g, double h) {
+                                                 return gti_single.miscentered(a, b, c, d, e, f, g, h);
+                                            },
+                                            epsrel, epsabs);
+      stop = std::chrono::high_resolution_clock::now();
+      diff = stop - start;
+
+      auto single_bin = make_gamma_t_integrated_bins(gti_single, single_res)[0];
+
+      std::cout << "(single - bin) status = " << single_res.status
+                << ", time = " << diff.count() << '\n';
+
+      std::cout << "(single - bin) lo = " << single_bin.lo_ir << ", zo = " << single_bin.zo_ir
+                << ", (N, Nw) = (" << single_bin.N << " +/- " << single_bin.N_error << ", "
+                << single_bin.Nw << " +/- " << single_bin.Nw_error << ")\n";
+
+      std::cout << "(simultaneous) lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
                 << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
                 << bin.Nw << " +/- " << bin.Nw_error << ")\n";
+
+      time_count += diff.count();
   }
+  std::cout << "** total single time: " << time_count << '\n';
 };
