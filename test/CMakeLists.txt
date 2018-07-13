@@ -80,6 +80,14 @@ target_include_directories(omega_z_sdss_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(omega_z_sdss_test omega_z_sdss_test)
 
+add_executable(hmf_t_test main.cc hmf_t.test.cc interp_2d.cc)
+target_link_libraries(hmf_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(hmf_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(hmf_t_test hmf_t_test)
+
 add_executable(lo_lc_t_test main.cc lo_lc_t.test.cc)
 target_include_directories(lo_lc_t_test
                            PRIVATE
@@ -162,6 +170,16 @@ target_include_directories(mor_probability_test
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(mor_probability_test mor_probability_test)
+
+add_executable(mor2_probability_test main.cc mor2_probability_unity.test.cc interp_2d.cc)
+target_link_libraries(mor2_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(mor2_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(mor2_probability_test mor2_probability_test)
 
 add_executable(roffset_probability_test main.cc roffset_probability_unity.test.cc interp_2d.cc)
 target_link_libraries(roffset_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})

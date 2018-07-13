@@ -15,7 +15,6 @@
 #include "test/ez_sq.hh"
 #include "test/hmf_t.hh"
 #include "test/lc_lt_t.hh"
-#include "test/lc_lt_t2.hh"
 #include "test/lo_lc_t.hh"
 #include "test/mor_t2.hh"
 #include "test/omega_z_sdss.hh"
@@ -84,14 +83,14 @@ main(int argc, char* argv[])
   // ============ Input Data Tables ============
   // dndlnmh.txt, m_h.txt, z.txt came from the cosmosis tinker_mf_module.so
   // d_a.txt, z_da.txt came from the cosmosis camb.so
-  auto const dndlnmh = read_vector("dndlnmh.txt", identity);
+  auto const dndlnmh = read_vector("dndlnmh_matteo.txt", identity);
   // m_h.txt is in units of: 
   //    \Omega_M M_{solar} h^{-1}
   // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
   // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
   // dndlnmh is in unit of (h^3 Mpc^{-3})
-  auto mh = read_vector("m_h.txt", log_omega_m);
-  auto const zz = read_vector("z.txt", identity);
+  auto mh = read_vector("m_h_matteo.txt", log_omega_m);
+  auto const zz = read_vector("z_matteo.txt", identity);
   // da_arr in Mpc
   auto const zz_da = read_vector("z.txt", identity);
   auto const da_arr = read_vector("d_a.txt", identity);
