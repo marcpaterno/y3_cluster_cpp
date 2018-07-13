@@ -1,6 +1,6 @@
 # Tests Directory
 
-For the moment, this directory (`tests`) contains all of the code for `y3_cluster_cpp` - tests and otherwise. We recognize that is confusing; non-test code will be moved elsewhere once the repository is in a stable state.
+Welcome to the tests for the Y3 Cluster Cosmology Pipeline. This directory should contain only source code, data files should be in the `../data` directory.
 
 ## Building and Running Tests
 
@@ -63,3 +63,5 @@ In addition, there are several non-test executables, intended to ease examining 
     * Integrate, respectively, the probability distributions $P(\lc|\lt)$, $P(\lo|\lt)$, $P(\lt|M,\zt)$, and $P_{mis}(R_{mis}$, over respective ranges. This is to check whether the distributions integrate properly to 1.0, within acceptable limits.
     * Each executable emits CSV-formatted results tables of the resulting integration value, as well as the values of extra parameters used.
     * Each executable takes a number of command-line arguments for customization. Obtain a list with `./integrate_<whatever> -h` or `--help`.
+* `integrate_delta_sigma`
+    * Compares `del_sig_cen` and `del_sig_mis`. Aims to have a similar interface to the above integrations.
