@@ -1,9 +1,9 @@
 #include "catch2/catch.hpp"
-#include "test/lc_lt_t.hh"
-#include "test/lo_lc_t.hh"
-#include "test/mor_t.hh"
+#include "lc_lt_t.hh"
+#include "lo_lc_t.hh"
+#include "mor_t.hh"
+#include "roffset_t.hh"
 #include "test/param_space_explorer.hh"
-#include "test/roffset_t.hh"
 #include "cubacpp/cubacpp.hh"
 #include "integration_range.hh"
 

@@ -1,5 +1,5 @@
-#include "test/interp_2d.hh"
-#include "test/fpsupport.hh"
+#include "interp_2d.hh"
+#include "fpsupport.hh"
 
 #include <algorithm>
 #include <stdexcept>

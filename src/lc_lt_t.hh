@@ -2,8 +2,9 @@
 #define Y3_CLUSTER_LC_LT_T_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "test/interp_2d.hh"
-#include "test/primitives.hh"
+#include "interp_2d.hh"
+#include "primitives.hh"
+
 #include <algorithm>
 #include <cmath>
 #include <fstream>

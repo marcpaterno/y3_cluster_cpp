@@ -2,7 +2,8 @@
 #define Y3_CLUSTER_CPP_LO_LC_T_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "test/primitives.hh"
+#include "primitives.hh"
+
 #include <cmath>
 
 namespace y3_cluster {

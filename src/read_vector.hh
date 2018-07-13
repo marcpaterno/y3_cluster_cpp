@@ -9,7 +9,7 @@ template <class XFORM>
 std::vector<double>
 read_vector(char const* filename, XFORM xform)
 {
-    std::string fname = std::string("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/")
+    std::string fname = std::string("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/data/")
                         + filename;
     std::ifstream file(fname);
 	if (!file) {

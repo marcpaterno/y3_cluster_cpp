@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/transform.hh"
+#include "transform.hh"
 #include <array>
 #include <locale> // for std::toupper
 #include <string>

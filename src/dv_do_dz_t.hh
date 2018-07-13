@@ -1,9 +1,9 @@
 #ifndef Y3_CLUSTER_DV_DO_DZ_T_HH
 #define Y3_CLUSTER_DV_DO_DZ_T_HH
 
-#include "test/ez.hh"
-#include "test/interp_1d.hh"
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "ez.hh"
+#include "interp_1d.hh"
 
 #include <memory>
 #include <vector>

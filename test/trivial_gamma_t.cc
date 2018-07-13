@@ -5,6 +5,7 @@
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
 
+/*
 #include "test/a_cen_t.hh"
 #include "test/a_mis_t.hh"
 #include "test/del_sig_y1.hh"
@@ -25,6 +26,7 @@
 #include "test/zo_zt_t.hh"
 #include "test/read_vector.hh"
 #include "test/default_models.hh"
+*/
 
 #include <chrono>
 #include <cmath>
@@ -35,8 +37,11 @@
 #include <string>
 #include <vector>
 
-#include "test/interp_1d.hh"
-#include "test/transform.hh"
+#include <default_models.hh>
+#include <interp_1d.hh>
+#include <interp_2d.hh>
+#include <read_vector.hh>
+#include <transform.hh>
 
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;

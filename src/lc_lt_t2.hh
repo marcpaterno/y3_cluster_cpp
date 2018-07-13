@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_CPP_LC_LT_T2_HH
 #define Y3_CLUSTER_CPP_LC_LT_T2_HH
 
-#include "test/primitives.hh"
+#include "primitives.hh"
 
 namespace y3_cluster {
 
