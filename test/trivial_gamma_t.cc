@@ -46,6 +46,7 @@
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
+using y3_cluster::make_gamma_t_integrand;
 using y3_cluster::mz_power_law;
 
 // Helper template, to automate the timing of integration.
