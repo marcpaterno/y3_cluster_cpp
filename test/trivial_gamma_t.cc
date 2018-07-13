@@ -83,14 +83,14 @@ main(int argc, char* argv[])
   // ============ Input Data Tables ============
   // dndlnmh.txt, m_h.txt, z.txt came from the cosmosis tinker_mf_module.so
   // d_a.txt, z_da.txt came from the cosmosis camb.so
-  auto const dndlnmh = read_vector("dndlnmh_matteo.txt", identity);
+  auto const dndlnmh = read_vector("dndlnmh.txt", identity);
   // m_h.txt is in units of: 
   //    \Omega_M M_{solar} h^{-1}
   // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
   // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
   // dndlnmh is in unit of (h^3 Mpc^{-3})
-  auto mh = read_vector("m_h_matteo.txt", log_omega_m);
-  auto const zz = read_vector("z_matteo.txt", identity);
+  auto mh = read_vector("m_h.txt", log_omega_m);
+  auto const zz = read_vector("z.txt", identity);
   // da_arr in Mpc
   auto const zz_da = read_vector("z.txt", identity);
   auto const da_arr = read_vector("d_a.txt", identity);
@@ -123,6 +123,7 @@ main(int argc, char* argv[])
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   y3_cluster::HMF_t hmf(p1, 4.50732047e-02, 1.01958078e+00);
+  //y3_cluster::HMF_t hmf(p1, 0, 1.0);
   //y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
   y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
 
