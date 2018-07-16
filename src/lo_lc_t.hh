@@ -15,10 +15,10 @@ namespace y3_cluster {
     {}
 
     explicit LO_LC_t(cosmosis::DataBlock& sample)
-      : _alpha(get_datablock<double>(sample, "LO_LC_params", "alpha"))
-      , _a(get_datablock<double>(sample, "LO_LC_params", "a"))
-      , _b(get_datablock<double>(sample, "LO_LC_params", "b"))
-      , _R_lambda(get_datablock<double>(sample, "LO_LC_params", "R_lambda"))
+      : _alpha(get_datablock<double>(sample, "gamma_t", "LO_LC_alpha"))
+      , _a(get_datablock<double>(sample, "gamma_t", "LO_LC_a"))
+      , _b(get_datablock<double>(sample, "gamma_t", "LO_LC_b"))
+      , _R_lambda(get_datablock<double>(sample, "gamma_t", "LO_LC_R_lambda"))
     {}
 
     double

@@ -18,11 +18,11 @@ namespace y3_cluster {
 
     explicit HMF_t(cosmosis::DataBlock& sample)
       : _nmz(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "HMF_params", "xs"),
-          get_datablock<doubles>(sample, "HMF_params", "ys"),
-          get_datablock<doubles>(sample, "HMF_params", "zs")))
-      , _s(get_datablock<double>(sample, "MHF_params", "s"))
-      , _q(get_datablock<double>(sample, "MHF_params", "q"))
+          get_datablock<doubles>(sample, "gamma_t", "hmf_xs"),
+          get_datablock<doubles>(sample, "gamma_t", "hmf_ys"),
+          get_datablock<doubles>(sample, "gamma_t", "hmf_zs")))
+      , _s(get_datablock<double>(sample, "gamma_t", "hmf_s"))
+      , _q(get_datablock<double>(sample, "gamma_t", "hmf_q"))
     {}
 
     double

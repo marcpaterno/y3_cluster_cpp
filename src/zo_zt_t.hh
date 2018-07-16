@@ -11,7 +11,7 @@ namespace y3_cluster {
     explicit ZO_ZT_t(double sigma) : _sigma(sigma) {}
 
     explicit ZO_ZT_t(cosmosis::DataBlock& sample)
-      : _sigma(get_datablock<double>(sample, "ZO_ZT_params", "sigma"))
+      : _sigma(get_datablock<double>(sample, "gamma_t", "zo_zt_sigma"))
     {}
 
     double
