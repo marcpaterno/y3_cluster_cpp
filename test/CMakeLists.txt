@@ -98,6 +98,15 @@ target_include_directories(omega_z_sdss_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(omega_z_sdss_test omega_z_sdss_test)
 
+add_executable(hmf_t_test main.cc hmf_t.test.cc)
+target_link_libraries(hmf_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+target_include_directories(hmf_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(hmf_t_test hmf_t_test)
+
 add_executable(lo_lc_t_test main.cc lo_lc_t.test.cc)
 target_include_directories(lo_lc_t_test
                            PRIVATE
@@ -171,6 +180,15 @@ target_include_directories(lo_lc_probability_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(lo_lc_probability_test lo_lc_probability_test)
 
+add_executable(mor_t2_test main.cc mor_t2.test.cc)
+target_link_libraries(mor_t2_test PRIVATE ${GSL_LIBRARIES} interp)
+target_include_directories(mor_t2_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+		                   ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(mor_t2_test mor_t2_test)
+
 add_executable(mor_probability_test main.cc mor_probability_unity.test.cc)
 target_link_libraries(mor_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(mor_probability_test
@@ -181,6 +199,17 @@ target_include_directories(mor_probability_test
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(mor_probability_test mor_probability_test)
+
+add_executable(mor2_probability_test main.cc mor2_probability_unity.test.cc)
+target_link_libraries(mor2_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+target_include_directories(mor2_probability_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(mor2_probability_test mor2_probability_test)
 
 add_executable(roffset_probability_test main.cc roffset_probability_unity.test.cc)
 target_link_libraries(roffset_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
@@ -202,6 +231,17 @@ target_include_directories(integrate_delta_sigma
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_executable(simultaneous_bin_comparison_test main.cc simultaneous_bin_comparison.test.cc)
+target_link_libraries(simultaneous_bin_comparison_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_include_directories(simultaneous_bin_comparison_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(simultaneous_bin_comparison_test simultaneous_bin_comparison_test)
 
 add_executable(integrate_lc_lt integrate_lc_lt.cc)
 target_link_libraries(integrate_lc_lt PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
@@ -236,6 +276,16 @@ target_include_directories(integrate_mor
 add_executable(integrate_roffset integrate_roffset.cc)
 target_link_libraries(integrate_roffset PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(integrate_roffset
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_executable(simultaneous_bin_comparison simultaneous_bin_comparison.cc)
+target_link_libraries(simultaneous_bin_comparison PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_include_directories(simultaneous_bin_comparison
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src
