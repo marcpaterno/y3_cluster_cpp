@@ -1,7 +1,10 @@
 add_library(interp STATIC interp_1d.cc interp_2d.cc)
 target_link_libraries(interp PRIVATE ${GSL_LIBRARIES})
+set_property(TARGET interp PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 add_library(lc_lt STATIC lc_lt_t.cc)
 target_link_libraries(lc_lt PRIVATE ${GSL_LIBRARIES})
+set_property(TARGET lc_lt PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_library(example_module SHARED example_module.cc interp_1d.cc interp_2d.cc)
 target_link_libraries(example_module
