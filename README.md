@@ -13,6 +13,9 @@ In whatever directory is to become your top-level installation, clone the `cosmo
 $ git clone https://<your-username>@bitbucket.org/mpaterno/cosmosis-docker.git
 ```
 
+Make sure you are cloning `mpaterno/cosmosis-docker.git` and not `joezuntz/cosmosis-docker.git`. We have
+some additions that are not (yet) in Joe's repository.
+
 This will get some scripts, a `Dockerfile`, etc.
 
 ### Build your personal Docker image

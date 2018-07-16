@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/point_3d.hh"
+#include "point_3d.hh"
 
 #include <cmath>
 #include <limits>

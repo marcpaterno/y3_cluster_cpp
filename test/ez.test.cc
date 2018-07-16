@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/ez.hh"
+#include "ez.hh"
 
 #include <fstream>
 
@@ -33,5 +33,5 @@ TEST_CASE("ez works")
         CHECK(ez(z) == Approx(valid).epsilon(epsrel));
         z += dz;
     }
-        
+
 }

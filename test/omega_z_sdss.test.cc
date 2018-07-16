@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/omega_z_sdss.hh"
+#include "omega_z_sdss.hh"
 
 #include <fstream>
 
@@ -7,7 +7,7 @@ using y3_cluster::OMEGA_Z_SDSS;
 
 TEST_CASE("omega_z_sdss works")
 {
-  std::ifstream infile {"omega_z_sdss.txt"};
+  std::ifstream infile {"../data/omega_z_sdss.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> zs;
@@ -25,9 +25,9 @@ TEST_CASE("omega_z_sdss works")
   // If the file is well-formed, we have the same number of z-values as
   // y(z)-values.
   REQUIRE(zs.size() == ys.size());
-  
+
   OMEGA_Z_SDSS omega;
-  
+
   for (std::size_t i = 0, sz = zs.size(); i != sz; ++i)
   {
     double const fz = omega(zs[i]);

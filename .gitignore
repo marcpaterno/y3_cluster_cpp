@@ -8,3 +8,7 @@ cmake_install.cmake
 *.swp
 ez_sq_test
 ez_test
+*~
+*.pdf
+*.ps
+gmon.out

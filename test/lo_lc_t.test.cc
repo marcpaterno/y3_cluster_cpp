@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/lo_lc_t.hh"
+#include "lo_lc_t.hh"
 
 #include <fstream>
 #include <string>
@@ -8,7 +8,7 @@
 using y3_cluster::LO_LC_t;
 TEST_CASE("Lo_Lc_t works")
 {
-  std::ifstream infile {"test_lolc_t.txt"};
+  std::ifstream infile {"../data/test_lolc_t.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> los;
@@ -35,13 +35,14 @@ TEST_CASE("Lo_Lc_t works")
   REQUIRE(los.size() == lcs.size());
   REQUIRE(lcs.size() == Rs.size());
   REQUIRE(Rs.size() == ys.size());
-  
+
+  // No longer relevant - redefined lo_lc
   LO_LC_t lolc(1.66, 0.26, 1.43, 1.0);
-  
+
   for (std::size_t i = 0, sy = ys.size(); i != sy; ++i)
   {
     double const fz = lolc(los[i], lcs[i], Rs[i]);
-    double constexpr epsrel = 1.0e-3;
-    CHECK(fz == Approx(ys[i]).epsilon(epsrel));
+    double constexpr epsrel = 1.0e-6;
+    CHECK((fz * lcs[i])== Approx(ys[i]).epsilon(epsrel));
   }
 }
