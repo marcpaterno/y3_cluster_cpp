@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/lo_lc_t.hh"
+#include "lo_lc_t.hh"
 
 #include <fstream>
 #include <string>
@@ -8,7 +8,7 @@
 using y3_cluster::LO_LC_t;
 TEST_CASE("Lo_Lc_t works")
 {
-  std::ifstream infile {"test_lolc_t.txt"};
+  std::ifstream infile {"../data/test_lolc_t.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> los;

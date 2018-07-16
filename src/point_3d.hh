@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_POINT_3D_HH
 #define Y3_CLUSTER_POINT_3D_HH
 
-#include "test/fpsupport.hh"
+#include "fpsupport.hh"
 
 #include <array>
 #include <vector>

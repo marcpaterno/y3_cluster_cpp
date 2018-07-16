@@ -1,4 +1,4 @@
-#include "test/lc_lt_t.hh"
+#include "lc_lt_t.hh"
 
 using namespace y3_cluster;
 

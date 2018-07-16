@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_CPP_HMF_T_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "test/interp_2d.hh"
+#include "interp_2d.hh"
 
 #include <memory>
 

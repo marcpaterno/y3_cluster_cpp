@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_INTERP_2D_HH
 #define Y3_CLUSTER_INTERP_2D_HH
 
-#include "test/point_3d.hh"
+#include "point_3d.hh"
 
 #include "gsl/gsl_interp2d.h"
 #include <array>

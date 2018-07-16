@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/omega_z_sdss.hh"
+#include "omega_z_sdss.hh"
 
 #include <fstream>
 
@@ -7,7 +7,7 @@ using y3_cluster::OMEGA_Z_SDSS;
 
 TEST_CASE("omega_z_sdss works")
 {
-  std::ifstream infile {"omega_z_sdss.txt"};
+  std::ifstream infile {"../data/omega_z_sdss.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> zs;

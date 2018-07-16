@@ -1,4 +1,4 @@
-#include "test/default_models.hh"
+#include "default_models.hh"
 #include "generate_module.hh"
 
 // If you want to use something other than default models:

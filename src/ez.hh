@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_CPP_EZ_HH
 #define Y3_CLUSTER_CPP_EZ_HH
 
-#include "test/ez_sq.hh"
+#include "ez_sq.hh"
 #include <cmath>
 
 namespace y3_cluster {

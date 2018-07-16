@@ -2,17 +2,19 @@
 #define Y3_CLUSTER_GAMMA_T_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "integration_range.hh"
+#include <integration_range.hh>
+#include <transform.hh>
+
 #include <algorithm>
 #include <array>
 #include <cubacpp/cubacpp.hh>
 #include <cmath>
 #include <iostream>
-#include <test/transform.hh>
 
 // This class template is based
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
 // provided by Spencer Everett.
+namespace y3_cluster {
 
 template <typename MODELS, std::size_t NRADII>
 class Gamma_T_Integrand {
@@ -387,5 +389,7 @@ make_gamma_t_integrand(double fcen,
            theta_ir,
            rarray };
 }
+
+} // namespace y3_cluster
 
 #endif
