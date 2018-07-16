@@ -16,11 +16,11 @@ namespace y3_cluster {
     {}
 
     explicit MOR_t(cosmosis::DataBlock& sample)
-      : _lambda(mz_power_law(get_datablock<double>(sample, "MOR_params", "A"),
-                             get_datablock<double>(sample, "MOR_params", "B"),
-                             get_datablock<double>(sample, "MOR_params", "C")))
-      , _sigma_intr(get_datablock<double>(sample, "MOR_params", "sigma"))
-      , _alpha(get_datablock<double>(sample, "MOR_params", "alpha"))
+      : _lambda(mz_power_law(get_datablock<double>(sample, "gamma_t", "mor_A"),
+                             get_datablock<double>(sample, "gamma_t", "mor_B"),
+                             get_datablock<double>(sample, "gamma_t", "mor_C")))
+      , _sigma_intr(get_datablock<double>(sample, "gamma_t", "mor_sigma"))
+      , _alpha(get_datablock<double>(sample, "gamma_t", "mor_alpha"))
       {}
 
     double
