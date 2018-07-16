@@ -1,9 +1,9 @@
 #ifndef Y3_CLUSTER_CPP_MOR_T_HH
 #define Y3_CLUSTER_CPP_MOR_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "mz_power_law.hh"
-#include "primitives.hh"
+#include <datablock_reader.hh>
+#include <mz_power_law.hh>
+#include <primitives.hh>
 
 #include <cmath>
 
@@ -16,11 +16,11 @@ namespace y3_cluster {
     {}
 
     explicit MOR_t(cosmosis::DataBlock& sample)
-      : _lambda(mz_power_law(sample.view<double>("MOR_params", "A"),
-                             sample.view<double>("MOR_params", "B"),
-                             sample.view<double>("MOR_params", "C")))
-      , _sigma_intr(sample.view<double>("MOR_params", "sigma"))
-      , _alpha(sample.view<double>("MOR_params", "alpha"))
+      : _lambda(mz_power_law(get_datablock<double>(sample, "MOR_params", "A"),
+                             get_datablock<double>(sample, "MOR_params", "B"),
+                             get_datablock<double>(sample, "MOR_params", "C")))
+      , _sigma_intr(get_datablock<double>(sample, "MOR_params", "sigma"))
+      , _alpha(get_datablock<double>(sample, "MOR_params", "alpha"))
       {}
 
     double

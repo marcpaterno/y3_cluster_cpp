@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_CPP_HMF_T_HH
 #define Y3_CLUSTER_CPP_HMF_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include <datablock_reader.hh>
 #include "interp_2d.hh"
 
 #include <memory>
@@ -18,11 +18,11 @@ namespace y3_cluster {
 
     explicit HMF_t(cosmosis::DataBlock& sample)
       : _nmz(std::make_shared<Interp2D const>(
-          sample.view<doubles>("HMF_params", "xs"),
-          sample.view<doubles>("HMF_params", "ys"),
-          sample.view<doubles>("HMF_params", "zs")))
-      , _s(sample.view<double>("MHF_params", "s"))
-      , _q(sample.view<double>("MHF_params", "q"))
+          get_datablock<doubles>(sample, "HMF_params", "xs"),
+          get_datablock<doubles>(sample, "HMF_params", "ys"),
+          get_datablock<doubles>(sample, "HMF_params", "zs")))
+      , _s(get_datablock<double>(sample, "MHF_params", "s"))
+      , _q(get_datablock<double>(sample, "MHF_params", "q"))
     {}
 
     double

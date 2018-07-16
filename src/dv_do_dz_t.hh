@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_DV_DO_DZ_T_HH
 #define Y3_CLUSTER_DV_DO_DZ_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include <datablock_reader.hh>
 #include "ez.hh"
 #include "interp_1d.hh"
 
@@ -19,12 +19,12 @@ namespace y3_cluster {
 
     explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
       : _da(std::make_shared<Interp1D const>(
-          sample.view<doubles>("DV_D0_DZ_params", "xs"),
-          sample.view<doubles>("DV_D0_DZ_params", "ys")))
-      , _ezt(y3_cluster::EZ(sample.view<double>("", "omega_m"),
-                            sample.view<double>("", "omega_l"),
-                            sample.view<double>("", "omega_k")))
-      , _h(sample.view<double>("DV_D0_DZ_params", "h"))
+          get_datablock<doubles>(sample, "DV_D0_DZ_params", "xs"),
+          get_datablock<doubles>(sample, "DV_D0_DZ_params", "ys")))
+      , _ezt(y3_cluster::EZ(get_datablock<double>(sample, "", "omega_m"),
+                            get_datablock<double>(sample, "", "omega_l"),
+                            get_datablock<double>(sample, "", "omega_k")))
+      , _h(get_datablock<double>(sample, "DV_D0_DZ_params", "h"))
       {}
 
     double
