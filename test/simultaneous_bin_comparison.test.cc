@@ -58,7 +58,7 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
     auto mh = read_vector("m_h.txt", log_omega_m);
     auto const zz = read_vector("z.txt", identity);
     // da_arr in Mpc
-    auto const zz_da = read_vector("z_da.txt", identity);
+    auto const zz_da = read_vector("z.txt", identity);
     auto const da_arr = read_vector("d_a.txt", identity);
 
     auto const del_sig_1 = read_vector("deltasigma_1.txt", identity);
