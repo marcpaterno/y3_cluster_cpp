@@ -29,6 +29,7 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <gperftools/profiler.h>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -156,6 +157,7 @@ main(int argc, char* argv[])
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
+  ProfilerStart("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/dump.txt");
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
   time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs); },
@@ -163,4 +165,7 @@ main(int argc, char* argv[])
 
   time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
                    "miscentered-cuhre");
+
+  ProfilerFlush();
+  ProfilerStop();
 };
