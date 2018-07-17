@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <iostream>
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "/cosmosis/cosmosis/datablock/datablock_status.h"
 
@@ -56,12 +57,12 @@ datablock_status_str(DATABLOCK_STATUS dbs)
 
 template<typename T>
 T
-get_datablock(cosmosis::DataBlock& db, const char * top, const char * subject)
+get_datablock(cosmosis::DataBlock& db, const char * section, const char * value)
 {
     T a;
-    auto retval = db.get_val<T>(top, subject, a);
+    auto retval = db.get_val<T>(section, value, a);
     if (retval != 0) {
-        throw std::runtime_error("Error (" + std::string(datablock_status_str(retval)) + ") when retrieving: " + std::string(top) + ":" + std::string(subject));
+        throw std::runtime_error("Error (" + std::string(datablock_status_str(retval)) + ") when retrieving: " + std::string(section) + ":" + std::string(value));
     }
     return a;
 }

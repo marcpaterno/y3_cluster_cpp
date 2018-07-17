@@ -12,14 +12,15 @@ namespace y3_cluster {
     explicit ClustersModule(cosmosis::DataBlock& config);
     void execute(cosmosis::DataBlock& sample);
 
-  private:
-    Gamma_T_Integrand<MODELS, NRADII> _integrand;
+  //private:
+  //  Gamma_T_Integrand<MODELS, NRADII> _integrand;
   };
 }
 
 template <class MODELS, std::size_t NRADII>
 y3_cluster::ClustersModule<MODELS, NRADII>::ClustersModule(cosmosis::DataBlock& config)
-  : _integrand(config)
+  // TODO: Possibly set up any optional parameters, like integration params?
+  //: _integrand(config)
 {}
 
 template <class MODELS, std::size_t NRADII>
@@ -37,8 +38,9 @@ y3_cluster::ClustersModule<MODELS, NRADII>::execute(cosmosis::DataBlock& sample)
   cubacpp::Cuhre c;
   c.maxeval = 100000000;
 
-  auto centered_result = _integrand.integrate_centered(c, epsrel, epsabs);
-  auto miscentered_result = _integrand.integrate_miscentered(c, epsrel, epsabs);
+  Gamma_T_Integrand<MODELS, NRADII> integrand(sample);
+  auto centered_result = integrand.integrate_centered(c, epsrel, epsabs);
+  auto miscentered_result = integrand.integrate_miscentered(c, epsrel, epsabs);
 
   std::cout << "Centered:\n" << centered_result;
   std::cout << "Miscentered:\n" << miscentered_result;
