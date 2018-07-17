@@ -1,11 +1,15 @@
 #ifndef Y3_CLUSTER_OMEGA_Z_SDSS_HH
 #define Y3_CLUSTER_OMEGA_Z_SDSS_HH
 
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include <array>
 #include <cmath>
 
 namespace y3_cluster {
   struct  OMEGA_Z_SDSS {
+
+    OMEGA_Z_SDSS() {}
+    OMEGA_Z_SDSS(cosmosis::DataBlock&) {}
 
     double
     operator()(double zt) const

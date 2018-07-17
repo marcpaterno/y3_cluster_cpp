@@ -2,6 +2,7 @@
 #include "lc_lt_t.hh"
 #include "lo_lc_t.hh"
 #include "mor_t.hh"
+#include "mor_t2.hh"
 #include "roffset_t.hh"
 #include "test/param_space_explorer.hh"
 #include "cubacpp/cubacpp.hh"
@@ -236,5 +237,54 @@ namespace y3_cluster {
                 CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(0.15));
             }
         } while (pse.next());
+    }
+
+    template<typename Integrator>
+    void
+    test_integrate_mor2(Integrator I,
+                       IntegrationRange lt_ir,
+                       IntegrationRange lnM_ir,
+                       IntegrationRange zt_ir,
+                       std::size_t lnM_width,
+                       std::size_t zt_width,
+                       const double epsrel=1.0e-4,
+                       const double epsabs=1.0e-12,
+                       bool print=false,
+                       bool test=true)
+
+    {
+        if (print)
+            std::cout << "lnM,M,zt,mor2_integrated,status,error,prob\n";
+
+        // Values from trivial_gamma_t
+        MOR_t2 mor2{pow(10,1.11375214e+01), pow(10,12.4225835912), 0.65, 0.15};
+
+        for (auto i = 0u; i < lnM_width; i++) {
+            for (auto j = 0u; j < zt_width; j++) {
+                const double lnM = lnM_ir.transform((i + 1) / ((double) lnM_width + 1));
+                const double zt = zt_ir.transform((j + 1) / ((double) zt_width + 1));
+
+                const auto res = I.integrate([lnM, zt, lt_ir, mor2](double scaled_lt) {
+                          const double lt = lt_ir.transform(scaled_lt);
+                          return lt_ir.jacobian() * mor2(lt, lnM, zt);
+                        },
+                        epsrel, epsabs);
+
+                if (print)
+                    std::cout << lnM << ", "
+                              << std::exp(lnM) << ", "
+                              << zt << ", "
+                              << res.value << ", "
+                              << res.status << ", "
+                              << res.error << ", "
+                              << res.prob << '\n';
+
+                if (test) {
+                    CHECK(res.status == 0);
+                    CHECK(res.value == Approx(1.0).epsilon(1e-2).margin(0.01));
+                }
+            }
+        }
+
     }
 }

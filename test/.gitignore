@@ -12,13 +12,13 @@ interp_1d_test
 interp_2d_test
 lc_lt_t_test
 lo_lc_t_test
-mor_t_test
 mz_power_law_test
 omega_z_sdss_test
 point_3d_test
 roffset_t_test
 transform_test
 trivial_gamma_t
+hmf_t_test
 integrate_delta_sigma
 integrate_lc_lt
 integrate_lo_l
@@ -27,7 +27,10 @@ integrate_lo_lc
 integrate_roffset
 lc_lt_probability_test
 lo_lc_probability_test
+mor_t_test
+mor_t2_test
 mor_probability_test
+mor2_probability_test
 param_space_explorer_test
 roffset_probability_test
 roffset_t_test

@@ -15,9 +15,8 @@
 #include "test/ez_sq.hh"
 #include "test/hmf_t.hh"
 #include "test/lc_lt_t.hh"
-#include "test/lc_lt_t2.hh"
 #include "test/lo_lc_t.hh"
-#include "test/mor_t.hh"
+#include "test/mor_t2.hh"
 #include "test/omega_z_sdss.hh"
 #include "test/primitives.hh"
 #include "test/roffset_t.hh"
@@ -39,6 +38,7 @@
 #include <vector>
 
 #include <default_models.hh>
+#include <mor_t2.hh>
 #include <interp_1d.hh>
 #include <interp_2d.hh>
 #include <read_vector.hh>
@@ -52,14 +52,16 @@ using y3_cluster::mz_power_law;
 
 // Helper template, to automate the timing of integration.
 template <class F>
-void
-time_integration(F f, char const* algname)
+auto
+time_integration(F f,
+                 char const* algname) -> decltype(f())
 {
   auto start = std::chrono::high_resolution_clock::now();
   auto res = f();
   auto stop = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = stop - start;
   std::cout << algname << ": " << res << " (" << diff.count() << "s)\n";
+  return res;
 }
 
 // The main function for exercising our integrand.
@@ -76,10 +78,10 @@ main(int argc, char* argv[])
 
   // ============ Cosmological Parameters ============
   //            (to be passed by CosmoSIS)
-  const double Omega_M = 0.3;
+  const double Omega_M = 1.87518978e-01;
   const double Omega_L = 1.0 - Omega_M;
   const double Omega_K = 0.0;
-  const double h = 0.7;
+  const double h = 7.71358152e-01;
 
   // ============ Scaling Functions ============
   auto identity = [](double x) { return x; };
@@ -98,7 +100,7 @@ main(int argc, char* argv[])
   auto mh = read_vector("m_h.txt", log_omega_m);
   auto const zz = read_vector("z.txt", identity);
   // da_arr in Mpc
-  auto const zz_da = read_vector("z_da.txt", identity);
+  auto const zz_da = read_vector("z.txt", identity);
   auto const da_arr = read_vector("d_a.txt", identity);
 
   auto const del_sig_1 = read_vector("deltasigma_1.txt", identity);
@@ -111,14 +113,16 @@ main(int argc, char* argv[])
   // ============ Integral Components ============
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
-  using MODELS = y3_cluster::DefaultModels;
+  struct MODELS : public y3_cluster::DefaultModels {
+      using MOR = typename y3_cluster::MOR_t2;
+  };
   long long maxeval = std::stoll(args[0]);
-  double sigma_intr = 0.15 ;//this is a parameter that should come from cosmosis
-  double alpha = 0.65;//this is a parameter that should come from cosmosis
-  MODELS::MOR mor{mz_power_law{9.1e-9, alpha, 0.0}, sigma_intr, alpha};
+  double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis
+  double alpha=6.91589257e-01 ;//this is a parameter that should come from cosmosis
+  MODELS::MOR mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr};
   MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
   MODELS::LC_LT lc_lt;
-  MODELS::ZO_ZT zo_zt{0.05};
+  MODELS::ZO_ZT zo_zt{0.005};
   MODELS::ROFFSET roffset{0.2};
   MODELS::T_CEN t_cen;
   MODELS::T_MIS t_mis;
@@ -139,10 +143,10 @@ main(int argc, char* argv[])
   MODELS::DV_DO_DZ dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
   MODELS::OMEGA_Z omega_z;
 
-  IntegrationRange lo_ir{20, 28};
+  IntegrationRange lo_ir{20, 27.9};
   IntegrationRange zo_ir{0.1, 0.3};
 
-  auto gti = make_gamma_t_integrand<MODELS>(0.7,
+  auto gti = make_gamma_t_integrand<MODELS, 10>(0.7,
                                     0.11,
                                     mor,
                                     lo_lc,
@@ -157,9 +161,12 @@ main(int argc, char* argv[])
                                     ds,
                                     dvdodz,
                                     omega_z,
-                                    lo_ir,
-                                    zo_ir);
+                                    {lo_ir},//, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
+                                    {zo_ir});
 
+  // ============ Actual Integrations ============
+  // Integrate centered and miscentered, simultaneously over all bins,
+  // then each bin individually
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 

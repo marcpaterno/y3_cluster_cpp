@@ -1,6 +1,8 @@
 #ifndef Y3_CLUSTER_A_CEN_T_HH
 #define Y3_CLUSTER_A_CEN_T_HH
 
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
+
 namespace y3_cluster {
 
   class A_CEN_t {
