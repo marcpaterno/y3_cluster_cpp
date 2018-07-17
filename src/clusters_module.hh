@@ -11,28 +11,20 @@ namespace y3_cluster {
   public:
     explicit ClustersModule(cosmosis::DataBlock& config);
     void execute(cosmosis::DataBlock& sample);
-
-  //private:
-  //  Gamma_T_Integrand<MODELS, NRADII> _integrand;
   };
 }
 
 template <class MODELS, std::size_t NRADII>
 y3_cluster::ClustersModule<MODELS, NRADII>::ClustersModule(cosmosis::DataBlock& config)
   // TODO: Possibly set up any optional parameters, like integration params?
-  //: _integrand(config)
 {}
 
 template <class MODELS, std::size_t NRADII>
 void
 y3_cluster::ClustersModule<MODELS, NRADII>::execute(cosmosis::DataBlock& sample)
 {
-  // FIXME: evaluate isn't a thing, it should look like this from trivial_gamma_t.cc:
-  //    auto res = alg.integrate(f, epsrel, epsabs);
-  // auto val = integrand_.evaluate(sample);
-  // Placeholder...
-  // sample.put_val("gamma_t", "likelihood", val);
   // FIXME: Just a test placeholder!
+  // sample.put_val("gamma_t", "likelihood", val);
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
   cubacpp::Cuhre c;
