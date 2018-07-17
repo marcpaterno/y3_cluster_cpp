@@ -35,10 +35,11 @@ namespace y3_cluster {
       //: _da(std::make_shared<Interp1D const>(
       //    get_datablock<doubles>(sample, "DV_D0_DZ_params", "xs"),
       //    get_datablock<doubles>(sample, "DV_D0_DZ_params", "ys")))
-      , _ezt(y3_cluster::EZ(get_datablock<double>(sample, "", "omega_m"),
-                            get_datablock<double>(sample, "", "omega_l"),
-                            get_datablock<double>(sample, "", "omega_k")))
-      , _h(get_datablock<double>(sample, "DV_D0_DZ_params", "h"))
+      , _ezt(y3_cluster::EZ(get_datablock<double>(sample, "cosmological_parameters", "omega_m"),
+                            get_datablock<double>(sample, "cosmological_parameters", "omega_l"),
+                            get_datablock<double>(sample, "cosmological_parameters", "omega_k")))
+      // FIXME: Check which h value this should be!
+      , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
       {
 	    std::cout << "Finsihed DV_DO_DZ construction" << std::endl;
       }
@@ -46,6 +47,7 @@ namespace y3_cluster {
     double
     operator()(double zt) const
     {
+      // TODO: Check this, as it looks incorrect
       double const da_z = _da->eval(zt); // da_z needs to be in Mpc
       return 3000.0 * (1.0 + zt) * (1.0 + zt) * da_z*_h * da_z*_h / _ezt(zt);
     }
