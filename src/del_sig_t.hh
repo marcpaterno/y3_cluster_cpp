@@ -70,12 +70,16 @@
 namespace y3_cluster
 {
   class DEL_SIG_t {
+  private:
+    std::shared_ptr<Interp2D const> _dsigma1;
+    std::shared_ptr<Interp2D const> _dsigma2;
+    std::shared_ptr<Interp2D const> _bias;
+
   public:
     DEL_SIG_t(std::shared_ptr<Interp2D const> dsigma1, 
-                  std::shared_ptr<Interp2D const> dsigma2, 
-                  std::shared_ptr<Interp2D const> bias
-                  /*,double c*/) 
-                  : _dsigma1(dsigma1), _dsigma2(dsigma2), _bias(bias)/*, _c(c)*/ {}
+              std::shared_ptr<Interp2D const> dsigma2, 
+              std::shared_ptr<Interp2D const> bias)
+              : _dsigma1(dsigma1), _dsigma2(dsigma2), _bias(bias) {}
 
     using doubles = std::vector<double>;
 
@@ -83,14 +87,14 @@ namespace y3_cluster
       : _dsigma1(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "del_sig_params", "x1"),
           get_datablock<doubles>(sample, "del_sig_params", "y1"),
-          get_datablock<doubles>(sample, "del_sig_params", "z1"))
+          get_datablock<doubles>(sample, "del_sig_params", "z1")))
       , _dsigma2(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "del_sig_params", "x2")
-          get_datablock<doubles>(sample, "del_sig_params", "y2")
+          get_datablock<doubles>(sample, "del_sig_params", "x2"),
+          get_datablock<doubles>(sample, "del_sig_params", "y2"),
           get_datablock<doubles>(sample, "del_sig_params", "z2")))
       , _bias(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "del_sig_params", "x3")
-          get_datablock<doubles>(sample, "del_sig_params", "y3")
+          get_datablock<doubles>(sample, "del_sig_params", "x3"),
+          get_datablock<doubles>(sample, "del_sig_params", "y3"),
           get_datablock<doubles>(sample, "del_sig_params", "z3")))
     {}
 
@@ -106,12 +110,6 @@ namespace y3_cluster
         return (1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
       }
     }
-
-  private:
-    std::shared_ptr<Interp2D const> _dsigma1;
-    std::shared_ptr<Interp2D const> _dsigma2;
-    std::shared_ptr<Interp2D const> _bias;
-    /*double _c;*/
   };
 }
 

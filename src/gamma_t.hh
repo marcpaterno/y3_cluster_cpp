@@ -10,6 +10,7 @@
 #include <cubacpp/cubacpp.hh>
 #include <cmath>
 #include <iostream>
+#include <string>
 
 // This class template is based
 // on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
@@ -20,7 +21,8 @@ namespace y3_cluster {
 template <std::size_t NRADII>
 struct Gamma_T_Integrated_Bin_Result;
 
-template <typename MODELS, std::size_t NRADII, std::size_t NRICHNESS = 1, std::size_t NREDSHIFT = 1>
+template <typename MODELS, std::size_t NRADII,
+          std::size_t NRICHNESS = 1, std::size_t NREDSHIFT = 1>
 class Gamma_T_Integrand {
   friend struct Gamma_T_Integrated_Bin_Result<NRADII>;
 private:
@@ -108,22 +110,11 @@ public:
     , r(rarray)
   {}
 
-  template <std::size_t NRanges>
-  static inline std::array<y3_cluster::IntegrationRange, NRanges>
-  _get_ranges(cosmosis::DataBlock db, std::string name)
-  {
-      std::array<std::size_t, NRanges> r;
-      for (auto i = 0u; i < NRanges; i++)
-          r[i] = i;
-      auto mins = db.view<std::vector<double>>("integration_ranges", name + "_min");
-      auto maxs = db.view<std::vector<double>>("integration_ranges", name + "_min");
-      return y3_cluster::transform(r, [&](std::size_t i) {
-                return y3_cluster::IntegrationRange{mins[i], maxs[i]};
-              });
-  }
-
   // Alternatively, can automatically construct each model component given a datablock.
-  Gamma_T_Integrand(cosmosis::DataBlock& sample)
+  Gamma_T_Integrand(cosmosis::DataBlock& sample,
+                    std::array<double, NRADII> radii,
+                    std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_bins,
+                    std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_bins)
     : mor(sample)
     , lo_lc(sample)
     , lc_lt(sample)
@@ -138,21 +129,17 @@ public:
     , dv_do_dz(sample)
     , omega_z(sample)
     , lnM_ir_(sample, "lnM")
-    , lo_ir_(_get_ranges<NRICHNESS>(sample, "lo"))
+    , lo_ir_(lo_bins)
     , lt_ir_(sample, "lt")
     , lc_ir_(sample, "lc")
-    , zo_ir_(_get_ranges<NREDSHIFT>(sample, "zo"))
+    , zo_ir_(zo_bins)
     , zt_ir_(sample, "zt")
     , R_ir_(sample, "R")
     , A_ir_(sample, "A")
     , theta_ir_(sample, "theta")
-    //, r(sample)
+    , r(radii)
   // TODO: Switch this out for a general method soon!
-  {
-    for (std::size_t i = 0; i < 10; i++) {
-      r[i] = 5.0 * (i + 0.01);
-    }
-  }
+  {}
 
   template<std::size_t NEW_NRICHNESS, std::size_t NEW_NREDSHIFT>
   Gamma_T_Integrand<MODELS, NRADII, NEW_NRICHNESS, NEW_NREDSHIFT>
