@@ -114,7 +114,7 @@ main(int argc, char* argv[])
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
   struct MODELS : public y3_cluster::DefaultModels {
-      using MOR = typename y3_cluster::MOR_t2;
+      using MOR = y3_cluster::MOR_t2;
   };
   long long maxeval = std::stoll(args[0]);
   double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis
