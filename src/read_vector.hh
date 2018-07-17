@@ -1,3 +1,6 @@
+#ifndef Y3_CLUSTER_CPP_READ_VECTOR_HH
+#define Y3_CLUSTER_CPP_READ_VECTOR_HH
+
 // Helper function to read a vector<double> from a file with the given filename.
 #include <fstream>
 #include <iostream>
@@ -23,3 +26,5 @@ read_vector(char const* filename, XFORM xform)
         res.push_back(xform(tmp));
     return res;
 }
+
+#endif

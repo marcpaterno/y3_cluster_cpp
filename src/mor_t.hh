@@ -21,7 +21,7 @@ namespace y3_cluster {
                              get_datablock<double>(sample, "gamma_t", "mor_C")))
       , _sigma_intr(get_datablock<double>(sample, "gamma_t", "mor_sigma"))
       , _alpha(get_datablock<double>(sample, "gamma_t", "mor_alpha"))
-      {}
+      {std::cout << "COSMO params exist: " << sample.has_section("cosmological_parameters") << std::endl;}
 
     double
     operator()(double lt, double lnM, double zt) const
