@@ -147,7 +147,6 @@ main(int argc, char* argv[])
   IntegrationRange zo_ir{0.1, 0.3};
 
   auto gti = make_gamma_t_integrand<MODELS, 10>(0.7,
-                                    0.11,
                                     mor,
                                     lo_lc,
                                     lc_lt,

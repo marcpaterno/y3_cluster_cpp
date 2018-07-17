@@ -27,7 +27,6 @@ class Gamma_T_Integrand {
   friend struct Gamma_T_Integrated_Bin_Result<NRADII>;
 private:
   double fcen_;
-  double msci_;
 
   typename MODELS::MOR mor;
   typename MODELS::LO_LC lo_lc;
@@ -59,7 +58,6 @@ public:
   // callable objects (function pointers or callable class instances)  that
   // specify the various terms of the integrand.
   Gamma_T_Integrand(double fcen,
-                    double msci,
                     typename MODELS::MOR mor,
                     typename MODELS::LO_LC lo_lc,
                     typename MODELS::LC_LT lc_lt,
@@ -84,7 +82,6 @@ public:
                     y3_cluster::IntegrationRange theta_ir,
                     std::array<double, NRADII> const& rarray)
     : fcen_(fcen)
-    , msci_(msci)
     , mor(mor)
     , lo_lc(lo_lc)
     , lc_lt(lc_lt)
@@ -115,7 +112,8 @@ public:
                     std::array<double, NRADII> radii,
                     std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_bins,
                     std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_bins)
-    : mor(sample)
+    : fcen_(get_datablock<double>(sample, "gamma_t", "fcen"))
+    , mor(sample)
     , lo_lc(sample)
     , lc_lt(sample)
     , zo_zt(sample)
@@ -147,7 +145,6 @@ public:
             std::array<y3_cluster::IntegrationRange, NEW_NREDSHIFT> new_zir)
   {
       return {fcen_,
-              msci_,
               mor,
               lo_lc,
               lc_lt,
@@ -401,7 +398,6 @@ public:
 template <typename MODELS, std::size_t NRADII=10, std::size_t NRICHNESS=1, std::size_t NREDSHIFT=1>
 Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>
 make_gamma_t_integrand(double fcen,
-                       double msci,
                        typename MODELS::MOR mor,
                        typename MODELS::LO_LC lo_lc,
                        typename MODELS::LC_LT lc_lt,
@@ -431,7 +427,6 @@ make_gamma_t_integrand(double fcen,
        rarray[i] = 0.1 * (i + 0.1);
 
    return {fcen,
-           msci,
            mor,
            lo_lc,
            lc_lt,

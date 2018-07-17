@@ -113,7 +113,6 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
                                       decltype(dvdodz),
                                       decltype(omega_z)>;
     auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
-                                      0.11,
                                       mor,
                                       lo_lc,
                                       lc_lt,
