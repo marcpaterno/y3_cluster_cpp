@@ -12,18 +12,7 @@ extern "C" { \
 \
 void * setup(cosmosis::DataBlock * options) \
 { \
-    try { \
-        return new y3_cluster::ClustersModule<y3_cluster::DefaultModels, nradii>(*options); \
-    } catch (cosmosis::DataBlock::BadDataBlockAccess e) { \
-        std::cerr << "cosmosis::DataBlock::BadDataBlock exception on setup of y3_cluster_cpp:\n"; \
-        throw e; \
-    } catch (cosmosis::Section::BadSectionAccess e) { \
-        std::cerr << "cosmosis::Section::BadSectionAccess exception on setup of y3_cluster_cpp:\n"; \
-        throw e; \
-    } catch (cosmosis::Entry::BadEntry e) { \
-        std::cerr << "cosmosis::Entry::BadEntry exception on setup of y3_cluster_cpp:\n"; \
-        throw e; \
-    } \
+	return new y3_cluster::ClustersModule<y3_cluster::DefaultModels, nradii>(*options); \
 } \
 \
 DATABLOCK_STATUS execute(cosmosis::DataBlock * block, void * config) \

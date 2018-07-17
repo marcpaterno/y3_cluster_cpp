@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_CPP_ROFFSET_T_HH
 
 #include <cmath>
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include <datablock_reader.hh>
 
 namespace y3_cluster {
 
@@ -11,9 +11,8 @@ namespace y3_cluster {
     explicit ROFFSET_t(double tau) : _tau(tau) {}
 
     explicit ROFFSET_t(cosmosis::DataBlock& sample)
-    {
-      sample.get_val<double>("ROFFSET_params", "tau", _tau);
-    }
+        : _tau(get_datablock<double>(sample, "gamma_t", "roffset_tau"))
+    {}
 
     double
     operator()(double x) const

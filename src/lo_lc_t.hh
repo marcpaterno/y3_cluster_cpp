@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_CPP_LO_LC_T_HH
 #define Y3_CLUSTER_CPP_LO_LC_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include <datablock_reader.hh>
 #include "primitives.hh"
 
 #include <cmath>
@@ -15,10 +15,10 @@ namespace y3_cluster {
     {}
 
     explicit LO_LC_t(cosmosis::DataBlock& sample)
-      : _alpha(sample.view<double>("LO_LC_params", "alpha"))
-      , _a(sample.view<double>("LO_LC_params", "a"))
-      , _b(sample.view<double>("LO_LC_params", "b"))
-      , _R_lambda(sample.view<double>("LO_LC_params", "R_lambda"))
+      : _alpha(get_datablock<double>(sample, "gamma_t", "LO_LC_alpha"))
+      , _a(get_datablock<double>(sample, "gamma_t", "LO_LC_a"))
+      , _b(get_datablock<double>(sample, "gamma_t", "LO_LC_b"))
+      , _R_lambda(get_datablock<double>(sample, "gamma_t", "LO_LC_R_lambda"))
     {}
 
     double

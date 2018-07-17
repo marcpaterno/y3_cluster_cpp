@@ -5,6 +5,7 @@
 #include "ez.hh"
 #include "primitives.hh"
 #include "interp_2d.hh"
+#include <datablock_reader.hh>
 
 #include <memory>
 
@@ -80,18 +81,17 @@ namespace y3_cluster
 
     explicit DEL_SIG_t(cosmosis::DataBlock& sample)
       : _dsigma1(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_params", "x1"),
-          sample.view<doubles>("del_sig_params", "y1"),
-          sample.view<doubles>("del_sig_params", "z1")))
+          get_datablock<doubles>(sample, "del_sig_params", "x1"),
+          get_datablock<doubles>(sample, "del_sig_params", "y1"),
+          get_datablock<doubles>(sample, "del_sig_params", "z1"))
       , _dsigma2(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_params", "x2"),
-          sample.view<doubles>("del_sig_params", "y2"),
-          sample.view<doubles>("del_sig_params", "z2")))
+          get_datablock<doubles>(sample, "del_sig_params", "x2")
+          get_datablock<doubles>(sample, "del_sig_params", "y2")
+          get_datablock<doubles>(sample, "del_sig_params", "z2")))
       , _bias(std::make_shared<Interp2D const>(
-          sample.view<doubles>("del_sig_params", "x3"),
-          sample.view<doubles>("del_sig_params", "y3"),
-          sample.view<doubles>("del_sig_params", "z3")))
-      // , _c(sample.view<double>("del_sig_params", "c"))
+          get_datablock<doubles>(sample, "del_sig_params", "x3")
+          get_datablock<doubles>(sample, "del_sig_params", "y3")
+          get_datablock<doubles>(sample, "del_sig_params", "z3")))
     {}
 
     double

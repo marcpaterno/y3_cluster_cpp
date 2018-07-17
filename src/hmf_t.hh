@@ -1,8 +1,11 @@
 #ifndef Y3_CLUSTER_CPP_HMF_T_HH
 #define Y3_CLUSTER_CPP_HMF_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include <datablock_reader.hh>
 #include "interp_2d.hh"
+#include <read_vector.hh>
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "/cosmosis/cosmosis/datablock/section_names.h"
 
 #include <memory>
 
@@ -17,12 +20,20 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit HMF_t(cosmosis::DataBlock& sample)
-      : _nmz(std::make_shared<Interp2D const>(
-          sample.view<doubles>("HMF_params", "xs"),
-          sample.view<doubles>("HMF_params", "ys"),
-          sample.view<doubles>("HMF_params", "zs")))
-      , _s(sample.view<double>("MHF_params", "s"))
-      , _q(sample.view<double>("MHF_params", "q"))
+      : _nmz([sample] () mutable {
+	// FIXME: Make this grab the hmf array from cosmosis!
+	  auto identity = [](double x) { return x; };
+	  double om = get_datablock<double>(sample, "cosmological_parameters", "omega_m");
+	  auto log_omega_m = [om](double x) { return std::log(x*om); };
+	  auto mh = read_vector("m_h.txt", log_omega_m);
+	  auto const zz = read_vector("z.txt", identity);
+	  auto const dndlnmh = read_vector("dndlnmh.txt", identity);
+          return std::make_shared<Interp2D const>(mh, zz, dndlnmh);}())
+          //get_datablock<doubles>(sample, "gamma_t", "hmf_xs"),
+          //get_datablock<doubles>(sample, "gamma_t", "hmf_ys"),
+          //get_datablock<doubles>(sample, "gamma_t", "hmf_zs")))
+      , _s(get_datablock<double>(sample, "gamma_t", "hmf_s"))
+      , _q(get_datablock<double>(sample, "gamma_t", "hmf_q"))
     {}
 
     double

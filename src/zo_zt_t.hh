@@ -1,6 +1,7 @@
 #ifndef Y3_CLUSTER_ZO_ZT_HH
 #define Y3_CLUSTER_ZO_ZT_HH
 
+#include <datablock_reader.hh>
 #include <cmath>
 
 namespace y3_cluster {
@@ -10,7 +11,7 @@ namespace y3_cluster {
     explicit ZO_ZT_t(double sigma) : _sigma(sigma) {}
 
     explicit ZO_ZT_t(cosmosis::DataBlock& sample)
-      : _sigma(sample.view<double>("ZO_ZT_params", "sigma"))
+      : _sigma(get_datablock<double>(sample, "gamma_t", "zo_zt_sigma"))
     {}
 
     double

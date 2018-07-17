@@ -1,7 +1,8 @@
 #ifndef Y3_CLUSTER_DV_DO_DZ_T_HH
 #define Y3_CLUSTER_DV_DO_DZ_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include <datablock_reader.hh>
+#include <read_vector.hh>
 #include "ez.hh"
 #include "interp_1d.hh"
 
@@ -18,18 +19,35 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
-      : _da(std::make_shared<Interp1D const>(
-          sample.view<doubles>("DV_D0_DZ_params", "xs"),
-          sample.view<doubles>("DV_D0_DZ_params", "ys")))
-      , _ezt(y3_cluster::EZ(sample.view<double>("", "omega_m"),
-                            sample.view<double>("", "omega_l"),
-                            sample.view<double>("", "omega_k")))
-      , _h(sample.view<double>("DV_D0_DZ_params", "h"))
-      {}
+      : _da([sample] () {
+	    // FIXME: This should be fully done from cosmosis
+	    // when array is understood!
+	    // Currently taken from trivial_gamma_t.cc
+	    std::cout << "Starting DV_DO_DZ construction" << std::endl;
+	    auto identity = [](double x) { return x; };
+	    auto const da_arr = read_vector("d_a.txt", identity);
+	    auto const zz_da = read_vector("z_da.txt", identity);
+	    std::cout << "Beginning da construction" << std::endl;
+	    auto da = std::make_shared<Interp1D const>(zz_da, da_arr);
+	    std::cout << "Successfully made da" << std::endl;
+	    return da;
+	    }())
+      //: _da(std::make_shared<Interp1D const>(
+      //    get_datablock<doubles>(sample, "DV_D0_DZ_params", "xs"),
+      //    get_datablock<doubles>(sample, "DV_D0_DZ_params", "ys")))
+      , _ezt(y3_cluster::EZ(get_datablock<double>(sample, "cosmological_parameters", "omega_m"),
+                            get_datablock<double>(sample, "cosmological_parameters", "omega_l"),
+                            get_datablock<double>(sample, "cosmological_parameters", "omega_k")))
+      // FIXME: Check which h value this should be!
+      , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
+      {
+	    std::cout << "Finsihed DV_DO_DZ construction" << std::endl;
+      }
 
     double
     operator()(double zt) const
     {
+      // TODO: Check this, as it looks incorrect
       double const da_z = _da->eval(zt); // da_z needs to be in Mpc
       return 3000.0 * (1.0 + zt) * (1.0 + zt) * da_z*_h * da_z*_h / _ezt(zt);
     }
