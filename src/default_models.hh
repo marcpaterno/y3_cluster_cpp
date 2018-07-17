@@ -3,7 +3,7 @@
 
 #include <gamma_t.hh>
 
-#include <mor_t.hh>
+#include <mor_t2.hh>
 #include <lo_lc_t.hh>
 #include <lc_lt_t.hh>
 #include <zo_zt_t.hh>
@@ -48,7 +48,7 @@ namespace y3_cluster
         using OMEGA_Z = OMEGA_Z_;
     };
 
-    using DefaultModels = Models<MOR_t,
+    using DefaultModels = Models<MOR_t2,
                                  LO_LC_t,
                                  LC_LT_t,
                                  ZO_ZT_t,

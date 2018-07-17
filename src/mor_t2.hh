@@ -2,9 +2,10 @@
 #define Y3_CLUSTER_CPP_MOR_T2_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "interp_2d.hh"
 #include "mz_power_law.hh"
 #include "primitives.hh"
-#include "interp_2d.hh"
+#include "datablock_reader.hh"
 
 #include <cmath>
 #include <fstream>
@@ -89,10 +90,10 @@ namespace y3_cluster {
     {}
 
     explicit MOR_t2(cosmosis::DataBlock& sample)
-        : _A(sample.view<double>("MOR_params", "A"))
-        , _B(sample.view<double>("MOR_params", "B"))
-        , _C(sample.view<double>("MOR_params", "C"))
-        , _sigma_intr(sample.view<double>("MOR_params", "sigma"))
+        : _A(get_datablock<double>(sample, "gamma_t", "mor_A"))
+        , _B(get_datablock<double>(sample, "gamma_t", "mor_B"))
+        , _C(get_datablock<double>(sample, "gamma_t", "mor_alpha"))
+        , _sigma_intr(get_datablock<double>(sample, "gamma_t", "mor_sigma"))
     {}
 
     double
