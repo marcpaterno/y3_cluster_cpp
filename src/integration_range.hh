@@ -19,8 +19,8 @@ namespace y3_cluster {
       double b;
       std::string min = var + "_min";
       std::string max = var + "_max";
-      _a = get_datablock<double>(sample, "gamma_t", min.c_str());
-      b = get_datablock<double>(sample, "gamma_t", max.c_str());
+      _a = get_datablock<double>(sample, "cluster_abundance", min.c_str());
+      b = get_datablock<double>(sample, "cluster_abundance", max.c_str());
       _range = b - _a;
       if (_range == 0.0)
         throw std::logic_error("zero-length IntegrationRange");

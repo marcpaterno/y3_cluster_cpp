@@ -112,7 +112,7 @@ public:
                     std::array<double, NRADII> radii,
                     std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_bins,
                     std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_bins)
-    : fcen_(get_datablock<double>(sample, "gamma_t", "fcen"))
+    : fcen_(get_datablock<double>(sample, "cluster_abundance", "fcen"))
     , mor(sample)
     , lo_lc(sample)
     , lc_lt(sample)

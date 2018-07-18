@@ -90,10 +90,10 @@ namespace y3_cluster {
     {}
 
     explicit MOR_t2(cosmosis::DataBlock& sample)
-        : _A(get_datablock<double>(sample, "gamma_t", "mor_A"))
-        , _B(get_datablock<double>(sample, "gamma_t", "mor_B"))
-        , _C(get_datablock<double>(sample, "gamma_t", "mor_alpha"))
-        , _sigma_intr(get_datablock<double>(sample, "gamma_t", "mor_sigma"))
+        : _A(get_datablock<double>(sample, "cluster_abundance", "mor_A"))
+        , _B(get_datablock<double>(sample, "cluster_abundance", "mor_B"))
+        , _C(get_datablock<double>(sample, "cluster_abundance", "mor_alpha"))
+        , _sigma_intr(get_datablock<double>(sample, "cluster_abundance", "mor_sigma"))
     {}
 
     double
