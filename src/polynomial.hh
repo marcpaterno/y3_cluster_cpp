@@ -18,9 +18,9 @@ namespace y3_cluster {
         const std::array<double, Order> coeffs;
 
     public:
-        polynomial(std::array<double, Order> coeffs) : coeffs(coeffs) {}
+        constexpr polynomial(std::array<double, Order> coeffs) : coeffs(coeffs) {}
 
-        double
+        constexpr double
         operator()(const double x) const 
         {
             double out = 0.0;
