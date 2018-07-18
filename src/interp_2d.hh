@@ -44,6 +44,10 @@ namespace y3_cluster {
              std::vector<double> const& ys,
              std::vector<double> const& zs);
 
+    // Interpolator created from vector, vector, 2D vector, compiler assures they are of the same length; Added by Yuanyuan Zhang
+    Interp2D(std::vector<double> const& xs, std::vector<double> const& ys, std::vector< std::vector<double> > const& zs);
+
+
     // Interpolator created from vector of triplets: throws std::logic_error if
     // the points do not lie on a grid in (x,y) space, or if any values are NaN
     // or infinities. Any denormalized x- or y-values are flushed to zero. We
@@ -95,6 +99,24 @@ inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
       zs_[i + j * M] = row[j];
     }
   }
+  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
+  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+}
+// below are added by Yuanyuan Zhang July 17
+inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
+		                      std::vector<double> const& ys,
+                                std::vector< std::vector<double> > const& zs)
+       : xs_(xs), ys_(ys), zs_(xs.size() * ys.size() )
+{
+  for (std::size_t i = 0; i != xs.size(); ++i) {
+    std::vector<double> const& row = zs[i];
+    for (std::size_t j = 0; j != ys.size(); ++j) {
+      zs_[i + j * ys.size()] = row[j];
+    }
+  }
+  
+  if (zs_.size() != nx() * ny())
+    throw std::domain_error("Interp2D -- wrong number of z values passed");
   interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
   gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
 }
