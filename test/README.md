@@ -22,7 +22,9 @@ Please do add more tests! To do so is straightforward. Create a file in this dir
 // This header is needed for the test framework
 #include "catch2/catch.hpp"
 // Than, any other headers you want - e.g.:
-#include "needed_header_file.hh"
+#include <lc_lt_t.hh>
+#include <primitives.hh>
+#include <test/your_test_file.hh>
 ...
 
 using ...;
@@ -43,15 +45,16 @@ Next, add the commands to build your test to the end of `CMakeLists.txt` in this
 
 ```
 add_executable(<your_test>_test main.cc <your_test>.test.cc)
-target_link_libraries(<your_test>_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_link_libraries(<your_test>_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
 target_include_directories(<your_test>_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(<your_test>_test <your_test>_test)
 ```
 
-Where `<your_test>` has been replaced with a descriptive name. Now, simply fire up docker and run `make` in the parent directory, and your test should automatically be built! (No need to rerun `cmake`.) If you are unsure how to write your test or are having trouble, look in the other `*.test.cc` files, and don't hesitate to ask for help.
+Where `<your_test>` has been replaced with a descriptive name. Now, simply fire up the docker image and run `make` in the parent directory, and your test should automatically be built! (No need to rerun `cmake`.) If you are unsure how to write your test or are having trouble, look in the other `*.test.cc` files, and don't hesitate to ask for help.
 
 ## Diagnostic Executables
 
