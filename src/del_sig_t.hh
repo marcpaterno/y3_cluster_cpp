@@ -83,6 +83,7 @@ namespace y3_cluster
 
     using doubles = std::vector<double>;
 
+    // TODO: This needs to be reading cosmosis datablock parameters
     explicit DEL_SIG_t(cosmosis::DataBlock& sample)
       : _dsigma1(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "del_sig_params", "x1"),
