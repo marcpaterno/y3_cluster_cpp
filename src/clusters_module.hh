@@ -60,7 +60,7 @@ void
 y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::execute(cosmosis::DataBlock& sample)
 {
   // FIXME: Just a test placeholder!
-  // sample.put_val("gamma_t", "likelihood", val);
+  // sample.put_val("cluster_abundance", "likelihood", val);
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
   cubacpp::Cuhre c;
@@ -80,7 +80,7 @@ y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::execute(cosmos
   //
   // Then you've got science!
 
-  //sample.put_val("gamma_t", "likelihood", result);
+  //sample.put_val("cluster_abundance", "likelihood", result);
 
 //  time_integration(c, gti, epsrel, epsabs, "cuhre");
 //  time_integration(ALG alg,

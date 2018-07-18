@@ -11,7 +11,7 @@ namespace y3_cluster {
     explicit ROFFSET_t(double tau) : _tau(tau) {}
 
     explicit ROFFSET_t(cosmosis::DataBlock& sample)
-        : _tau(get_datablock<double>(sample, "gamma_t", "roffset_tau"))
+        : _tau(get_datablock<double>(sample, "cluster_abundance", "roffset_tau"))
     {}
 
     double

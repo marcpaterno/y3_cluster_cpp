@@ -38,8 +38,8 @@ namespace y3_cluster {
                   _adjust_to_log(sample, get_datablock<doubles>(sample, "mass_function", "m_h")),
                   get_datablock<doubles>(sample, "mass_function", "z"),
                   get_datablock<cosmosis::ndarray<double>>(sample, "mass_function", "dndlnmh")))
-      , _s(get_datablock<double>(sample, "gamma_t", "hmf_s"))
-      , _q(get_datablock<double>(sample, "gamma_t", "hmf_q"))
+      , _s(get_datablock<double>(sample, "cluster_abundance", "hmf_s"))
+      , _q(get_datablock<double>(sample, "cluster_abundance", "hmf_q"))
     {}
 
     double
