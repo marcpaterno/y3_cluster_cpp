@@ -4,6 +4,7 @@
 #include "point_3d.hh"
 
 #include "gsl/gsl_interp2d.h"
+#include "/cosmosis/cosmosis/datablock/ndarray.hh"
 #include <array>
 #include <cstddef>
 #include <stdexcept>
@@ -45,7 +46,15 @@ namespace y3_cluster {
              std::vector<double> const& zs);
 
     // Interpolator created from vector, vector, 2D vector, compiler assures they are of the same length; Added by Yuanyuan Zhang
-    Interp2D(std::vector<double> const& xs, std::vector<double> const& ys, std::vector< std::vector<double> > const& zs);
+    Interp2D(std::vector<double> const& xs,
+             std::vector<double> const& ys,
+             std::vector< std::vector<double> > const& zs);
+
+    // Like above - assumes ndarray is 2D and fits it appropriately
+    Interp2D(std::vector<double> const& xs,
+             std::vector<double> const& ys,
+             cosmosis::ndarray<double> const& zs)
+        : Interp2D(xs, ys, std::vector<double>{zs.begin(), zs.end()}) {}
 
 
     // Interpolator created from vector of triplets: throws std::logic_error if
@@ -102,11 +111,12 @@ inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
   interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
   gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
 }
+
 // below are added by Yuanyuan Zhang July 17
 inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
-		                      std::vector<double> const& ys,
-                                std::vector< std::vector<double> > const& zs)
-       : xs_(xs), ys_(ys), zs_(xs.size() * ys.size() )
+                                      std::vector<double> const& ys,
+                                      std::vector< std::vector<double> > const& zs)
+       : xs_(xs), ys_(ys), zs_(xs.size() * ys.size())
 {
   for (std::size_t i = 0; i != xs.size(); ++i) {
     std::vector<double> const& row = zs[i];

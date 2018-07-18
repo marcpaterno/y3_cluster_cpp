@@ -5,11 +5,25 @@
 #include "interp_2d.hh"
 #include <read_vector.hh>
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "/cosmosis/cosmosis/datablock/ndarray.hh"
 #include "/cosmosis/cosmosis/datablock/section_names.h"
 
 #include <memory>
 
 namespace y3_cluster {
+
+  namespace {
+      inline std::vector<double> 
+      _adjust_to_log(cosmosis::DataBlock& db, const std::vector<double>& masses)
+      {
+          std::vector<double> output = masses;
+          double omega_m = get_datablock<double>(db, "cosmological_parameters", "omega_M");
+          for (auto& x : output)
+              x = std::log(x * omega_m);
+          return output;
+      }
+
+  }
 
   class HMF_t {
   public:
@@ -21,10 +35,9 @@ namespace y3_cluster {
 
     explicit HMF_t(cosmosis::DataBlock& sample)
       : _nmz(std::make_shared<Interp2D const>(
-                  get_datablock<doubles>(sample, "mass_function", "m_h"),
+                  _adjust_to_log(sample, get_datablock<doubles>(sample, "mass_function", "m_h")),
                   get_datablock<doubles>(sample, "mass_function", "z"),
-                  read_vector("dndlnmh.txt", [](double x) { return x; })))
-                  //get_datablock<std::vector<doubles>>(sample, "mass_function", "dndlnmh")))
+                  get_datablock<cosmosis::ndarray<double>>(sample, "mass_function", "dndlnmh")))
       , _s(get_datablock<double>(sample, "gamma_t", "hmf_s"))
       , _q(get_datablock<double>(sample, "gamma_t", "hmf_q"))
     {}
@@ -32,7 +45,7 @@ namespace y3_cluster {
     double
     operator()(double lnM, double zt) const
     {
-      return _nmz->eval( lnM, zt) * (_s * ( lnM *0.4342944819 - 13.8124426028) + _q);
+      return _nmz->eval(lnM, zt) * (_s * (lnM *0.4342944819 - 13.8124426028) + _q);
       //0.4342944819 is log(e)
     }
 
