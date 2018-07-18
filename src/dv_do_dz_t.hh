@@ -19,19 +19,9 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
-      : _da([sample] () {
-	    // FIXME: This should be fully done from cosmosis
-	    // when array is understood!
-	    // Currently taken from trivial_gamma_t.cc
-	    auto identity = [](double x) { return x; };
-	    auto const da_arr = read_vector("d_a.txt", identity);
-	    auto const zz_da = read_vector("z_da.txt", identity);
-	    auto da = std::make_shared<Interp1D const>(zz_da, da_arr);
-	    return da;
-	    }())
-      //: _da(std::make_shared<Interp1D const>(
-      //    get_datablock<doubles>(sample, "DV_D0_DZ_params", "xs"),
-      //    get_datablock<doubles>(sample, "DV_D0_DZ_params", "ys")))
+      : _da(std::make_shared<y3_cluster::Interp1D const>(
+                     get_datablock<doubles>(sample, "distances", "z"),
+                     get_datablock<doubles>(sample, "distances", "d_a")))
       , _ezt(y3_cluster::EZ(get_datablock<double>(sample, "cosmological_parameters", "omega_m"),
                             get_datablock<double>(sample, "cosmological_parameters", "omega_lambda"),
                             get_datablock<double>(sample, "cosmological_parameters", "omega_k")))

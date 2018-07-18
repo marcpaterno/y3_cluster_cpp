@@ -5,11 +5,25 @@
 #include "interp_2d.hh"
 #include <read_vector.hh>
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "/cosmosis/cosmosis/datablock/ndarray.hh"
 #include "/cosmosis/cosmosis/datablock/section_names.h"
 
 #include <memory>
 
 namespace y3_cluster {
+
+  namespace {
+      inline std::vector<double> 
+      _adjust_to_log(cosmosis::DataBlock& db, const std::vector<double>& masses)
+      {
+          std::vector<double> output = masses;
+          double omega_m = get_datablock<double>(db, "cosmological_parameters", "omega_M");
+          for (auto& x : output)
+              x = std::log(x * omega_m);
+          return output;
+      }
+
+  }
 
   class HMF_t {
   public:
@@ -20,18 +34,10 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit HMF_t(cosmosis::DataBlock& sample)
-      : _nmz([sample] () mutable {
-	// FIXME: Make this grab the hmf array from cosmosis!
-	  auto identity = [](double x) { return x; };
-	  double om = get_datablock<double>(sample, "cosmological_parameters", "omega_m");
-	  auto log_omega_m = [om](double x) { return std::log(x*om); };
-	  auto mh = read_vector("m_h.txt", log_omega_m);
-	  auto const zz = read_vector("z.txt", identity);
-	  auto const dndlnmh = read_vector("dndlnmh.txt", identity);
-          return std::make_shared<Interp2D const>(mh, zz, dndlnmh);}())
-          //get_datablock<doubles>(sample, "gamma_t", "hmf_xs"),
-          //get_datablock<doubles>(sample, "gamma_t", "hmf_ys"),
-          //get_datablock<doubles>(sample, "gamma_t", "hmf_zs")))
+      : _nmz(std::make_shared<Interp2D const>(
+                  _adjust_to_log(sample, get_datablock<doubles>(sample, "mass_function", "m_h")),
+                  get_datablock<doubles>(sample, "mass_function", "z"),
+                  get_datablock<cosmosis::ndarray<double>>(sample, "mass_function", "dndlnmh")))
       , _s(get_datablock<double>(sample, "gamma_t", "hmf_s"))
       , _q(get_datablock<double>(sample, "gamma_t", "hmf_q"))
     {}
@@ -39,7 +45,7 @@ namespace y3_cluster {
     double
     operator()(double lnM, double zt) const
     {
-      return _nmz->eval( lnM, zt) * (_s * ( lnM *0.4342944819 - 13.8124426028) + _q);
+      return _nmz->eval(lnM, zt) * (_s * (lnM *0.4342944819 - 13.8124426028) + _q);
       //0.4342944819 is log(e)
     }
 

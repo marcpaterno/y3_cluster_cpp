@@ -169,6 +169,16 @@ target_include_directories(dv_do_dz_t_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(dv_do_dz_t_test dv_do_dz_t_test)
 
+add_executable(polynomial_test main.cc polynomial.test.cc)
+target_link_libraries(polynomial_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+target_include_directories(polynomial_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(polynomial_test polynomial_test)
+
 add_executable(lo_lc_probability_test main.cc lo_lc_probability_unity.test.cc)
 target_link_libraries(lo_lc_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(lo_lc_probability_test
