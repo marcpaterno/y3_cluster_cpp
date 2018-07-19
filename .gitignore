@@ -1,7 +1,8 @@
-CMakeCache.txt
 CMakeFiles/
-CTestTestfile.cmake
 Testing/
+cosmosis_test_output/
+CMakeCache.txt
+CTestTestfile.cmake
 Makefile
 cmake_install.cmake
 *.pyc
@@ -12,3 +13,4 @@ ez_test
 *.pdf
 *.ps
 gmon.out
+dump.txt
