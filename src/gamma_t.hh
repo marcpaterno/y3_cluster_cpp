@@ -37,6 +37,7 @@ private:
   typename MODELS::T_MIS T_mis;
   typename MODELS::A_CEN A_cen;
   typename MODELS::A_MIS A_mis;
+  typename MODELS::BMZ bmz;
   typename MODELS::HMF hmf;
   typename MODELS::DEL_SIG del_sig;
   typename MODELS::DV_DO_DZ dv_do_dz;
@@ -67,6 +68,7 @@ public:
                     typename MODELS::T_MIS T_mis,
                     typename MODELS::A_CEN A_cen,
                     typename MODELS::A_MIS A_mis,
+                    typename MODELS::BMZ bmz,
                     typename MODELS::HMF hmf,
                     typename MODELS::DEL_SIG del_sig,
                     typename MODELS::DV_DO_DZ dv_do_dz,
@@ -91,6 +93,7 @@ public:
     , T_mis(T_mis)
     , A_cen(A_cen)
     , A_mis(A_mis)
+    , bmz(bmz)
     , hmf(hmf)
     , del_sig(del_sig)
     , dv_do_dz(dv_do_dz)
@@ -122,6 +125,7 @@ public:
     , T_mis(sample)
     , A_cen(sample)
     , A_mis(sample)
+    , bmz(sample)
     , hmf(sample)
     , del_sig(sample)
     , dv_do_dz(sample)
@@ -154,6 +158,7 @@ public:
               T_mis,
               A_cen,
               A_mis,
+              bmz,
               hmf,
               del_sig,
               dv_do_dz,
@@ -173,7 +178,7 @@ public:
   }
 
   template<typename Fjn, typename Fjg, typename Fnm, typename Fgr>
-  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)>
+  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
   integrand_common(double lt,
                    double zt,
                    double lnM,
@@ -185,15 +190,16 @@ public:
                    // Radially dependent function
                    Fgr gamma_radial_dep) const
   {
-    std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)> return_arr;
+    std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)> return_arr;
 
+    auto const bmz_v = bmz(lnM, zt);
     auto const hmf_v = hmf(lnM, zt);
     auto const mor_v = mor(lt, lnM, zt);
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
 
     for (std::size_t loi = 0; loi < NRICHNESS; loi++) {
-        auto const richness_bin_start = loi * NREDSHIFT * (NRADII + 2);
+        auto const richness_bin_start = loi * NREDSHIFT * (NRADII + 3);
 
         for (std::size_t zoi = 0; zoi < NREDSHIFT; zoi++) {
             // Zo does not actually need to be integrated over
@@ -213,6 +219,7 @@ public:
             // eq. (24)
             double const N = jacob_N(loi) * N_int * N_mult;
             double const Nw = N * w;
+            double const Nb = N * bmz_v;
 
             // eq. (29)
             auto const gamma_t_int = jacob_G(loi) * N_int * w;
@@ -226,11 +233,12 @@ public:
                                        * gamma_t_int * N_mult * gamma_radial_dep(radius);
                            });
 
-            auto redshift_bin_start = richness_bin_start + zoi * (NRADII + 2);
+            auto redshift_bin_start = richness_bin_start + zoi * (NRADII + 3);
 
             std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
             return_arr[redshift_bin_start + NRADII] = N;
             return_arr[redshift_bin_start + NRADII + 1] = Nw;
+            return_arr[redshift_bin_start + NRADII + 2] = Nb;
         }
     }
 
@@ -248,7 +256,7 @@ public:
    * * lnM - ln(M)
    * * A - ???
    * */
-  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)>
+  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
   miscentered(double scaled_lo,
               double scaled_lc,
               double scaled_lt,
@@ -321,7 +329,7 @@ public:
    * * lnM - ln(M)
    * * A - ???
    * */
-  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+2)>
+  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
   centered(double scaled_lo,
            double scaled_lt,
            double scaled_zt,
@@ -370,7 +378,7 @@ public:
   }
 
   template<typename Integrator>
-  cubacpp::integration_results<NRADII + 2>
+  cubacpp::integration_results<NRADII + 3>
   integrate_centered(Integrator i, double epsrel, double epsabs)
   {
       return i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
@@ -381,7 +389,7 @@ public:
   }
 
   template<typename Integrator>
-  cubacpp::integration_results<NRADII + 2>
+  cubacpp::integration_results<NRADII + 3>
   integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
       return i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
@@ -407,6 +415,7 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::T_MIS t_mis,
                        typename MODELS::A_CEN a_cen,
                        typename MODELS::A_MIS a_mis,
+                       typename MODELS::BMZ bmz,
                        typename MODELS::HMF hmf,
                        typename MODELS::DEL_SIG del_sig,
                        typename MODELS::DV_DO_DZ dv_do_dz,
@@ -436,6 +445,7 @@ make_gamma_t_integrand(double fcen,
            t_mis,
            a_cen,
            a_mis,
+           bmz,
            hmf,
            del_sig,
            dv_do_dz,
@@ -460,7 +470,8 @@ struct Gamma_T_Integrated_Bin_Result {
     std::array<double, NRADII> gamma_t_errors;
     std::array<double, NRADII> gamma_t_probs;
     double N, N_error, N_prob,
-           Nw, Nw_error, Nw_prob;
+           Nw, Nw_error, Nw_prob,
+           Nb, Nb_error, Nb_prob;
 
     Gamma_T_Integrated_Bin_Result() : lo_ir{0.0, 1.0}, zo_ir{0.0, 1.0} {}
 
@@ -468,12 +479,12 @@ struct Gamma_T_Integrated_Bin_Result {
     Gamma_T_Integrated_Bin_Result(std::size_t which_richness,
                                   std::size_t which_redshift,
                                   const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>& gt,
-                                  const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 2)>& results)
+                                  const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>& results)
         : lo_ir(gt.lo_ir_[which_richness])
         , zo_ir(gt.zo_ir_[which_redshift])
         , radius(gt.r)
     {
-        const auto base = (which_richness * NREDSHIFT + which_redshift) * (NRADII + 2);
+        const auto base = (which_richness * NREDSHIFT + which_redshift) * (NRADII + 3);
 
         for (auto i = 0u; i < NRADII; i++) {
             gamma_ts[i] = results.value[base + i];
@@ -483,19 +494,22 @@ struct Gamma_T_Integrated_Bin_Result {
 
         N = results.value[base + NRADII];
         Nw = results.value[base + NRADII + 1];
+        Nb = results.value[base + NRADII + 2];
 
         N_error = results.error[base + NRADII];
         Nw_error = results.error[base + NRADII + 1];
+        Nb_error = results.error[base + NRADII + 2];
 
         N_prob = results.prob[base + NRADII];
         Nw_prob = results.prob[base + NRADII + 1];
+        Nb_prob = results.prob[base + NRADII + 2];
     }
 };
 
 template<typename MODELS, std::size_t NRADII, std::size_t NRICHNESS = 1, std::size_t NREDSHIFT = 1>
 std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>
 make_gamma_t_integrated_bins(const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>& gt,
-                             const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 2)>& results)
+                             const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>& results)
 {
     std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT> return_arr;
 

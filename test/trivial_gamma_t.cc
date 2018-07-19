@@ -135,6 +135,7 @@ main(int argc, char* argv[])
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
 
+  MODELS::BMZ bmz;
   MODELS::HMF hmf(p1, 4.50732047e-02, 1.01958078e+00);
   // TODO: Change to DEL_SIG_Y1
   // MODELS::DEL_SIG ds(p2, p3, p4);
@@ -156,6 +157,7 @@ main(int argc, char* argv[])
                                     t_mis,
                                     a_cen,
                                     a_mis,
+                                    bmz,
                                     hmf,
                                     ds,
                                     dvdodz,

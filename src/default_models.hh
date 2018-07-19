@@ -12,6 +12,7 @@
 #include <t_mis_t.hh>
 #include <a_cen_t.hh>
 #include <a_mis_t.hh>
+#include <bmz_t.hh>
 #include <hmf_t.hh>
 #include <del_sig_y1.hh>
 #include <dv_do_dz_t.hh>
@@ -28,6 +29,7 @@ namespace y3_cluster
              typename T_MIS_,
              typename A_CEN_,
              typename A_MIS_,
+             typename BMZ_,
              typename HMF_,
              typename DEL_SIG_,
              typename DV_DO_DZ_,
@@ -42,6 +44,7 @@ namespace y3_cluster
         using T_MIS = T_MIS_;
         using A_CEN = A_CEN_;
         using A_MIS = A_MIS_;
+        using BMZ = BMZ_;
         using HMF = HMF_;
         using DEL_SIG = DEL_SIG_;
         using DV_DO_DZ = DV_DO_DZ_;
@@ -57,6 +60,7 @@ namespace y3_cluster
                                  T_MIS_t,
                                  A_CEN_t,
                                  A_MIS_t,
+                                 BMZ_t,
                                  HMF_t,
                                  DEL_SIG_y1,
                                  DV_DO_DZ_t,
