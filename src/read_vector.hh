@@ -27,4 +27,10 @@ read_vector(char const* filename, XFORM xform)
     return res;
 }
 
+std::vector<double>
+read_vector(char const* filename)
+{
+    return read_vector(filename, [](double x) { return x; });
+}
+
 #endif
