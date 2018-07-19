@@ -67,11 +67,42 @@ y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::execute(cosmos
   c.maxeval = 100000000;
 
   Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT> integrand(sample, radii_bins, lo_bins, zo_bins);
-  auto centered_result = integrand.integrate_centered(c, epsrel, epsabs);
-  auto miscentered_result = integrand.integrate_miscentered(c, epsrel, epsabs);
+  auto centered_result = integrand.integrate_centered(c, epsrel, epsabs),
+       miscentered_result = integrand.integrate_miscentered(c, epsrel, epsabs);
 
   std::cout << "Centered:\n" << centered_result;
   std::cout << "Miscentered:\n" << miscentered_result;
+
+  const auto binned_centered_result = make_gamma_t_integrated_bins(integrand, centered_result),
+             binned_miscentered_result = make_gamma_t_integrated_bins(integrand, miscentered_result);
+
+  std::vector<double> centered_gamma_ts,
+                      centered_cluster_counts,
+                      miscentered_gamma_ts,
+                      miscentered_cluster_counts;
+
+  for (const auto& bin : binned_centered_result) {
+      centered_cluster_counts.push_back(bin.N);
+      centered_cluster_counts.push_back(bin.Nw);
+      for (auto i = 0u; i < NRADII; i++)
+          centered_gamma_ts.push_back(bin.gamma_ts[i]);
+  }
+
+  for (const auto& bin : binned_miscentered_result) {
+      miscentered_cluster_counts.push_back(bin.N);
+      miscentered_cluster_counts.push_back(bin.Nw);
+      for (auto i = 0u; i < NRADII; i++)
+          miscentered_gamma_ts.push_back(bin.gamma_ts[i]);
+  }
+
+  sample.put_val<std::vector<double>>("cluster_abundance", "centered_gamma_ts",
+                                      centered_gamma_ts);
+  sample.put_val<std::vector<double>>("cluster_abundance", "centered_cluster_counts",
+                                      centered_cluster_counts);
+  sample.put_val<std::vector<double>>("cluster_abundance", "miscentered_gamma_ts",
+                                      miscentered_gamma_ts);
+  sample.put_val<std::vector<double>>("cluster_abundance", "miscentered_cluster_counts",
+                                      miscentered_cluster_counts);
 
   // TODO:
   // - Combine centered and miscentered terms
