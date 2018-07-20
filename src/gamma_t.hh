@@ -378,7 +378,7 @@ public:
   }
 
   template<typename Integrator>
-  cubacpp::integration_results<NRADII + 3>
+  cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>
   integrate_centered(Integrator i, double epsrel, double epsabs)
   {
       return i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
@@ -389,7 +389,7 @@ public:
   }
 
   template<typename Integrator>
-  cubacpp::integration_results<NRADII + 3>
+  cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>
   integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
       return i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
@@ -506,7 +506,7 @@ struct Gamma_T_Integrated_Bin_Result {
     }
 };
 
-template<typename MODELS, std::size_t NRADII, std::size_t NRICHNESS = 1, std::size_t NREDSHIFT = 1>
+template<typename MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
 std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>
 make_gamma_t_integrated_bins(const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>& gt,
                              const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>& results)

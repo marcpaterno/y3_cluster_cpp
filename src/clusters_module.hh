@@ -45,7 +45,7 @@ _get_ranges(cosmosis::DataBlock db, std::string name)
 template <class MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
 y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::ClustersModule(cosmosis::DataBlock& config)
   // TODO: Possibly set up any optional parameters, like integration params?
-  : lo_bins(_get_ranges<NREDSHIFT>(config, "lo"))
+  : lo_bins(_get_ranges<NRICHNESS>(config, "lo"))
   , zo_bins(_get_ranges<NREDSHIFT>(config, "zo"))
 {
     auto radii = get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins");
@@ -83,14 +83,14 @@ y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::execute(cosmos
 
   for (const auto& bin : binned_centered_result) {
       centered_cluster_counts.push_back(bin.N);
-      centered_cluster_counts.push_back(bin.Nw);
+      //centered_cluster_counts.push_back(bin.Nw);
       for (auto i = 0u; i < NRADII; i++)
           centered_gamma_ts.push_back(bin.gamma_ts[i]);
   }
 
   for (const auto& bin : binned_miscentered_result) {
       miscentered_cluster_counts.push_back(bin.N);
-      miscentered_cluster_counts.push_back(bin.Nw);
+      //miscentered_cluster_counts.push_back(bin.Nw);
       for (auto i = 0u; i < NRADII; i++)
           miscentered_gamma_ts.push_back(bin.gamma_ts[i]);
   }

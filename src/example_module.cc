@@ -10,4 +10,4 @@
 //
 // GENERATE_Y3_COSMOSIS_MODULE(Y3Models)
 
-GENERATE_Y3_COSMOSIS_MODULE(y3_cluster::DefaultModels, 10)
+GENERATE_Y3_COSMOSIS_MODULE(y3_cluster::DefaultModels, 10, 5, 1)
