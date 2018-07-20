@@ -14,3 +14,4 @@ ez_test
 *.ps
 gmon.out
 dump.txt
+cross_output.txt
