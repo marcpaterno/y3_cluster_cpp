@@ -9,7 +9,7 @@
 #include "dv_do_dz_t.hh"
 #include "ez.hh"
 #include "ez_sq.hh"
-#include "bmz_t.hh"
+#include "hmb_t.hh"
 #include "hmf_t.hh"
 #include "lc_lt_t.hh"
 #include "lc_lt_t2.hh"
@@ -93,7 +93,7 @@ int main()
     auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
     auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
     auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
-    y3_cluster::BMZ_t bmz;
+    y3_cluster::HMB_t hmb;
     y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
     y3_cluster::DEL_SIG_t dsc(p2, p3, p4);
 
@@ -112,7 +112,7 @@ int main()
                           decltype(t_mis),
                           decltype(a_cen),
                           decltype(a_mis),
-                          decltype(bmz),
+                          decltype(hmb),
                           decltype(hmf),
                           decltype(dsc),
                           decltype(dvdodz),
@@ -127,7 +127,7 @@ int main()
                                       t_mis,
                                       a_cen,
                                       a_mis,
-                                      bmz,
+                                      hmb,
                                       hmf,
                                       dsc,
                                       dvdodz,

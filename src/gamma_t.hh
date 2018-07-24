@@ -70,7 +70,7 @@ private:
   typename MODELS::T_MIS T_mis;
   typename MODELS::A_CEN A_cen;
   typename MODELS::A_MIS A_mis;
-  typename MODELS::BMZ bmz;
+  typename MODELS::HMB hmb;
   typename MODELS::HMF hmf;
   typename MODELS::DEL_SIG del_sig;
   typename MODELS::DV_DO_DZ dv_do_dz;
@@ -101,7 +101,7 @@ public:
                     typename MODELS::T_MIS T_mis,
                     typename MODELS::A_CEN A_cen,
                     typename MODELS::A_MIS A_mis,
-                    typename MODELS::BMZ bmz,
+                    typename MODELS::HMB hmb,
                     typename MODELS::HMF hmf,
                     typename MODELS::DEL_SIG del_sig,
                     typename MODELS::DV_DO_DZ dv_do_dz,
@@ -126,7 +126,7 @@ public:
     , T_mis(T_mis)
     , A_cen(A_cen)
     , A_mis(A_mis)
-    , bmz(bmz)
+    , hmb(hmb)
     , hmf(hmf)
     , del_sig(del_sig)
     , dv_do_dz(dv_do_dz)
@@ -158,7 +158,7 @@ public:
     , T_mis(sample)
     , A_cen(sample)
     , A_mis(sample)
-    , bmz(sample)
+    , hmb(sample)
     , hmf(sample)
     , del_sig(sample)
     , dv_do_dz(sample)
@@ -193,7 +193,7 @@ public:
               T_mis,
               A_cen,
               A_mis,
-              bmz,
+              hmb,
               hmf,
               del_sig,
               dv_do_dz,
@@ -233,7 +233,7 @@ public:
   {
     std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)> return_arr;
 
-    auto const bmz_v = bmz(lnM, zt);
+    auto const hmb_v = hmb(lnM, zt);
     auto const hmf_v = hmf(lnM, zt);
     auto const mor_v = mor(lt, lnM, zt);
     auto const dv_do_dz_v = dv_do_dz(zt);
@@ -260,7 +260,7 @@ public:
             // eq. (24)
             double const N = jacob_N(loi) * N_int * N_mult;
             double const Nw = N * w;
-            double const Nb = N * bmz_v;
+            double const Nb = N * hmb_v;
 
             // eq. (29)
             auto const gamma_t_int = jacob_G(loi) * N_int * w;
@@ -480,7 +480,7 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::T_MIS t_mis,
                        typename MODELS::A_CEN a_cen,
                        typename MODELS::A_MIS a_mis,
-                       typename MODELS::BMZ bmz,
+                       typename MODELS::HMB hmb,
                        typename MODELS::HMF hmf,
                        typename MODELS::DEL_SIG del_sig,
                        typename MODELS::DV_DO_DZ dv_do_dz,
@@ -510,7 +510,7 @@ make_gamma_t_integrand(double fcen,
            t_mis,
            a_cen,
            a_mis,
-           bmz,
+           hmb,
            hmf,
            del_sig,
            dv_do_dz,
