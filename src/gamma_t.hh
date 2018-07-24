@@ -17,10 +17,43 @@
 // provided by Spencer Everett.
 namespace y3_cluster {
 
-// Forward declaration so we can declare it friend
+// Forward declaration of our integrand class
+template <typename MODELS, std::size_t NRADII,
+          std::size_t NRICHNESS, std::size_t NREDSHIFT>
+class Gamma_T_Integrand;
+
+// Forward declaration of result type, used in following function
 template <std::size_t NRADII>
 struct Gamma_T_Integrated_Bin_Result;
 
+// Forward declaration of binning function. Sorts raw integrator output into
+// an array of `Gamma_T_Integrated_Bin_Result`, so results don't get mixed up between bins.
+template<typename MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
+std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>
+make_gamma_t_integrated_bins(const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>&,
+                             const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>&);
+
+/*
+ * The core of this module - A class which represents the integrand for both
+ * cluster number counts and gamma_T weak lensing shear.
+ *
+ * Template parameters:
+ *
+ * MODELS - A structure representing the specific models to be used in the integration,
+ *      see `src/default_models.hh` for an example. Allows easily dropping in your own
+ *      model, e.g. if you want to test a different mass-observable relationship,
+ *      just subclass DefaultModels with a different MOR type.
+ *
+ * NRADII - The number of radii at which to compute gamma_T. Ideally this could
+ *      be specified at runtime; for now it must be statically known.
+ *
+ * NRICHNESS, NREDSHIFT - The number of richness and redshift bins to be used,
+ *      respectively. As with NRADII, we would like to specify at runtime, but
+ *      for now these are compile-time constants. The member functions
+ *      `integrate_centered` and `integrate_miscentered` will automatically
+ *      sort the integrator output into (richness, redshift) bins, see also
+ *      `make_gamma_t_integrated_bins`.
+ */
 template <typename MODELS, std::size_t NRADII,
           std::size_t NRICHNESS = 1, std::size_t NREDSHIFT = 1>
 class Gamma_T_Integrand {
@@ -140,9 +173,11 @@ public:
     , A_ir_(sample, "A")
     , theta_ir_(sample, "theta")
     , r(radii)
-  // TODO: Switch this out for a general method soon!
   {}
 
+  // Convert from one set of bins to another - useful for the
+  // `simultaneous_bin_comparison` test and executable, but may prove
+  // useful elsewhere
   template<std::size_t NEW_NRICHNESS, std::size_t NEW_NREDSHIFT>
   Gamma_T_Integrand<MODELS, NRADII, NEW_NRICHNESS, NEW_NREDSHIFT>
   with_bins(std::array<y3_cluster::IntegrationRange, NEW_NRICHNESS> new_lir,
@@ -177,6 +212,12 @@ public:
               r};
   }
 
+  /* Common integrand functionality. Do not call this directly, you can probably
+   * ignore it.
+   *
+   * Called by both `integrand_centered` and `integrand_miscentered`; factors
+   * out calculations common to them both.
+   */
   template<typename Fjn, typename Fjg, typename Fnm, typename Fgr>
   std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
   integrand_common(double lt,
@@ -377,29 +418,53 @@ public:
                             gamma_t_cen);
   }
 
+  /* Integrates the _centered_ component of the gamma_T, N expressions, and returns
+   * a pair of (results, bins), where `results` is the raw `cubacpp` output, and
+   * `bins` is an array of `Gamma_T_Integrated_Bin_Result<NRADII>`
+   *
+   * Arguments:
+   *
+   * Integrator i: A `cubacpp` integrator, i.e., Cuhre, Vegas, Suave
+   * double epsrel: The relative acceptable error of the integration
+   * double epsabs: The absolute acceptable integration error
+   */
   template<typename Integrator>
-  cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>
+  std::pair<cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>,
+            std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>>
   integrate_centered(Integrator i, double epsrel, double epsabs)
   {
-      return i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
-                                double scaled_lnM, double scaled_A) {
-                            return centered(scaled_lo, scaled_lt, scaled_zt, scaled_lnM, scaled_A);
-                         },
-                         epsrel, epsabs);
+      auto result = i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
+                                       double scaled_lnM, double scaled_A) {
+                                   return centered(scaled_lo, scaled_lt, scaled_zt, scaled_lnM, scaled_A);
+                                },
+                                epsrel, epsabs);
+      return {result, make_gamma_t_integrated_bins(*this, result)};
   }
 
+  /* Integrates the _mis_centered component of the gamma_T, N expressions, and returns
+   * a pair of (results, bins), where `results` is the raw `cubacpp` output, and
+   * `bins` is an array of `Gamma_T_Integrated_Bin_Result<NRADII>`
+   *
+   * Arguments:
+   *
+   * Integrator i: A `cubacpp` integrator, i.e., Cuhre, Vegas, Suave
+   * double epsrel: The relative acceptable error of the integration
+   * double epsabs: The absolute acceptable integration error
+   */
   template<typename Integrator>
-  cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>
+  std::pair<cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>,
+            std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>>
   integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
-      return i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
-                                double scaled_zt, double scaled_R, double scaled_lnM,
-                                double scaled_A, double scaled_theta) {
-                            return miscentered(scaled_lo, scaled_lc, scaled_lt,
-                                               scaled_zt, scaled_R, scaled_lnM,
-                                               scaled_A, scaled_theta);
-                         },
-                         epsrel, epsabs);
+      auto result = i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
+                                       double scaled_zt, double scaled_R, double scaled_lnM,
+                                       double scaled_A, double scaled_theta) {
+                                   return miscentered(scaled_lo, scaled_lc, scaled_lt,
+                                                      scaled_zt, scaled_R, scaled_lnM,
+                                                      scaled_A, scaled_theta);
+                                },
+                                epsrel, epsabs);
+      return {result, make_gamma_t_integrated_bins(*this, result)};
   }
 };
 
@@ -462,6 +527,12 @@ make_gamma_t_integrand(double fcen,
            rarray };
 }
 
+/* The integration results of a particular (richness, redshift) bin.
+ *
+ * The bin is specified by `lo_ir` and `zo_ir` for richness, redshift, respectively.
+ * Integrated values are in `gamma_ts`, `N`, `Nw`, `Nb`, with error and probability
+ * values for each in `*_error[s]` and `*_prob[s]`.
+ */
 template <std::size_t NRADII>
 struct Gamma_T_Integrated_Bin_Result {
     y3_cluster::IntegrationRange lo_ir, zo_ir;
