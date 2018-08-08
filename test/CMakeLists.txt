@@ -20,6 +20,16 @@ target_include_directories(integration_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(integration_test integration_test)
 
+add_executable(sub_integral_memoizer_test main.cc sub_integral_memoizer.test.cc)
+target_link_libraries(sub_integral_memoizer_test PRIVATE ${GSL_LIBRARIES})
+target_include_directories(sub_integral_memoizer_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR})
+add_test(sub_integral_memoizer_test sub_integral_memoizer_test)
+
 add_executable(trivial_gamma_t trivial_gamma_t.cc)
 target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} profiler interp lc_lt)
 target_include_directories(trivial_gamma_t
