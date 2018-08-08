@@ -22,7 +22,3 @@ target_include_directories(example_module
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
-add_test(NAME ExampleModuleCompiles
-         COMMAND ${CMAKE_COMMAND} --build . --target example_module --config $<CONFIGURATION>
-         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        )
