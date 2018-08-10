@@ -25,14 +25,20 @@ namespace y3_cluster {
         {
             cubacpp::QAG qag(arange.transform(0.0), arange.transform(1.0),
                              GSL_INTEG_GAUSS61, 20);
-            std::vector<double> xs(xsteps),
-                                ys(ysteps),
-                                values(xsteps * ysteps);
+            std::vector<double> xs, ys, values;
 
-            for (auto i = 0u; i < xsteps; i++) {
-                for (auto j = 0u; j < ysteps; j++) {
-                    const double x = xrange.transform(((double) i) / (xsteps - 1)),
-                                 y = yrange.transform(((double) j) / (ysteps - 1));
+            // Create xgrid
+            for (auto i = 0u; i < xsteps; i++)
+                xs.push_back(xrange.transform(((double) i) / (xsteps - 1)));
+
+            // Create ygrid
+            for (auto i = 0u; i < ysteps; i++)
+                ys.push_back(yrange.transform(((double) i) / (ysteps - 1)));
+
+            // Create grid of integral
+            for (auto j = 0u; j < ysteps; j++) {
+                for (auto i = 0u; i < xsteps; i++) {
+                    const double x = xs[i], y = ys[j];
 
                     // Perform integration
                     auto result = qag.integrate([&f, x, y](double a) { return f(a, x, y); },
@@ -41,11 +47,9 @@ namespace y3_cluster {
 
                     // Did something go wrong?
                     if (result.status != 0)
-                        throw std::runtime_error("GSL Romberg Integration failed in MemoizedIntegration constructor");
+                        throw std::runtime_error("GSL QAG Integration failed in MemoizedIntegration constructor");
 
                     // Record the result of this integration
-                    xs.push_back(x);
-                    ys.push_back(y);
                     values.push_back(result.value);
                 }
             }
