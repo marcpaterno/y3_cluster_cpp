@@ -1,7 +1,5 @@
 #include "catch2/catch.hpp"
 
-#include "integration_range.hh"
-#include "interp_2d.hh"
 #include "sub_integral_memoizer.hh"
 
 using y3_cluster::MemoizedIntegration;

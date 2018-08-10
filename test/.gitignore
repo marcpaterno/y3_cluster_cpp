@@ -33,5 +33,6 @@ roffset_probability_test
 roffset_t_test
 simultaneous_bin_comparison
 simultaneous_bin_comparison_test
+sub_integral_memoizer_test
 transform_test
 trivial_gamma_t
