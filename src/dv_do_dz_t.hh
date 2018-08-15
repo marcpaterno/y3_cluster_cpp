@@ -22,9 +22,7 @@ namespace y3_cluster {
       : _da(std::make_shared<y3_cluster::Interp1D const>(
                      get_datablock<doubles>(sample, "distances", "z"),
                      get_datablock<doubles>(sample, "distances", "d_a")))
-      , _ezt(y3_cluster::EZ(get_datablock<double>(sample, "cosmological_parameters", "omega_m"),
-                            get_datablock<double>(sample, "cosmological_parameters", "omega_lambda"),
-                            get_datablock<double>(sample, "cosmological_parameters", "omega_k")))
+      , _ezt(y3_cluster::EZ(sample))
       // FIXME: Check which h value this should be!
       , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
       {}
