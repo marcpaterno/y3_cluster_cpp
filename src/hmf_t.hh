@@ -17,9 +17,10 @@ namespace y3_cluster {
       _adjust_to_log(cosmosis::DataBlock& db, const std::vector<double>& masses)
       {
           std::vector<double> output = masses;
-          double omega_m = get_datablock<double>(db, "cosmological_parameters", "omega_M");
+          double omega_c = get_datablock<double>(db, "cosmological_parameters", "omega_c");
+          double omega_b = get_datablock<double>(db, "cosmological_parameters", "omega_b");
           for (auto& x : output)
-              x = std::log(x * omega_m);
+              x = std::log(x * (omega_c + omega_b));
           return output;
       }
 
