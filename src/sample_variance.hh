@@ -1,6 +1,7 @@
 #ifndef Y3_CLUSTER_SIGMA_HH
 #define Y3_CLUSTER_SIGMA_HH
 
+#include <cmath>
 #include <cubacpp/cubacpp.hh>
 #include <memory>
 #include <stdexcept>
@@ -11,10 +12,21 @@
 #include "ez.hh"
 #include "integration_range.hh"
 #include "interp_2d.hh"
+#include "omega_z_sdss.hh"
 #include "primitives.hh"
 
-// TODO: Power spectrum? Comoving distance?
 namespace y3_cluster {
+  namespace {
+    std::vector<double>
+    convert_to_mpch(std::vector<double> dm, double h)
+    {
+      std::vector<double> out(dm);
+      for (auto& v : out)
+          v *= h;
+      return out;
+    }
+  }
+
   /* The Sample Variance covariance is computed by:
    *
    *  C_{ij} = Nb_i * Nb_j * sigma_{ij}^2
@@ -24,8 +36,10 @@ namespace y3_cluster {
   class SampleVariance_t {
     std::vector<IntegrationRange> z_ranges;
     DV_DO_DZ_t dvdodz;
+    OMEGA_Z_SDSS omega_z;
     EZ ez;
-    std::shared_ptr<const Interp2D> matter_power_lin;
+    std::shared_ptr<Interp2D const> matter_power_lin;
+    std::shared_ptr<Interp1D const> dcom;
 
     std::size_t maxl;
 
@@ -34,44 +48,46 @@ namespace y3_cluster {
     SampleVariance_t(EZ ez, DV_DO_DZ_t dvdodz, const std::vector<IntegrationRange>& ir)
       : z_ranges(ir)
       , dvdodz(dvdodz)
+      , omega_z()
       , ez(ez)
-      , matter_power_lin(std::make_shared<const Interp2D>(
+      , matter_power_lin(std::make_shared<Interp2D const>(
             read_vector("matter_power_lin/k_h.txt"),
             read_vector("matter_power_lin/z.txt"),
             read_vector("matter_power_lin/p_k.txt")))
+      , dcom(std::make_shared<Interp1D const>(
+            read_vector("distances/z.txt"),
+            read_vector("distances/d_m.txt")))
       , maxl(100)
       {}
 
     explicit SampleVariance_t(cosmosis::DataBlock& sample)
       : z_ranges()
       , dvdodz(sample)
+      , omega_z()
       , ez(sample)
-      , matter_power_lin(std::make_shared<const Interp2D>(
+      , matter_power_lin(std::make_shared<Interp2D const>(
             get_datablock<std::vector<double>>(sample, "matter_power_lin", "k_h"),
             get_datablock<std::vector<double>>(sample, "matter_power_lin", "z"),
             get_datablock<cosmosis::ndarray<double>>(sample, "matter_power_lin", "p_k")))
+      , dcom(std::make_shared<Interp1D const>(
+            get_datablock<std::vector<double>>(sample, "distances", "z"),
+            convert_to_mpch(get_datablock<std::vector<double>>(sample, "distances", "d_m"),
+                            get_datablock<double>(sample, "distances", "h"))))
       , maxl(100)
       {}
 
     double
-    bessel(std::size_t /*l*/, double /*x*/) const
+    kay(std::size_t l, double z) const
     {
-      // TODO Implement me!!
-      return 1.0;
-    }
-
-    double
-    kay(std::size_t /*l*/, double /*z*/) const
-    {
-      // TODO Implement me!!
-      return 1.0;
-    }
-
-    double
-    dcom(double /*z*/) const
-    {
-      // TODO Implement me!!
-      return 1.0;
+      if (l == 0)
+          return 1 / 2 / std::sqrt(pi());
+      else {
+        const double oz = omega_z(z),
+                     cos_theta = 1 - oz / 2 / pi(),
+                     frac = (std::legendre(l - 1, cos_theta) - std::legendre(l + 1, cos_theta))
+                            / oz;
+        return std::sqrt(pi() / (2*l + 1)) * frac;
+      }
     }
 
     /* Compute the full sigma_{ij} matrix
@@ -120,12 +136,12 @@ namespace y3_cluster {
                                  k = std::exp(lnk);
 
                       const auto matter_power = std::sqrt(matter_power_lin->eval(k, zi) * matter_power_lin->eval(k, zj)),
-                                 dcomi = dcom(zi),
-                                 dcomj = dcom(zj);
+                                 dcomi = dcom->eval(zi),
+                                 dcomj = dcom->eval(zj);
 
                       double sum = 0;
                       for (auto l = 0u; l < maxl; l++) {
-                        const double this_l = bessel(l, k * dcomi) * bessel(l, k * dcomj)
+                        const double this_l = std::sph_bessel(l, k * dcomi) * std::sph_bessel(l, k * dcomj)
                                             * kay(l, zi) * kay(l, zj);
                         if (l & 1)
                           sum -= this_l;
@@ -133,7 +149,8 @@ namespace y3_cluster {
                           sum += this_l;
                       }
 
-                      return dcomi * dcomi * dcomj * dcomj
+                      // k^3 due to integration over log
+                      return k * k * k * dcomi * dcomi * dcomj * dcomj
                              * sum * matter_power
                              * lnk_ir.jacobian() * z_ranges[i].jacobian() * z_ranges[j].jacobian();
                     },
