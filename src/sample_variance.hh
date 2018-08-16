@@ -56,7 +56,7 @@ namespace y3_cluster {
             read_vector("matter_power_lin/p_k.txt")))
       , dcom(std::make_shared<Interp1D const>(
             read_vector("distances/z.txt"),
-            read_vector("distances/d_m.txt")))
+            convert_to_mpch(read_vector("distances/d_m.txt"), 0.771358152)))
       , maxl(100)
       {}
 
@@ -72,7 +72,7 @@ namespace y3_cluster {
       , dcom(std::make_shared<Interp1D const>(
             get_datablock<std::vector<double>>(sample, "distances", "z"),
             convert_to_mpch(get_datablock<std::vector<double>>(sample, "distances", "d_m"),
-                            get_datablock<double>(sample, "distances", "h"))))
+                            get_datablock<double>(sample, "cosmological_parameters", "h0"))))
       , maxl(100)
       {}
 
