@@ -98,6 +98,17 @@ target_include_directories(omega_z_sdss_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(omega_z_sdss_test omega_z_sdss_test)
 
+add_executable(sample_variance_test main.cc sample_variance.test.cc)
+target_link_libraries(sample_variance_test PRIVATE ${GSL_LIBRARIES} interp)
+target_include_directories(sample_variance_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(sample_variance_test sample_variance_test)
+
 add_executable(hmf_t_test main.cc hmf_t.test.cc)
 target_link_libraries(hmf_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(hmf_t_test
