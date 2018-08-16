@@ -335,7 +335,7 @@ public:
     // eq. (27)
     auto N_mis = [=](std::size_t loi) {
         auto const lo = lo_ir_[loi].transform(scaled_lo);
-        return (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt(lc, lt, zt) * roffset(R);
+        return (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt(loi, lt, zt) * roffset(R);
     };
 
     // eq. (30)
@@ -371,8 +371,7 @@ public:
    * * A - ???
    * */
   std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
-  centered(double scaled_lo,
-           double scaled_lt,
+  centered(double scaled_lt,
            double scaled_zt,
            double scaled_lnM,
            double scaled_A) const
@@ -383,14 +382,14 @@ public:
     auto const zt = zt_ir_.transform(scaled_zt);
     auto const A = A_ir_.transform(scaled_A);
 
-    auto jacob_N = [=](std::size_t loi) {
-        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+    auto jacob_N = [=](std::size_t) {
+        return lnM_ir_.jacobian() //* lo_ir_[loi].jacobian()
                * lt_ir_.jacobian()
                * zt_ir_.jacobian();
     };
 
-    auto jacob_G = [=](std::size_t loi) {
-        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+    auto jacob_G = [=](std::size_t) {
+        return lnM_ir_.jacobian() //* lo_ir_[loi].jacobian()
                * lt_ir_.jacobian()
                * zt_ir_.jacobian()
                * A_ir_.jacobian();
@@ -398,8 +397,7 @@ public:
 
     // eq. (26)
     auto N_cen = [=](std::size_t loi) {
-        auto const lo = lo_ir_[loi].transform(scaled_lo);
-        return lc_lt(lo, lt, zt) * fcen_;
+        return lc_lt(loi, lt, zt) * fcen_;
     };
 
     // eq. (30)
@@ -433,9 +431,9 @@ public:
             std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>>
   integrate_centered(Integrator i, double epsrel, double epsabs)
   {
-      auto result = i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
+      auto result = i.integrate([this](double scaled_lt, double scaled_zt,
                                        double scaled_lnM, double scaled_A) {
-                                   return centered(scaled_lo, scaled_lt, scaled_zt, scaled_lnM, scaled_A);
+                                   return centered(scaled_lt, scaled_zt, scaled_lnM, scaled_A);
                                 },
                                 epsrel, epsabs);
       return {result, make_gamma_t_integrated_bins(*this, result)};
