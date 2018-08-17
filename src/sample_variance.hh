@@ -57,7 +57,7 @@ namespace y3_cluster {
       , dcom(std::make_shared<Interp1D const>(
             read_vector("distances/z.txt"),
             convert_to_mpch(read_vector("distances/d_m.txt"), 0.771358152)))
-      , maxl(100)
+      , maxl(20)
       {}
 
     explicit SampleVariance_t(cosmosis::DataBlock& sample)
@@ -73,9 +73,10 @@ namespace y3_cluster {
             get_datablock<std::vector<double>>(sample, "distances", "z"),
             convert_to_mpch(get_datablock<std::vector<double>>(sample, "distances", "d_m"),
                             get_datablock<double>(sample, "cosmological_parameters", "h0"))))
-      , maxl(100)
+      , maxl(20)
       {}
 
+    // Coefficients of expansion of survey mask, in spherical harmonics
     double
     kay(std::size_t l, double z) const
     {
@@ -90,8 +91,7 @@ namespace y3_cluster {
       }
     }
 
-    /* Compute the full sigma_{ij} matrix
-     */
+    // Compute the full sigma_{ij} matrix
     std::vector<std::vector<double>>
     operator()()
     {
@@ -117,19 +117,23 @@ namespace y3_cluster {
         delta_dvdos[i] = result.value;
       }
 
+      // Compute matrix of sigma^{SampVar}_{ij}
+      cubacpp::Vegas integrator;
+      integrator.maxeval = 999999999;
 
-      /* Compute matrix of sigma^{SampVar}_{ij} */
-      cubacpp::Cuhre cuhre;
-      cuhre.maxeval = 999999999;
-
-      // No idea what real range should be
-      IntegrationRange lnk_ir{1, 10};
+      // Using Matteo's range for now
+      IntegrationRange lnk_ir{std::log(0.0001), std::log(0.80)};
       for (auto i = 0u; i < z_ranges.size(); i++) {
         for (auto j = 0u; j < z_ranges.size(); j++) {
           if (i <= j) {
-            // Integrate \sigma_{ij} =
-            // TODO: Implement dcom, bessel, kay, and matter_power_lin
-            auto result = cuhre.integrate([&](double lnk_scaled, double zi_scaled, double zj_scaled) {
+            /* Integrate \sigma_{ij} =
+             *      ((dV/d\Omega)|_{\Delta zi} (dV/d\Omega)|_{\Delta zi})^{-1}
+             *       2/pi \int dk^3 \int_{\Delta z_i} dz_i \int_{\Delta z_j} dz_j
+             *       \sqrt{P_{lin}(k, z_i) P_{lin}(k, z_j)} D(z_i)^2 D(z_j)^2
+             *       \sum_l (-1}^l j_l(k D(z_i)) j_l(k D(z_j)) K_l(z_i) K_l(z_j)
+             */
+
+            auto result = integrator.integrate([&](double lnk_scaled, double zi_scaled, double zj_scaled) {
                       const auto lnk = lnk_ir.transform(lnk_scaled),
                                  zi = z_ranges[i].transform(zi_scaled),
                                  zj = z_ranges[j].transform(zj_scaled),

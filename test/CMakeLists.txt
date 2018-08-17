@@ -99,7 +99,7 @@ target_include_directories(omega_z_sdss_test
 add_test(omega_z_sdss_test omega_z_sdss_test)
 
 add_executable(sample_variance_test main.cc sample_variance.test.cc)
-target_link_libraries(sample_variance_test PRIVATE ${GSL_LIBRARIES} interp)
+target_link_libraries(sample_variance_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(sample_variance_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
