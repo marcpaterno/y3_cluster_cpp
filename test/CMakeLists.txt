@@ -313,3 +313,13 @@ target_include_directories(simultaneous_bin_comparison
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_executable(sample_variance sample_variance.cc)
+target_link_libraries(sample_variance PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_include_directories(sample_variance
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
