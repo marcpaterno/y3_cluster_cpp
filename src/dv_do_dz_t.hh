@@ -23,16 +23,16 @@ namespace y3_cluster {
                      get_datablock<doubles>(sample, "distances", "z"),
                      get_datablock<doubles>(sample, "distances", "d_a")))
       , _ezt(y3_cluster::EZ(sample))
-      // FIXME: Check which h value this should be!
       , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
       {}
 
     double
     operator()(double zt) const
     {
-      // TODO: Check this, as it looks incorrect
       double const da_z = _da->eval(zt); // da_z needs to be in Mpc
-      return 3000.0 * (1.0 + zt) * (1.0 + zt) * da_z*_h * da_z*_h / _ezt(zt);
+      // Units: (Mpc/h)^3
+      // 2997.92 is Hubble distance, c/H_0
+      return 2997.92 * (1.0 + zt) * (1.0 + zt) * da_z*_h * da_z*_h / _ezt(zt);
     }
 
   private:
