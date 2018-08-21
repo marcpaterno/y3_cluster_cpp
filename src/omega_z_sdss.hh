@@ -8,7 +8,7 @@
 #include <cmath>
 
 namespace y3_cluster {
-  struct  OMEGA_Z_SDSS {
+  struct OMEGA_Z_SDSS {
   private:
     static const y3_cluster::polynomial<12> SDSS_fit;
 
@@ -19,6 +19,7 @@ namespace y3_cluster {
     double
     operator()(double zt) const
     {
+      // Returns effective survey area in rad^2
       return SDSS_fit(zt - 0.2);
     }
   };
