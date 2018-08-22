@@ -45,7 +45,7 @@ TEST_CASE("Check that different ways to integrate bessel functions are equivalen
         REQUIRE(z_normalization.status == 0);
 
         y3_cluster::IntegrationRange ln_kir(std::log(0.0001), std::log(0.01));
-        for (auto l = 0u; l < 1; l++) {
+        for (auto l = 0u; l < 10; l++) {
             for (auto ki = 0u; ki < 10; ki++) {
                 const double lnk = ln_kir.transform(ki / 9.0),
                              k = std::exp(lnk);
@@ -66,7 +66,7 @@ TEST_CASE("Check that different ways to integrate bessel functions are equivalen
 
                 const double z_value = z_bessel_integral.value / z_normalization.value,
                              r_value = r_bessel_integral.value / r_normalization;
-                CHECK(z_value == Approx(r_value).epsilon(1e-4));
+                CHECK(z_value == Approx(r_value).epsilon(1e-3).margin(1e-6));
             }
         }
     }
