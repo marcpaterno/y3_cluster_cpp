@@ -264,6 +264,17 @@ target_include_directories(sin_cos_analytic_integral_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(sin_cos_analytic_integral_test sin_cos_analytic_integral_test)
 
+add_executable(bessel_analytic_integral_test main.cc bessel_analytic_integral.test.cc)
+target_link_libraries(bessel_analytic_integral_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_include_directories(bessel_analytic_integral_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+add_test(bessel_analytic_integral_test bessel_analytic_integral_test)
+
 add_executable(bessel_integral_equivalence_test main.cc bessel_integral_equivalence.test.cc)
 target_link_libraries(bessel_integral_equivalence_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
 target_include_directories(bessel_integral_equivalence_test

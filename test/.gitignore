@@ -1,6 +1,7 @@
 CMakeFiles/
 CTestTestfile.cmake
 Makefile
+bessel_analytic_integral_test
 bessel_integral_equivalence_test
 cmake_install.cmake
 dv_do_dz_t_test
