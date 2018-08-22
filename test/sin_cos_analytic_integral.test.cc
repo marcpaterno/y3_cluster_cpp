@@ -2,26 +2,15 @@
 #include <iostream>
 
 #include "catch2/catch.hpp"
-#include "sin_cos_polynomial_integrals.hh"
+#include "primitives.hh"
+#include "sin_cos_polynomial_integral.hh"
 
-using y3_cluster::sinusoid_polynomial_integral;
-
-constexpr double
-integer_pow(double n, int pow)
-{
-    if (pow == 0)
-        return 1;
-    if (pow < 0)
-        return integer_pow(n, pow + 1) / n;
-    return integer_pow(n, pow - 1) * n;
-}
+using y3_cluster::sinusoid_polynomial_integral,
+      y3_cluster::integer_pow;
 
 TEST_CASE("Test analytic sin/cos polynomial integrals")
 {
     cubacpp::QAG qag;
-
-    CHECK(integer_pow(2, -1) == Approx(0.5));
-    CHECK(integer_pow(3, -2) == Approx(1.0/3.0/3.0));
 
     std::vector<std::pair<double, double>> ranges{{{1, 2}, {2, 3}, {3, 7}}};
     for (auto pow = -10; pow < 12; pow++) {

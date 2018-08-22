@@ -21,6 +21,17 @@ namespace y3_cluster {
     return std::exp(-z * z / 2.) * 0.3989422804014327 / sigma;
   }
 
+  // In C++ >= 11, the std::pow does not optimize for integers :/
+  constexpr double
+  integer_pow(double n, int pow)
+  {
+    if (pow == 0)
+      return 1;
+    if (pow < 0)
+      return integer_pow(n, pow + 1) / n;
+    return integer_pow(n, pow - 1) * n;
+  }
+
   /*
   double constexpr
   erf_approx(const double x)

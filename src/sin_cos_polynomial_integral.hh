@@ -5,6 +5,8 @@
 #include <utility>
 #include <gsl/gsl_sf_expint.h>
 
+#include "primitives.hh"
+
 /* Contains routines for analytic integrations of the form:
  *
  *  X_n = \int dx x^n sin(x)
@@ -15,18 +17,6 @@
  */
 
 namespace y3_cluster {
-    namespace {
-        // In C++ >= 11, the std::pow does not optimize for integers :/
-        constexpr double
-        integer_pow(double n, int pow)
-        {
-            if (pow == 0)
-                return 1;
-            if (pow < 0)
-                return integer_pow(n, pow + 1) / n;
-            return integer_pow(n, pow - 1) * n;
-        }
-    }
 
     // Returns (\Delta X_n, \Delta Y_n)
     std::pair<double, double>
