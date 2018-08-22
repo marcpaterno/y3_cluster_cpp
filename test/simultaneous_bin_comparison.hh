@@ -16,27 +16,13 @@ namespace y3_cluster {
                            bool print = false,
                            bool test = true)
     {
-        auto res_cen = I.integrate([&gti](double a, double b, double c,
-                                          double d, double e) {
-                                        return gti.centered(a, b, c, d, e);
-                                    },
-                                    epsrel, epsabs);
-
+        auto [res_cen, bins_cen] = gti.integrate_centered(I, epsrel, epsabs);
         if (test)
             CHECK(res_cen.status == 0);
 
-        auto res_mis = I.integrate([&gti](double a, double b, double c,
-                                          double d, double e, double f,
-                                          double g, double h) {
-                                        return gti.miscentered(a, b, c, d, e, f, g, h);
-                                    },
-                                    epsrel, epsabs);
-
+        auto [res_mis, bins_mis] = gti.integrate_miscentered(I, epsrel, epsabs);
         if (test)
             CHECK(res_mis.status == 0);
-
-        auto bins_cen = make_gamma_t_integrated_bins(gti, res_cen);
-        auto bins_mis = make_gamma_t_integrated_bins(gti, res_mis);
 
         // CSV Output Header
         if (print)
@@ -79,41 +65,28 @@ namespace y3_cluster {
             };
 
             // First, check that the centered term gives comparable results
-            auto res_cen_single = I.integrate([&gti_new](double a, double b, double c,
-                                                         double d, double e) {
-                                                   return gti_new.centered(a, b, c, d, e);
-                                               },
-                                               epsrel, epsabs);
-
+            auto [res_cen_single, bin_cen_single] = gti_new.integrate_centered(I, epsrel, epsabs);
             CHECK(res_cen_single.status == 0);
 
-            const auto bin_cen_single = make_gamma_t_integrated_bins(gti_new, res_cen_single)[0];
             for(auto j = 0u; j < NRADII; j++)
-                checker(bin_cen_single.gamma_ts[i], bin_cen.gamma_ts[i]);
+                checker(bin_cen_single[0].gamma_ts[i], bin_cen.gamma_ts[i]);
 
-            checker(bin_cen_single.N, bin_cen.N);
-            checker(bin_cen_single.Nw, bin_cen.Nw);
+            checker(bin_cen_single[0].N, bin_cen.N);
+            checker(bin_cen_single[0].Nw, bin_cen.Nw);
 
-            print_line("cen", bin_cen, bin_cen_single, res_cen, res_cen_single);
+            print_line("cen", bin_cen, bin_cen_single[0], res_cen, res_cen_single);
 
             // Now test the miscentered term
-            auto res_mis_single = I.integrate([&gti_new](double a, double b, double c,
-                                                         double d, double e, double f,
-                                                         double g, double h) {
-                                                       return gti_new.miscentered(a, b, c, d, e, f, g, h);
-                                                   },
-                                                   epsrel, epsabs);
-
+            auto [res_mis_single, bin_mis_single] = gti_new.integrate_miscentered(I, epsrel, epsabs);
             CHECK(res_mis_single.status == 0);
 
-            const auto bin_mis_single = make_gamma_t_integrated_bins(gti_new, res_mis_single)[0];
             for(auto j = 0u; j < NRADII; j++)
-                checker(bin_mis_single.gamma_ts[i], bin_mis.gamma_ts[i]);
+                checker(bin_mis_single[0].gamma_ts[i], bin_mis.gamma_ts[i]);
 
-            checker(bin_mis_single.N, bin_mis.N);
-            checker(bin_mis_single.Nw, bin_mis.Nw);
+            checker(bin_mis_single[0].N, bin_mis.N);
+            checker(bin_mis_single[0].Nw, bin_mis.Nw);
 
-            print_line("mis", bin_mis, bin_mis_single, res_mis, res_mis_single);
+            print_line("mis", bin_mis, bin_mis_single[0], res_mis, res_mis_single);
         }
     }
 
