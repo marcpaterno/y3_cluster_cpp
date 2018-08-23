@@ -50,8 +50,11 @@ namespace y3_cluster {
             // Set X, Y for base case (n = -1)
             X_min = gsl_sf_Si(range_min);
             X_max = gsl_sf_Si(range_max);
-            Y_min = gsl_sf_Ci(range_min);
-            Y_max = gsl_sf_Ci(range_max);
+            // Ci = - \int_x^{+inf} cos(t)/t dt
+            // Ci = - \int (odd function) dt
+            //  therefore, Ci is _even_
+            Y_min = gsl_sf_Ci(std::abs(range_min));
+            Y_max = gsl_sf_Ci(std::abs(range_max));
 
             for (auto i = -2; i >= n; i--) {
                 const double X_min_new = (integer_pow(range_min, i + 1) * sin_min - Y_min) / (i + 1),

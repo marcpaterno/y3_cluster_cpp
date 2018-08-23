@@ -12,7 +12,7 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
 {
     cubacpp::QAG qag;
 
-    std::vector<std::pair<double, double>> ranges{{{1, 2}, {2, 3}, {3, 7}}};
+    std::vector<std::pair<double, double>> ranges{{{-7, -3}, {-3, -2}, {-2, -1}, {1, 2}, {2, 3}, {3, 7}}};
     for (auto pow = -10; pow < 12; pow++) {
         for (const auto [minx, maxx] : ranges) {
             const auto cos_integral = qag.with_range(minx, maxx)
