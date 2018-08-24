@@ -1,5 +1,10 @@
-add_executable(integrand_test main.cc integrand.test.cc)
-target_link_libraries(integrand_test PRIVATE ${CUBA_LIBRARIES})
+add_library(testmain SHARED main.cc)
+target_include_directories(testmain
+                           PUBLIC ${CMAKE_SOURCE_DIR}
+                                  ${CMAKE_SOURCE_DIR}/externals)
+
+add_executable(integrand_test integrand.test.cc)
+target_link_libraries(integrand_test PRIVATE testmain ${CUBA_LIBRARIES})
 target_include_directories(integrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -9,8 +14,8 @@ target_include_directories(integrand_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(integrand_test integrand_test)
 
-add_executable(integration_test main.cc integration.test.cc)
-target_link_libraries(integration_test PRIVATE ${CUBA_LIBRARIES})
+add_executable(integration_test integration.test.cc)
+target_link_libraries(integration_test PRIVATE testmain ${CUBA_LIBRARIES})
 target_include_directories(integration_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -30,7 +35,8 @@ target_include_directories(trivial_gamma_t
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
-add_executable(transform_test main.cc transform.test.cc)
+add_executable(transform_test transform.test.cc)
+target_link_libraries(transform_test PRIVATE testmain)
 target_include_directories(transform_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -38,8 +44,8 @@ target_include_directories(transform_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(transform_test transform_test)
 
-add_executable(interp_1d_test main.cc)
-target_link_libraries(interp_1d_test PRIVATE ${GSL_LIBRARIES} interp)
+add_executable(interp_1d_test interp_1d.test.cc)
+target_link_libraries(interp_1d_test PRIVATE testmain ${GSL_LIBRARIES} interp)
 target_include_directories(interp_1d_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -48,8 +54,8 @@ target_include_directories(interp_1d_test
                            ${GSL_INCLUDE_DIR})
 add_test(interp_1d_test interp_1d_test)
 
-add_executable(interp_2d_test main.cc interp_2d.test.cc)
-target_link_libraries(interp_2d_test PRIVATE ${GSL_LIBRARIES} interp)
+add_executable(interp_2d_test interp_2d.test.cc)
+target_link_libraries(interp_2d_test PRIVATE testmain ${GSL_LIBRARIES} interp)
 target_include_directories(interp_2d_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -58,7 +64,8 @@ target_include_directories(interp_2d_test
                            ${GSL_INCLUDE_DIR})
 add_test(interp_2d_test interp_2d_test)
 
-add_executable(mz_power_law_test main.cc mz_power_law.test.cc)
+add_executable(mz_power_law_test mz_power_law.test.cc)
+target_link_libraries(mz_power_law_test PRIVATE testmain)
 target_include_directories(mz_power_law_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -66,7 +73,8 @@ target_include_directories(mz_power_law_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(mz_power_law_test mz_power_law_test)
 
-add_executable(point_3d_test main.cc point_3d.test.cc)
+add_executable(point_3d_test point_3d.test.cc)
+target_link_libraries(point_3d_test PRIVATE testmain)
 target_include_directories(point_3d_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -74,7 +82,8 @@ target_include_directories(point_3d_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(point_3d_test point_3d_test)
 
-add_executable(param_space_explorer_test main.cc param_space_explorer.test.cc)
+add_executable(param_space_explorer_test param_space_explorer.test.cc)
+target_link_libraries(param_space_explorer_test PRIVATE testmain)
 target_include_directories(param_space_explorer_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -82,7 +91,8 @@ target_include_directories(param_space_explorer_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(param_space_explorer_test param_space_explorer_test)
 
-add_executable(fpsupport_test main.cc fpsupport.test.cc)
+add_executable(fpsupport_test fpsupport.test.cc)
+target_link_libraries(fpsupport_test PRIVATE testmain)
 target_include_directories(fpsupport_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -90,7 +100,8 @@ target_include_directories(fpsupport_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(fpsupport_test fpsupport_test)
 
-add_executable(omega_z_sdss_test main.cc omega_z_sdss.test.cc)
+add_executable(omega_z_sdss_test omega_z_sdss.test.cc)
+target_link_libraries(omega_z_sdss_test PRIVATE testmain)
 target_include_directories(omega_z_sdss_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -98,8 +109,8 @@ target_include_directories(omega_z_sdss_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(omega_z_sdss_test omega_z_sdss_test)
 
-add_executable(hmf_t_test main.cc hmf_t.test.cc)
-target_link_libraries(hmf_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+add_executable(hmf_t_test hmf_t.test.cc)
+target_link_libraries(hmf_t_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(hmf_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -107,7 +118,8 @@ target_include_directories(hmf_t_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(hmf_t_test hmf_t_test)
 
-add_executable(lo_lc_t_test main.cc lo_lc_t.test.cc)
+add_executable(lo_lc_t_test lo_lc_t.test.cc)
+target_link_libraries(lo_lc_t_test PRIVATE testmain)
 target_include_directories(lo_lc_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -115,7 +127,8 @@ target_include_directories(lo_lc_t_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(lo_lc_t_test lo_lc_t_test)
 
-add_executable(ez_sq_test main.cc ez_sq.test.cc)
+add_executable(ez_sq_test ez_sq.test.cc)
+target_link_libraries(ez_sq_test PRIVATE testmain)
 target_include_directories(ez_sq_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -123,7 +136,8 @@ target_include_directories(ez_sq_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ez_sq_test ez_sq_test)
 
-add_executable(ez_test main.cc ez.test.cc)
+add_executable(ez_test ez.test.cc)
+target_link_libraries(ez_test PRIVATE testmain)
 target_include_directories(ez_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -131,7 +145,8 @@ target_include_directories(ez_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ez_test ez_test)
 
-add_executable(roffset_t_test main.cc roffset_t.test.cc)
+add_executable(roffset_t_test roffset_t.test.cc)
+target_link_libraries(roffset_t_test PRIVATE testmain)
 target_include_directories(roffset_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -139,8 +154,8 @@ target_include_directories(roffset_t_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(roffset_t_test roffset_t_test)
 
-add_executable(lc_lt_t_test main.cc lc_lt_t.test.cc)
-target_link_libraries(lc_lt_t_test PRIVATE ${GSL_LIBRARIES} interp lc_lt)
+add_executable(lc_lt_t_test lc_lt_t.test.cc)
+target_link_libraries(lc_lt_t_test PRIVATE testmain ${GSL_LIBRARIES} interp lc_lt)
 target_include_directories(lc_lt_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -148,8 +163,8 @@ target_include_directories(lc_lt_t_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(lc_lt_t_test lc_lt_t_test)
 
-add_executable(lc_lt_probability_test main.cc lc_lt_probability_unity.test.cc)
-target_link_libraries(lc_lt_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+add_executable(lc_lt_probability_test lc_lt_probability_unity.test.cc)
+target_link_libraries(lc_lt_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
 target_include_directories(lc_lt_probability_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -159,8 +174,8 @@ target_include_directories(lc_lt_probability_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(lc_lt_probability_test lc_lt_probability_test)
 
-add_executable(dv_do_dz_t_test main.cc dv_do_dz_t.test.cc)
-target_link_libraries(dv_do_dz_t_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+add_executable(dv_do_dz_t_test dv_do_dz_t.test.cc)
+target_link_libraries(dv_do_dz_t_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(dv_do_dz_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -169,8 +184,8 @@ target_include_directories(dv_do_dz_t_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(dv_do_dz_t_test dv_do_dz_t_test)
 
-add_executable(polynomial_test main.cc polynomial.test.cc)
-target_link_libraries(polynomial_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+add_executable(polynomial_test polynomial.test.cc)
+target_link_libraries(polynomial_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(polynomial_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -179,39 +194,39 @@ target_include_directories(polynomial_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(polynomial_test polynomial_test)
 
-add_executable(lo_lc_probability_test main.cc lo_lc_probability_unity.test.cc)
-target_link_libraries(lo_lc_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
-target_include_directories(lo_lc_probability_test
+add_executable(lo_lc_probability_unity_test lo_lc_probability_unity.test.cc)
+target_link_libraries(lo_lc_probability_unity_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+target_include_directories(lo_lc_probability_unity_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
-add_test(lo_lc_probability_test lo_lc_probability_test)
+add_test(lo_lc_probability_unity_test lo_lc_probability_unity_test)
 
-add_executable(mor_t2_test main.cc mor_t2.test.cc)
-target_link_libraries(mor_t2_test PRIVATE ${GSL_LIBRARIES} interp)
+add_executable(mor_t2_test mor_t2.test.cc)
+target_link_libraries(mor_t2_test PRIVATE testmain ${GSL_LIBRARIES} interp)
 target_include_directories(mor_t2_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
-		                   ${CMAKE_SOURCE_DIR}/src
+		                       ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(mor_t2_test mor_t2_test)
 
-add_executable(mor_probability_test main.cc mor_probability_unity.test.cc)
-target_link_libraries(mor_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
-target_include_directories(mor_probability_test
+add_executable(mor_probability_unity_test mor_probability_unity.test.cc)
+target_link_libraries(mor_probability_unity_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+target_include_directories(mor_probability_unity_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
-add_test(mor_probability_test mor_probability_test)
+add_test(mor_probability_unity_test mor_probability_unity_test)
 
-add_executable(mor2_probability_test main.cc mor2_probability_unity.test.cc)
-target_link_libraries(mor2_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+add_executable(mor2_probability_test mor2_probability_unity.test.cc)
+target_link_libraries(mor2_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(mor2_probability_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -221,8 +236,8 @@ target_include_directories(mor2_probability_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(mor2_probability_test mor2_probability_test)
 
-add_executable(roffset_probability_test main.cc roffset_probability_unity.test.cc)
-target_link_libraries(roffset_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+add_executable(roffset_probability_test roffset_probability_unity.test.cc)
+target_link_libraries(roffset_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(roffset_probability_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -242,8 +257,8 @@ target_include_directories(integrate_delta_sigma
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
-add_executable(simultaneous_bin_comparison_test main.cc simultaneous_bin_comparison.test.cc)
-target_link_libraries(simultaneous_bin_comparison_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+add_executable(simultaneous_bin_comparison_test simultaneous_bin_comparison.test.cc)
+target_link_libraries(simultaneous_bin_comparison_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
 target_include_directories(simultaneous_bin_comparison_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
