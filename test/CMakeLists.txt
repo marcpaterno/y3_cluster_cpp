@@ -190,6 +190,14 @@ target_include_directories(polynomial_test
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 add_test(polynomial_test polynomial_test)
 
+add_executable(integer_pow_test main.cc integer_pow.test.cc)
+target_include_directories(integer_pow_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(integer_pow_test integer_pow_test)
+
 add_executable(lo_lc_probability_test main.cc lo_lc_probability_unity.test.cc)
 target_link_libraries(lo_lc_probability_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
 target_include_directories(lo_lc_probability_test

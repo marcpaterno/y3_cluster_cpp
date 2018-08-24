@@ -9,6 +9,7 @@ ez_sq_test
 ez_test
 fpsupport_test
 hmf_t_test
+integer_pow_test
 integrand_test
 integrate_delta_sigma
 integrate_lc_lt

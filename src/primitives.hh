@@ -21,6 +21,19 @@ namespace y3_cluster {
     return std::exp(-z * z / 2.) * 0.3989422804014327 / sigma;
   }
 
+  namespace {
+    // Tail recursive helper for `integer_pow`
+    constexpr double
+    do_integer_pow(const double accumulator, const double n, const unsigned pow)
+    {
+      if (pow == 0)
+        return accumulator;
+      if ((pow % 2) == 0)
+        return do_integer_pow(accumulator, n * n, pow / 2);
+      return do_integer_pow(accumulator * n, n, pow - 1);
+    }
+  }
+
   // In C++ >= 11, the std::pow does not optimize for integers :/
   constexpr double
   integer_pow(double n, int pow)
@@ -28,8 +41,8 @@ namespace y3_cluster {
     if (pow == 0)
       return 1;
     if (pow < 0)
-      return integer_pow(n, pow + 1) / n;
-    return integer_pow(n, pow - 1) * n;
+      return do_integer_pow(1, 1.0 / n, 0 - pow);
+    return do_integer_pow(1, n, pow);
   }
 
   /*
