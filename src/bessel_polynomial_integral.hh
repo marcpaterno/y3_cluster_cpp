@@ -4,6 +4,7 @@
 #include <cmath>
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_errno.h>
+#include <vector>
 
 #include "sin_cos_polynomial_integral.hh"
 #include "primitives.hh"
@@ -35,29 +36,34 @@ namespace y3_cluster {
                 output *= l + n - 2*k - 1;
             return output;
         }
+
+        std::vector<double>
+        bessels_array(const unsigned l, const double x)
+        {
+            std::vector<double> output(l + 1);
+            // WARNING: These values are not exact! See GSL docs:
+            // https://www.gnu.org/software/gsl/doc/html/specfunc.html#c.gsl_sf_bessel_jl_array
+            auto retval = gsl_sf_bessel_jl_array(l, x, &output[0]);
+            if (retval != GSL_SUCCESS)
+              throw std::runtime_error("GSL error!");
+            return output;
+        }
     }
 
     // Performs the integral:
     //      \int dx x^n j_l(kx)
-    // On the range x \in [range_min, range_max]
+    // On the range x \in [range_min, range_max], where j_l(x) has already been
+    // computed at k*range_min and k*range_max for l = 0, 1, 2, ... l - 1
     double
-    bessel_polynomial_integral(const int n, const unsigned l, const double k,
-                               const double range_min, const double range_max)
+    bessel_polynomial_integral_precomputed_jls(
+            const int n, const unsigned l, const double k,
+            const double range_min, const double range_max,
+            const std::vector<double>& bessels_min,
+            const std::vector<double>& bessels_max)
     {
-        // First, compute bessels up front
-        std::vector<double> bessels_min(l), bessels_max(l);
-
-        if (l > 0) {
-            // WARNING: These values are not exact! See GSL docs:
-            // https://www.gnu.org/software/gsl/doc/html/specfunc.html#c.gsl_sf_bessel_jl_array
-            auto retval = gsl_sf_bessel_jl_array(l - 1, k * range_min, &bessels_min[0]);
-            if (retval != GSL_SUCCESS)
-              throw std::runtime_error("GSL error!");
-
-            retval = gsl_sf_bessel_jl_array(l - 1, k * range_max, &bessels_max[0]);
-            if (retval != GSL_SUCCESS)
-              throw std::runtime_error("GSL error!");
-        }
+        if ((bessels_min.size() != bessels_max.size())
+                || (bessels_min.size() < l))
+            throw std::runtime_error("bessel_polynomial_integral_precomputed_jls: Bad jl vector size");
 
         // Compute the sum over B^n_{li}
         double running_sum = 0;
@@ -72,6 +78,51 @@ namespace y3_cluster {
         const double xdiff = sinusoid_polynomial_integral(n - l - 1, k * range_min, k * range_max).first,
                      Anl = (l > 0) ? product_l_n_k(l, n, l) : 1.0;
         return integer_pow(k, -n - 1) * (Anl * xdiff + running_sum);
+    }
+
+    // Performs the integral:
+    //      \int dx x^n j_l(kx)
+    // On the range x \in [range_min, range_max]
+    double
+    bessel_polynomial_integral(const int n, const unsigned l, const double k,
+                               const double range_min, const double range_max)
+    {
+        // First, compute bessels up front
+        std::vector<double> bessels_min, bessels_max;
+
+        if (l > 0) {
+            bessels_min = bessels_array(l - 1, k * range_min);
+            bessels_max = bessels_array(l - 1, k * range_max);
+        }
+
+        // Then pass off to other function
+        return bessel_polynomial_integral_precomputed_jls(n, l, k, 
+                range_min, range_max,
+                bessels_min, bessels_max);
+    }
+
+    // Computes I^n_l(x; k) on the range x = [range_min, range_max] for all l
+    // from 0 to l, inclusive, and returns a vector of the results.
+    // i.e., output[l] = I_n^l(x; k)
+    std::vector<double>
+    bessel_polynomial_integrals(const int n, const unsigned maxl, const double k,
+                                const double range_min, const double range_max)
+    {
+        // First, make output vector, and compute bessels up front
+        std::vector<double> output(maxl + 1), bessels_min, bessels_max;
+
+        if (maxl > 0) {
+            bessels_min = bessels_array(maxl - 1, k * range_min);
+            bessels_max = bessels_array(maxl - 1, k * range_max);
+        }
+
+        for (auto l = 0u; l <= maxl; l++)
+            output[l] = bessel_polynomial_integral_precomputed_jls(
+                    n, l, k,
+                    range_min, range_max,
+                    bessels_min, bessels_max);
+
+        return output;
     }
 }
 

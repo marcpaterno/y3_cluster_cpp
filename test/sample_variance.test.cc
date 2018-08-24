@@ -14,10 +14,10 @@ TEST_CASE("Test the sample variance calculator")
     REQUIRE(da_arr.size() == zz.size());
     auto da_f = std::make_shared<y3_cluster::Interp1D const>(zz, da_arr);
 
-    SampleVariance_t sv({{{0.1, 0.3}}}, h);
+    SampleVariance_t sv({{{0.1, 0.3}, {0.3, 0.5}, {0.5, 0.7}}}, h);
 
     auto matrix = sv.compute();
-    REQUIRE(matrix.size() == 1);
+    REQUIRE(matrix.size() == 3);
     for (const auto& row : matrix)
-        REQUIRE(row.size() == 1);
+        REQUIRE(row.size() == 3);
 }

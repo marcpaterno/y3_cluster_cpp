@@ -116,18 +116,15 @@ namespace y3_cluster {
                    i_normalization = (ri_max * ri_max * ri_max - ri_min * ri_min * ri_min) / 3.0,
                    j_normalization = (rj_max * rj_max * rj_max - rj_min * rj_min * rj_min) / 3.0;
 
+      const std::vector<double> bessels_i = bessel_polynomial_integrals(2, maxl, k, ri_min, ri_max),
+                                bessels_j = (i == j) ? bessels_i :
+                                    bessel_polynomial_integrals(2, maxl, k, ri_min, ri_max);
+
       double sum = 0;
       for (auto l = 0u; l < maxl; l++) {
-        double this_l = 0.0;
-        if (i == j) {
-          const double bessel = bessel_polynomial_integral(2, l, k, ri_min, ri_max)
-                              / i_normalization;
-          this_l = bessel * bessel * ks[i][l] * ks[i][l];
-        } else {
-          this_l = bessel_polynomial_integral(2, l, k, ri_min, ri_max) / i_normalization
-                 * bessel_polynomial_integral(2, l, k, rj_min, rj_max) / j_normalization
-                 * ks[i][l] * ks[j][l];
-        }
+        double this_l = bessels_i[l] * bessels_j[l]
+                      / i_normalization / j_normalization
+                      * ks[i][l] * ks[j][l];
         if (l & 1)
           sum -= this_l;
         else
@@ -145,7 +142,7 @@ namespace y3_cluster {
         v.resize(z_ranges.size());
 
       // Compute matrix of sigma^{SampVar}_{ij}
-      cubacpp::Vegas integrator;
+      cubacpp::Cuhre integrator;
       integrator.maxeval = 999999999;
 
       // Using Matteo's range for now
@@ -160,15 +157,16 @@ namespace y3_cluster {
              *       \sum_l (-1}^l j_l(k D(z_i)) j_l(k D(z_j)) K_l(z_i) K_l(z_j)
              */
 
-            auto result = integrator.integrate([&](const double lnk_scaled) {
+            // Have ignored parameter so we can use Cuhre - which requires >=2 integration dimensions
+            // But, Cuhre is much, much faster at this than Vegas, Suave
+            auto result = integrator.integrate([&](const double lnk_scaled, const double ignored [[maybe_unused]]) {
                       const auto lnk = lnk_ir.transform(lnk_scaled),
                                  zi_mid = z_ranges[i].transform(0.5),
                                  zj_mid = z_ranges[j].transform(0.5),
                                  k = std::exp(lnk);
 
-                      const auto matter_power = std::sqrt(matter_power_lin->eval(k, zi_mid) * matter_power_lin->eval(k, zj_mid));
-
-                      const auto sum = compute_sum_over_bessels(k, i, j);
+                      const auto matter_power = std::sqrt(matter_power_lin->eval(k, zi_mid) * matter_power_lin->eval(k, zj_mid)),
+                                 sum = compute_sum_over_bessels(k, i, j);
 
                       // k^3 due to integration over log
                       return 2 / pi()

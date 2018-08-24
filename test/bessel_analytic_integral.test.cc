@@ -6,6 +6,7 @@
 #include "bessel_polynomial_integral.hh"
 
 using y3_cluster::bessel_polynomial_integral,
+      y3_cluster::bessel_polynomial_integrals,
       y3_cluster::sinusoid_polynomial_integral,
       y3_cluster::integer_pow;
 
@@ -29,12 +30,14 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
 
   CHECK(test_integral.value == Approx(test_analytic(2) - test_analytic(1)));
 
-  std::vector<std::pair<double, double>> ranges{{{1, 2}, {2, 3}, {3, 7}}};
+  std::vector<std::pair<double, double>> ranges{{{1, 2}, {2, 3}, {3, 7}, {10, 20}}};
   std::vector<double> ks{{1.0, 2.0, 5.0, 10.0}};
+  const double maxl = 10;
   for (auto pow = 0; pow < 10; pow++) {
-    for (auto l = 0u; l < 10; l++) {
-      for (const auto [minx, maxx] : ranges) {
-        for (const auto k : ks) {
+    for (const auto [minx, maxx] : ranges) {
+      for (const auto k : ks) {
+        const auto list = bessel_polynomial_integrals(pow, maxl, k, minx, maxx);
+        for (auto l = 0u; l < maxl; l++) {
           const auto bessel_integral = qag.with_range(minx, maxx)
                                           .integrate([&](double x) {
                                                      return integer_pow(x, pow) * gsl_sf_bessel_jl(l, k * x);
@@ -45,7 +48,11 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
 
           const auto result = bessel_polynomial_integral(pow, l, k, minx, maxx);
 
-          CHECK(bessel_integral.value == Approx(result).epsilon(1e-3));
+          if (!(bessel_integral.value == Approx(result).epsilon(1e-3).margin(1e-10)))
+              std::cout << "x^" << pow << " * j_" << l << "(" << k << " x) on ["
+                        << minx << ", " << maxx << "]\n";
+          CHECK(bessel_integral.value == Approx(result).epsilon(1e-3).margin(1e-10));
+          CHECK(bessel_integral.value == Approx(list[l]).epsilon(1e-3).margin(1e-10));
         }
       }
     }

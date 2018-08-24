@@ -79,7 +79,7 @@ main()
 
     std::cout << "DCom({0.1, 0.3}) = {" << 1.1 * da_f->eval(0.1) * h << ", " << 1.3 * da_f->eval(0.3) * h << "}\n";
 
-    SampleVariance_t sv({{{0.1, 0.3}}}, h);
+    SampleVariance_t sv({{{0.1, 0.3}, {0.3, 0.5}, {0.5, 0.7}}}, h);
     write_bessel_sums(sv);
 
     std::shared_ptr<const y3_cluster::Interp2D> matter_power_lin = std::make_shared<const y3_cluster::Interp2D>(
