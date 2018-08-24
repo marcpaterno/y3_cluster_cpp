@@ -17,6 +17,23 @@
  */
 
 namespace y3_cluster {
+    namespace {
+        // Helper function for recursion relation
+        std::pair<double, double>
+        sinusoid_polynomial_iteration(const std::pair<double, double> curstep, const int n,
+                                               const double x, const double cosx, const double sinx)
+        {
+            if (n > 0)
+                return {n * curstep.second - integer_pow(x, n) * cosx,
+                        -n * curstep.first + integer_pow(x, n) * sinx};
+
+            if (n < -1)
+                return {(integer_pow(x, n + 1) * sinx - curstep.second) / (n + 1),
+                        (integer_pow(x, n + 1) * cosx + curstep.first) / (n + 1)};
+
+            throw std::runtime_error("n shouldn't be a base case");
+        }
+    }
 
     // Returns (\Delta X_n, \Delta Y_n)
     std::pair<double, double>
@@ -27,49 +44,95 @@ namespace y3_cluster {
                      cos_min = std::cos(range_min),
                      cos_max = std::cos(range_max);
 
-        double X_min = 0, X_max = 0, Y_min = 0, Y_max = 0;
+        std::pair<double, double> vals_min{-cos_min, sin_min},
+                                  vals_max{-cos_max, sin_max};
         if (n >= 0) {
-            // Set X, Y for base case
-            X_min = -cos_min;
-            X_max = -cos_max;
-            Y_min = sin_min;
-            Y_max = sin_max;
-
             for (auto i = 1; i <= n; i++) {
-                const double X_min_new = i * Y_min - integer_pow(range_min, i) * cos_min,
-                             X_max_new = i * Y_max - integer_pow(range_max, i) * cos_max,
-                             Y_min_new = -i * X_min + integer_pow(range_min, i) * sin_min,
-                             Y_max_new = -i * X_max + integer_pow(range_max, i) * sin_max;
-
-                X_min = X_min_new;
-                X_max = X_max_new;
-                Y_min = Y_min_new;
-                Y_max = Y_max_new;
+                vals_min = sinusoid_polynomial_iteration(vals_min, i, range_min, cos_min, sin_min);
+                vals_max = sinusoid_polynomial_iteration(vals_max, i, range_max, cos_max, sin_max);
             }
         } else if (n < 0) {
             // Set X, Y for base case (n = -1)
-            X_min = gsl_sf_Si(range_min);
-            X_max = gsl_sf_Si(range_max);
             // Ci = - \int_x^{+inf} cos(t)/t dt
             // Ci = - \int (odd function) dt
             //  therefore, Ci is _even_
-            Y_min = gsl_sf_Ci(std::abs(range_min));
-            Y_max = gsl_sf_Ci(std::abs(range_max));
+            vals_min = {gsl_sf_Si(range_min), gsl_sf_Ci(std::abs(range_min))};
+            vals_max = {gsl_sf_Si(range_max), gsl_sf_Ci(std::abs(range_max))};
 
             for (auto i = -2; i >= n; i--) {
-                const double X_min_new = (integer_pow(range_min, i + 1) * sin_min - Y_min) / (i + 1),
-                             X_max_new = (integer_pow(range_max, i + 1) * sin_max - Y_max) / (i + 1),
-                             Y_min_new = (integer_pow(range_min, i + 1) * cos_min + X_min) / (i + 1),
-                             Y_max_new = (integer_pow(range_max, i + 1) * cos_max + X_max) / (i + 1);
-
-                X_min = X_min_new;
-                X_max = X_max_new;
-                Y_min = Y_min_new;
-                Y_max = Y_max_new;
+                vals_min = sinusoid_polynomial_iteration(vals_min, i, range_min, cos_min, sin_min);
+                vals_max = sinusoid_polynomial_iteration(vals_max, i, range_max, cos_max, sin_max);
             }
         }
 
-        return {X_max - X_min, Y_max - Y_min};
+        return {vals_max.first - vals_min.first, vals_max.second - vals_min.second};
+    }
+
+    // Computes \Delta X_n and \Delta Y_n on the range
+    // x = [range_min, range_max] for all n from minn to maxn, inclusive.
+    //
+    // Returns a pair of vectors, ([\Delta X_{minn} ... \Delta X_{maxn}],
+    //                             [\Delta Y_{minn} ... \Delta Y_{maxn}])
+    std::pair<std::vector<double>, std::vector<double>>
+    sinusoid_polynomial_integrals(int minn, int maxn, const double range_min, const double range_max)
+    {
+        if (minn > maxn)
+            throw std::runtime_error("sinusoid_polynomial_integrals: Bad range");
+
+        int diff = maxn - minn, pivot = -minn;
+        std::pair<std::vector<double>, std::vector<double>>
+            output = {std::vector<double>(diff + 1),
+                      std::vector<double>(diff + 1)};
+
+        const double sin_min = std::sin(range_min),
+                     sin_max = std::sin(range_max),
+                     cos_min = std::cos(range_min),
+                     cos_max = std::cos(range_max);
+
+        std::pair<double, double> vals_min{-cos_min, sin_min},
+                                  vals_max{-cos_max, sin_max};
+        if (maxn >= 0) {
+            if (minn <= 0) {
+                output.first[pivot] = vals_max.first - vals_min.first;
+                output.second[pivot] = vals_max.second - vals_min.second;
+            }
+
+            for (auto i = 1; i <= maxn; i++) {
+                vals_min = sinusoid_polynomial_iteration(vals_min, i, range_min, cos_min, sin_min);
+                vals_max = sinusoid_polynomial_iteration(vals_max, i, range_max, cos_max, sin_max);
+
+                if (i >= minn) {
+                    output.first[pivot + i] = vals_max.first - vals_min.first;
+                    output.second[pivot + i] = vals_max.second - vals_min.second;
+                }
+            }
+        }
+
+        if (minn < 0) {
+            // Set X, Y for base case (n = -1)
+            // Ci = - \int_x^{+inf} cos(t)/t dt
+            // Ci = - \int (odd function) dt
+            //  therefore, Ci is _even_
+            vals_min = {gsl_sf_Si(range_min), gsl_sf_Ci(std::abs(range_min))};
+            vals_max = {gsl_sf_Si(range_max), gsl_sf_Ci(std::abs(range_max))};
+
+            if (maxn >= 0) {
+                output.first[pivot - 1] = vals_max.first - vals_min.first;
+                output.second[pivot - 1] = vals_max.second - vals_min.second;
+            }
+
+            for (auto i = -2; i >= minn; i--) {
+                vals_min = sinusoid_polynomial_iteration(vals_min, i, range_min, cos_min, sin_min);
+                vals_max = sinusoid_polynomial_iteration(vals_max, i, range_max, cos_max, sin_max);
+
+                if (i <= maxn) {
+                    output.first[pivot + i] = vals_max.first - vals_min.first;
+                    output.second[pivot + i] = vals_max.second - vals_min.second;
+                }
+            }
+        }
+
+        return output;
     }
 }
 

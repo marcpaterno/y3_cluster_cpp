@@ -43,41 +43,45 @@ namespace y3_cluster {
             std::vector<double> output(l + 1);
             // WARNING: These values are not exact! See GSL docs:
             // https://www.gnu.org/software/gsl/doc/html/specfunc.html#c.gsl_sf_bessel_jl_array
-            auto retval = gsl_sf_bessel_jl_array(l, x, &output[0]);
+
+            // Contrary to GSL docs, Steed's method seems to be faster. Maybe our maxl is too
+            // small to see the benefit of the recursive relations.
+            auto retval = gsl_sf_bessel_jl_steed_array(l, x, &output[0]);
             if (retval != GSL_SUCCESS)
               throw std::runtime_error("GSL error!");
             return output;
         }
-    }
 
-    // Performs the integral:
-    //      \int dx x^n j_l(kx)
-    // On the range x \in [range_min, range_max], where j_l(x) has already been
-    // computed at k*range_min and k*range_max for l = 0, 1, 2, ... l - 1
-    double
-    bessel_polynomial_integral_precomputed_jls(
-            const int n, const unsigned l, const double k,
-            const double range_min, const double range_max,
-            const std::vector<double>& bessels_min,
-            const std::vector<double>& bessels_max)
-    {
-        if ((bessels_min.size() != bessels_max.size())
-                || (bessels_min.size() < l))
-            throw std::runtime_error("bessel_polynomial_integral_precomputed_jls: Bad jl vector size");
+        // Performs the integral:
+        //      \int dx x^n j_l(kx)
+        // On the range x \in [range_min, range_max], where j_l(x) has already been
+        // computed at k*range_min and k*range_max for l = 0, 1, 2, ... l - 1,
+        // and \Delta X_{n - l - 1} has been computed on the same range.
+        double
+        bessel_polynomial_integral_precomputed(
+                const int n, const unsigned l, const double k,
+                const double range_min, const double range_max,
+                const std::vector<double>& bessels_min,
+                const std::vector<double>& bessels_max,
+                const double Xn)
+        {
+            if ((bessels_min.size() != bessels_max.size())
+                    || (bessels_min.size() < l))
+                throw std::runtime_error("bessel_polynomial_integral_precomputed: Bad jl vector size");
 
-        // Compute the sum over B^n_{li}
-        double running_sum = 0;
-        for (auto i = 0u; i < l; i++) {
-            const auto exponent = n - l + 1 + i;
-            const double B = product_l_n_k(l, n, l - i - 1);
-            running_sum -= B * (integer_pow(k*range_max, exponent) * bessels_max[i]
-                              - integer_pow(k*range_min, exponent) * bessels_min[i]);
+            // Compute the sum over B^n_{li}
+            double running_sum = 0;
+            for (auto i = 0u; i < l; i++) {
+                const auto exponent = n - l + 1 + i;
+                const double B = product_l_n_k(l, n, l - i - 1);
+                running_sum -= B * (integer_pow(k*range_max, exponent) * bessels_max[i]
+                                  - integer_pow(k*range_min, exponent) * bessels_min[i]);
+            }
+
+            // Calculate \Delta X_{n - l - 1}
+            const double Anl = (l > 0) ? product_l_n_k(l, n, l) : 1.0;
+            return integer_pow(k, -n - 1) * (Anl * Xn + running_sum);
         }
-
-        // Calculate \Delta X_{n - l - 1}
-        const double xdiff = sinusoid_polynomial_integral(n - l - 1, k * range_min, k * range_max).first,
-                     Anl = (l > 0) ? product_l_n_k(l, n, l) : 1.0;
-        return integer_pow(k, -n - 1) * (Anl * xdiff + running_sum);
     }
 
     // Performs the integral:
@@ -96,9 +100,10 @@ namespace y3_cluster {
         }
 
         // Then pass off to other function
-        return bessel_polynomial_integral_precomputed_jls(n, l, k, 
+        return bessel_polynomial_integral_precomputed(n, l, k,
                 range_min, range_max,
-                bessels_min, bessels_max);
+                bessels_min, bessels_max,
+                sinusoid_polynomial_integral(n - l - 1, k * range_min, k * range_max).first);
     }
 
     // Computes I^n_l(x; k) on the range x = [range_min, range_max] for all l
@@ -116,11 +121,16 @@ namespace y3_cluster {
             bessels_max = bessels_array(maxl - 1, k * range_max);
         }
 
+        const auto sin_integral = sinusoid_polynomial_integrals(
+                n - maxl - 1, n, k * range_min, k * range_max
+                ).first;
+
         for (auto l = 0u; l <= maxl; l++)
-            output[l] = bessel_polynomial_integral_precomputed_jls(
+            output[l] = bessel_polynomial_integral_precomputed(
                     n, l, k,
                     range_min, range_max,
-                    bessels_min, bessels_max);
+                    bessels_min, bessels_max,
+                    sin_integral[maxl - l]);
 
         return output;
     }

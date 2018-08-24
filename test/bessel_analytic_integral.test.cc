@@ -48,9 +48,6 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
 
           const auto result = bessel_polynomial_integral(pow, l, k, minx, maxx);
 
-          if (!(bessel_integral.value == Approx(result).epsilon(1e-3).margin(1e-10)))
-              std::cout << "x^" << pow << " * j_" << l << "(" << k << " x) on ["
-                        << minx << ", " << maxx << "]\n";
           CHECK(bessel_integral.value == Approx(result).epsilon(1e-3).margin(1e-10));
           CHECK(bessel_integral.value == Approx(list[l]).epsilon(1e-3).margin(1e-10));
         }
