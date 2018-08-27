@@ -13,8 +13,7 @@ TEST_CASE("Lc_Lt_t probability weighted correctly")
   IntegrationRange lt_ir{20.0, 80.0};
   IntegrationRange zt_ir{0.1, 0.3};
 
-  cubacpp::Vegas v;
-  v.maxeval = 9999999;
+  cubacpp::CQUAD v;
 
   test_integrate_lc_lt(v, lc_ir, lt_ir, zt_ir, 2, 2);
 }

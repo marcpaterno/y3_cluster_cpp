@@ -7,8 +7,7 @@ TEST_CASE("roffset probability weighted correctly")
 {
     IntegrationRange R_ir{0.0, 1.0};
 
-    cubacpp::Vegas v;
-    v.maxeval = 9999999;
+    cubacpp::CQUAD v;
 
     test_integrate_roffset(v, R_ir, 0.2);
 }
