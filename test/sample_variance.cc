@@ -35,12 +35,14 @@ write_bessel_sums(const y3_cluster::SampleVariance_t& sv)
 {
     std::ofstream output_file;
     output_file.open("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/sample_variance_output/bessel_sums.csv");
-    output_file << "k_h,sum_of_bessels\n";
-    y3_cluster::IntegrationRange lnk_range{std::log(0.0001), std::log(1.0)};
+    output_file << "k_h,sum_of_bessels,manual_sum_of_bessels\n";
+    y3_cluster::IntegrationRange lnk_range{std::log(0.0001), std::log(0.1)};
     for (auto i = 0; i < 1001; i++) {
         const double k = std::exp(lnk_range.transform(i / 1000.0));
+        std::cout << "Summing over bessels for k = " << k << '\n';
         output_file << k << ","
-                    << sv.compute_sum_over_bessels(k, 0, 0) << "\n";
+                    << sv.compute_sum_over_bessels(k, 0, 0) << ','
+                    << sv.manual_compute_sum_over_bessels(k, 0, 0) << "\n";
     }
     output_file.close();
 }
@@ -79,7 +81,8 @@ main()
 
     std::cout << "DCom({0.1, 0.3}) = {" << 1.1 * da_f->eval(0.1) * h << ", " << 1.3 * da_f->eval(0.3) * h << "}\n";
 
-    SampleVariance_t sv({{{0.1, 0.3}, {0.3, 0.5}, {0.5, 0.7}}}, h);
+    std::vector<y3_cluster::IntegrationRange> zs{{0.1, 0.3}, {0.3, 0.5}, {0.5, 0.7}};
+    SampleVariance_t sv(zs, h);
     write_bessel_sums(sv);
 
     std::shared_ptr<const y3_cluster::Interp2D> matter_power_lin = std::make_shared<const y3_cluster::Interp2D>(

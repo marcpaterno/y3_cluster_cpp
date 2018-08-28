@@ -133,6 +133,44 @@ namespace y3_cluster {
       return sum;
     }
 
+    double
+    manual_compute_sum_over_bessels(double k, unsigned i, unsigned j) const
+    {
+      const double ri_min = dcom->eval(z_ranges[i].transform(0)) * hubble,
+                   ri_max = dcom->eval(z_ranges[i].transform(1)) * hubble,
+                   rj_min = dcom->eval(z_ranges[j].transform(0)) * hubble,
+                   rj_max = dcom->eval(z_ranges[j].transform(1)) * hubble,
+                   i_normalization = (ri_max * ri_max * ri_max - ri_min * ri_min * ri_min) / 3.0,
+                   j_normalization = (rj_max * rj_max * rj_max - rj_min * rj_min * rj_min) / 3.0;
+
+      cubacpp::Cuhre integrator;
+      integrator.maxeval = 999999999;
+      auto integrate_bessel = [&](unsigned l, double k, double r_min, double r_max) {
+          y3_cluster::IntegrationRange r_ir{r_min, r_max};
+          const auto result = integrator.integrate([&](double r_scaled, double ignored [[maybe_unused]]) {
+                  const double r = r_ir.transform(r_scaled);
+                  return r * r * gsl_sf_bessel_jl(l, k * r) * r_ir.jacobian();
+                  }, 1e-2, 1e-18);
+
+          if (result.status != 0)
+              throw std::runtime_error("Big boom! (bessel integral did not converge)");
+
+          return result.value;
+      };
+
+      double sum = 0;
+      for (auto l = 0u; l < maxl; l++) {
+        double this_l = integrate_bessel(l, k, ri_min, ri_max) * integrate_bessel(l, k, rj_min, rj_max)
+                      / i_normalization / j_normalization
+                      * ks[i][l] * ks[j][l];
+        if (l & 1)
+          sum -= this_l;
+        else
+          sum += this_l;
+      }
+      return sum;
+    }
+
     // Compute the full sigma_{ij} matrix
     std::vector<std::vector<double>>
     compute() const
