@@ -3,20 +3,21 @@
 
 #include <gamma_t.hh>
 
-#include <mor_t2.hh>
-#include <lo_lc_t.hh>
-#include <lc_lt_t.hh>
-#include <zo_zt_t.hh>
-#include <roffset_t.hh>
-#include <t_cen_t.hh>
-#include <t_mis_t.hh>
 #include <a_cen_t.hh>
 #include <a_mis_t.hh>
-#include <hmb_t.hh>
-#include <hmf_t.hh>
 #include <del_sig_y1.hh>
 #include <dv_do_dz_t.hh>
+#include <hmb_t.hh>
+#include <hmf_t.hh>
+#include <lc_lt_t.hh>
+#include <lo_lc_t.hh>
+#include <mor_t2.hh>
+#include <roffset_t.hh>
+#include <sample_variance.hh>
+#include <t_cen_t.hh>
+#include <t_mis_t.hh>
 #include <omega_z_sdss.hh>
+#include <zo_zt_t.hh>
 
 namespace y3_cluster
 {
@@ -33,7 +34,8 @@ namespace y3_cluster
              typename HMF_,
              typename DEL_SIG_,
              typename DV_DO_DZ_,
-             typename OMEGA_Z_>
+             typename OMEGA_Z_,
+             typename SAMPLE_VARIANCE_>
     struct Models {
         using MOR = MOR_;
         using LO_LC = LO_LC_;
@@ -50,6 +52,7 @@ namespace y3_cluster
         using DEL_SIG = DEL_SIG_;
         using DV_DO_DZ = DV_DO_DZ_;
         using OMEGA_Z = OMEGA_Z_;
+        using SAMPLE_VARIANCE = SAMPLE_VARIANCE_;
     };
 
     using DefaultModels = Models<MOR_t2,
@@ -65,7 +68,8 @@ namespace y3_cluster
                                  HMF_t,
                                  DEL_SIG_y1,
                                  DV_DO_DZ_t,
-                                 OMEGA_Z_SDSS>;
+                                 OMEGA_Z_SDSS,
+                                 SampleVariance_t>;
 }
 
 #endif

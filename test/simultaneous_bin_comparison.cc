@@ -116,7 +116,8 @@ int main()
                           decltype(hmf),
                           decltype(dsc),
                           decltype(dvdodz),
-                          decltype(omega_z)>;
+                          decltype(omega_z),
+                          void>;
     auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
                                       mor,
                                       lo_lc,

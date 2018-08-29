@@ -2,10 +2,12 @@
 #include <gperftools/profiler.h>
 #include <iostream>
 
+#include "omega_z_sdss.hh"
 #include "sample_variance.hh"
 
 using y3_cluster::SampleVariance_t,
       y3_cluster::IntegrationRange,
+      y3_cluster::OMEGA_Z_SDSS,
       y3_cluster::bessel_polynomial_integral;
 
 void
@@ -81,8 +83,9 @@ main()
 
     std::cout << "DCom({0.1, 0.3}) = {" << 1.1 * da_f->eval(0.1) * h << ", " << 1.3 * da_f->eval(0.3) * h << "}\n";
 
+    OMEGA_Z_SDSS omega_z;
     std::vector<y3_cluster::IntegrationRange> zs{{0.1, 0.3}, {0.3, 0.5}, {0.5, 0.7}};
-    SampleVariance_t sv(zs, h);
+    SampleVariance_t sv(omega_z, zs, h);
     write_bessel_sums(sv);
 
     std::shared_ptr<const y3_cluster::Interp2D> matter_power_lin = std::make_shared<const y3_cluster::Interp2D>(
@@ -94,9 +97,8 @@ main()
     for (const auto k : ks)
         std::cout << "sum(" << k << ") = " << sv.compute_sum_over_bessels(k, 0, 0) << '\n';
 
-    for (auto l = 0u; l < 10; l++) {
-        std::cout << "kay(" << l << ", " << 0.1 << ") = " << y3_cluster::survey_mask_kay(l, 0.1) << '\n';
-    }
+    for (auto l = 0u; l < 10; l++)
+        std::cout << "kay(" << l << ", " << 0.1 << ") = " << y3_cluster::survey_mask_kay(omega_z, l, 0.1) << '\n';
 
     std::cout << "About to integrate...\n";
 

@@ -20,11 +20,10 @@
 
 namespace y3_cluster {
   // Coefficients of survey mask, in spherical harmonics
+  template<typename OMEGA_Z>
   double
-  survey_mask_kay(unsigned l, double z)
+  survey_mask_kay(const OMEGA_Z& omega_z, unsigned l, double z)
   {
-    OMEGA_Z_SDSS omega_z;
-
     if (l == 0)
         return 0.5 / std::sqrt(pi());
     else {
@@ -38,15 +37,16 @@ namespace y3_cluster {
 
   namespace {
     // Create a grid of K_l(z_i), so: compute_ks()[i][j] = K_j(z_i)
+    template<typename OMEGA_Z>
     std::vector<std::vector<double>>
-    compute_ks(unsigned maxl, const std::vector<IntegrationRange>& zirs)
+    compute_ks(const OMEGA_Z& omega_z, std::size_t maxl, const std::vector<IntegrationRange>& zirs)
     {
       std::vector<std::vector<double>> out;
       for (const auto zbin : zirs) {
         std::vector<double> this_bin;
         // Use the midpoint of the bin
         for (auto l = 0u; l < maxl; l++)
-          this_bin.push_back(survey_mask_kay(l, zbin.transform(0.5)));
+          this_bin.push_back(survey_mask_kay(omega_z, l, zbin.transform(0.5)));
         out.push_back(this_bin);
       }
       return out;
@@ -73,7 +73,9 @@ namespace y3_cluster {
 
   public:
     SampleVariance_t() = delete;
-    SampleVariance_t(const std::vector<IntegrationRange>& ir, double h)
+
+    template<typename OMEGA_Z>
+    SampleVariance_t(const OMEGA_Z& omega_z, const std::vector<IntegrationRange>& ir, double h)
       : z_ranges(ir)
       , matter_power_lin(std::make_shared<Interp2D const>(
             read_vector("matter_power_lin/k_h.txt"),
@@ -83,13 +85,13 @@ namespace y3_cluster {
             read_vector("distances/z.txt"),
             read_vector("distances/d_m.txt")))
       , maxl(5)
-      , ks(compute_ks(maxl, ir))
+      , ks(compute_ks(omega_z, maxl, ir))
       , hubble(h)
       {}
 
-    // TODO: Implement grabbing z-bins from datablock, and maxl parameter
-    explicit SampleVariance_t(cosmosis::DataBlock& sample)
-      : z_ranges()
+    template<typename OMEGA_Z>
+    explicit SampleVariance_t(cosmosis::DataBlock& sample, const OMEGA_Z& omega_z, const std::vector<IntegrationRange>& z_ranges)
+      : z_ranges(z_ranges)
       , matter_power_lin(std::make_shared<Interp2D const>(
             get_datablock<std::vector<double>>(sample, "matter_power_lin", "k_h"),
             get_datablock<std::vector<double>>(sample, "matter_power_lin", "z"),
@@ -97,8 +99,8 @@ namespace y3_cluster {
       , dcom(std::make_shared<Interp1D const>(
             get_datablock<std::vector<double>>(sample, "distances", "z"),
             get_datablock<std::vector<double>>(sample, "distances", "d_m")))
-      , maxl(5)
-      , ks(compute_ks(maxl, {}))
+      , maxl(get_datablock<int>(sample, "cluster_abundance", "smp_var_maxl"))
+      , ks(compute_ks(omega_z, maxl, z_ranges))
       , hubble(get_datablock<double>(sample, "cosmological_parameters", "h0"))
       {}
 
