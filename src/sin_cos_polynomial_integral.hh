@@ -21,7 +21,7 @@ namespace y3_cluster {
         // Helper function for recursion relation
         std::pair<double, double>
         sinusoid_polynomial_iteration(const std::pair<double, double> curstep, const int n,
-                                               const double x, const double cosx, const double sinx)
+                                      const double x, const double cosx, const double sinx)
         {
             if (n > 0)
                 return {n * curstep.second - integer_pow(x, n) * cosx,
@@ -35,10 +35,59 @@ namespace y3_cluster {
         }
     }
 
+    // Expands sine & cosine to 12th order around x=0, and analytically
+    // integrates with a polynomial
+    std::pair<double, double>
+    sinusoid_polynomial_taylor_approx(int n, const double range_min, const double range_max)
+    {
+        // n + 1 power because we are integrating
+        double powmin = integer_pow(range_min, n + 1),
+               powmax = integer_pow(range_max, n + 1),
+               sinint_min_sum = 0,
+               cosint_min_sum = 0,
+               sinint_max_sum = 0,
+               cosint_max_sum = 0;
+
+        int factorial = 1;
+
+        for (auto i = 0; i <= 12; i++) {
+            factorial *= (i == 0) ? 1 : i;
+            double sign = ((i / 2) % 2) ? -1 : 1,
+                   min_item = sign * (powmin / (n + i + 1)) / factorial,
+                   max_item = sign * (powmax / (n + i + 1)) / factorial;
+
+            if ((n + i + 1) == 0) {
+                min_item = sign * std::log(std::abs(range_min)) / factorial;
+                max_item = sign * std::log(std::abs(range_max)) / factorial;
+            }
+
+            if (i % 2) {
+                // Odd, sine
+                sinint_min_sum += min_item;
+                sinint_max_sum += max_item;
+            } else {
+                // Even, cosine
+                cosint_min_sum += min_item;
+                cosint_max_sum += max_item;
+            }
+
+            powmin *= range_min;
+            powmax *= range_max;
+        }
+
+        return {sinint_max_sum - sinint_min_sum, cosint_max_sum - cosint_min_sum};
+    }
+
     // Returns (\Delta X_n, \Delta Y_n)
     std::pair<double, double>
     sinusoid_polynomial_integral(int n, const double range_min, const double range_max)
     {
+        if ((std::abs(range_max - range_min) < 1)
+                && (range_max < 2)
+                && (range_min > -2)) {
+            return sinusoid_polynomial_taylor_approx(n, range_min, range_max);
+        }
+
         const double sin_min = std::sin(range_min),
                      sin_max = std::sin(range_max),
                      cos_min = std::cos(range_min),
@@ -83,6 +132,18 @@ namespace y3_cluster {
         std::pair<std::vector<double>, std::vector<double>>
             output = {std::vector<double>(diff + 1),
                       std::vector<double>(diff + 1)};
+
+        // On range around zero, defer to taylor expansion
+        if ((std::abs(range_max - range_min) < 2)
+                && (range_max < 2)
+                && (range_min > -2)) {
+            for (auto i = 0; i < diff; i++) {
+                const auto [sin, cos] = sinusoid_polynomial_taylor_approx(minn + i, range_min, range_max);
+                output.first[i] = sin;
+                output.second[i] = cos;
+            }
+            return output;
+        }
 
         const double sin_min = std::sin(range_min),
                      sin_max = std::sin(range_max),
