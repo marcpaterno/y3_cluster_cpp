@@ -84,7 +84,7 @@ namespace y3_cluster {
       , dcom(std::make_shared<Interp1D const>(
             read_vector("distances/z.txt"),
             read_vector("distances/d_m.txt")))
-      , maxl(5)
+      , maxl(90)
       , ks(compute_ks(omega_z, maxl, ir))
       , hubble(h)
       {}
@@ -124,13 +124,9 @@ namespace y3_cluster {
 
       double sum = 0;
       for (auto l = 0u; l < maxl; l++) {
-        double this_l = bessels_i[l] * bessels_j[l]
-                      / i_normalization / j_normalization
-                      * ks[i][l] * ks[j][l];
-        if (l & 1)
-          sum -= this_l;
-        else
-          sum += this_l;
+        sum += bessels_i[l] * bessels_j[l]
+             / i_normalization / j_normalization
+             * ks[i][l] * ks[j][l];
       }
       return sum;
     }
@@ -162,13 +158,9 @@ namespace y3_cluster {
 
       double sum = 0;
       for (auto l = 0u; l < maxl; l++) {
-        double this_l = integrate_bessel(l, k, ri_min, ri_max) * integrate_bessel(l, k, rj_min, rj_max)
+        sum += integrate_bessel(l, k, ri_min, ri_max) * integrate_bessel(l, k, rj_min, rj_max)
                       / i_normalization / j_normalization
                       * ks[i][l] * ks[j][l];
-        if (l & 1)
-          sum -= this_l;
-        else
-          sum += this_l;
       }
       return sum;
     }
@@ -205,6 +197,9 @@ namespace y3_cluster {
                                  zj_mid = z_ranges[j].transform(0.5),
                                  k = std::exp(lnk);
 
+                      // TODO Matteo computes the sum-over-bessels ahead of
+                      // time on a grid in ln(k) and interpolates over it -
+                      // we should do the same
                       const auto matter_power = std::sqrt(matter_power_lin->eval(k, zi_mid) * matter_power_lin->eval(k, zj_mid)),
                                  sum = compute_sum_over_bessels(k, i, j);
 
