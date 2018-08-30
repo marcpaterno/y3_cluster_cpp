@@ -2,6 +2,7 @@
 #define _Y3_BESSEL_POLYNOMIAL_HH
 
 #include <cmath>
+#include <cubacpp/cubacpp.hh>
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_errno.h>
 #include <vector>
@@ -52,6 +53,20 @@ namespace y3_cluster {
             return output;
         }
 
+        double
+        bessel_polynomial_integral_quadrature(
+                const int n, const unsigned l, const double k,
+                const double range_min, const double range_max)
+        {
+            cubacpp::QNG integrator(range_min, range_max);
+            const auto res = integrator.integrate([=](double r) {
+                    return integer_pow(r, n) * gsl_sf_bessel_jl(l, k * r);
+                    }, 1e-5, 1e-18);
+            if (res.status != 0)
+                throw std::runtime_error("Bessel quadrature did not converge!");
+            return res.value;
+        }
+
         // Performs the integral:
         //      \int dx x^n j_l(kx)
         // On the range x \in [range_min, range_max], where j_l(x) has already been
@@ -68,6 +83,15 @@ namespace y3_cluster {
             if ((bessels_min.size() != bessels_max.size())
                     || (bessels_min.size() < l))
                 throw std::runtime_error("bessel_polynomial_integral_precomputed: Bad jl vector size");
+
+            // The analytic integration is unstable for ranges very close to
+            // zero, punt to a quadrature version for integrations within
+            // the first zero of the Bessel function. See Bloomfield et al.,
+            // Equation 15
+            const auto diff = std::abs(k * (range_max - range_min));
+            if (((l < 10) && (diff < (pi() + l)))
+                    || (diff < (4.75 + 1.05 * l)))
+                return bessel_polynomial_integral_quadrature(n, l, k, range_min, range_max);
 
             // Compute the sum over B^n_{li}
             double running_sum = 0;

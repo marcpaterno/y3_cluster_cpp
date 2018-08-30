@@ -31,9 +31,9 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
   CHECK(test_integral.value == Approx(test_analytic(2) - test_analytic(1)));
 
   std::vector<std::pair<double, double>> ranges{{{1, 2}, {2, 3}, {3, 7}, {10, 20}}};
-  std::vector<double> ks{{1.0, 2.0, 5.0, 10.0}};
-  const double maxl = 10;
-  for (auto pow = 0; pow < 10; pow++) {
+  std::vector<double> ks{{0.001, 0.1, 1.0, 2.0, 5.0, 10.0}};
+  const double maxl = 30;
+  for (auto pow = -16; pow < 6; pow++) {
     for (const auto [minx, maxx] : ranges) {
       for (const auto k : ks) {
         const auto list = bessel_polynomial_integrals(pow, maxl, k, minx, maxx);
