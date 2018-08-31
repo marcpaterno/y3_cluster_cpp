@@ -5,18 +5,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 bessel_sums = pd.read_csv('bessel_sums.csv')
-bessel_sums['residual'] = (bessel_sums['sum_of_bessels'] - bessel_sums['manual_sum_of_bessels']) / bessel_sums['manual_sum_of_bessels']
 
-fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
-ax1.set_title('Bessel Sums')
+plt.figure('Bessel Sums')
 
-bessel_sums.plot('k_h', 'sum_of_bessels', ax=ax1)
-bessel_sums.plot('k_h', 'manual_sum_of_bessels', ax=ax1)
-bessel_sums.plot('k_h', 'residual', ax=ax2)
+sums = ['sum_of_bessels_z{}_z{}'.format(i, j)
+        for (i, j) in [(0, 0), (1, 1), (2, 2),
+                       (0, 1), (0, 2), (1, 2)]]
+for name in sums:
+    bessel_sums.plot('k_h', name, ax=plt.gca())
 
-ax1.set_xscale('log')
-ax1.set_yscale('log')
-ax2.set_yscale('log')
+plt.xscale('log')
+plt.yscale('log')
+
+plt.ylabel(r'$\sum_l R_{il}(k) R_{jl}(k) \Theta_l^2$')
+plt.xlabel(r'$k_h (Mpc^{-1} h)$')
 
 plt.legend()
 plt.show()
