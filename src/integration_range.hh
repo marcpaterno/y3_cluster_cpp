@@ -8,7 +8,10 @@
 
 namespace y3_cluster {
   class IntegrationRange {
+
   public:
+    IntegrationRange ()  =  default;
+
     IntegrationRange(double a, double b) : _a(a), _range(b - a)
     {
       if (_range == 0.0)
@@ -40,8 +43,8 @@ namespace y3_cluster {
 
     friend std::ostream& operator<<(std::ostream& os, const IntegrationRange&);
   private:
-    double _a;
-    double _range;
+    double _a  {0};
+    double _range  {0};
   };
 
   std::ostream&

@@ -101,6 +101,7 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
     y3_cluster::OMEGA_Z_SDSS omega_z;
     IntegrationRange lo_ir{20, 28};
     IntegrationRange zo_ir{0.1, 0.3};
+
     using MODELS = y3_cluster::Models<decltype(mor),
                                       decltype(lo_lc),
                                       decltype(lc_lt),
@@ -115,7 +116,8 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
                                       decltype(dsc),
                                       decltype(dvdodz),
                                       decltype(omega_z)>;
-    auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
+
+    auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                       mor,
                                       lo_lc,
                                       lc_lt,
@@ -131,7 +133,8 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
                                       dvdodz,
                                       omega_z,
                                       {lo_ir, {30, 40}},
-                                      {zo_ir, {0.3, 0.4}});
+                                      {zo_ir, {0.3, 0.4}},
+                                      10  /* radius bins */);
 
     cubacpp::Cuhre v;
     v.maxeval = 999999999;

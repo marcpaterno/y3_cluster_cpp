@@ -17,21 +17,13 @@
 // provided by Spencer Everett.
 namespace y3_cluster {
 
+
 // Forward declaration of our integrand class
-template <typename MODELS, std::size_t NRADII,
-          std::size_t NRICHNESS, std::size_t NREDSHIFT>
+template <typename MODELS>
 class Gamma_T_Integrand;
 
 // Forward declaration of result type, used in following function
-template <std::size_t NRADII>
 struct Gamma_T_Integrated_Bin_Result;
-
-// Forward declaration of binning function. Sorts raw integrator output into
-// an array of `Gamma_T_Integrated_Bin_Result`, so results don't get mixed up between bins.
-template<typename MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
-std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>
-make_gamma_t_integrated_bins(const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>&,
-                             const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>&);
 
 /*
  * The core of this module - A class which represents the integrand for both
@@ -54,11 +46,9 @@ make_gamma_t_integrated_bins(const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, 
  *      sort the integrator output into (richness, redshift) bins, see also
  *      `make_gamma_t_integrated_bins`.
  */
-template <typename MODELS, std::size_t NRADII,
-          std::size_t NRICHNESS = 1, std::size_t NREDSHIFT = 1>
-class Gamma_T_Integrand {
-  friend struct Gamma_T_Integrated_Bin_Result<NRADII>;
-private:
+template <typename MODELS>
+struct  Gamma_T_Integrand {
+
   double fcen_;
 
   typename MODELS::MOR mor;
@@ -77,16 +67,16 @@ private:
   typename MODELS::OMEGA_Z omega_z;
 
   y3_cluster::IntegrationRange lnM_ir_;
-  std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_ir_;
+  std::vector<y3_cluster::IntegrationRange> lo_ir_;   /* richness bins */
   y3_cluster::IntegrationRange lt_ir_;
   y3_cluster::IntegrationRange lc_ir_;
-  std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_ir_;
+  std::vector<y3_cluster::IntegrationRange> zo_ir_;   /* redshift bins */
   y3_cluster::IntegrationRange zt_ir_;
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
   y3_cluster::IntegrationRange theta_ir_;
 
-  std::array <double, NRADII> r;
+  std::vector<double>  r;  /* radii array */
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -107,15 +97,15 @@ public:
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
                     y3_cluster::IntegrationRange lnM_ir,
-                    std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_ir,
+                    std::vector<y3_cluster::IntegrationRange> lo_ir,
                     y3_cluster::IntegrationRange lt_ir,
                     y3_cluster::IntegrationRange lc_ir,
-                    std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_ir,
+                    std::vector<y3_cluster::IntegrationRange> zo_ir,
                     y3_cluster::IntegrationRange zt_ir,
                     y3_cluster::IntegrationRange R_ir,
                     y3_cluster::IntegrationRange A_ir,
                     y3_cluster::IntegrationRange theta_ir,
-                    std::array<double, NRADII> const& rarray)
+                    std::vector<double> const& rarray)
     : fcen_(fcen)
     , mor(mor)
     , lo_lc(lo_lc)
@@ -145,9 +135,9 @@ public:
 
   // Alternatively, can automatically construct each model component given a datablock.
   Gamma_T_Integrand(cosmosis::DataBlock& sample,
-                    std::array<double, NRADII> radii,
-                    std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_bins,
-                    std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_bins)
+                    std::vector<double> radii,
+                    std::vector<y3_cluster::IntegrationRange> lo_bins,
+                    std::vector<y3_cluster::IntegrationRange> zo_bins)
     : fcen_(get_datablock<double>(sample, "cluster_abundance", "fcen"))
     , mor(sample)
     , lo_lc(sample)
@@ -178,10 +168,9 @@ public:
   // Convert from one set of bins to another - useful for the
   // `simultaneous_bin_comparison` test and executable, but may prove
   // useful elsewhere
-  template<std::size_t NEW_NRICHNESS, std::size_t NEW_NREDSHIFT>
-  Gamma_T_Integrand<MODELS, NRADII, NEW_NRICHNESS, NEW_NREDSHIFT>
-  with_bins(std::array<y3_cluster::IntegrationRange, NEW_NRICHNESS> new_lir,
-            std::array<y3_cluster::IntegrationRange, NEW_NREDSHIFT> new_zir)
+  Gamma_T_Integrand<MODELS>
+  with_bins(std::vector<y3_cluster::IntegrationRange> new_lir,
+            std::vector<y3_cluster::IntegrationRange> new_zir)
   {
       return {fcen_,
               mor,
@@ -212,6 +201,11 @@ public:
               r};
   }
 
+
+
+  typedef  std::vector<double>  IntegrandResult;
+  
+
   /* Common integrand functionality. Do not call this directly, you can probably
    * ignore it.
    *
@@ -219,7 +213,7 @@ public:
    * out calculations common to them both.
    */
   template<typename Fjn, typename Fjg, typename Fnm, typename Fgr>
-  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
+  IntegrandResult
   integrand_common(double lt,
                    double zt,
                    double lnM,
@@ -231,7 +225,7 @@ public:
                    // Radially dependent function
                    Fgr gamma_radial_dep) const
   {
-    std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)> return_arr;
+    auto  return_arr  =  IntegrandResult  ((r.size () + 3)  *  lo_ir_.size ()  *  zo_ir_.size ());
 
     auto const hmb_v = hmb(lnM, zt);
     auto const hmf_v = hmf(lnM, zt);
@@ -239,10 +233,13 @@ public:
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
 
-    for (std::size_t loi = 0; loi < NRICHNESS; loi++) {
-        auto const richness_bin_start = loi * NREDSHIFT * (NRADII + 3);
+    for (std::size_t loi = 0; loi < lo_ir_.size (); loi++)
+      {
+        auto const richness_bin_start 
+          =  loi * zo_ir_.size () * (r.size () + 3);
 
-        for (std::size_t zoi = 0; zoi < NREDSHIFT; zoi++) {
+        for (std::size_t zoi = 0; zoi < zo_ir_.size (); zoi++)
+          {
             // Zo does not actually need to be integrated over
             double const zomin = zo_ir_[zoi].transform(0.0);
             double const zomax = zo_ir_[zoi].transform(1.0);
@@ -266,20 +263,24 @@ public:
             auto const gamma_t_int = jacob_G(loi) * N_int * w;
 
             // eq. (28)
-            auto const gamma_t = y3_cluster::transform(r,
-	                   [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep]
-                           (double radius) {
+
+            auto  gamma_t  =  std::vector<double> (r.size ());
+            
+            std::transform  (begin (r),  end (r),
+                             begin (gamma_t),
+                             [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep]
+                             (double radius) {
                                // Nw intentionally left out - returned in return_arr to be used further on
                                return (1.0 + m_shear) / sig_crit
-                                       * gamma_t_int * N_mult * gamma_radial_dep(radius);
-                           });
+                                 * gamma_t_int * N_mult * gamma_radial_dep(radius);
+                             });
 
-            auto redshift_bin_start = richness_bin_start + zoi * (NRADII + 3);
+            auto redshift_bin_start = richness_bin_start + zoi * (r.size () + 3);
 
             std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
-            return_arr[redshift_bin_start + NRADII] = N;
-            return_arr[redshift_bin_start + NRADII + 1] = Nw;
-            return_arr[redshift_bin_start + NRADII + 2] = Nb;
+            return_arr[redshift_bin_start + r.size ()] = N;
+            return_arr[redshift_bin_start + r.size () + 1] = Nw;
+            return_arr[redshift_bin_start + r.size () + 2] = Nb;
         }
     }
 
@@ -297,7 +298,7 @@ public:
    * * lnM - ln(M)
    * * A - ???
    * */
-  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
+  IntegrandResult
   miscentered(double scaled_lo,
               double scaled_lc,
               double scaled_lt,
@@ -310,13 +311,13 @@ public:
     // We probably should factor out the common subexpressions, rather than
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
-    auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const lt = lt_ir_.transform(scaled_lt);
-    auto const lc = lc_ir_.transform(scaled_lc);
-    auto const zt = zt_ir_.transform(scaled_zt);
-    auto const R = R_ir_.transform(scaled_R);
-    auto const A = A_ir_.transform(scaled_A);
-    auto const theta = theta_ir_.transform(scaled_theta);
+    auto const lnM   = lnM_ir_   .transform(scaled_lnM);
+    auto const lt    = lt_ir_    .transform(scaled_lt);
+    auto const lc    = lc_ir_    .transform(scaled_lc);
+    auto const zt    = zt_ir_    .transform(scaled_zt);
+    auto const R     = R_ir_     .transform(scaled_R);
+    auto const A     = A_ir_     .transform(scaled_A);
+    auto const theta = theta_ir_ .transform(scaled_theta);
 
     auto jacob_N = [=](std::size_t loi) {
         return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
@@ -370,7 +371,7 @@ public:
    * * lnM - ln(M)
    * * A - ???
    * */
-  std::array<double, NRICHNESS * NREDSHIFT * (NRADII+3)>
+  IntegrandResult
   centered(double scaled_lo,
            double scaled_lt,
            double scaled_zt,
@@ -428,17 +429,34 @@ public:
    * double epsrel: The relative acceptable error of the integration
    * double epsabs: The absolute acceptable integration error
    */
+
+  struct  Gamma_T_Integrated_Bin_Result_S
+    :  std::vector <Gamma_T_Integrated_Bin_Result>
+  {
+    std::size_t  const  n_richness;
+    std::size_t  const  n_redshift;
+    
+    Gamma_T_Integrated_Bin_Result_S (std::size_t i, std::size_t e)
+      :  std::vector<Gamma_T_Integrated_Bin_Result>  (i*e),
+         n_richness {i},
+         n_redshift {e}
+    {}
+   };
+
   template<typename Integrator>
-  std::pair<cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>,
-            std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>>
+  std::pair<cubacpp::integration_results_v,
+            Gamma_T_Integrated_Bin_Result_S>
   integrate_centered(Integrator i, double epsrel, double epsabs)
   {
-      auto result = i.integrate([this](double scaled_lo, double scaled_lt, double scaled_zt,
-                                       double scaled_lnM, double scaled_A) {
-                                   return centered(scaled_lo, scaled_lt, scaled_zt, scaled_lnM, scaled_A);
-                                },
-                                epsrel, epsabs);
-      return {result, make_gamma_t_integrated_bins(*this, result)};
+    auto result
+        = i.integrate ([this] (double scaled_lo, double scaled_lt,
+                               double scaled_zt, double scaled_lnM,
+                               double scaled_A)
+                           {  return centered(scaled_lo,  scaled_lt, scaled_zt,
+                                              scaled_lnM, scaled_A);  },
+                       epsrel, epsabs);
+
+    return {result, make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ())};
   }
 
   /* Integrates the _mis_centered component of the gamma_T, N expressions, and returns
@@ -452,8 +470,8 @@ public:
    * double epsabs: The absolute acceptable integration error
    */
   template<typename Integrator>
-  std::pair<cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>,
-            std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>>
+  std::pair<cubacpp::integration_results_v,
+            Gamma_T_Integrated_Bin_Result_S>
   integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
       auto result = i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
@@ -464,13 +482,14 @@ public:
                                                       scaled_A, scaled_theta);
                                 },
                                 epsrel, epsabs);
-      return {result, make_gamma_t_integrated_bins(*this, result)};
+      return {result, make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ())};
   }
 };
 
-template <typename MODELS, std::size_t NRADII=10, std::size_t NRICHNESS=1, std::size_t NREDSHIFT=1>
-Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>
-make_gamma_t_integrand(double fcen,
+
+template <typename MODELS>
+Gamma_T_Integrand<MODELS>
+make_gamma_t_integrand(double       fcen,
                        typename MODELS::MOR mor,
                        typename MODELS::LO_LC lo_lc,
                        typename MODELS::LC_LT lc_lt,
@@ -485,8 +504,9 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::DEL_SIG del_sig,
                        typename MODELS::DV_DO_DZ dv_do_dz,
                        typename MODELS::OMEGA_Z omega_z,
-                       std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_ir,
-                       std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_ir)
+                       std::vector<y3_cluster::IntegrationRange> lo_ir,
+                       std::vector<y3_cluster::IntegrationRange> zo_ir,
+                       std::size_t  n_radii)
 {
    y3_cluster::IntegrationRange lnM_ir{29.0, 38.0};
    y3_cluster::IntegrationRange lt_ir{2.0, 120}; // we should adjust lt, lc and lnM ranges according to the bin
@@ -496,8 +516,8 @@ make_gamma_t_integrand(double fcen,
    y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
    y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
-   std::array<double, NRADII> rarray; 
-   for (std::size_t i = 0; i < NRADII; i++)
+   auto  rarray  =  std::vector<double> (n_radii);
+   for (std::size_t i = 0; i < n_radii; i++)
        rarray[i] = 0.1 * (i + 0.1);
 
    return {fcen,
@@ -533,29 +553,33 @@ make_gamma_t_integrand(double fcen,
  * Integrated values are in `gamma_ts`, `N`, `Nw`, `Nb`, with error and probability
  * values for each in `*_error[s]` and `*_prob[s]`.
  */
-template <std::size_t NRADII>
 struct Gamma_T_Integrated_Bin_Result {
     y3_cluster::IntegrationRange lo_ir, zo_ir;
-    std::array<double, NRADII> radius;
-    std::array<double, NRADII> gamma_ts;
-    std::array<double, NRADII> gamma_t_errors;
-    std::array<double, NRADII> gamma_t_probs;
+    std::vector<double>  radius;
+    std::vector<double>  gamma_ts;
+    std::vector<double>  gamma_t_errors;
+    std::vector<double>  gamma_t_probs;
     double N, N_error, N_prob,
            Nw, Nw_error, Nw_prob,
            Nb, Nb_error, Nb_prob;
 
     Gamma_T_Integrated_Bin_Result() : lo_ir{0.0, 1.0}, zo_ir{0.0, 1.0} {}
 
-    template<typename MODELS, std::size_t NRICHNESS, std::size_t NREDSHIFT>
+    template<typename MODELS>
     Gamma_T_Integrated_Bin_Result(std::size_t which_richness,
                                   std::size_t which_redshift,
-                                  const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>& gt,
-                                  const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>& results)
+                                  const Gamma_T_Integrand<MODELS> &gt,
+                                  const cubacpp::integration_results_v &results)
         : lo_ir(gt.lo_ir_[which_richness])
         , zo_ir(gt.zo_ir_[which_redshift])
         , radius(gt.r)
+        , gamma_ts(gt.r.size())
+        , gamma_t_errors(gt.r.size())
+        , gamma_t_probs(gt.r.size())
     {
-        const auto base = (which_richness * NREDSHIFT + which_redshift) * (NRADII + 3);
+        auto  const  NRADII  =  radius.size ();
+
+        const auto base = (which_richness * gt.zo_ir_.size () + which_redshift) * (NRADII + 3);
 
         for (auto i = 0u; i < NRADII; i++) {
             gamma_ts[i] = results.value[base + i];
@@ -577,22 +601,28 @@ struct Gamma_T_Integrated_Bin_Result {
     }
 };
 
-template<typename MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
-std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT>
-make_gamma_t_integrated_bins(const Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT>& gt,
-                             const cubacpp::integration_results<NRICHNESS * NREDSHIFT * (NRADII + 3)>& results)
-{
-    std::array<Gamma_T_Integrated_Bin_Result<NRADII>, NRICHNESS * NREDSHIFT> return_arr;
 
-    for (auto loi = 0u; loi < NRICHNESS; loi++) {
-        for (auto zoi = 0u; zoi < NREDSHIFT; zoi++) {
-            return_arr[loi * NREDSHIFT + zoi] = Gamma_T_Integrated_Bin_Result<NRADII>(loi, zoi, gt, results);
+
+template<typename INTEGRAND>
+typename INTEGRAND::Gamma_T_Integrated_Bin_Result_S
+make_gamma_t_integrated_bins(const INTEGRAND& gt,
+                             const cubacpp::integration_results_v &  results,
+                             const  size_t  n_richness,
+                             const  size_t  n_redshift)
+{
+    auto   return_arr   =  typename INTEGRAND::Gamma_T_Integrated_Bin_Result_S (n_richness, n_redshift);
+
+    for (auto loi = 0u; loi < n_richness; loi++) {
+        for (auto zoi = 0u; zoi < n_redshift; zoi++) {
+          return_arr[loi * n_redshift + zoi] = Gamma_T_Integrated_Bin_Result (loi, zoi, gt, results);
         }
     }
 
     return return_arr;
 }
 
-} // namespace y3_cluster
 
-#endif
+} /*  End of namespace y3_cluster. */
+
+
+#endif  /* Header guard. */
