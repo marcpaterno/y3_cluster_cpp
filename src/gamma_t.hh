@@ -17,13 +17,146 @@
 // provided by Spencer Everett.
 namespace y3_cluster {
 
-
 // Forward declaration of our integrand class
 template <typename MODELS>
 class Gamma_T_Integrand;
 
-// Forward declaration of result type, used in following function
-struct Gamma_T_Integrated_Bin_Result;
+/* The integration results of a particular (richness, redshift) bin.
+ *
+ * The bin is specified by `lo_ir` and `zo_ir` for richness, redshift, respectively.
+ * Integrated values are in `gamma_ts`, `N`, `Nw`, `Nb`, with error and probability
+ * values for each in `*_error[s]` and `*_prob[s]`.
+ */
+struct Gamma_T_Integrated_Bin_Result {
+  y3_cluster::IntegrationRange lo_ir, zo_ir;
+  std::vector<double>  radius;
+  std::vector<double>  gamma_ts;
+  std::vector<double>  gamma_t_errors;
+  std::vector<double>  gamma_t_probs;
+  double N, N_error, N_prob,
+         Nw, Nw_error, Nw_prob,
+         Nb, Nb_error, Nb_prob;
+
+  Gamma_T_Integrated_Bin_Result() : lo_ir{0.0, 1.0}, zo_ir{0.0, 1.0} {}
+
+  template<typename MODELS>
+  Gamma_T_Integrated_Bin_Result(std::size_t which_richness,
+                                std::size_t which_redshift,
+                                const Gamma_T_Integrand<MODELS> &gt,
+                                const cubacpp::integration_results_v &results)
+      : lo_ir(gt.lo_ir_[which_richness])
+      , zo_ir(gt.zo_ir_[which_redshift])
+      , radius(gt.r)
+      , gamma_ts(gt.r.size())
+      , gamma_t_errors(gt.r.size())
+      , gamma_t_probs(gt.r.size())
+  {
+    auto  const  NRADII  =  radius.size ();
+
+    const auto base = (which_richness * gt.zo_ir_.size () + which_redshift) * (NRADII + 3);
+
+    for (auto i = 0u; i < NRADII; i++) {
+      gamma_ts[i] = results.value[base + i];
+      gamma_t_errors[i] = results.error[base + i];
+      gamma_t_probs[i] = results.prob[base + i];
+    }
+
+    N = results.value[base + NRADII];
+    Nw = results.value[base + NRADII + 1];
+    Nb = results.value[base + NRADII + 2];
+
+    N_error = results.error[base + NRADII];
+    Nw_error = results.error[base + NRADII + 1];
+    Nb_error = results.error[base + NRADII + 2];
+
+    N_prob = results.prob[base + NRADII];
+    Nw_prob = results.prob[base + NRADII + 1];
+    Nb_prob = results.prob[base + NRADII + 2];
+  }
+};
+
+
+/* The integration results for a collection of (richness, redshift) bins.
+ *
+ * The integration bins all share the `neval`, `nregions`, and `status` parameters
+ * from the integration algorithm (see `cubacpp` for details).
+ *
+ * Results for each specific bin can be accessed from `Gamma_T_Integrated_Bin_Result_S`
+ * as in a vector.
+ */
+struct Gamma_T_Integrated_Bin_Result_S
+  : std::vector <Gamma_T_Integrated_Bin_Result>
+{
+  long long neval;
+  int nregions = -1;
+  int status = 1;
+
+  std::size_t const n_richness;
+  std::size_t const n_redshift;
+
+  Gamma_T_Integrated_Bin_Result_S (std::size_t i, std::size_t e, long long neval, int nregions, int status)
+    : std::vector<Gamma_T_Integrated_Bin_Result>  (i*e)
+    , neval {neval}
+    , nregions {nregions}
+    , status {status}
+    , n_richness {i}
+    , n_redshift {e}
+  {}
+};
+
+inline std::ostream&
+operator<<(std::ostream& os, Gamma_T_Integrated_Bin_Result_S const& res)
+{
+  os << "neval: " << res.neval << " nregions: " << res.nregions
+     << " status: " << res.status << '\n';
+  for (auto const& bin : res) {
+    // Print out bin info
+    os << "Bin: [zmin, zmax] = ["
+       << bin.zo_ir.transform(0.0) << ", " << bin.zo_ir.transform(1.0)
+       << "], [lomin, lomax] = ["
+       << bin.lo_ir.transform(0.0) << ", " << bin.lo_ir.transform(1.0)
+       << "]\n";
+
+    // Print out number counts
+    os << "N:  " << bin.N << " +/- " << bin.N_error
+       << " prob: " << bin.N_prob << '\n';
+    os << "Nw: " << bin.Nw << " +/- " << bin.Nw_error
+       << " prob: " << bin.Nw_prob << '\n';
+    os << "Nb: " << bin.Nb << " +/- " << bin.Nb_error
+       << " prob: " << bin.Nb_prob << '\n';
+
+    // Print out gamma_ts
+    for (auto i = 0u; i < bin.radius.size(); i++)
+      os << "gamma_t (R = " << bin.radius[i] << "): "
+         << bin.gamma_ts[i] << " +/- " << bin.gamma_t_errors[i]
+         << " prob: " << bin.gamma_t_probs[i] << '\n';
+  }
+
+  return os;
+}
+
+namespace {
+  /* Helper function for converting output of integration algorithm into
+   * a nicely formatted result.
+   */
+  template<typename INTEGRAND>
+  Gamma_T_Integrated_Bin_Result_S
+  make_gamma_t_integrated_bins(const INTEGRAND& gt,
+                               const cubacpp::integration_results_v &  results,
+                               const size_t n_richness,
+                               const size_t n_redshift)
+  {
+    Gamma_T_Integrated_Bin_Result_S return_arr (n_richness, n_redshift, results.neval, results.nregions, results.status);
+
+    for (auto loi = 0u; loi < n_richness; loi++) {
+      for (auto zoi = 0u; zoi < n_redshift; zoi++) {
+        return_arr[loi * n_redshift + zoi] = Gamma_T_Integrated_Bin_Result (loi, zoi, gt, results);
+      }
+    }
+
+    return return_arr;
+  }
+}
 
 /*
  * The core of this module - A class which represents the integrand for both
@@ -76,7 +209,7 @@ struct  Gamma_T_Integrand {
   y3_cluster::IntegrationRange A_ir_;
   y3_cluster::IntegrationRange theta_ir_;
 
-  std::vector<double>  r;  /* radii array */
+  std::vector<double> r;  /* radii array */
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -129,7 +262,7 @@ public:
     , zt_ir_(zt_ir)
     , R_ir_(R_ir)
     , A_ir_(A_ir)
-    , theta_ir_(theta_ir)	
+    , theta_ir_(theta_ir)
     , r(rarray)
   {}
 
@@ -172,40 +305,37 @@ public:
   with_bins(std::vector<y3_cluster::IntegrationRange> new_lir,
             std::vector<y3_cluster::IntegrationRange> new_zir)
   {
-      return {fcen_,
-              mor,
-              lo_lc,
-              lc_lt,
-              zo_zt,
-              roffset,
-              T_cen,
-              T_mis,
-              A_cen,
-              A_mis,
-              hmb,
-              hmf,
-              del_sig,
-              dv_do_dz,
-              omega_z,
-              lnM_ir_,
-              // Different lir
-              new_lir,
-              lt_ir_,
-              lc_ir_,
-              // Different zir
-              new_zir,
-              zt_ir_,
-              R_ir_,
-              A_ir_,
-              theta_ir_,
-              r};
+    return {fcen_,
+            mor,
+            lo_lc,
+            lc_lt,
+            zo_zt,
+            roffset,
+            T_cen,
+            T_mis,
+            A_cen,
+            A_mis,
+            hmb,
+            hmf,
+            del_sig,
+            dv_do_dz,
+            omega_z,
+            lnM_ir_,
+            // Different lir
+            new_lir,
+            lt_ir_,
+            lc_ir_,
+            // Different zir
+            new_zir,
+            zt_ir_,
+            R_ir_,
+            A_ir_,
+            theta_ir_,
+            r};
   }
 
-
-
-  typedef  std::vector<double>  IntegrandResult;
+  typedef std::vector<double> IntegrandResult;
   
-
   /* Common integrand functionality. Do not call this directly, you can probably
    * ignore it.
    *
@@ -233,55 +363,51 @@ public:
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
 
-    for (std::size_t loi = 0; loi < lo_ir_.size (); loi++)
-      {
-        auto const richness_bin_start 
-          =  loi * zo_ir_.size () * (r.size () + 3);
+    for (std::size_t loi = 0; loi < lo_ir_.size (); loi++) {
+      auto const richness_bin_start = loi * zo_ir_.size () * (r.size () + 3);
 
-        for (std::size_t zoi = 0; zoi < zo_ir_.size (); zoi++)
-          {
-            // Zo does not actually need to be integrated over
-            double const zomin = zo_ir_[zoi].transform(0.0);
-            double const zomax = zo_ir_[zoi].transform(1.0);
-            auto const zo_zt_v = zo_zt(zomin, zomax, zt);
+      for (std::size_t zoi = 0; zoi < zo_ir_.size (); zoi++) {
+        // Zo does not actually need to be integrated over
+        double const zomin = zo_ir_[zoi].transform(0.0);
+        double const zomax = zo_ir_[zoi].transform(1.0);
+        auto const zo_zt_v = zo_zt(zomin, zomax, zt);
 
-            // These will eventually be passed by CosmoSIS
-            double m_shear = 0.0;
-            double sig_crit = 1.0;
-            // This is the lambda-redshift bin weight that we don't fully understand
-            double w = 1.0;
+        // These will eventually be passed by CosmoSIS
+        double m_shear = 0.0;
+        double sig_crit = 1.0;
+        // This is the lambda-redshift bin weight that we don't fully understand
+        double w = 1.0;
 
-            // eq. (25)
-            double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
-            double const N_mult = N_multiplier(loi);
-            // eq. (24)
-            double const N = jacob_N(loi) * N_int * N_mult;
-            double const Nw = N * w;
-            double const Nb = N * hmb_v;
+        // eq. (25)
+        double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
+        double const N_mult = N_multiplier(loi);
 
-            // eq. (29)
-            auto const gamma_t_int = jacob_G(loi) * N_int * w;
+        // eq. (24)
+        double const N = jacob_N(loi) * N_int * N_mult;
+        double const Nw = N * w;
+        double const Nb = N * hmb_v;
 
-            // eq. (28)
+        // eq. (29)
+        auto const gamma_t_int = jacob_G(loi) * N_int * w;
 
-            auto  gamma_t  =  std::vector<double> (r.size ());
-            
-            std::transform  (begin (r),  end (r),
-                             begin (gamma_t),
-                             [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep]
-                             (double radius) {
-                               // Nw intentionally left out - returned in return_arr to be used further on
-                               return (1.0 + m_shear) / sig_crit
-                                 * gamma_t_int * N_mult * gamma_radial_dep(radius);
-                             });
+        // eq. (28)
+        auto gamma_t = std::vector<double> (r.size ());
+        std::transform  (begin (r),  end (r),
+                         begin (gamma_t),
+                         [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep]
+                         (double radius) {
+                           // Nw intentionally left out - returned in return_arr to be used further on
+                           return (1.0 + m_shear) / sig_crit
+                             * gamma_t_int * N_mult * gamma_radial_dep(radius);
+                         });
 
-            auto redshift_bin_start = richness_bin_start + zoi * (r.size () + 3);
+        auto redshift_bin_start = richness_bin_start + zoi * (r.size () + 3);
 
-            std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
-            return_arr[redshift_bin_start + r.size ()] = N;
-            return_arr[redshift_bin_start + r.size () + 1] = Nw;
-            return_arr[redshift_bin_start + r.size () + 2] = Nb;
-        }
+        std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
+        return_arr[redshift_bin_start + r.size ()] = N;
+        return_arr[redshift_bin_start + r.size () + 1] = Nw;
+        return_arr[redshift_bin_start + r.size () + 2] = Nb;
+      }
     }
 
     return return_arr;
@@ -320,23 +446,23 @@ public:
     auto const theta = theta_ir_ .transform(scaled_theta);
 
     auto jacob_N = [=](std::size_t loi) {
-        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
-               * lt_ir_.jacobian() * lc_ir_.jacobian()
-               * zt_ir_.jacobian()
-               * R_ir_.jacobian();
+       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+              * lt_ir_.jacobian() * lc_ir_.jacobian()
+              * zt_ir_.jacobian()
+              * R_ir_.jacobian();
     };
     auto jacob_G = [=](std::size_t loi) {
-        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
-               * lt_ir_.jacobian() * lc_ir_.jacobian()
-               * zt_ir_.jacobian()
-               * R_ir_.jacobian() * A_ir_.jacobian()
-               * theta_ir_.jacobian();
+       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+              * lt_ir_.jacobian() * lc_ir_.jacobian()
+              * zt_ir_.jacobian()
+              * R_ir_.jacobian() * A_ir_.jacobian()
+              * theta_ir_.jacobian();
     };
 
     // eq. (27)
     auto N_mis = [=](std::size_t loi) {
-        auto const lo = lo_ir_[loi].transform(scaled_lo);
-        return (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt(lc, lt, zt) * roffset(R);
+      auto const lo = lo_ir_[loi].transform(scaled_lo);
+      return (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt(lc, lt, zt) * roffset(R);
     };
 
     // eq. (30)
@@ -345,10 +471,10 @@ public:
     // paper
     // eq. (31)
     auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
-        double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
-        return (1.0 / 6.28318530718)
-               * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
-               * del_sig(adjusted_R, lnM, zt);
+      double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
+      return (1.0 / 6.28318530718)
+             * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
+             * del_sig(adjusted_R, lnM, zt);
     };
 
     return integrand_common(lt,
@@ -385,29 +511,29 @@ public:
     auto const A = A_ir_.transform(scaled_A);
 
     auto jacob_N = [=](std::size_t loi) {
-        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
-               * lt_ir_.jacobian()
-               * zt_ir_.jacobian();
+      return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+             * lt_ir_.jacobian()
+             * zt_ir_.jacobian();
     };
 
     auto jacob_G = [=](std::size_t loi) {
-        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
-               * lt_ir_.jacobian()
-               * zt_ir_.jacobian()
-               * A_ir_.jacobian();
+      return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+             * lt_ir_.jacobian()
+             * zt_ir_.jacobian()
+             * A_ir_.jacobian();
     };
 
     // eq. (26)
     auto N_cen = [=](std::size_t loi) {
-        auto const lo = lo_ir_[loi].transform(scaled_lo);
-        return lc_lt(lo, lt, zt) * fcen_;
+      auto const lo = lo_ir_[loi].transform(scaled_lo);
+      return lc_lt(lo, lt, zt) * fcen_;
     };
 
     // eq. (30)
     // For the following lambda function, `radius` corresponds to what is called
     // `R` in the paper
     auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
-        return exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig(radius, lnM, zt);
+      return exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig(radius, lnM, zt);
     };
 
     return integrand_common(lt,
@@ -421,7 +547,7 @@ public:
 
   /* Integrates the _centered_ component of the gamma_T, N expressions, and returns
    * a pair of (results, bins), where `results` is the raw `cubacpp` output, and
-   * `bins` is an array of `Gamma_T_Integrated_Bin_Result<NRADII>`
+   * `bins` is an array of `Gamma_T_Integrated_Bin_Result`
    *
    * Arguments:
    *
@@ -429,23 +555,8 @@ public:
    * double epsrel: The relative acceptable error of the integration
    * double epsabs: The absolute acceptable integration error
    */
-
-  struct  Gamma_T_Integrated_Bin_Result_S
-    :  std::vector <Gamma_T_Integrated_Bin_Result>
-  {
-    std::size_t  const  n_richness;
-    std::size_t  const  n_redshift;
-    
-    Gamma_T_Integrated_Bin_Result_S (std::size_t i, std::size_t e)
-      :  std::vector<Gamma_T_Integrated_Bin_Result>  (i*e),
-         n_richness {i},
-         n_redshift {e}
-    {}
-   };
-
   template<typename Integrator>
-  std::pair<cubacpp::integration_results_v,
-            Gamma_T_Integrated_Bin_Result_S>
+  Gamma_T_Integrated_Bin_Result_S
   integrate_centered(Integrator i, double epsrel, double epsabs)
   {
     auto result
@@ -456,12 +567,12 @@ public:
                                               scaled_lnM, scaled_A);  },
                        epsrel, epsabs);
 
-    return {result, make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ())};
+    return make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ());
   }
 
   /* Integrates the _mis_centered component of the gamma_T, N expressions, and returns
    * a pair of (results, bins), where `results` is the raw `cubacpp` output, and
-   * `bins` is an array of `Gamma_T_Integrated_Bin_Result<NRADII>`
+   * `bins` is an array of `Gamma_T_Integrated_Bin_Result
    *
    * Arguments:
    *
@@ -470,26 +581,25 @@ public:
    * double epsabs: The absolute acceptable integration error
    */
   template<typename Integrator>
-  std::pair<cubacpp::integration_results_v,
-            Gamma_T_Integrated_Bin_Result_S>
+  Gamma_T_Integrated_Bin_Result_S
   integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
-      auto result = i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
-                                       double scaled_zt, double scaled_R, double scaled_lnM,
-                                       double scaled_A, double scaled_theta) {
-                                   return miscentered(scaled_lo, scaled_lc, scaled_lt,
-                                                      scaled_zt, scaled_R, scaled_lnM,
-                                                      scaled_A, scaled_theta);
-                                },
-                                epsrel, epsabs);
-      return {result, make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ())};
+    auto result = i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
+                                     double scaled_zt, double scaled_R, double scaled_lnM,
+                                     double scaled_A, double scaled_theta) {
+                                 return miscentered(scaled_lo, scaled_lc, scaled_lt,
+                                                    scaled_zt, scaled_R, scaled_lnM,
+                                                    scaled_A, scaled_theta);
+                              },
+                              epsrel, epsabs);
+    return make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ());
   }
 };
 
 
 template <typename MODELS>
 Gamma_T_Integrand<MODELS>
-make_gamma_t_integrand(double       fcen,
+make_gamma_t_integrand(double fcen,
                        typename MODELS::MOR mor,
                        typename MODELS::LO_LC lo_lc,
                        typename MODELS::LC_LT lc_lt,
@@ -508,117 +618,43 @@ make_gamma_t_integrand(double       fcen,
                        std::vector<y3_cluster::IntegrationRange> zo_ir,
                        std::size_t  n_radii)
 {
-   y3_cluster::IntegrationRange lnM_ir{29.0, 38.0};
-   y3_cluster::IntegrationRange lt_ir{2.0, 120}; // we should adjust lt, lc and lnM ranges according to the bin
-   y3_cluster::IntegrationRange lc_ir{2.0, 120};
-   y3_cluster::IntegrationRange zt_ir{0.05, 0.35};
-   y3_cluster::IntegrationRange R_ir{0., 3.0};
-   y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
-   y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
+  y3_cluster::IntegrationRange lnM_ir{29.0, 38.0};
+  y3_cluster::IntegrationRange lt_ir{2.0, 120}; // we should adjust lt, lc and lnM ranges according to the bin
+  y3_cluster::IntegrationRange lc_ir{2.0, 120};
+  y3_cluster::IntegrationRange zt_ir{0.05, 0.35};
+  y3_cluster::IntegrationRange R_ir{0., 3.0};
+  y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
+  y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
-   auto  rarray  =  std::vector<double> (n_radii);
-   for (std::size_t i = 0; i < n_radii; i++)
-       rarray[i] = 0.1 * (i + 0.1);
+  auto rarray = std::vector<double> (n_radii);
+  for (std::size_t i = 0; i < n_radii; i++)
+    rarray[i] = 0.1 * (i + 0.1);
 
-   return {fcen,
-           mor,
-           lo_lc,
-           lc_lt,
-           zo_zt,
-           roffset,
-           t_cen,
-           t_mis,
-           a_cen,
-           a_mis,
-           hmb,
-           hmf,
-           del_sig,
-           dv_do_dz,
-           omega_z,
-           lnM_ir,
-           lo_ir,
-           lt_ir,
-           lc_ir,
-           zo_ir,
-           zt_ir,
-           R_ir,
-           A_ir,
-           theta_ir,
-           rarray };
-}
-
-/* The integration results of a particular (richness, redshift) bin.
- *
- * The bin is specified by `lo_ir` and `zo_ir` for richness, redshift, respectively.
- * Integrated values are in `gamma_ts`, `N`, `Nw`, `Nb`, with error and probability
- * values for each in `*_error[s]` and `*_prob[s]`.
- */
-struct Gamma_T_Integrated_Bin_Result {
-    y3_cluster::IntegrationRange lo_ir, zo_ir;
-    std::vector<double>  radius;
-    std::vector<double>  gamma_ts;
-    std::vector<double>  gamma_t_errors;
-    std::vector<double>  gamma_t_probs;
-    double N, N_error, N_prob,
-           Nw, Nw_error, Nw_prob,
-           Nb, Nb_error, Nb_prob;
-
-    Gamma_T_Integrated_Bin_Result() : lo_ir{0.0, 1.0}, zo_ir{0.0, 1.0} {}
-
-    template<typename MODELS>
-    Gamma_T_Integrated_Bin_Result(std::size_t which_richness,
-                                  std::size_t which_redshift,
-                                  const Gamma_T_Integrand<MODELS> &gt,
-                                  const cubacpp::integration_results_v &results)
-        : lo_ir(gt.lo_ir_[which_richness])
-        , zo_ir(gt.zo_ir_[which_redshift])
-        , radius(gt.r)
-        , gamma_ts(gt.r.size())
-        , gamma_t_errors(gt.r.size())
-        , gamma_t_probs(gt.r.size())
-    {
-        auto  const  NRADII  =  radius.size ();
-
-        const auto base = (which_richness * gt.zo_ir_.size () + which_redshift) * (NRADII + 3);
-
-        for (auto i = 0u; i < NRADII; i++) {
-            gamma_ts[i] = results.value[base + i];
-            gamma_t_errors[i] = results.error[base + i];
-            gamma_t_probs[i] = results.prob[base + i];
-        }
-
-        N = results.value[base + NRADII];
-        Nw = results.value[base + NRADII + 1];
-        Nb = results.value[base + NRADII + 2];
-
-        N_error = results.error[base + NRADII];
-        Nw_error = results.error[base + NRADII + 1];
-        Nb_error = results.error[base + NRADII + 2];
-
-        N_prob = results.prob[base + NRADII];
-        Nw_prob = results.prob[base + NRADII + 1];
-        Nb_prob = results.prob[base + NRADII + 2];
-    }
-};
-
-
-
-template<typename INTEGRAND>
-typename INTEGRAND::Gamma_T_Integrated_Bin_Result_S
-make_gamma_t_integrated_bins(const INTEGRAND& gt,
-                             const cubacpp::integration_results_v &  results,
-                             const  size_t  n_richness,
-                             const  size_t  n_redshift)
-{
-    auto   return_arr   =  typename INTEGRAND::Gamma_T_Integrated_Bin_Result_S (n_richness, n_redshift);
-
-    for (auto loi = 0u; loi < n_richness; loi++) {
-        for (auto zoi = 0u; zoi < n_redshift; zoi++) {
-          return_arr[loi * n_redshift + zoi] = Gamma_T_Integrated_Bin_Result (loi, zoi, gt, results);
-        }
-    }
-
-    return return_arr;
+  return {fcen,
+          mor,
+          lo_lc,
+          lc_lt,
+          zo_zt,
+          roffset,
+          t_cen,
+          t_mis,
+          a_cen,
+          a_mis,
+          hmb,
+          hmf,
+          del_sig,
+          dv_do_dz,
+          omega_z,
+          lnM_ir,
+          lo_ir,
+          lt_ir,
+          lc_ir,
+          zo_ir,
+          zt_ir,
+          R_ir,
+          A_ir,
+          theta_ir,
+          rarray };
 }
 
 

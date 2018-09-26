@@ -58,11 +58,16 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   cubacpp::Cuhre c;
   c.maxeval = 100000000;
 
-  auto  integrand  =  Gamma_T_Integrand<MODELS>
-                         {sample, radii_bins, lo_bins, zo_bins};
+  auto integrand = Gamma_T_Integrand<MODELS>
+                     {sample, radii_bins, lo_bins, zo_bins};
 
-  auto [centered_result, binned_centered_result] = integrand.integrate_centered(c, epsrel, epsabs);
-  auto [miscentered_result, binned_miscentered_result] = integrand.integrate_miscentered(c, epsrel, epsabs);
+  auto centered_result = integrand.integrate_centered(c, epsrel, epsabs);
+  auto miscentered_result = integrand.integrate_miscentered(c, epsrel, epsabs);
+
+  if (centered_result.status != 0)
+    throw std::runtime_error("Centered integration did not converge!");
+  if (miscentered_result.status != 0)
+    throw std::runtime_error("Centered integration did not converge!");
 
   std::cout << "Centered:\n" << centered_result;
   std::cout << "Miscentered:\n" << miscentered_result;
@@ -72,14 +77,14 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
                       miscentered_gamma_ts,
                       miscentered_cluster_counts;
 
-  for (const auto& bin : binned_centered_result) {
+  for (const auto& bin : centered_result) {
       centered_cluster_counts.push_back(bin.N);
       //centered_cluster_counts.push_back(bin.Nw);
       for (auto i = 0u; i < radii_bins.size (); i++)
           centered_gamma_ts.push_back(bin.gamma_ts[i]);
   }
 
-  for (const auto& bin : binned_miscentered_result) {
+  for (const auto& bin : miscentered_result) {
       miscentered_cluster_counts.push_back(bin.N);
       //miscentered_cluster_counts.push_back(bin.Nw);
       for (auto i = 0u; i < radii_bins.size (); i++)

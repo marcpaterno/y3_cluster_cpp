@@ -175,10 +175,10 @@ main(int argc, char* argv[])
   ProfilerStart("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/dump.txt");
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
-  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs).first; },
+  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs); },
                    "centered-cuhre");
 
-  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs).first; },
+  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
                    "miscentered-cuhre");
 
   ProfilerFlush();
