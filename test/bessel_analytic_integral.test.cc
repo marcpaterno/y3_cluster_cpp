@@ -1,9 +1,12 @@
 #include <cubacpp/cubacpp.hh>
+#include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_errno.h>
 #include <iostream>
 
+#include "bessel_polynomial_integral.hh"
 #include "catch2/catch.hpp"
 #include "primitives.hh"
-#include "bessel_polynomial_integral.hh"
+#include "sin_cos_polynomial_integral.hh"
 
 using y3_cluster::bessel_polynomial_integral,
       y3_cluster::bessel_polynomial_integrals,

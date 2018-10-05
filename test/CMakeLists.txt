@@ -110,7 +110,7 @@ target_include_directories(omega_z_sdss_test
 add_test(omega_z_sdss_test omega_z_sdss_test)
 
 add_executable(sample_variance_test sample_variance.test.cc)
-target_link_libraries(sample_variance_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+target_link_libraries(sample_variance_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp smp_var)
 target_include_directories(sample_variance_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -278,7 +278,7 @@ target_include_directories(integrate_delta_sigma
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
 add_executable(sin_cos_analytic_integral_test sin_cos_analytic_integral.test.cc)
-target_link_libraries(sin_cos_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_link_libraries(sin_cos_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt smp_var)
 target_include_directories(sin_cos_analytic_integral_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -289,7 +289,7 @@ target_include_directories(sin_cos_analytic_integral_test
 add_test(sin_cos_analytic_integral_test sin_cos_analytic_integral_test)
 
 add_executable(bessel_analytic_integral_test bessel_analytic_integral.test.cc)
-target_link_libraries(bessel_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_link_libraries(bessel_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt smp_var)
 target_include_directories(bessel_analytic_integral_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -372,7 +372,7 @@ target_include_directories(simultaneous_bin_comparison
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
 add_executable(sample_variance sample_variance.cc)
-target_link_libraries(sample_variance PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt profiler)
+target_link_libraries(sample_variance PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt profiler smp_var)
 target_include_directories(sample_variance
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}

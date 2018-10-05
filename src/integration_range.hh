@@ -44,7 +44,7 @@ namespace y3_cluster {
     double _range;
   };
 
-  std::ostream&
+  inline std::ostream&
   operator<<(std::ostream& os, const y3_cluster::IntegrationRange& ir)
   {
       return os << "[" << ir._a << ", " << ir._a + ir._range << "]";

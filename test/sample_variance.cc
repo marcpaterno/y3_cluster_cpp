@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cubacpp/cubacpp.hh>
 #include <gperftools/profiler.h>
 #include <iostream>
 
