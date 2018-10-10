@@ -32,7 +32,7 @@ Now get the right branches of the `cosmosis` and `cosmosis-standard-library` rep
 
 ```bash
 $ cd cosmosis
-$ git checkout v1.5rc1
+$ git checkout develop
 $ cd cosmosis-standard-library
 $ git checkout v1.5rc1
 ```
@@ -47,11 +47,12 @@ $ git clone https://mpaterno@bitbucket.org/mpaterno/cubacpp.git
 
 ### Get y3_cluster_cpp
 
-Move to the `cosmosis/cosmosis-standard-libary` directory, and in that directory clone our repository:
+Move to the `cosmosis/cosmosis-standard-libary` directory, and in that directory clone our repository and likelihood module:
 
 ```bash
 $ cd cosmosis/cosmosis-standard-library
 $ git clone https://<your-username>@bitbucket.org/mpaterno/y3_cluster_cpp.git
+$ git clone https://<your-username>@bitbucket.org/cosmosisclustercpp/cluster_mass_nc_like.git
 ```
 
 Now you're ready to start building the software.
@@ -64,7 +65,7 @@ From your top-level directory, start up the "VM" (really the Docker container):
 $ ./start-cosmosis-vm cosmosis
 ```
 
-This will land you at a _bash_  prompt, where you can build and then run CosmoSIS.
+This will land you at a _bash_ prompt, where you can build and then run CosmoSIS.
 To build, just run _make_.
 
 ```bash
@@ -85,4 +86,3 @@ $ ctest
 ```
 
 The output from `ctest` should show some number of tests having run, and all passing.
-
