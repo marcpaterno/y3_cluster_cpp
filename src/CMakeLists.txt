@@ -27,6 +27,7 @@ target_link_libraries(example_module
 		      PRIVATE
 		      interp
 		      lc_lt
+              smp_var
 		      ${CUBA_LIBRARIES}
 		      ${GSL_LIBRARIES}
 		      /cosmosis/cosmosis/datablock/libcosmosis.so)
