@@ -86,13 +86,14 @@ namespace y3_cluster {
       , hubble(h)
       {}
 
+    // TODO point to arbitrary matter_power_lin section name
     template<typename OMEGA_Z>
     explicit SampleVariance_t(cosmosis::DataBlock& sample, const OMEGA_Z& omega_z, const std::vector<IntegrationRange>& z_ranges)
       : z_ranges(z_ranges)
       , matter_power_lin(std::make_shared<Interp2D const>(
-            get_datablock<std::vector<double>>(sample, "matter_power_lin", "k_h"),
-            get_datablock<std::vector<double>>(sample, "matter_power_lin", "z"),
-            get_datablock<cosmosis::ndarray<double>>(sample, "matter_power_lin", "p_k")))
+            get_datablock<std::vector<double>>(sample, "matter_power_lin_cdm_baryon", "k_h"),
+            get_datablock<std::vector<double>>(sample, "matter_power_lin_cdm_baryon", "z"),
+            get_datablock<cosmosis::ndarray<double>>(sample, "matter_power_lin_cdm_baryon", "p_k")))
       , dcom(std::make_shared<Interp1D const>(
             get_datablock<std::vector<double>>(sample, "distances", "z"),
             get_datablock<std::vector<double>>(sample, "distances", "d_m")))

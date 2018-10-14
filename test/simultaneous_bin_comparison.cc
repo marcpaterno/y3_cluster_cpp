@@ -103,6 +103,7 @@ int main()
     y3_cluster::OMEGA_Z_SDSS omega_z;
     IntegrationRange lo_ir{20, 28};
     IntegrationRange zo_ir{0.1, 0.3};
+
     using MODELS = Models<decltype(mor),
                           decltype(lo_lc),
                           decltype(lc_lt),
@@ -118,7 +119,8 @@ int main()
                           decltype(dvdodz),
                           decltype(omega_z),
                           void>;
-    auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
+
+    auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                       mor,
                                       lo_lc,
                                       lc_lt,
@@ -134,7 +136,8 @@ int main()
                                       dvdodz,
                                       omega_z,
                                       {lo_ir, {28, 37.6}},
-                                      {zo_ir, {0.3, 0.4}});
+                                      {zo_ir, {0.3, 0.4}},
+                                      10);
 
     cubacpp::Cuhre v;
     v.maxeval = 999999999;
