@@ -24,13 +24,13 @@ set_property(TARGET smp_var PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_library(example_module SHARED example_module.cc datablock_reader.cc interp_1d.cc interp_2d.cc)
 target_link_libraries(example_module
-		      PRIVATE
-		      interp
-		      lc_lt
+              PRIVATE
+              interp
+              lc_lt
               smp_var
-		      ${CUBA_LIBRARIES}
-		      ${GSL_LIBRARIES}
-		      /cosmosis/cosmosis/datablock/libcosmosis.so)
+              ${CUBA_LIBRARIES}
+              ${GSL_LIBRARIES}
+              /cosmosis/cosmosis/datablock/libcosmosis.so)
 target_include_directories(example_module
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
