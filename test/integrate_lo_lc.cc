@@ -20,30 +20,30 @@ int main(int argc, char **argv)
     bool help = false;
 
     using namespace Catch::clara;
-    auto args_parser = Opt(lo_min, "lomin")
-                          ["--lomin"]
-                          ("Lower bound of \\lambda_o values to try")
-                     | Opt(lo_max, "lomax")
-                          ["--lomax"]
-                          ("Upper bound of \\lambda_o values to try")
-                     | Opt(lc_min, "lcmin")
-                          ["--lcmin"]
-                          ("Lower bound of \\lambda_c values to try")
-                     | Opt(lc_max, "lcmax")
-                          ["--lcmax"]
-                          ("Upper bound of \\lambda_c values to try")
+    auto args_parser = Opt(lo_min, "lo min")
+                          ["--lo-min"]
+                          ("Lower integration bound of \\lambda_o values")
+                     | Opt(lo_max, "lo max")
+                          ["--lo-max"]
+                          ("Upper integration bound of \\lambda_o values")
+                     | Opt(lc_min, "lc min")
+                          ["--lc-min"]
+                          ("Lower bound of \\lambda_c values to integrate at")
+                     | Opt(lc_max, "lc max")
+                          ["--lc-max"]
+                          ("Upper bound of \\lambda_c values to integrate at")
                      | Opt(R_min, "R min")
-                          ["--rmin"]
-                          ("Lower bound of R values to try")
+                          ["--r-min"]
+                          ("Lower bound of R values to integrate at")
                      | Opt(R_max, "R max")
-                          ["--rmax"]
-                          ("Upper bound of R values to try")
+                          ["--r-max"]
+                          ("Upper bound of R values to integrate at")
                      | Opt(lc_width, "lc width")
                           ["--lc-width"]
-                          ("Number of distinct \\lambda_c values to try")
+                          ("Number of distinct \\lambda_c values to integrate at")
                      | Opt(R_width, "R width")
                           ["--r-width"]
-                          ("Number of distinct R values to try")
+                          ("Number of distinct R values to integrate at")
                      | Opt(maxeval, "maxeval")
                           ["--maxeval"]
                           ("Maximum number of evaluations for integration algorithm")

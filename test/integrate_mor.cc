@@ -20,30 +20,30 @@ int main(int argc, char **argv)
     bool help = false;
 
     using namespace Catch::clara;
-    auto args_parser = Opt(lt_min, "ltmin")
-                          ["--ltmin"]
-                          ("Lower bound of \\lambda_t values to try")
-                     | Opt(lt_max, "ltmax")
-                          ["--ltmax"]
-                          ("Upper bound of \\lambda_t values to try")
-                     | Opt(M_min, "Mmin")
-                          ["--Mmin"]
-                          ("Lower bound of mass values to try. NOTE: Will automatically convert to ln(M) to pass to mor.")
-                     | Opt(M_max, "Mmax")
-                          ["--Mmax"]
-                          ("Upper bound of mass values to try. NOTE: Will automatically convert to ln(M) to pass to mor.")
-                     | Opt(zt_min, "ztmin")
-                          ["--ztmin"]
-                          ("Lower bound of z_t values to try")
-                     | Opt(zt_max, "ztmax")
-                          ["--ztmax"]
-                          ("Upper bound of z_t values to try")
+    auto args_parser = Opt(lt_min, "lt min")
+                          ["--lt-min"]
+                          ("Lower integration bound of \\lambda_t values")
+                     | Opt(lt_max, "lt max")
+                          ["--lt-max"]
+                          ("Upper integration bound of \\lambda_t values")
+                     | Opt(M_min, "M min")
+                          ["--M-min"]
+                          ("Lower bound of mass values to integrate at. NOTE: Will automatically convert to ln(M) to pass to mor.")
+                     | Opt(M_max, "M max")
+                          ["--M-max"]
+                          ("Upper bound of mass values to integrate at. NOTE: Will automatically convert to ln(M) to pass to mor.")
+                     | Opt(zt_min, "zt min")
+                          ["--zt-min"]
+                          ("Lower bound of z_t values to integrate at")
+                     | Opt(zt_max, "zt max")
+                          ["--zt-max"]
+                          ("Upper bound of z_t values to integrate at")
                      | Opt(lnM_width, "lnM width")
                           ["--lnM-width"]
-                          ("Number of distinct mass values to try")
+                          ("Number of distinct mass values to integrate at")
                      | Opt(zt_width, "zt width")
                           ["--zt-width"]
-                          ("Number of distinct z_t values to try")
+                          ("Number of distinct z_t values to integrate at")
                      | Opt(maxeval, "maxeval")
                           ["--maxeval"]
                           ("Maximum number of evaluations for integration algorithm")
