@@ -2,6 +2,10 @@ This is the y3_cluster_cpp repository.
 
 ## Getting started
 
+We devleop and test the code in the docker environment -- so the first thing would be to installthe docker software. 
+The free version is sufficient for this purpose, and the installation instruction can be found here
+https://www.docker.com/get-started
+
 We will be installing four different `git` repositories, nested like Russian dolls. Stay on your toes!
 _This_ repository is the very last one to clone.
 
@@ -20,6 +24,7 @@ This will get some scripts, a `Dockerfile`, etc.
 
 ### Build your personal Docker image
 
+Go into the git folder that you've just cloned.
 The first build is:
 
 ```bash
