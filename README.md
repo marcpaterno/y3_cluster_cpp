@@ -30,6 +30,15 @@ The first build is:
 ```bash
 $ ./get-cosmosis-and-vm cosmosis
 ```
+You may need to set up your ssh key on bitbucket, if the following error appears,
+
+Type this into your terminal window to see your ssh key
+```
+cat < ~/.ssh/id_rsa.pub
+
+```
+Copy what was displayed, then go to bitbucket, your account -- > Bitbucket settings -- > ssh keys --> Add key --> paste into the key window 
+
 
 This will clone the `cosmosis` and `cosmosis-standard-library` repositories, and will "run" your `Dockerfile` to build the docker image.
 
