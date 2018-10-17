@@ -31,13 +31,7 @@ The first build is:
 $ ./get-cosmosis-and-vm cosmosis
 ```
 
-If you get a failure when trying to download the `cosmosis-standard-library`, you will need to set up ssh key for your bitbucket account.
-Type this into your terminal window to see your ssh key
-```
-cat < ~/.ssh/id_rsa.pub
-
-```
-Copy what is displayed, then go to bitbucket, your account -- > Bitbucket settings -- > ssh keys --> Add key --> paste into the key window 
+If you get a failure when trying to download the `cosmosis-standard-library`, you will need to set up ssh key for your bitbucket account. Follow the instructions [here](https://confluence.atlassian.com/bitbucket/set-up-an-ssh-key-728138079.html#SetupanSSHkey-ssh2) 
 
 
 This will clone the `cosmosis` and `cosmosis-standard-library` repositories, and will "run" your `Dockerfile` to build the docker image.
