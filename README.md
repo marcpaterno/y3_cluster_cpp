@@ -91,3 +91,17 @@ $ ctest
 ```
 
 The output from `ctest` should show some number of tests having run, and all passing.
+
+## Keeping up-to-date
+
+The `y3_cluster_cpp` project has many moving parts, and it is important to keep them synchronized.
+As long as our code is still under rapid development, this will be challenging.
+The following are suggestions on how to manage your use of the various repositories:
+
+1. Keep your `cosmosis-docker` updated to the head of the master branch. This will help keep you using the correct versions of the Docker image layers.
+2. Update `cosmosis` when you receive an email telling you to do so. We will update this infrequently, but it is important we are all using the same version.
+3. Update `cosmosis-standard-library` regularly. We are using our own fork of Joe's repository so that we can both stay in sync with each other, and move forward more rapidly than does the official CosmoSIS release. We are working on the `develop` branch of this repository.
+4. Update `y3_cluster_cpp` regularly. You should stay current with the head of the `master` branch. Unless you have a strong reason to do so, don't use other branches.
+
+The current version of `cosmosis` is: 1.6rc1.
+
