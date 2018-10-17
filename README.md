@@ -33,14 +33,8 @@ $ ./get-cosmosis-and-vm cosmosis
 
 This will clone the `cosmosis` and `cosmosis-standard-library` repositories, and will "run" your `Dockerfile` to build the docker image.
 
-Now get the right branches of the `cosmosis` and `cosmosis-standard-library` repositories:
-
-```bash
-$ cd cosmosis
-$ git checkout develop
-$ cd cosmosis-standard-library
-$ git checkout v1.5rc1
-```
+Please note that an important difference between `paterno/cosmosis-docker` and `joezuntz/cosmosis-docker` is
+that `paterno/cosmosis-docker` checks our the correct version of the `cosmosis` and `cosmosis-standard-library` repositories.
 
 ### Get cuba_cpp
 
