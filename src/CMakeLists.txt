@@ -22,16 +22,32 @@ target_include_directories(smp_var
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 set_property(TARGET smp_var PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-add_library(example_module SHARED example_module.cc datablock_reader.cc interp_1d.cc interp_2d.cc)
+add_library(example_module SHARED example_module.cc datablock_reader.cc)
 target_link_libraries(example_module
               PRIVATE
               interp
               lc_lt
-              smp_var
               ${CUBA_LIBRARIES}
               ${GSL_LIBRARIES}
               /cosmosis/cosmosis/datablock/libcosmosis.so)
 target_include_directories(example_module
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_library(cluster_abundance_covariance SHARED cluster_abundance_covariance.cc datablock_reader.cc)
+target_link_libraries(cluster_abundance_covariance
+                      PRIVATE
+                      interp
+                      lc_lt
+                      smp_var
+                      ${CUBA_LIBRARIES}
+                      ${GSL_LIBRARIES}
+                      /cosmosis/cosmosis/datablock/libcosmosis.so)
+target_include_directories(cluster_abundance_covariance
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals

@@ -6,6 +6,7 @@
 #include "/cosmosis/cosmosis/datablock/section_names.h"
 #include "/cosmosis/cosmosis/datablock/section.hh"
 #include <clusters_module.hh>
+
 #define GENERATE_Y3_COSMOSIS_MODULE(models, nradii, nrichness, nredshift) \
 \
 extern "C" { \

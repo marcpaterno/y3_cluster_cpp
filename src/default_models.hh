@@ -34,8 +34,7 @@ namespace y3_cluster
              typename HMF_,
              typename DEL_SIG_,
              typename DV_DO_DZ_,
-             typename OMEGA_Z_,
-             typename SAMPLE_VARIANCE_>
+             typename OMEGA_Z_>
     struct Models {
         using MOR = MOR_;
         using LO_LC = LO_LC_;
@@ -52,7 +51,6 @@ namespace y3_cluster
         using DEL_SIG = DEL_SIG_;
         using DV_DO_DZ = DV_DO_DZ_;
         using OMEGA_Z = OMEGA_Z_;
-        using SAMPLE_VARIANCE = SAMPLE_VARIANCE_;
     };
 
     using DefaultModels = Models<MOR_t2,
@@ -68,8 +66,7 @@ namespace y3_cluster
                                  HMF_t,
                                  DEL_SIG_y1,
                                  DV_DO_DZ_t,
-                                 OMEGA_Z_SDSS,
-                                 SampleVariance_t>;
+                                 OMEGA_Z_SDSS>;
 }
 
 #endif
