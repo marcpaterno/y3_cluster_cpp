@@ -13,15 +13,15 @@ int main(int argc, char **argv)
     bool help = false;
 
     using namespace Catch::clara;
-    auto args_parser = Opt(R_min, "Rmin")
-                          ["--rmin"]
-                          ("Lower bound of R integration")
-                     | Opt(R_max, "Rmax")
-                          ["--rmax"]
-                          ("Upper bound of R integration")
+    auto args_parser = Opt(R_min, "R min")
+                          ["--r-min"]
+                          ("Lower integration bound of R")
+                     | Opt(R_max, "R max")
+                          ["--r-max"]
+                          ("Upper integration bound of R")
                      | Opt(tau, "tau")
                           ["--tau"]
-                          ("Width parameter of roffset")
+                          ("Width parameter of roffset. Only one value used")
                      | Opt(maxeval, "maxeval")
                           ["--maxeval"]
                           ("Maximum number of evaluations for integration algorithm")

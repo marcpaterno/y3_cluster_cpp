@@ -24,3 +24,4 @@ template<> cosmosis::ndarray<double>
 get_datablock(cosmosis::DataBlock& db, const char * section, const char * value);
 
 #endif // _Y3_CLUSTER_CPP_DATABLOCK_READER_HH
+

@@ -56,7 +56,7 @@ int main()
     // dndlnmh.txt, m_h.txt, z.txt came from the cosmosis tinker_mf_module.so
     // d_a.txt, z_da.txt came from the cosmosis camb.so
     auto const dndlnmh = read_vector("dndlnmh.txt", identity);
-    // m_h.txt is in units of: 
+    // m_h.txt is in units of:
     //    \Omega_M M_{solar} h^{-1}
     // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
     // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
@@ -98,11 +98,12 @@ int main()
     y3_cluster::DEL_SIG_t dsc(p2, p3, p4);
 
     auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
-    y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
-    // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc 
+    y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
+    // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc
     y3_cluster::OMEGA_Z_SDSS omega_z;
     IntegrationRange lo_ir{20, 28};
     IntegrationRange zo_ir{0.1, 0.3};
+
     using MODELS = Models<decltype(mor),
                           decltype(lo_lc),
                           decltype(lc_lt),
@@ -117,7 +118,8 @@ int main()
                           decltype(dsc),
                           decltype(dvdodz),
                           decltype(omega_z)>;
-    auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
+
+    auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                       mor,
                                       lo_lc,
                                       lc_lt,
@@ -133,9 +135,10 @@ int main()
                                       dvdodz,
                                       omega_z,
                                       {lo_ir, {28, 37.6}},
-                                      {zo_ir, {0.3, 0.4}});
+                                      {zo_ir, {0.3, 0.4}},
+                                      10);
 
-    cubacpp::Vegas v;
+    cubacpp::Cuhre v;
     v.maxeval = 999999999;
 
     test_simultaneous_bins(v, gti, 1e-3, 1e-12, true, false);

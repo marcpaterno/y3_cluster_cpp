@@ -147,7 +147,7 @@ main(int argc, char* argv[])
   IntegrationRange lo_ir{20, 27.9};
   IntegrationRange zo_ir{0.1, 0.3};
 
-  auto gti = make_gamma_t_integrand<MODELS, 10>(0.7,
+  auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                     mor,
                                     lo_lc,
                                     lc_lt,
@@ -163,7 +163,8 @@ main(int argc, char* argv[])
                                     dvdodz,
                                     omega_z,
                                     {lo_ir},//, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
-                                    {zo_ir});
+                                    {zo_ir},
+                                    10);
 
   // ============ Actual Integrations ============
   // Integrate centered and miscentered, simultaneously over all bins,
@@ -174,10 +175,10 @@ main(int argc, char* argv[])
   ProfilerStart("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/dump.txt");
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
-  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs).first; },
+  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs); },
                    "centered-cuhre");
 
-  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs).first; },
+  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
                    "miscentered-cuhre");
 
   ProfilerFlush();

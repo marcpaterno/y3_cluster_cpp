@@ -10,22 +10,21 @@ using y3_cluster::Interp1D;
 
 TEST_CASE("Interp1D exact at knots", "[interpolation][1d]")
 {
-  constexpr const std::size_t numpoints = 9;
-  std::array<double, numpoints> const xs = {1., 2., 3., 4., 5., 6, 7., 8., 9};
-  auto fcn = [](double x) { return 2 * x * (3 - x) * std::cos(x); };
-  std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
+  std::vector<double> const xs = {1., 2., 3., 4., 5., 6, 7., 8., 9};
+  std::vector<double> const ys
+    = y3_cluster::transform<double,double>
+              ( xs,    [](double x) { return 2 * x * (3 - x) * std::cos(x); } );
   Interp1D f{xs, ys};
-  for (std::size_t i = 0; i != numpoints; ++i) {
+  for (std::size_t i = 0; i != xs.size (); ++i) {
     CHECK(ys[i] == f(xs[i]));
   }
 }
 
 TEST_CASE("Interp1D on quadratic")
 {
-  constexpr const std::size_t numpoints = 3;
-  std::array<double, numpoints> const xs = {1., 2., 3.};
+  std::vector<double> const xs = {1., 2., 3.};
   auto fcn = [](double x) { return x * x; };
-  std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
+  std::vector<double> const ys = y3_cluster::transform<double,double>(xs, fcn);
   Interp1D f{xs, ys};
   // Answer produced using Mathematica 11.3.0.0,
   // using  Interpolation[{1., 4., 9.}, InterpolationOrder -> 1]
@@ -34,10 +33,9 @@ TEST_CASE("Interp1D on quadratic")
 
 TEST_CASE("Interp1D throws on extrapolation")
 {
-  constexpr const std::size_t numpoints = 2;
-  std::array<double, numpoints> const xs = {-5., 5.};
+  std::vector<double> const xs = {-5., 5.};
   auto fcn = [](double x) { return -4 * x; };
-  std::array<double, numpoints> const ys = y3_cluster::transform(xs, fcn);
+  std::vector<double> const ys = y3_cluster::transform<double,double>(xs, fcn);
   Interp1D f{xs, ys};
   CHECK_THROWS_AS(f(-10), std::domain_error);
   CHECK_NOTHROW(f(-5.0));

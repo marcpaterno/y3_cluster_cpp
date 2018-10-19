@@ -12,8 +12,7 @@ TEST_CASE("MOR_t probability weighted correctly")
   IntegrationRange lnM_ir{std::log(1e13), std::log(1e16)};
   IntegrationRange zt_ir{0.1, 0.3};
 
-  cubacpp::Vegas v;
-  v.maxeval = 9999999;
+  cubacpp::CQUAD v;
 
   test_integrate_mor(v, lt_ir, lnM_ir, zt_ir, 2, 2);
 }

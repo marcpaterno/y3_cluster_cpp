@@ -6,11 +6,11 @@
 #include "gamma_t.hh"
 
 namespace y3_cluster {
-  template <class MODELS, std::size_t NRADII, std::size_t NRICHNESS = 1, std::size_t NREDSHIFT = 1>
+  template <class MODELS>
   class ClustersModule {
-    std::array<double, NRADII> radii_bins;
-    std::array<y3_cluster::IntegrationRange, NRICHNESS> lo_bins;
-    std::array<y3_cluster::IntegrationRange, NREDSHIFT> zo_bins;
+    std::vector<double> radii_bins;
+    std::vector<y3_cluster::IntegrationRange> lo_bins;
+    std::vector<y3_cluster::IntegrationRange> zo_bins;
 
   public:
     explicit ClustersModule(cosmosis::DataBlock& config);
@@ -18,46 +18,38 @@ namespace y3_cluster {
   };
 }
 
-template <std::size_t NRanges>
-static inline std::array<y3_cluster::IntegrationRange, NRanges>
+
+static inline std::vector<y3_cluster::IntegrationRange>
 _get_ranges(cosmosis::DataBlock db, std::string name)
 {
-    std::array<std::size_t, NRanges> r;
-    for (auto i = 0u; i < NRanges; i++)
-        r[i] = i;
+    auto const  edges  =  get_datablock<std::vector<double>>(db, OPTION_SECTION,
+                                                             (name + "_bins").c_str());
 
-    auto edges = get_datablock<std::vector<double>>(db, OPTION_SECTION,
-                                                    (name + "_bins").c_str());
+    auto  ret  =  std::vector<y3_cluster::IntegrationRange> (edges.size () - 1);
 
-    // TODO:
-    //    This is not ideal. In the future we expect the number of bins
-    //    to be configurable at runtime, not a template parameter.
-    if (edges.size() != (NRanges + 1)) {
-        throw std::runtime_error("Wrong number of edges for bins: " + name
-                                 + " (expected " + std::to_string(NRanges + 1) + ")");
-    }
+    std::transform  (begin (edges),  end (edges) - 1,
+                     begin (edges) + 1,
+                     begin (ret),
+                     [] (double const &a,  double const &b)
+                     {  return y3_cluster::IntegrationRange {a, b}; });
 
-    return y3_cluster::transform(r, [&](std::size_t i) {
-              return y3_cluster::IntegrationRange{edges[i], edges[i + 1]};
-            });
+    return ret;
 }
 
-template <class MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
-y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::ClustersModule(cosmosis::DataBlock& config)
+template <class MODELS>
+y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
   // TODO: Possibly set up any optional parameters, like integration params?
-  : lo_bins(_get_ranges<NRICHNESS>(config, "lo"))
-  , zo_bins(_get_ranges<NREDSHIFT>(config, "zo"))
+  : lo_bins(_get_ranges(config, "lo"))
+  , zo_bins(_get_ranges(config, "zo"))
 {
-    auto radii = get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins");
-    if (radii.size() != NRADII)
-        throw std::runtime_error("Wrong number of radii! (expected " + std::to_string(NRADII) + ")");
-    for (auto i = 0u; i < NRADII; i++)
-        radii_bins[i] = radii[0];
+    auto  const  radii  =  get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins");
+
+    radii_bins  =  std::vector<double>  (radii.size (),  radii [0]);
 }
 
-template <class MODELS, std::size_t NRADII, std::size_t NRICHNESS, std::size_t NREDSHIFT>
+template <class MODELS>
 void
-y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::execute(cosmosis::DataBlock& sample)
+y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
 {
   // FIXME: Just a test placeholder!
   // sample.put_val("cluster_abundance", "likelihood", val);
@@ -66,9 +58,16 @@ y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::execute(cosmos
   cubacpp::Cuhre c;
   c.maxeval = 100000000;
 
-  Gamma_T_Integrand<MODELS, NRADII, NRICHNESS, NREDSHIFT> integrand(sample, radii_bins, lo_bins, zo_bins);
-  auto [centered_result, binned_centered_result] = integrand.integrate_centered(c, epsrel, epsabs);
-  auto [miscentered_result, binned_miscentered_result] = integrand.integrate_miscentered(c, epsrel, epsabs);
+  auto integrand = Gamma_T_Integrand<MODELS>
+                     {sample, radii_bins, lo_bins, zo_bins};
+
+  auto centered_result = integrand.integrate_centered(c, epsrel, epsabs);
+  auto miscentered_result = integrand.integrate_miscentered(c, epsrel, epsabs);
+
+  if (centered_result.status != 0)
+    throw std::runtime_error("Centered integration did not converge!");
+  if (miscentered_result.status != 0)
+    throw std::runtime_error("Centered integration did not converge!");
 
   std::cout << "Centered:\n" << centered_result;
   std::cout << "Miscentered:\n" << miscentered_result;
@@ -78,17 +77,17 @@ y3_cluster::ClustersModule<MODELS, NRADII, NRICHNESS, NREDSHIFT>::execute(cosmos
                       miscentered_gamma_ts,
                       miscentered_cluster_counts;
 
-  for (const auto& bin : binned_centered_result) {
+  for (const auto& bin : centered_result) {
       centered_cluster_counts.push_back(bin.N);
       //centered_cluster_counts.push_back(bin.Nw);
-      for (auto i = 0u; i < NRADII; i++)
+      for (auto i = 0u; i < radii_bins.size (); i++)
           centered_gamma_ts.push_back(bin.gamma_ts[i]);
   }
 
-  for (const auto& bin : binned_miscentered_result) {
+  for (const auto& bin : miscentered_result) {
       miscentered_cluster_counts.push_back(bin.N);
       //miscentered_cluster_counts.push_back(bin.Nw);
-      for (auto i = 0u; i < NRADII; i++)
+      for (auto i = 0u; i < radii_bins.size (); i++)
           miscentered_gamma_ts.push_back(bin.gamma_ts[i]);
   }
 
