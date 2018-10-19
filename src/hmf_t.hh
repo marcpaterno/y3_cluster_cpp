@@ -4,6 +4,7 @@
 #include <datablock_reader.hh>
 #include "interp_2d.hh"
 #include <read_vector.hh>
+#include <stdexcept>
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "/cosmosis/cosmosis/datablock/ndarray.hh"
 #include "/cosmosis/cosmosis/datablock/section_names.h"
@@ -24,6 +25,19 @@ namespace y3_cluster {
           return output;
       }
 
+      cosmosis::ndarray<double>
+      log_ndarray(cosmosis::ndarray<double> input)
+      {
+          cosmosis::ndarray<double> output = input;
+          if (output.ndims() != 2)
+              throw std::runtime_error("expected 2d array");
+
+          const auto dims = output.extents();
+          for (auto i = 0u; i < dims[0]; i++)
+              for (auto j = 0u; j < dims[1]; j++)
+                  output(i, j) = std::log(output(i, j));
+          return output;
+      }
   }
 
   class HMF_t {
@@ -38,7 +52,7 @@ namespace y3_cluster {
       : _nmz(std::make_shared<Interp2D const>(
                   _adjust_to_log(sample, get_datablock<doubles>(sample, "mass_function", "m_h")),
                   get_datablock<doubles>(sample, "mass_function", "z"),
-                  get_datablock<cosmosis::ndarray<double>>(sample, "mass_function", "dndlnmh")))
+                  log_ndarray(get_datablock<cosmosis::ndarray<double>>(sample, "mass_function", "dndlnmh"))))
       , _s(get_datablock<double>(sample, "cluster_abundance", "hmf_s"))
       , _q(get_datablock<double>(sample, "cluster_abundance", "hmf_q"))
     {}
@@ -46,7 +60,7 @@ namespace y3_cluster {
     double
     operator()(double lnM, double zt) const
     {
-      return _nmz->eval(lnM, zt) * (_s * (lnM *0.4342944819 - 13.8124426028) + _q);
+      return std::exp(_nmz->eval(lnM, zt)) * (_s * (lnM *0.4342944819 - 13.8124426028) + _q);
       //0.4342944819 is log(e)
     }
 
