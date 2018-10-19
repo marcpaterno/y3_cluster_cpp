@@ -20,9 +20,6 @@ namespace y3_cluster {
       filename << "int_P_lob_ltr/int_P_lob_ltr_ztr_Deltal_" << i
                << std::string("_v27_0.dat");
       const auto lc_lt_integrated = read_vector(std::string(filename.str()).c_str());
-      std::cout << "LTs size: " << lts.size() << '\n'
-                << "ZTs size: " << zts.size() << '\n'
-                << "Integrated size: " << lc_lt_integrated.size() << '\n';
       if (lts.size() * zts.size() != lc_lt_integrated.size()) {
         lts.pop_back();
         zts.pop_back();
