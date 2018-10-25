@@ -122,7 +122,7 @@ main(int argc, char* argv[])
   MODELS::MOR mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr};
   MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
   MODELS::LC_LT lc_lt;
-  MODELS::ZO_ZT zo_zt{0.005};
+  MODELS::ZO_ZT zo_zt;
   MODELS::ROFFSET roffset{0.2};
   MODELS::T_CEN t_cen;
   MODELS::T_MIS t_mis;

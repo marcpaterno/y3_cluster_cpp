@@ -1,6 +1,8 @@
 #ifndef Y3_CLUSTER_ZO_ZT_HH
 #define Y3_CLUSTER_ZO_ZT_HH
 
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
+
 #include <datablock_reader.hh>
 #include <cmath>
 

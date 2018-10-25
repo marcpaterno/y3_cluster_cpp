@@ -3,8 +3,9 @@
 
 #include <gamma_t.hh>
 
-#include <mor_t2.hh>
 #include <matteos_lc_lt_t.hh>
+#include <matteos_zo_zt_t.hh>
+#include <mor_t2.hh>
 #include <lo_lc_t.hh>
 #include <lc_lt_t.hh>
 #include <zo_zt_t.hh>
@@ -56,7 +57,7 @@ namespace y3_cluster
     using DefaultModels = Models<MOR_t2,
                                  LO_LC_t,
                                  MATTEOS_LC_LT_t, //LC_LT_t,
-                                 ZO_ZT_t,
+                                 MATTEOS_ZO_ZT_t, //ZO_ZT_t,
                                  ROFFSET_t,
                                  T_CEN_t,
                                  T_MIS_t,

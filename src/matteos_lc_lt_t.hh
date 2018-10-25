@@ -4,6 +4,7 @@
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "read_vector.hh"
 
+#include <interp_2d.hh>
 #include <iostream>
 #include <sstream>
 #include <string>
