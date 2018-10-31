@@ -1,4 +1,5 @@
 *~
 lib*.a
 libexample_module.so
+libcluster_abundance.so
 libcluster_abundance_covariance.so
