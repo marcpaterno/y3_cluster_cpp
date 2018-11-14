@@ -2,6 +2,10 @@ This is the y3_cluster_cpp repository.
 
 ## Getting started
 
+We devleop and test the code in the docker environment -- so the first thing would be to installthe docker software. 
+The free version is sufficient for this purpose, and the installation instruction can be found here
+https://www.docker.com/get-started
+
 We will be installing four different `git` repositories, nested like Russian dolls. Stay on your toes!
 _This_ repository is the very last one to clone.
 
@@ -20,22 +24,20 @@ This will get some scripts, a `Dockerfile`, etc.
 
 ### Build your personal Docker image
 
+Go into the git folder that you've just cloned.
 The first build is:
 
 ```bash
 $ ./get-cosmosis-and-vm cosmosis
 ```
 
+If you get a failure when trying to download the `cosmosis-standard-library`, you will need to set up ssh key for your bitbucket account. Follow the instructions [here](https://confluence.atlassian.com/bitbucket/set-up-an-ssh-key-728138079.html#SetupanSSHkey-ssh2) 
+
+
 This will clone the `cosmosis` and `cosmosis-standard-library` repositories, and will "run" your `Dockerfile` to build the docker image.
 
-Now get the right branches of the `cosmosis` and `cosmosis-standard-library` repositories:
-
-```bash
-$ cd cosmosis
-$ git checkout develop
-$ cd cosmosis-standard-library
-$ git checkout v1.5rc1
-```
+Please note that an important difference between `paterno/cosmosis-docker` and `joezuntz/cosmosis-docker` is
+that `paterno/cosmosis-docker` checks our the correct version of the `cosmosis` and `cosmosis-standard-library` repositories.
 
 ### Get cuba_cpp
 
@@ -86,3 +88,17 @@ $ ctest
 ```
 
 The output from `ctest` should show some number of tests having run, and all passing.
+
+## Keeping up-to-date
+
+The `y3_cluster_cpp` project has many moving parts, and it is important to keep them synchronized.
+As long as our code is still under rapid development, this will be challenging.
+The following are suggestions on how to manage your use of the various repositories:
+
+1. Keep your `cosmosis-docker` updated to the head of the master branch. This will help keep you using the correct versions of the Docker image layers.
+2. Update `cosmosis` when you receive an email telling you to do so. We will update this infrequently, but it is important we are all using the same version.
+3. Update `cosmosis-standard-library` regularly. We are using our own fork of Joe's repository so that we can both stay in sync with each other, and move forward more rapidly than does the official CosmoSIS release. We are working on the `develop` branch of this repository.
+4. Update `y3_cluster_cpp` regularly. You should stay current with the head of the `master` branch. Unless you have a strong reason to do so, don't use other branches.
+
+The current version of `cosmosis` is: 1.6rc1.
+
