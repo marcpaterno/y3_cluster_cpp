@@ -43,8 +43,8 @@ def execute(block, config):
     ln_m_interp_h = np.log( 10.0**(np.linspace(7, 17, 100)) )
     for zed in z_table:
         # tinker bias function is defined as  M_mean; https://arxiv.org/pdf/1001.3162.pdf 
-        omega_mz = omega_m*(1.0 + zed)**3
-        m_table=(4.0*3.1416/3.0)*rho_c*omega_mz*r_table**3  # M_solar/h
+        #omega_mz = omega_m*(1.0 + zed)**3
+        m_table=(4.0*3.1416/3.0)*rho_c*omega_m*r_table**3  # M_solar/h
         ln_m_table = np.log(m_table)
 
         sigma_mass = RectBivariateSpline(ln_m_table,z_table,sigmar_table)  
