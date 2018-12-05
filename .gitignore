@@ -1,6 +1,7 @@
 CMakeFiles/
 Testing/
 cosmosis_test_output/
+covariance_test_output/
 matteos_power_spectrum/
 CMakeCache.txt
 CTestTestfile.cmake
