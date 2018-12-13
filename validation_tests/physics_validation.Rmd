@@ -44,3 +44,10 @@ ggplot(d) +
   xlab("x") +
   ylab("residual/ytrue")
 ```
+
+## Session information
+
+```{r echo = TRUE}
+sessionInfo()
+```
+
