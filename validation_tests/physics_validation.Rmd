@@ -1,0 +1,46 @@
+---
+title: "Physics Validation of Y3 Clusters Code"
+author: "Y3 Cluster Team"
+date: "12/12/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      fig.align = "center")
+library(tidyverse)
+```
+
+## Introduction
+
+This document presents analysis to demonstrate the calculations done by the Y3 clusters analysis code.
+
+## An example
+
+This is an example of how to read data files and make plots.
+It is not an actually interesting example of a plot.
+We can settle upon standard formatting, etc., at a later date.
+
+### Absolute comparison of 1-d interpolation results to exact answers
+
+```{r, include = FALSE}
+d <- read_tsv("../data/interp_1d.out")
+d <- mutate(d, resid = ytrue - ytest)
+```
+
+```{r, fig.cap = "Comparison of linear interpolation and exact results"}
+ggplot(d) +
+  geom_point(aes(x, ytrue), color = "red") +
+  geom_point(aes(x, ytest), color = "blue") +
+  xlab("x") +
+  ylab("y")
+```
+
+### Fractional comparison of linear interpolation and exact results
+
+```{r, fig.cap = "Difference between linear interpolation and exact results"}
+ggplot(d) +
+  geom_point(aes(x, resid/ytrue)) +
+  xlab("x") +
+  ylab("residual/ytrue")
+```
