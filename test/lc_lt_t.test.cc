@@ -8,36 +8,23 @@
 using y3_cluster::LC_LT_t;
 TEST_CASE("Lc_Lt_t works")
 {
-  std::ifstream infile{"../data/test_lc_lt_t_SDSS.txt"};
-  // Use REQUIRE for immediate failure if we can't open the file.
-  REQUIRE(infile.good());
-  std::vector<double> zs;
-  std::vector<double> lts;
-  std::vector<double> lcs;
-  std::vector<double> ys;
-  while (infile) {
-    // We aren't bothering to test that the reading worked, because we're
-    // careful to make sure the data file is not mal-formed when we write the
-    // test.
-    double z, lt, lc, y;
-    infile >> z >> lt >> lc >> y;
-    zs.push_back(z);
-    lts.push_back(lt);
-    lcs.push_back(lc);
-    ys.push_back(y);
-  }
-  // If the file is well-formed, we have the same number of z-values as
-  // y(z)-values.
-  REQUIRE(zs.size() == lts.size());
-  REQUIRE(lts.size() == lcs.size());
-  REQUIRE(lcs.size() == ys.size());
+
+  std::vector<double> ys(195);
+  std::vector<double> zs(10);
 
   LC_LT_t lc_lt;
+  for (std::size_t j = 0; j != zs.size(); ++j) {
+ 
+      double sum = 0;
+      zs[j]=j*0.05+0.1;
+      for (std::size_t i = 0, sy = ys.size(); i != sy; ++i) {
+         ys[i]=i+1.0;
+   	 double const fz = lc_lt(5, ys[i], zs[j]);
+	 sum=sum+fz;
+      }
+      double constexpr epsrel = 1.0e-6;
+      double constexpr epsabs = 1.0e-12;
+      CHECK(sum == Approx(1.0).epsilon(epsrel).margin(epsabs));
 
-  for (std::size_t i = 0, sy = ys.size(); i != sy; ++i) {
-    double const fz = lc_lt(lcs[i], lts[i], zs[i]);
-    double constexpr epsrel = 1.0e-6;
-    double constexpr epsabs = 1.0e-12;
-    CHECK(fz == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
   }
 }

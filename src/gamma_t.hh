@@ -111,25 +111,35 @@ operator<<(std::ostream& os, Gamma_T_Integrated_Bin_Result_S const& res)
      << " status: " << res.status << '\n';
   for (auto const& bin : res) {
     // Print out bin info
-    os << "Bin: [zmin, zmax] = ["
+    os << "#Bin: [zmin, zmax] = ["
        << bin.zo_ir.transform(0.0) << ", " << bin.zo_ir.transform(1.0)
        << "], [lomin, lomax] = ["
        << bin.lo_ir.transform(0.0) << ", " << bin.lo_ir.transform(1.0)
        << "]\n";
 
     // Print out number counts
-    os << "N:  " << bin.N << " +/- " << bin.N_error
+
+
+    os << "#N, Nerr, Nprop, Nw, Nwerr, Nwprop, Nb, Nberr, Nb_prop" << '\n';
+    os << bin.N << ", " << bin.N_error<<", " << bin.N_prob << '\n';
+//       << bin.Nw << ", " << bin.Nw_error<<", " << bin.Nw_prob
+//       << bin.Nb << ", " << bin.Nb_error<<", " << bin.Nb_prob<< '\n';
+    /* os << "N:  " << bin.N << " +/- " << bin.N_error
        << " prob: " << bin.N_prob << '\n';
     os << "Nw: " << bin.Nw << " +/- " << bin.Nw_error
        << " prob: " << bin.Nw_prob << '\n';
     os << "Nb: " << bin.Nb << " +/- " << bin.Nb_error
-       << " prob: " << bin.Nb_prob << '\n';
+       << " prob: " << bin.Nb_prob << '\n'; */
 
     // Print out gamma_ts
     for (auto i = 0u; i < bin.radius.size(); i++)
+    {os << "# gamma_t (R = " << bin.radius[i] << "), Error, Prob " << '\n';
+     os << bin.gamma_ts[i] << ", " << bin.gamma_t_errors[i]
+         << ", " << bin.gamma_t_probs[i] << '\n';}
+    /*for (auto i = 0u; i < bin.radius.size(); i++)
       os << "gamma_t (R = " << bin.radius[i] << "): "
          << bin.gamma_ts[i] << " +/- " << bin.gamma_t_errors[i]
-         << " prob: " << bin.gamma_t_probs[i] << '\n';
+         << " prob: " << bin.gamma_t_probs[i] << '\n'; */
   }
 
   return os;
@@ -498,8 +508,7 @@ public:
    * * A - ???
    * */
   IntegrandResult
-  centered(double scaled_lo,
-           double scaled_lt,
+  centered(double scaled_lt,
            double scaled_zt,
            double scaled_lnM,
            double scaled_A) const
@@ -511,13 +520,13 @@ public:
     auto const A = A_ir_.transform(scaled_A);
 
     auto jacob_N = [=](std::size_t loi) {
-      return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+      return lnM_ir_.jacobian() //* lo_ir_[loi].jacobian()
              * lt_ir_.jacobian()
              * zt_ir_.jacobian();
     };
 
     auto jacob_G = [=](std::size_t loi) {
-      return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
+      return lnM_ir_.jacobian() //* lo_ir_[loi].jacobian()
              * lt_ir_.jacobian()
              * zt_ir_.jacobian()
              * A_ir_.jacobian();
@@ -525,8 +534,7 @@ public:
 
     // eq. (26)
     auto N_cen = [=](std::size_t loi) {
-      auto const lo = lo_ir_[loi].transform(scaled_lo);
-      return lc_lt(lo, lt, zt) * fcen_;
+      return lc_lt(5.0, lt, zt) * fcen_;
     };
 
     // eq. (30)
@@ -563,7 +571,7 @@ public:
         = i.integrate ([this] (double scaled_lo, double scaled_lt,
                                double scaled_zt, double scaled_lnM,
                                double scaled_A)
-                           {  return centered(scaled_lo,  scaled_lt, scaled_zt,
+                           {  return centered(scaled_lt, scaled_zt,
                                               scaled_lnM, scaled_A);  },
                        epsrel, epsabs);
 
@@ -619,9 +627,9 @@ make_gamma_t_integrand(double fcen,
                        std::size_t  n_radii)
 {
   y3_cluster::IntegrationRange lnM_ir{29.0, 38.0};
-  y3_cluster::IntegrationRange lt_ir{2.0, 120}; // we should adjust lt, lc and lnM ranges according to the bin
-  y3_cluster::IntegrationRange lc_ir{2.0, 120};
-  y3_cluster::IntegrationRange zt_ir{0.05, 0.35};
+  y3_cluster::IntegrationRange lt_ir{2.0, 195}; // we should adjust lt, lc and lnM ranges according to the bin
+  y3_cluster::IntegrationRange lc_ir{2.0, 195};
+  y3_cluster::IntegrationRange zt_ir{0.05, 0.75};
   y3_cluster::IntegrationRange R_ir{0., 3.0};
   y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
   y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
