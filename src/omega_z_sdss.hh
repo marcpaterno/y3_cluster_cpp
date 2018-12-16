@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_OMEGA_Z_SDSS_HH
-#define Y3_CLUSTER_OMEGA_Z_SDSS_HH
+#ifndef Y3_CLUSTER_OMEGA_Z_DES_HH
+#define Y3_CLUSTER_OMEGA_Z_DES_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include <polynomial.hh>

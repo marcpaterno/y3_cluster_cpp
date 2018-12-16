@@ -10,6 +10,7 @@
 #include <hmb_t.hh>
 #include <hmf_t.hh>
 #include <lc_lt_t.hh>
+#include <lc_lt_t_des.hh>
 #include <lo_lc_t.hh>
 #include <mor_t2.hh>
 #include <roffset_t.hh>
@@ -17,6 +18,7 @@
 #include <t_cen_t.hh>
 #include <t_mis_t.hh>
 #include <omega_z_sdss.hh>
+#include <omega_z_des.hh>
 #include <zo_zt_t.hh>
 
 namespace y3_cluster
@@ -55,7 +57,7 @@ namespace y3_cluster
 
     using DefaultModels = Models<MOR_t2,
                                  LO_LC_t,
-                                 LC_LT_t,
+                                 LC_LT_t_des,
                                  ZO_ZT_t,
                                  ROFFSET_t,
                                  T_CEN_t,
@@ -66,7 +68,7 @@ namespace y3_cluster
                                  HMF_t,
                                  DEL_SIG_y1,
                                  DV_DO_DZ_t,
-                                 OMEGA_Z_SDSS>;
+                                 OMEGA_Z_DES>;
 }
 
 #endif

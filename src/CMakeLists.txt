@@ -7,6 +7,11 @@ target_link_libraries(lc_lt PRIVATE ${GSL_LIBRARIES})
 target_include_directories(lc_lt PRIVATE ${CMAKE_SOURCE_DIR}/src)
 set_property(TARGET lc_lt PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+add_library(lc_lt_des STATIC lc_lt_t_des.cc)
+target_link_libraries(lc_lt_des PRIVATE ${GSL_LIBRARIES})
+target_include_directories(lc_lt_des PRIVATE ${CMAKE_SOURCE_DIR}/src)
+set_property(TARGET lc_lt_des PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 add_library(smp_var
             STATIC
             sample_variance.cc
@@ -27,7 +32,8 @@ target_link_libraries(cluster_abundance
 		      PRIVATE
 		      interp
 		      lc_lt
-              smp_var
+		      lc_lt_des
+                      smp_var
 		      ${CUBA_LIBRARIES}
 		      ${GSL_LIBRARIES}
 		      /cosmosis/cosmosis/datablock/libcosmosis.so)
@@ -44,6 +50,7 @@ target_link_libraries(cluster_abundance_covariance
                       PRIVATE
                       interp
                       lc_lt
+                      lc_lt_des
                       smp_var
                       ${CUBA_LIBRARIES}
                       ${GSL_LIBRARIES}
