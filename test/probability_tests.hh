@@ -257,7 +257,12 @@ namespace y3_cluster {
             std::cout << "lnM,M,zt,mor2_integrated,status,error,prob\n";
 
         // Values from trivial_gamma_t
-        MOR_t2 mor2{pow(10,1.11375214e+01), pow(10,12.4225835912), 0.65, 0.15};
+        MOR_t2 mor2{pow(10, 1.11375214e+01),
+	  	    pow(10,12.4225835912),
+		    0.65,
+		    0.15,
+	            0.,
+	            0.};
 
         for (auto i = 0u; i < lnM_width; i++) {
             for (auto j = 0u; j < zt_width; j++) {
