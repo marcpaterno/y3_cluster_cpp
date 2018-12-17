@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_LC_LT_T_HH
-#define Y3_CLUSTER_LC_LT_T_HH
+#ifndef Y3_CLUSTER_LC_LT_T_DES_HH
+#define Y3_CLUSTER_LC_LT_T_DES_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "interp_2d.hh"
@@ -24,7 +24,7 @@ namespace y3_cluster {
     double
     operator()(double, double lt, double zt) const
     {
-       return lambda2_interp(lt, zt);
+       return lambda3_interp(lt, zt);
     }
   };
 }

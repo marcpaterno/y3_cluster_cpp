@@ -84,9 +84,12 @@ namespace y3_cluster {
     double _B;
     double _C;
     double _sigma_intr;
-  public:
-    MOR_t2(double A, double B, double C, double sigma_i)
-      : _A(A),_B(B), _C(C), _sigma_intr(sigma_i)
+    double _epsilon;
+    double _z_pivot;
+
+	  public:
+    MOR_t2(double A, double B, double C, double sigma_i, double epsilon, double z_pivot)
+      : _A(A),_B(B), _C(C), _sigma_intr(sigma_i), _epsilon(epsilon), _z_pivot(z_pivot)
     {}
 
     explicit MOR_t2(cosmosis::DataBlock& sample)
@@ -94,15 +97,17 @@ namespace y3_cluster {
         , _B(get_datablock<double>(sample, "cluster_abundance", "mor_B"))
         , _C(get_datablock<double>(sample, "cluster_abundance", "mor_alpha"))
         , _sigma_intr(get_datablock<double>(sample, "cluster_abundance", "mor_sigma"))
+        , _epsilon(get_datablock<double>(sample, "cluster_abundance", "mor_epsilon"))
+        , _z_pivot(get_datablock<double>(sample, "cluster_abundance", "z_mor_pivot"))
     {}
 
     double
-    operator()(double lt, double lnM, double ) const
+    operator()(double lt, double lnM, double zt) const
     {
       //Now _lambda returns the evaluation of the eq.(9) of the
       //Matteo's paper, i.e., lambda_sat_given_M. 1. is a dummy
       //value for z. We are not using z here.
-      double ltm = pow(( std::exp(lnM) - _A)/( _B - _A), _C);
+      double ltm = pow(( std::exp(lnM) - _A)/( _B - _A), _C)* pow((1.0+zt)/(1.0+_z_pivot), _epsilon);
 
       //Computing sigma from the interpolation
       //ltm is lambda_true_given_M; _sigma_intr is sigma_intrisic

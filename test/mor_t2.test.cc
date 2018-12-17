@@ -38,7 +38,7 @@ TEST_CASE("mor_t2 works")
     const double sigma_intr = 0.10;
     const double alpha = 0.65;
 
-    MOR_t2 mor_t(pow(10,11.2), pow(10,12.42), alpha, sigma_intr);
+    MOR_t2 mor_t(pow(10,11.2), pow(10,12.42), alpha, sigma_intr, 0, 0);
    
     for (std::size_t i = 0, sz = log10m.size(); i != sz; ++i)
     {

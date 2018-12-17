@@ -119,7 +119,7 @@ main(int argc, char* argv[])
   long long maxeval = std::stoll(args[0]);
   double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis
   double alpha=6.91589257e-01 ;//this is a parameter that should come from cosmosis
-  MODELS::MOR mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr};
+  MODELS::MOR mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr, 0.0, 0.0};
   MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
   MODELS::LC_LT lc_lt;
   MODELS::ZO_ZT zo_zt{0.005};
