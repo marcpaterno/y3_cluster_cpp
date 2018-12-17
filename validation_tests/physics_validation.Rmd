@@ -15,34 +15,33 @@ library(tidyverse)
 
 This document presents analysis to demonstrate the calculations done by the Y3 clusters analysis code.
 
-## An example
+Our unit tests require fractional errors to be less than one part per million,
+unless otherwise indicated.
 
-This is an example of how to read data files and make plots.
-It is not an actually interesting example of a plot.
-We can settle upon standard formatting, etc., at a later date.
-
-### Absolute comparison of 1-d interpolation results to exact answers
+## Omega_z
 
 ```{r, include = FALSE}
-d <- read_tsv("../data/interp_1d.out")
-d <- mutate(d, resid = ytrue - ytest)
+omega_z <- read_tsv("../data/omega_z_sdss.out")
+omega_z <- mutate(omega_z, resid = ytrue - ytest)
 ```
 
-```{r, fig.cap = "Comparison of linear interpolation and exact results"}
-ggplot(d) +
-  geom_point(aes(x, ytrue), color = "red") +
-  geom_point(aes(x, ytest), color = "blue") +
-  xlab("x") +
-  ylab("y")
+### Absolute comparison of omega_z
+
+```{r fig.cap = "Absolute comparision"}
+ggplot(omega_z) +
+  geom_point(aes(x = z, y = ytrue), color = "red", shape = 1) +
+  geom_point(aes(x = z, y = ytest), color = "blue", shape = 3) +
+  xlab("redshift") +
+  ylab("survey area")  
 ```
 
-### Fractional comparison of linear interpolation and exact results
+### Relative error
 
-```{r, fig.cap = "Difference between linear interpolation and exact results"}
-ggplot(d) +
-  geom_point(aes(x, resid/ytrue)) +
-  xlab("x") +
-  ylab("residual/ytrue")
+```{r figcap = "Relative comparison"}
+ggplot(omega_z, aes(x = z, y = resid/ytrue)) +
+  geom_point() +
+  xlab("redshift") +
+  ylab("relative difference in survey area") 
 ```
 
 ## Session information
