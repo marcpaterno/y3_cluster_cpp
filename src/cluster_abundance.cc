@@ -10,4 +10,5 @@
 //
 // GENERATE_Y3_COSMOSIS_MODULE(Y3Models)
 
-GENERATE_Y3_COSMOSIS_MODULE(y3_cluster::DefaultModels, 10, 5, 1)
+using module = y3_cluster::ClustersModule<y3_cluster::DefaultModels>;
+GENERATE_Y3_COSMOSIS_MODULE(module)
