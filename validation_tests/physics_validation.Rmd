@@ -2,13 +2,20 @@
 title: "Physics Validation of Y3 Clusters Code"
 author: "Y3 Cluster Team"
 date: "12/12/2018"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
-                      fig.align = "center")
+                      fig.align = "center"
+                      )
 library(tidyverse)
+truecolor = "red"
+trueshape = 1
+testcolor = "blue"
+testshape = 3
 ```
 
 ## Introduction
@@ -18,7 +25,14 @@ This document presents analysis to demonstrate the calculations done by the Y3 c
 Our unit tests require fractional errors to be less than one part per million,
 unless otherwise indicated.
 
+In plots that show both *true* and *test* values,
+the *true* value plotted in `r truecolor`
+and the *test* value is plotted in `r testcolor`.
+
 ## Omega_z
+
+$\Omega_z$ is the area of the survey as a function of redshift $z$.
+Our calculation is implemented in the file `omega_z_sdss.hh`.
 
 ```{r, include = FALSE}
 omega_z <- read_tsv("../data/omega_z_sdss.out")
@@ -27,24 +41,34 @@ omega_z <- mutate(omega_z, resid = ytrue - ytest)
 
 ### Absolute comparison of omega_z
 
-```{r fig.cap = "Absolute comparision"}
+```{r fig.cap = "Absolute comparision", fig.asp = 1/2}
 ggplot(omega_z) +
-  geom_point(aes(x = z, y = ytrue), color = "red", shape = 1) +
-  geom_point(aes(x = z, y = ytest), color = "blue", shape = 3) +
+  geom_point(aes(x = z, y = ytrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = z, y = ytest), color = testcolor, shape = testshape) +
   xlab("redshift") +
   ylab("survey area")  
 ```
 
 ### Relative error
 
-```{r figcap = "Relative comparison"}
+Over the range tested (`r min(omega_z$z)` < $z$ < `r max(omega_z$z)`),
+the maximum magnitude of deviation between the expected value
+and our calculated value is
+$`r max(abs(omega_z$resid))`$;
+the maximum absolute fractional deviation is
+$`r max(abs(omega_z$resid/omega_z$ytrue))`$.
+
+```{r fig.cap = "Relative comparison"}
 ggplot(omega_z, aes(x = z, y = resid/ytrue)) +
   geom_point() +
+  ylim(-1.0e-6, 1.0e-6) +
   xlab("redshift") +
   ylab("relative difference in survey area") 
 ```
 
 ## Session information
+
+The following R package versions were used to prepare this document.
 
 ```{r echo = TRUE}
 sessionInfo()
