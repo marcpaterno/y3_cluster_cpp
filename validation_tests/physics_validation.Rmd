@@ -5,6 +5,7 @@ date: "12/12/2018"
 output:
   html_document: default
   pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -57,6 +58,8 @@ and our calculated value is
 $`r max(abs(omega_z$resid))`$;
 the maximum absolute fractional deviation is
 $`r max(abs(omega_z$resid/omega_z$ytrue))`$.
+
+For this test, we require the differences to be less than $10^{-6}$. This test returns $`r (max(abs(omega_z$resid)) < 1.0e-6)`$. 
 
 ```{r fig.cap = "Relative comparison"}
 ggplot(omega_z, aes(x = z, y = resid/ytrue)) +
