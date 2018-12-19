@@ -17,6 +17,11 @@ truecolor = "red"
 trueshape = 1
 testcolor = "blue"
 testshape = 3
+testresult <- function(bool) {
+  checkmate::assert_logical(bool, len = 1)
+  if (bool) return("passes")
+  return("<span style=\"color:red\">fails</span>")
+}
 ```
 
 ## Introduction
@@ -59,7 +64,8 @@ $`r max(abs(omega_z$resid))`$;
 the maximum absolute fractional deviation is
 $`r max(abs(omega_z$resid/omega_z$ytrue))`$.
 
-For this test, we require the differences to be less than $10^{-6}$. This test returns $`r (max(abs(omega_z$resid)) < 1.0e-6)`$. 
+For this test, we require the differences to be less than $10^{-6}$.
+This test `r testresult((max(abs(omega_z$resid)) < 1.0e-6))`. 
 
 ```{r fig.cap = "Relative comparison"}
 ggplot(omega_z, aes(x = z, y = resid/ytrue)) +
