@@ -2,7 +2,9 @@
 #define Y3_CLUSTER_GAMMA_T_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include <sigma_crit_inverse_t.hh>
 #include <integration_range.hh>
+#include <read_vector.hh>
 #include <transform.hh>
 
 #include <algorithm>
@@ -199,12 +201,15 @@ struct  Gamma_T_Integrand {
   typename MODELS::DV_DO_DZ dv_do_dz;
   typename MODELS::OMEGA_Z omega_z;
 
+  y3_cluster::sigma_crit_inv sig_crit_inv_;
+
   y3_cluster::IntegrationRange lnM_ir_;
   std::vector<y3_cluster::IntegrationRange> lo_ir_;   /* richness bins */
   y3_cluster::IntegrationRange lt_ir_;
   y3_cluster::IntegrationRange lc_ir_;
   std::vector<y3_cluster::IntegrationRange> zo_ir_;   /* redshift bins */
   y3_cluster::IntegrationRange zt_ir_;
+  y3_cluster::IntegrationRange zs_ir_;
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
   y3_cluster::IntegrationRange theta_ir_;
@@ -229,12 +234,14 @@ public:
                     typename MODELS::DEL_SIG del_sig,
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
+                    y3_cluster::sigma_crit_inv sci,
                     y3_cluster::IntegrationRange lnM_ir,
                     std::vector<y3_cluster::IntegrationRange> lo_ir,
                     y3_cluster::IntegrationRange lt_ir,
                     y3_cluster::IntegrationRange lc_ir,
                     std::vector<y3_cluster::IntegrationRange> zo_ir,
                     y3_cluster::IntegrationRange zt_ir,
+                    y3_cluster::IntegrationRange zs_ir,
                     y3_cluster::IntegrationRange R_ir,
                     y3_cluster::IntegrationRange A_ir,
                     y3_cluster::IntegrationRange theta_ir,
@@ -254,12 +261,14 @@ public:
     , del_sig(del_sig)
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
+    , sig_crit_inv_(sci)
     , lnM_ir_(lnM_ir)
     , lo_ir_(lo_ir)
     , lt_ir_(lt_ir)
     , lc_ir_(lc_ir)
     , zo_ir_(zo_ir)
     , zt_ir_(zt_ir)
+    , zs_ir_(zs_ir)
     , R_ir_(R_ir)
     , A_ir_(A_ir)
     , theta_ir_(theta_ir)
@@ -286,12 +295,14 @@ public:
     , del_sig(sample)
     , dv_do_dz(sample)
     , omega_z(sample)
+    , sig_crit_inv_(sample)
     , lnM_ir_(sample, "lnM")
     , lo_ir_(lo_bins)
     , lt_ir_(sample, "lt")
     , lc_ir_(sample, "lc")
     , zo_ir_(zo_bins)
     , zt_ir_(sample, "zt")
+    , zs_ir_(sample, "zs")
     , R_ir_(sample, "R")
     , A_ir_(sample, "A")
     , theta_ir_(sample, "theta")
@@ -320,6 +331,7 @@ public:
             del_sig,
             dv_do_dz,
             omega_z,
+            sig_crit_inv_,
             lnM_ir_,
             // Different lir
             new_lir,
@@ -328,6 +340,7 @@ public:
             // Different zir
             new_zir,
             zt_ir_,
+            zs_ir_,
             R_ir_,
             A_ir_,
             theta_ir_,
@@ -346,6 +359,7 @@ public:
   IntegrandResult
   integrand_common(double lt,
                    double zt,
+                   double zs,
                    double lnM,
                    // Jacobian for N term
                    Fjn jacob_N,
@@ -374,7 +388,7 @@ public:
 
         // These will eventually be passed by CosmoSIS
         double m_shear = 0.0;
-        double sig_crit = 1.0;
+        double sig_crit_inv = sig_crit_inv_(zt, zs);
         // This is the lambda-redshift bin weight that we don't fully understand
         double w = 1.0;
 
@@ -394,10 +408,10 @@ public:
         auto gamma_t = std::vector<double> (r.size ());
         std::transform  (begin (r),  end (r),
                          begin (gamma_t),
-                         [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep]
+                         [m_shear, sig_crit_inv, gamma_t_int, N_mult, gamma_radial_dep]
                          (double radius) {
                            // Nw intentionally left out - returned in return_arr to be used further on
-                           return (1.0 + m_shear) / sig_crit
+                           return (1.0 + m_shear) * sig_crit_inv
                              * gamma_t_int * N_mult * gamma_radial_dep(radius);
                          });
 
@@ -429,6 +443,7 @@ public:
               double scaled_lc,
               double scaled_lt,
               double scaled_zt,
+              double scaled_zs,
               double scaled_R,
               double scaled_lnM,
               double scaled_A,
@@ -441,6 +456,7 @@ public:
     auto const lt    = lt_ir_    .transform(scaled_lt);
     auto const lc    = lc_ir_    .transform(scaled_lc);
     auto const zt    = zt_ir_    .transform(scaled_zt);
+    auto const zs    = zs_ir_    .transform(scaled_zs);
     auto const R     = R_ir_     .transform(scaled_R);
     auto const A     = A_ir_     .transform(scaled_A);
     auto const theta = theta_ir_ .transform(scaled_theta);
@@ -454,7 +470,7 @@ public:
     auto jacob_G = [=](std::size_t loi) {
        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
               * lt_ir_.jacobian() * lc_ir_.jacobian()
-              * zt_ir_.jacobian()
+              * zt_ir_.jacobian() * zs_ir_.jacobian()
               * R_ir_.jacobian() * A_ir_.jacobian()
               * theta_ir_.jacobian();
     };
@@ -479,6 +495,7 @@ public:
 
     return integrand_common(lt,
                             zt,
+                            zs,
                             lnM,
                             jacob_N,
                             jacob_G,
@@ -501,6 +518,7 @@ public:
   centered(double scaled_lo,
            double scaled_lt,
            double scaled_zt,
+           double scaled_zs,
            double scaled_lnM,
            double scaled_A) const
   {
@@ -508,6 +526,7 @@ public:
     auto const lnM = lnM_ir_.transform(scaled_lnM);
     auto const lt = lt_ir_.transform(scaled_lt);
     auto const zt = zt_ir_.transform(scaled_zt);
+    auto const zs = zs_ir_.transform(scaled_zs);
     auto const A = A_ir_.transform(scaled_A);
 
     auto jacob_N = [=](std::size_t loi) {
@@ -520,6 +539,7 @@ public:
       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
              * lt_ir_.jacobian()
              * zt_ir_.jacobian()
+             * zs_ir_.jacobian()
              * A_ir_.jacobian();
     };
 
@@ -538,6 +558,7 @@ public:
 
     return integrand_common(lt,
                             zt,
+                            zs,
                             lnM,
                             jacob_N,
                             jacob_G,
@@ -561,9 +582,10 @@ public:
   {
     auto result
         = i.integrate ([this] (double scaled_lo, double scaled_lt,
-                               double scaled_zt, double scaled_lnM,
-                               double scaled_A)
-                           {  return centered(scaled_lo,  scaled_lt, scaled_zt,
+                               double scaled_zt, double scaled_zs,
+                               double scaled_lnM, double scaled_A)
+                           {  return centered(scaled_lo,  scaled_lt,
+                                              scaled_zt, scaled_zs,
                                               scaled_lnM, scaled_A);  },
                        epsrel, epsabs);
 
@@ -585,9 +607,11 @@ public:
   integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
     auto result = i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
-                                     double scaled_zt, double scaled_R, double scaled_lnM,
+                                     double scaled_zt, double scaled_zs,
+                                     double scaled_R, double scaled_lnM,
                                      double scaled_A, double scaled_theta) {
-                                 return miscentered(scaled_lo, scaled_lc, scaled_lt,
+                                 return miscentered(scaled_lo, scaled_lc,
+                                                    scaled_lt, scaled_zs,
                                                     scaled_zt, scaled_R, scaled_lnM,
                                                     scaled_A, scaled_theta);
                               },
@@ -622,6 +646,7 @@ make_gamma_t_integrand(double fcen,
   y3_cluster::IntegrationRange lt_ir{2.0, 120}; // we should adjust lt, lc and lnM ranges according to the bin
   y3_cluster::IntegrationRange lc_ir{2.0, 120};
   y3_cluster::IntegrationRange zt_ir{0.05, 0.35};
+  y3_cluster::IntegrationRange zs_ir{0.15, 0.45};
   y3_cluster::IntegrationRange R_ir{0., 3.0};
   y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
   y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
@@ -629,6 +654,13 @@ make_gamma_t_integrand(double fcen,
   auto rarray = std::vector<double> (n_radii);
   for (std::size_t i = 0; i < n_radii; i++)
     rarray[i] = 0.1 * (i + 0.1);
+
+  auto const z_da = read_vector("z.txt"),
+             da_arr = read_vector("d_a.txt");
+
+  auto da_f = std::make_shared<y3_cluster::Interp1D const>(z_da, da_arr);
+
+  y3_cluster::sigma_crit_inv sci(da_f);
 
   return {fcen,
           mor,
@@ -645,12 +677,14 @@ make_gamma_t_integrand(double fcen,
           del_sig,
           dv_do_dz,
           omega_z,
+          sci,
           lnM_ir,
           lo_ir,
           lt_ir,
           lc_ir,
           zo_ir,
           zt_ir,
+          zs_ir,
           R_ir,
           A_ir,
           theta_ir,

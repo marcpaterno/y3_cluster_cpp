@@ -1,19 +1,40 @@
+#include <exception>
+#include <memory>
+#include <vector>
+
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "test/interp_1d.hh"
-#include "test/primitives.hh"
+#include "datablock_reader.hh"
+#include "interp_1d.hh"
+#include "primitives.hh"
 
 namespace y3_cluster {
 
   class sigma_crit_inv {
   public:
-    sigma_crit_inv(std::shared_ptr<Interp1D const> da, double c, double G)
-      :_da(da), _c(c), _G(G)
+    sigma_crit_inv(std::shared_ptr<Interp1D const> da)
+      : _da(da)
+      // Units: Mpc/s (NO h)
+      , _c(9.71561e-15)
+      // Units: Mpc^3 / (kg * s^2)
+      // TODO This is probably wrong, fix it, get higher precision
+      //, _G(2.272e-78)
+      // Units: Mpc^3 / (M_sol * s^2)
+      , _G(4.517e-48)
     {}
 
+    explicit sigma_crit_inv(cosmosis::DataBlock& sample)
+      : sigma_crit_inv(std::make_shared<y3_cluster::Interp1D const>(
+                     get_datablock<std::vector<double>>(sample, "distances", "z"),
+                     get_datablock<std::vector<double>>(sample, "distances", "d_a")))
+    {}
+
+    sigma_crit_inv(const sigma_crit_inv&) = default;
+    sigma_crit_inv(sigma_crit_inv&&) = default;
+
     double
-    operator()(double zt, zs) const
+    operator()(double zt, double zs) const
     {
-      double _sig_crit_inv=0;
+      double _sig_crit_inv = 0;
       if (zs > zt) {
         double const da_zt = _da->eval(zt), // da_z needs to be in Mpc
                      da_zs = _da->eval(zs), // da_z needs to be in Mpc
