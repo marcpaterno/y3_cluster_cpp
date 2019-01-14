@@ -7,6 +7,7 @@ namespace y3_cluster
              typename LO_LC_,
              typename LC_LT_,
              typename ZO_ZT_,
+             typename PZSOURCE_,
              typename ROFFSET_,
              typename T_CEN_,
              typename T_MIS_,
@@ -22,6 +23,7 @@ namespace y3_cluster
         using LO_LC = LO_LC_;
         using LC_LT = LC_LT_;
         using ZO_ZT = ZO_ZT_;
+        using PZSOURCE = PZSOURCE_;
         using ROFFSET = ROFFSET_;
         using T_CEN = T_CEN_;
         using T_MIS = T_MIS_;

@@ -23,6 +23,7 @@
 #include "test/t_cen_t.hh"
 #include "test/t_mis_t.hh"
 #include "test/zo_zt_t.hh"
+#include "test/pz_source_t.hh"
 #include "test/read_vector.hh"
 #include "test/default_models.hh"
 */
@@ -123,6 +124,7 @@ main(int argc, char* argv[])
   MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
   MODELS::LC_LT lc_lt;
   MODELS::ZO_ZT zo_zt{0.005};
+  MODELS::PZSOURCE pzsource{0.4, 0.2};
   MODELS::ROFFSET roffset{0.2};
   MODELS::T_CEN t_cen;
   MODELS::T_MIS t_mis;
@@ -152,6 +154,7 @@ main(int argc, char* argv[])
                                     lo_lc,
                                     lc_lt,
                                     zo_zt,
+                                    pzsource,
                                     roffset,
                                     t_cen,
                                     t_mis,

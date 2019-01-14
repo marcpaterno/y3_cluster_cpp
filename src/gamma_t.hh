@@ -190,6 +190,7 @@ struct  Gamma_T_Integrand {
   typename MODELS::LO_LC lo_lc;
   typename MODELS::LC_LT lc_lt;
   typename MODELS::ZO_ZT zo_zt;
+  typename MODELS::PZSOURCE pzsource;
   typename MODELS::ROFFSET roffset;
   typename MODELS::T_CEN T_cen;
   typename MODELS::T_MIS T_mis;
@@ -224,6 +225,7 @@ public:
                     typename MODELS::LO_LC lo_lc,
                     typename MODELS::LC_LT lc_lt,
                     typename MODELS::ZO_ZT zo_zt,
+                    typename MODELS::PZSOURCE pzsource,
                     typename MODELS::ROFFSET roffset,
                     typename MODELS::T_CEN T_cen,
                     typename MODELS::T_MIS T_mis,
@@ -251,6 +253,7 @@ public:
     , lo_lc(lo_lc)
     , lc_lt(lc_lt)
     , zo_zt(zo_zt)
+    , pzsource(pzsource)
     , roffset(roffset)
     , T_cen(T_cen)
     , T_mis(T_mis)
@@ -285,6 +288,7 @@ public:
     , lo_lc(sample)
     , lc_lt(sample)
     , zo_zt(sample)
+    , pzsource(sample)
     , roffset(sample)
     , T_cen(sample)
     , T_mis(sample)
@@ -321,6 +325,7 @@ public:
             lo_lc,
             lc_lt,
             zo_zt,
+            pzsource,
             roffset,
             T_cen,
             T_mis,
@@ -385,11 +390,13 @@ public:
         double const zomin = zo_ir_[zoi].transform(0.0);
         double const zomax = zo_ir_[zoi].transform(1.0);
         auto const zo_zt_v = zo_zt(zomin, zomax, zt);
+	// TODO: Left off here!
+        auto const pzsource_v = pzsource(zs);
 
-        // These will eventually be passed by CosmoSIS
+        // TODO: These will eventually be passed by CosmoSIS
         double m_shear = 0.0;
         double sig_crit_inv = sig_crit_inv_(zt, zs);
-        // This is the lambda-redshift bin weight that we don't fully understand
+        // TODO: The lambda-redshift bin weight that we don't fully understand
         double w = 1.0;
 
         // eq. (25)
@@ -411,7 +418,7 @@ public:
                          [m_shear, sig_crit_inv, gamma_t_int, N_mult, gamma_radial_dep]
                          (double radius) {
                            // Nw intentionally left out - returned in return_arr to be used further on
-                           return (1.0 + m_shear) * sig_crit_inv
+                           return (1.0 + m_shear) * sig_crit_inv * pzsource_v
                              * gamma_t_int * N_mult * gamma_radial_dep(radius);
                          });
 
@@ -628,6 +635,7 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::LO_LC lo_lc,
                        typename MODELS::LC_LT lc_lt,
                        typename MODELS::ZO_ZT zo_zt,
+                       typename MODELS::PZSOURCE pzsource,
                        typename MODELS::ROFFSET roffset,
                        typename MODELS::T_CEN t_cen,
                        typename MODELS::T_MIS t_mis,
@@ -667,6 +675,7 @@ make_gamma_t_integrand(double fcen,
           lo_lc,
           lc_lt,
           zo_zt,
+          pzsource,
           roffset,
           t_cen,
           t_mis,

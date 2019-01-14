@@ -17,6 +17,7 @@
 #include <t_mis_t.hh>
 #include <omega_z_sdss.hh>
 #include <zo_zt_t.hh>
+#include <pzsource_t.hh>
 #include "models.hh"
 
 namespace y3_cluster {
@@ -24,6 +25,7 @@ namespace y3_cluster {
                                  LO_LC_t,
                                  LC_LT_t,
                                  ZO_ZT_t,
+                                 PZSOURCE_t,
                                  ROFFSET_t,
                                  T_CEN_t,
                                  T_MIS_t,
