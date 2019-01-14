@@ -415,7 +415,7 @@ public:
         auto gamma_t = std::vector<double> (r.size ());
         std::transform  (begin (r),  end (r),
                          begin (gamma_t),
-                         [m_shear, sig_crit_inv, gamma_t_int, N_mult, gamma_radial_dep]
+                         [m_shear, sig_crit_inv, gamma_t_int, N_mult, gamma_radial_dep, pzsource_v]
                          (double radius) {
                            // Nw intentionally left out - returned in return_arr to be used further on
                            return (1.0 + m_shear) * sig_crit_inv * pzsource_v
