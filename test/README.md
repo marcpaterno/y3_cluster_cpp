@@ -1,6 +1,6 @@
 # Tests Directory
 
-For the moment, this directory (`tests`) contains all of the code for `y3_cluster_cpp` - tests and otherwise. We recognize that is confusing; non-test code will be moved elsewhere once the repository is in a stable state.
+Welcome to the tests for the Y3 Cluster Cosmology Pipeline. This directory should contain only source code, data files should be in the `../data` directory.
 
 ## Building and Running Tests
 
@@ -22,7 +22,9 @@ Please do add more tests! To do so is straightforward. Create a file in this dir
 // This header is needed for the test framework
 #include "catch2/catch.hpp"
 // Than, any other headers you want - e.g.:
-#include "needed_header_file.hh"
+#include <lc_lt_t.hh>
+#include <primitives.hh>
+#include <test/your_test_file.hh>
 ...
 
 using ...;
@@ -43,15 +45,16 @@ Next, add the commands to build your test to the end of `CMakeLists.txt` in this
 
 ```
 add_executable(<your_test>_test main.cc <your_test>.test.cc)
-target_link_libraries(<your_test>_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES})
+target_link_libraries(<your_test>_test PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
 target_include_directories(<your_test>_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(<your_test>_test <your_test>_test)
 ```
 
-Where `<your_test>` has been replaced with a descriptive name. Now, simply fire up docker and run `make` in the parent directory, and your test should automatically be built! (No need to rerun `cmake`.) If you are unsure how to write your test or are having trouble, look in the other `*.test.cc` files, and don't hesitate to ask for help.
+Where `<your_test>` has been replaced with a descriptive name. Now, simply fire up the docker image and run `make` in the parent directory, and your test should automatically be built! (No need to rerun `cmake`.) If you are unsure how to write your test or are having trouble, look in the other `*.test.cc` files, and don't hesitate to ask for help.
 
 ## Diagnostic Executables
 
@@ -63,3 +66,5 @@ In addition, there are several non-test executables, intended to ease examining 
     * Integrate, respectively, the probability distributions $P(\lc|\lt)$, $P(\lo|\lt)$, $P(\lt|M,\zt)$, and $P_{mis}(R_{mis}$, over respective ranges. This is to check whether the distributions integrate properly to 1.0, within acceptable limits.
     * Each executable emits CSV-formatted results tables of the resulting integration value, as well as the values of extra parameters used.
     * Each executable takes a number of command-line arguments for customization. Obtain a list with `./integrate_<whatever> -h` or `--help`.
+* `integrate_delta_sigma`
+    * Compares `del_sig_cen` and `del_sig_mis`. Aims to have a similar interface to the above integrations.

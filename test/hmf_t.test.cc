@@ -1,7 +1,7 @@
 #include "catch2/catch.hpp"
-#include "test/hmf_t.hh"
-#include "test/interp_2d.hh"
-#include "test/read_vector.hh"
+#include "hmf_t.hh"
+#include "interp_2d.hh"
+#include "read_vector.hh"
 #include <fstream>
 
 using y3_cluster::HMF_t;

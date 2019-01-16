@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/mz_power_law.hh"
+#include "mz_power_law.hh"
 
 #include <cmath>
 #include <type_traits>

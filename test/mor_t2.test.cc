@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/mor_t2.hh"
+#include "mor_t2.hh"
 
 #include <fstream>
 #include <iostream>
@@ -8,7 +8,7 @@ using y3_cluster::MOR_t2;
 
 TEST_CASE("mor_t2 works")
 {
-    std::ifstream infile {"mor_tt_test.txt"};
+    std::ifstream infile {"../data/mor_tt_test.txt"};
     // Use REQUIRE for immediate failure if we can't open the file.
     REQUIRE(infile.good());
     std::vector<double> log10m;

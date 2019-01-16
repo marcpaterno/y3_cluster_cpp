@@ -2,35 +2,38 @@
 #include "catch2/catch.hpp"
 #include "cubacpp/cubacpp.hh"
 
-#include "test/a_cen_t.hh"
-#include "test/a_mis_t.hh"
-#include "test/del_sig_cen_t.hh"
-#include "test/del_sig_cen_y1.hh"
-#include "test/del_sig_mis_t.hh"
-#include "test/dv_do_dz_t.hh"
-#include "test/ez.hh"
-#include "test/ez_sq.hh"
-#include "test/hmf_t.hh"
-#include "test/lc_lt_t.hh"
-#include "test/lc_lt_t2.hh"
-#include "test/lo_lc_t.hh"
-#include "test/mor_t.hh"
-#include "test/mz_power_law.hh"
-#include "test/omega_z_sdss.hh"
-#include "test/primitives.hh"
-#include "test/roffset_t.hh"
-#include "test/t_cen_t.hh"
-#include "test/t_mis_t.hh"
-#include "test/zo_zt_t.hh"
+#include "a_cen_t.hh"
+#include "a_mis_t.hh"
+#include "del_sig_t.hh"
+#include "del_sig_y1.hh"
+#include "dv_do_dz_t.hh"
+#include "ez.hh"
+#include "ez_sq.hh"
+#include "hmb_t.hh"
+#include "hmf_t.hh"
+#include "lc_lt_t.hh"
+#include "lc_lt_t2.hh"
+#include "lo_lc_t.hh"
+#include "mor_t.hh"
+#include "mz_power_law.hh"
+#include "omega_z_sdss.hh"
+#include "primitives.hh"
+#include "roffset_t.hh"
+#include "t_cen_t.hh"
+#include "t_mis_t.hh"
+#include "zo_zt_t.hh"
 
-#include "test/interp_1d.hh"
-#include "test/read_vector.hh"
-#include "test/simultaneous_bin_comparison.hh"
-#include "test/transform.hh"
+#include "default_models.hh"
+#include "interp_1d.hh"
+#include "read_vector.hh"
+#include "simultaneous_bin_comparison.hh"
+#include "transform.hh"
 
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
+using y3_cluster::make_gamma_t_integrand;
+using y3_cluster::Models;
 using y3_cluster::mz_power_law;
 
 using y3_cluster::test_simultaneous_bins;
@@ -53,7 +56,7 @@ int main()
     // dndlnmh.txt, m_h.txt, z.txt came from the cosmosis tinker_mf_module.so
     // d_a.txt, z_da.txt came from the cosmosis camb.so
     auto const dndlnmh = read_vector("dndlnmh.txt", identity);
-    // m_h.txt is in units of: 
+    // m_h.txt is in units of:
     //    \Omega_M M_{solar} h^{-1}
     // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
     // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
@@ -90,16 +93,17 @@ int main()
     auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
     auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
     auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
+    y3_cluster::HMB_t hmb;
     y3_cluster::HMF_t hmf(p1, 0.037, 1.008);
-    y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
-    //y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
+    y3_cluster::DEL_SIG_t dsc(p2, p3, p4);
 
     auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
-    y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
-    // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc 
+    y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
+    // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc
     y3_cluster::OMEGA_Z_SDSS omega_z;
     IntegrationRange lo_ir{20, 28};
     IntegrationRange zo_ir{0.1, 0.3};
+
     using MODELS = Models<decltype(mor),
                           decltype(lo_lc),
                           decltype(lc_lt),
@@ -109,12 +113,13 @@ int main()
                           decltype(t_mis),
                           decltype(a_cen),
                           decltype(a_mis),
+                          decltype(hmb),
                           decltype(hmf),
                           decltype(dsc),
                           decltype(dvdodz),
                           decltype(omega_z)>;
-    auto gti = make_gamma_t_integrand<MODELS, 10, 2, 2>(0.7,
-                                      0.11,
+
+    auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                       mor,
                                       lo_lc,
                                       lc_lt,
@@ -124,14 +129,16 @@ int main()
                                       t_mis,
                                       a_cen,
                                       a_mis,
+                                      hmb,
                                       hmf,
                                       dsc,
                                       dvdodz,
                                       omega_z,
                                       {lo_ir, {28, 37.6}},
-                                      {zo_ir, {0.3, 0.4}});
+                                      {zo_ir, {0.3, 0.4}},
+                                      10);
 
-    cubacpp::Vegas v;
+    cubacpp::Cuhre v;
     v.maxeval = 999999999;
 
     test_simultaneous_bins(v, gti, 1e-3, 1e-12, true, false);

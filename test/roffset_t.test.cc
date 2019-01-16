@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/roffset_t.hh"
+#include "roffset_t.hh"
 
 #include <fstream>
 
@@ -7,7 +7,7 @@ using y3_cluster::ROFFSET_t;
 
 TEST_CASE("roffset_t works")
 {
-    std::ifstream infile {"test_Rmis.txt"};
+    std::ifstream infile {"../data/test_Rmis.txt"};
     // Use REQUIRE for immediate failure if we can't open the file.
     REQUIRE(infile.good());
     std::vector<double> rmis;

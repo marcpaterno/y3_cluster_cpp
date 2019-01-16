@@ -5,11 +5,11 @@
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
 
+/*
 #include "test/a_cen_t.hh"
 #include "test/a_mis_t.hh"
-#include "test/del_sig_cen_t.hh"
-#include "test/del_sig_cen_y1.hh"
-#include "test/del_sig_mis_t.hh"
+#include "test/del_sig_y1.hh"
+#include "test/del_sig_t.hh"
 #include "test/dv_do_dz_t.hh"
 #include "test/ez.hh"
 #include "test/ez_sq.hh"
@@ -24,34 +24,40 @@
 #include "test/t_mis_t.hh"
 #include "test/zo_zt_t.hh"
 #include "test/read_vector.hh"
+#include "test/default_models.hh"
+*/
+
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <gperftools/profiler.h>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "test/interp_1d.hh"
-#include "test/transform.hh"
+#include <default_models.hh>
+#include <mor_t2.hh>
+#include <interp_1d.hh>
+#include <interp_2d.hh>
+#include <read_vector.hh>
+#include <transform.hh>
 
 using y3_cluster::IntegrationRange;
 using y3_cluster::Interp1D;
 using y3_cluster::Interp2D;
+using y3_cluster::make_gamma_t_integrand;
 using y3_cluster::mz_power_law;
 
 // Helper template, to automate the timing of integration.
-template <class ALG, class F>
+template <class F>
 auto
-time_integration(ALG alg,
-                 F f,
-                 double epsrel,
-                 double epsabs,
-                 char const* algname) -> decltype(alg.integrate(f, epsrel, epsabs))
+time_integration(F f,
+                 char const* algname) -> decltype(f())
 {
   auto start = std::chrono::high_resolution_clock::now();
-  auto res = alg.integrate(f, epsrel, epsabs);
+  auto res = f();
   auto stop = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = stop - start;
   std::cout << algname << ": " << res << " (" << diff.count() << "s)\n";
@@ -67,6 +73,8 @@ main(int argc, char* argv[])
     std::cerr << "Please specify an integer maxeval\n";
     return 1;
   }
+  // Make sure CUBA does not fork processes!
+  cubacores(0, 0);
 
   // ============ Cosmological Parameters ============
   //            (to be passed by CosmoSIS)
@@ -105,49 +113,41 @@ main(int argc, char* argv[])
   // ============ Integral Components ============
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
+  struct MODELS : public y3_cluster::DefaultModels {
+      using MOR = y3_cluster::MOR_t2;
+  };
   long long maxeval = std::stoll(args[0]);
   double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis
   double alpha=6.91589257e-01 ;//this is a parameter that should come from cosmosis
-  //y3_cluster::MOR_t mor{mz_power_law{8.8e-9, alpha, 0.0}, sigma_intr, alpha};
-  y3_cluster::MOR_t2 mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr};
-  y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
-  y3_cluster::LC_LT_t lc_lt;
-  y3_cluster::ZO_ZT_t zo_zt{0.005};
-  y3_cluster::ROFFSET_t roffset{0.2};
-  y3_cluster::T_CEN_t t_cen;
-  y3_cluster::T_MIS_t t_mis;
-  y3_cluster::A_CEN_t a_cen;
-  y3_cluster::A_MIS_t a_mis;
+  MODELS::MOR mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr};
+  MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
+  MODELS::LC_LT lc_lt;
+  MODELS::ZO_ZT zo_zt{0.005};
+  MODELS::ROFFSET roffset{0.2};
+  MODELS::T_CEN t_cen;
+  MODELS::T_MIS t_mis;
+  MODELS::A_CEN a_cen;
+  MODELS::A_MIS a_mis;
+
   auto p1 = std::make_shared<Interp2D const>(mh, zz, dndlnmh);
   auto p2 = std::make_shared<Interp2D const>(r_perp, mh1, del_sig_1);
   auto p3 = std::make_shared<Interp2D const>(r_perp, zz1, del_sig_2);
   auto p4 = std::make_shared<Interp2D const>(zz1, mh1, bm);
-  y3_cluster::HMF_t hmf(p1, 4.50732047e-02, 1.01958078e+00);
-  //y3_cluster::HMF_t hmf(p1, 0, 1.0);
-  //y3_cluster::DEL_SIG_CEN_t dsc(p2, p3, p4);
-  y3_cluster::DEL_SIG_CEN_y1 dsc; // this is using y1 observable
-
   auto da_f = std::make_shared<Interp1D const>(zz_da, da_arr);
-  y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h); 
-  // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc 
-  y3_cluster::OMEGA_Z_SDSS omega_z;
-  IntegrationRange lo_ir1{20, 27.9};
-  IntegrationRange zo_ir1{0.1, 0.3};
-  using MODELS = Models<decltype(mor),
-                        decltype(lo_lc),
-                        decltype(lc_lt),
-                        decltype(zo_zt),
-                        decltype(roffset),
-                        decltype(t_cen),
-                        decltype(t_mis),
-                        decltype(a_cen),
-                        decltype(a_mis),
-                        decltype(hmf),
-                        decltype(dsc),
-                        decltype(dvdodz),
-                        decltype(omega_z)>;
-  auto gti = make_gamma_t_integrand<MODELS, 10, 4, 1>(0.7,
-                                    0.11,
+
+  MODELS::HMB bmz;
+  MODELS::HMF hmf(p1, 4.50732047e-02, 1.01958078e+00);
+  // TODO: Change to DEL_SIG_Y1
+  // MODELS::DEL_SIG ds(p2, p3, p4);
+  MODELS::DEL_SIG ds;
+  // dvdodz in unit of h^{-3} Mpc^3, note that da_arr needs to be in unit of Mpc
+  MODELS::DV_DO_DZ dvdodz(da_f, y3_cluster::EZ(Omega_M, Omega_L, Omega_K), h);
+  MODELS::OMEGA_Z omega_z;
+
+  IntegrationRange lo_ir{20, 27.9};
+  IntegrationRange zo_ir{0.1, 0.3};
+
+  auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                     mor,
                                     lo_lc,
                                     lc_lt,
@@ -157,12 +157,14 @@ main(int argc, char* argv[])
                                     t_mis,
                                     a_cen,
                                     a_mis,
+                                    bmz,
                                     hmf,
-                                    dsc,
+                                    ds,
                                     dvdodz,
                                     omega_z,
-                                    {lo_ir1, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
-                                    {zo_ir1});
+                                    {lo_ir},//, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
+                                    {zo_ir},
+                                    10);
 
   // ============ Actual Integrations ============
   // Integrate centered and miscentered, simultaneously over all bins,
@@ -170,121 +172,15 @@ main(int argc, char* argv[])
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
+  ProfilerStart("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/dump.txt");
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
-  // Won't allow integrating gti.centered directly :(
-  auto start = std::chrono::high_resolution_clock::now();
-  auto centered_res = c.integrate([&gti](double a, double b, double c,
-                                         double d, double e) {
-                                      return gti.centered(a, b, c, d, e);
-                                 },
-                                 epsrel, epsabs);
-  auto stop = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> diff = stop - start;
+  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs); },
+                   "centered-cuhre");
 
-  auto centered_bins = make_gamma_t_integrated_bins(gti, centered_res);
+  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
+                   "miscentered-cuhre");
 
-  std::cout << "****** CENTERED ******\n"
-            << "** status: " << centered_res.status << '\n'
-            << "** simultaneous time: " << diff.count() << '\n';
-  double time_count = 0.0;
-  for (auto& bin : centered_bins) {
-      std::array<y3_cluster::IntegrationRange, 1> new_lir = {bin.lo_ir};
-      std::array<y3_cluster::IntegrationRange, 1> new_zir = {bin.zo_ir};
-      auto gti_single = gti.with_bins(new_lir, new_zir);
-
-      start = std::chrono::high_resolution_clock::now();
-      auto single_res = c.integrate([&gti_single](double a, double b, double c,
-                                                    double d, double e) {
-                                                 return gti_single.centered(a, b, c, d, e);
-                                            },
-                                            epsrel, epsabs);
-      stop = std::chrono::high_resolution_clock::now();
-      diff = stop - start;
-
-      auto single_bin = make_gamma_t_integrated_bins(gti_single, single_res)[0];
-
-      std::cout << "(simultaneous) lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
-                << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
-                << bin.Nw << " +/- " << bin.Nw_error << ")\n";
-
-      for (auto i = 0; i < 10; i++)
-          std::cout << "(simultaneous) value: " << bin.gamma_ts[i]
-                    << ", error: " << bin.gamma_t_errors[i]
-                    << ", prob: " << bin.gamma_t_probs[i] << '\n';
-
-      std::cout << "(single - bin) status = " << single_res.status
-                << ", time = " << diff.count() << '\n';
-
-      std::cout << "(single - bin) lo = " << single_bin.lo_ir << ", zo = " << single_bin.zo_ir
-                << ", (N, Nw) = (" << single_bin.N << " +/- " << single_bin.N_error << ", "
-                << single_bin.Nw << " +/- " << single_bin.Nw_error << ")\n";
-
-      for (auto i = 0; i < 10; i++)
-          std::cout << "(single - bin) value: " << single_bin.gamma_ts[i]
-                    << ", error: " << single_bin.gamma_t_errors[i]
-                    << ", prob: " << single_bin.gamma_t_probs[i] << '\n';
-
-      time_count += diff.count();
-  }
-  std::cout << "** total single time: " << time_count << '\n';
-
-  // same deal as above
-  start = std::chrono::high_resolution_clock::now();
-  auto miscentered_res = c.integrate([&gti](double a, double b, double c,
-                                            double d, double e, double f,
-                                            double g, double h) {
-                                         return gti.miscentered(a, b, c, d, e, f, g, h);
-                                    },
-                                    epsrel, epsabs);
-  stop = std::chrono::high_resolution_clock::now();
-  diff = stop - start;
-
-  auto miscentered_bins = make_gamma_t_integrated_bins(gti, miscentered_res);
-
-  std::cout << "****** MISCENTERED ******\n"
-            << "** status: " << centered_res.status << '\n'
-            << "** simultaneous time: " << diff.count() << '\n';
-  time_count = 0.0;
-  for (auto& bin : miscentered_bins) {
-      std::array<y3_cluster::IntegrationRange, 1> new_lir = {bin.lo_ir};
-      std::array<y3_cluster::IntegrationRange, 1> new_zir = {bin.zo_ir};
-      auto gti_single = gti.with_bins(new_lir, new_zir);
-
-      start = std::chrono::high_resolution_clock::now();
-      auto single_res = c.integrate([&gti_single](double a, double b, double c,
-                                                    double d, double e, double f,
-                                                    double g, double h) {
-                                                 return gti_single.miscentered(a, b, c, d, e, f, g, h);
-                                            },
-                                            epsrel, epsabs);
-      stop = std::chrono::high_resolution_clock::now();
-      diff = stop - start;
-
-      auto single_bin = make_gamma_t_integrated_bins(gti_single, single_res)[0];
-
-      std::cout << "(simultaneous) lo = " << bin.lo_ir << ", zo = " << bin.zo_ir
-                << ", (N, Nw) = (" << bin.N << " +/- " << bin.N_error << ", "
-                << bin.Nw << " +/- " << bin.Nw_error << ")\n";
-
-      for (auto i = 0; i < 10; i++)
-          std::cout << "(simultaneous) value: " << bin.gamma_ts[i]
-                    << ", error: " << bin.gamma_t_errors[i]
-                    << ", prob: " << bin.gamma_t_probs[i] << '\n';
-
-      std::cout << "(single - bin) status = " << single_res.status
-                << ", time = " << diff.count() << '\n';
-
-      std::cout << "(single - bin) lo = " << single_bin.lo_ir << ", zo = " << single_bin.zo_ir
-                << ", (N, Nw) = (" << single_bin.N << " +/- " << single_bin.N_error << ", "
-                << single_bin.Nw << " +/- " << single_bin.Nw_error << ")\n";
-
-      for (auto i = 0; i < 10; i++)
-          std::cout << "(single - bin) value: " << single_bin.gamma_ts[i]
-                    << ", error: " << single_bin.gamma_t_errors[i]
-                    << ", prob: " << single_bin.gamma_t_probs[i] << '\n';
-
-      time_count += diff.count();
-  }
-  std::cout << "** total single time: " << time_count << '\n';
+  ProfilerFlush();
+  ProfilerStop();
 };

@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "test/ez.hh"
+#include "ez.hh"
 
 #include <fstream>
 

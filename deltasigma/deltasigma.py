@@ -75,11 +75,11 @@ def execute(block,config):
 	Size3 = nz * M_bins
 	Bias = np.ndarray(Size3)
 	Bias.shape = (M_bins,nz)
-
-	for i in range(M_bins):
-		for j in range(nz):
-			Bias[i][j] = ct.bias.bias_at_M(M[i], k, P_k[j], omega_m)
-
+        
+	#for i in range(M_bins):
+	#	for j in range(nz):
+	#		Bias[i][j] = ct.bias.bias_at_M(M[i], k, P_k[j], omega_m)
+        
 	logM = np.log(M)
 	block[cosmo, "deltasigma_1"] = Deltasigma_1
 	block[cosmo, "deltasigma_2"] = Deltasigma_2

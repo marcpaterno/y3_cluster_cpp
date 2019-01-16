@@ -8,12 +8,11 @@ TEST_CASE("MOR_t probability weighted correctly")
   // integral of Lc_lt over $\lambda^{cen}$ = [0, +inf] should be unity
   // Since total probability = 1
   // In practice - $\lambda^{cen}$ from 1 to 200 should be good enough
-  IntegrationRange lt_ir{0.0, 1000.0};
-  IntegrationRange lnM_ir{std::log(5e11), std::log(1e16)};
+  IntegrationRange lt_ir{0.0, 5000.0};
+  IntegrationRange lnM_ir{std::log(1e13), std::log(1e16)};
   IntegrationRange zt_ir{0.1, 0.3};
 
-  cubacpp::Vegas v;
-  v.maxeval = 9999999;
+  cubacpp::CQUAD v;
 
   test_integrate_mor(v, lt_ir, lnM_ir, zt_ir, 2, 2);
 }

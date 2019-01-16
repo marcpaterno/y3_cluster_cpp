@@ -1,7 +1,10 @@
-CMakeCache.txt
 CMakeFiles/
-CTestTestfile.cmake
 Testing/
+cosmosis_test_output/
+covariance_test_output/
+matteos_power_spectrum/
+CMakeCache.txt
+CTestTestfile.cmake
 Makefile
 cmake_install.cmake
 *.pyc
@@ -9,3 +12,8 @@ cmake_install.cmake
 ez_sq_test
 ez_test
 *~
+*.pdf
+*.ps
+gmon.out
+dump.txt
+cross_output.txt

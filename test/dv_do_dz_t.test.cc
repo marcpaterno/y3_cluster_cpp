@@ -1,8 +1,8 @@
 #include "catch2/catch.hpp"
-#include "test/interp_1d.hh"
-#include "test/dv_do_dz_t.hh"
-#include "test/ez.hh"
-#include "test/read_vector.hh"
+#include "interp_1d.hh"
+#include "dv_do_dz_t.hh"
+#include "ez.hh"
+#include "read_vector.hh"
 #include <fstream>
 
 using y3_cluster::DV_DO_DZ_t;
@@ -10,7 +10,7 @@ using y3_cluster::Interp1D;
 
 TEST_CASE("dv_do_dz_t works")
 {
-  std::ifstream infile {"test_dv_do_dz.txt"};
+  std::ifstream infile {"../data/test_dv_do_dz.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> zs;

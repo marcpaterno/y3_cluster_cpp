@@ -20,30 +20,30 @@ int main(int argc, char **argv)
     bool help = false;
 
     using namespace Catch::clara;
-    auto args_parser = Opt(lc_min, "lcmin")
-                          ["--lcmin"]
-                          ("Lower bound of \\lambda_c values to try")
-                     | Opt(lc_max, "lcmax")
-                          ["--lcmax"]
-                          ("Upper bound of \\lambda_c values to try")
-                     | Opt(lt_min, "ltmin")
-                          ["--ltmin"]
-                          ("Lower bound of \\lambda_t values to try")
-                     | Opt(lt_max, "ltmax")
-                          ["--ltmax"]
-                          ("Upper bound of \\lambda_t values to try")
-                     | Opt(zt_min, "ztmin")
-                          ["--ztmin"]
-                          ("Lower bound of z_t values to try")
-                     | Opt(zt_max, "ztmax")
-                          ["--ztmax"]
-                          ("Upper bound of z_t values to try")
+    auto args_parser = Opt(lc_min, "lc min")
+                          ["--lc-min"]
+                          ("Lower integration bound of \\lambda_c values")
+                     | Opt(lc_max, "lc max")
+                          ["--lc-max"]
+                          ("Upper integration bound of \\lambda_c values")
+                     | Opt(lt_min, "lt min")
+                          ["--lt-min"]
+                          ("Lower bound of \\lambda_t values to integrate at")
+                     | Opt(lt_max, "lt max")
+                          ["--lt-max"]
+                          ("Upper bound of \\lambda_t values to integrate at")
+                     | Opt(zt_min, "zt min")
+                          ["--zt-min"]
+                          ("Lower bound of z_t values to integrate at")
+                     | Opt(zt_max, "zt max")
+                          ["--zt-max"]
+                          ("Upper bound of z_t values to integrate at")
                      | Opt(lt_width, "lt width")
                           ["--lt-width"]
-                          ("Number of distinct \\lambda_t values to try")
+                          ("Number of distinct \\lambda_t values to integrate at")
                      | Opt(zt_width, "zt width")
                           ["--zt-width"]
-                          ("Number of distinct z_t values to try")
+                          ("Number of distinct z_t values to integrate at")
                      | Opt(maxeval, "maxeval")
                           ["--maxeval"]
                           ("Maximum number of evaluations for integration algorithm")
