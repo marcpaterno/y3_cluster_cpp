@@ -13,13 +13,6 @@ namespace y3_cluster {
   public:
     sigma_crit_inv(std::shared_ptr<Interp1D const> da)
       : _da(da)
-      // Units: Mpc/s (NO h)
-      , _c(9.71561e-15)
-      // Units: Mpc^3 / (kg * s^2)
-      // TODO This is probably wrong, fix it, get higher precision
-      //, _G(2.272e-78)
-      // Units: Mpc^3 / (M_sol * s^2)
-      , _G(4.517e-48)
     {}
 
     explicit sigma_crit_inv(cosmosis::DataBlock& sample)
@@ -36,10 +29,12 @@ namespace y3_cluster {
     {
       double _sig_crit_inv = 0;
       if (zs > zt) {
+      // Units in Mpc, M_sol, s
         double const da_zt = _da->eval(zt), // da_z needs to be in Mpc
                      da_zs = _da->eval(zs), // da_z needs to be in Mpc
+		     // TODO: Check this - is likely wrong!
                      da_zt_zs = da_zs - (1.0+zt)/(1.0+zs) *da_zt; // da_z needs to be in Mpc
-        _sig_crit_inv = 4.0*pi()*_G/_c/_c * da_zt * da_zt_zs / da_zs;
+        _sig_crit_inv = 4.0*pi()*G()/c()/c() * da_zt * da_zt_zs / da_zs;
       }
       return _sig_crit_inv;
     }
