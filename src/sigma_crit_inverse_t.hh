@@ -13,6 +13,11 @@ namespace y3_cluster {
   public:
     sigma_crit_inv(std::shared_ptr<Interp1D const> da)
       : _da(da)
+      // Constants are in primitives.hh
+      // Units: Mpc/s (NO h)
+      , _c(c())
+      // Units: Mpc^3 / M_sol / s^2
+      , _G(G())
     {}
 
     explicit sigma_crit_inv(cosmosis::DataBlock& sample)

@@ -5,29 +5,6 @@
 #include "gamma_t.hh"
 #include "mz_power_law.hh"
 
-/*
-#include "test/a_cen_t.hh"
-#include "test/a_mis_t.hh"
-#include "test/del_sig_y1.hh"
-#include "test/del_sig_t.hh"
-#include "test/dv_do_dz_t.hh"
-#include "test/ez.hh"
-#include "test/ez_sq.hh"
-#include "test/hmf_t.hh"
-#include "test/lc_lt_t.hh"
-#include "test/lo_lc_t.hh"
-#include "test/mor_t2.hh"
-#include "test/omega_z_sdss.hh"
-#include "test/primitives.hh"
-#include "test/roffset_t.hh"
-#include "test/t_cen_t.hh"
-#include "test/t_mis_t.hh"
-#include "test/zo_zt_t.hh"
-#include "test/pz_source_t.hh"
-#include "test/read_vector.hh"
-#include "test/default_models.hh"
-*/
-
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -39,6 +16,7 @@
 #include <vector>
 
 #include <default_models.hh>
+#include <del_sig_y1.hh>
 #include <mor_t2.hh>
 #include <interp_1d.hh>
 #include <interp_2d.hh>
@@ -116,6 +94,7 @@ main(int argc, char* argv[])
   // TODO: remove magic numbers
   struct MODELS : public y3_cluster::DefaultModels {
       using MOR = y3_cluster::MOR_t2;
+      using DEL_SIG = y3_cluster::DEL_SIG_y1;
   };
   long long maxeval = std::stoll(args[0]);
   double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis

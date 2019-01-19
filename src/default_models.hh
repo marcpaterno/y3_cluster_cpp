@@ -4,7 +4,7 @@
 
 #include <a_cen_t.hh>
 #include <a_mis_t.hh>
-#include <del_sig_y1.hh>
+#include <del_sig_tom.hh>
 #include <dv_do_dz_t.hh>
 #include <hmb_t.hh>
 #include <hmf_t.hh>
@@ -33,7 +33,7 @@ namespace y3_cluster {
                                  A_MIS_t,
                                  HMB_t,
                                  HMF_t,
-                                 DEL_SIG_y1,
+                                 DEL_SIG_TOM,
                                  DV_DO_DZ_t,
                                  OMEGA_Z_SDSS>;
 }
