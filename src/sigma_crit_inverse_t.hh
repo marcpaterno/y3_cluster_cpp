@@ -1,3 +1,6 @@
+#ifndef Y3_CLUSTER_SIG_CRIT_INV
+#define Y3_CLUSTER_SIG_CRIT_INV
+
 #include <exception>
 #include <memory>
 #include <vector>
@@ -38,6 +41,7 @@ namespace y3_cluster {
                      da_zt_zs = da_zs - (1.0+zt)/(1.0+zs) *da_zt; // da_z needs to be in Mpc
         _sig_crit_inv = 4.0*pi()*G()/c()/c() * da_zt * da_zt_zs / da_zs;
       }
+      // Mpc^2 / M_sol
       return _sig_crit_inv;
     }
 
@@ -47,3 +51,5 @@ namespace y3_cluster {
     double _G;
   };
 }
+
+#endif

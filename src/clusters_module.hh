@@ -103,7 +103,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
     centered_count_errors.push_back(bin.N_error);
     centered_biased_counts.push_back(bin.Nb);
     for (auto i = 0u; i < NRADII; i++)
-      centered_gamma_ts.push_back(bin.gamma_ts[i]);
+      centered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
   }
 
   // Sort miscentered abundance counts/biased counts/error bars and gamma_t's
@@ -113,7 +113,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
     miscentered_count_errors.push_back(bin.N_error);
     miscentered_biased_counts.push_back(bin.Nb);
     for (auto i = 0u; i < NRADII; i++)
-      miscentered_gamma_ts.push_back(bin.gamma_ts[i]);
+      miscentered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
   }
 
   // Store abundance counts and gamma_t's

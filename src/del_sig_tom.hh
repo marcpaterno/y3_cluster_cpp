@@ -28,7 +28,6 @@ namespace y3_cluster
 
     using doubles = std::vector<double>;
 
-    // TODO: This needs to be reading cosmosis datablock parameters
     explicit DEL_SIG_TOM(cosmosis::DataBlock& sample)
       : _dsigma1(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "deltasigma", "R_perp"),
@@ -49,12 +48,16 @@ namespace y3_cluster
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     { 
       double del_sig_1 = _dsigma1->eval(r,lnM);
-      double del_sig_2 = _bias->eval(zt,lnM) * _dsigma2->eval(r,zt);
-      if (del_sig_1 >= del_sig_2) {
-        return (1.+zt)*(1.+zt)*(1.+zt)*del_sig_1;
-      } else {
-        return (1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
-      }
+      // double del_sig_2 = _bias->eval(zt,lnM) * _dsigma2->eval(r,zt);
+      // NB: The 1e12 factor is to convert from the M_{sol} / kpc^2 of the input
+      // to the M_{sol} / Mpc^2 we need
+      // TODO: h factor?
+      // TODO: Get deltasigma_2 working.
+      //if (del_sig_1 >= del_sig_2) {
+        return 1e12*(1.+zt)*(1.+zt)*(1.+zt)*del_sig_1;
+      /*} else {
+        return 1e12*(1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
+      } */
     }
   };
 }

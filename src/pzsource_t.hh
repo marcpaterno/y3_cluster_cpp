@@ -12,8 +12,8 @@ namespace y3_cluster {
     explicit PZSOURCE_t(double zbin, double sigma) : _zbin(zbin), _sigma(sigma) {}
 
     explicit PZSOURCE_t(cosmosis::DataBlock& sample)
-      : _zbin(get_datablock<double>(sample, "cluster_abundance", "pzsource_zbin")),
-        _sigma(get_datablock<double>(sample, "cluster_abundance", "pzsource_sigma"))
+      : _zbin(get_datablock<double>(sample, "cluster_abundance", "pzsource_zbin"))
+      , _sigma(get_datablock<double>(sample, "cluster_abundance", "pzsource_sigma"))
     {}
 
     double
