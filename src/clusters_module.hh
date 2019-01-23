@@ -44,7 +44,7 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
 {
   auto const radii = get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins");
 
-  radii_bins = std::vector<double>  (radii.size (),  radii [0]);
+  radii_bins = std::vector<double>  (radii.begin(),  radii.end());
 }
 
 // TODO:
