@@ -38,6 +38,7 @@ sample_variance
 sample_variance_output/dump.txt
 sample_variance_output/*.csv
 sample_variance_test
+sigma_crit_inv_test
 simultaneous_bin_comparison
 simultaneous_bin_comparison_test
 sin_cos_analytic_integral_test
