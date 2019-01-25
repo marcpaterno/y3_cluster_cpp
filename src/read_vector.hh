@@ -10,7 +10,7 @@
 
 template <class XFORM>
 inline std::vector<double>
-read_vector(char const* filename, XFORM xform)
+read_vector(const std::string filename, XFORM xform)
 {
     std::string fname = std::string("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/data/")
                         + filename;
@@ -37,7 +37,7 @@ read_vector(char const* filename, XFORM xform)
 }
 
 inline std::vector<double>
-read_vector(char const* filename)
+read_vector(const std::string filename)
 {
     return read_vector(filename, [](double x) { return x; });
 }

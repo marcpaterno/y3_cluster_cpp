@@ -18,19 +18,31 @@ using namespace y3_cluster;
 
 TEST_CASE("Compare sigma_crit_inv against astropy", "[sigma_crit_inverse]")
 {
-  const auto z = read_vector("sigma_crit_inv/z.txt"),
-             d_a = read_vector("sigma_crit_inv/d_a.txt"),
-             zl = read_vector("sigma_crit_inv/zl.txt"),
-             zs = read_vector("sigma_crit_inv/zs.txt"),
-             astropy_sci = read_vector("sigma_crit_inv/sigma_crit_inverse.txt");
-  shared_ptr<Interp1D const> da = make_shared<Interp1D const>(z, d_a);
-  sigma_crit_inv sci{da};
-  auto k = 0u;
-  for (auto j = 0u; j < zs.size(); j++) {
-    for (auto i = 0u; i < zl.size(); i++) {
-      // Pop the first item from astropy_sci
-      const auto expected = astropy_sci[k++];
-      CHECK(sci(zl[i], zs[j]) == Approx(expected).epsilon(1e-30).margin(1e-20));
+  string path = "sigma_crit_inv/";
+  const auto zl = read_vector(path + "zl.txt"),
+             zs = read_vector(path + "zs.txt");
+
+  const size_t NCOSMO = 2;
+  for (size_t cosmo = 0; cosmo < NCOSMO; cosmo++) {
+    const auto z = read_vector(path + "z_c" + std::to_string(cosmo) + ".txt"),
+               d_a = read_vector(path + "d_a_c" + std::to_string(cosmo) + ".txt"),
+               astropy_sci = read_vector(path + "sigma_crit_inverse_c" + std::to_string(cosmo) + ".txt");
+
+    shared_ptr<Interp1D const> da = make_shared<Interp1D const>(z, d_a);
+    sigma_crit_inv sci{da};
+
+    auto k = 0u;
+    for (auto j = 0u; j < zs.size(); j++) {
+      for (auto i = 0u; i < zl.size(); i++) {
+        // Pop the first item from astropy_sci
+        const auto expected_val = astropy_sci[k++];
+        auto expected = Approx(expected_val).epsilon(1e-6).margin(1e-19);
+        if (sci(zl[i], zs[j]) != expected)
+          std::cerr << "(zl, zs) = (" << zl[i] << ", " << zs[j] << ")\n"
+                    << "expected = " << expected_val << "\n"
+                    << "actual   = " << sci(zl[i], zs[j]) << "\n";
+        CHECK(sci(zl[i], zs[j]) == expected);
+      }
     }
   }
 }

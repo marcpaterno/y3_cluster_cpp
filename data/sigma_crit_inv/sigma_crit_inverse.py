@@ -9,10 +9,8 @@ from astropy.cosmology import FlatLambdaCDM
 import numpy as np
 import os
 
-default_cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.7, Ob0=0.06)
 
-
-def sig_crit_inv(zs, zl, cosmo=default_cosmo):
+def sig_crit_inv(zs, zl, cosmo):
     """
     Computes the inverse of the weak lensing critical surface density, for a
     source at redshift zs and lens at redshift zl.
@@ -33,6 +31,9 @@ def sig_crit_inv(zs, zl, cosmo=default_cosmo):
 if __name__ == '__main__':
     zl = np.arange(0.01, 1.005, 0.01)
     zs = np.copy(zl)
+    cosmologies = [FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.7, Ob0=0.06),
+                   FlatLambdaCDM(H0=50, Om0=0.5, Tcmb0=2.7, Ob0=0.03)]
+
     folder = os.path.dirname(__file__)
     np.savetxt(os.path.join(folder, 'zl.txt'), zl,
                header='Lens redshifts for sigma_crit_inv test')
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     zl, zs = np.meshgrid(zl, zs)
     msg = '\n'.join(['Inverse of critical surface density',
                      'Units: Mpc2 / M_{sol}'])
-    np.savetxt(os.path.join(folder, 'sigma_crit_inverse.txt'),
-               sig_crit_inv(zs, zl),
-               header=msg)
-    # TODO: try with other cosmologies?
+    for i, cosmo in enumerate(cosmologies):
+        np.savetxt(os.path.join(folder, 'sigma_crit_inverse_c{}.txt'.format(i)),
+                   sig_crit_inv(zs, zl, cosmo),
+                   header=msg)
