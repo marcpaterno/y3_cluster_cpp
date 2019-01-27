@@ -9,10 +9,12 @@ namespace y3_cluster {
 
   class PZSOURCE_t {
   public:
-    explicit PZSOURCE_t(double zbin, double sigma) : _zbin(zbin), _sigma(sigma) {}
+    // TODO take in pzsource distributions
+    explicit PZSOURCE_t(double zbin, double sigma) : pzsources(), _zbin(zbin), _sigma(sigma) {}
 
-    explicit PZSOURCE_t(cosmosis::DataBlock& sample)
-      : _zbin(get_datablock<double>(sample, "cluster_abundance", "pzsource_zbin"))
+    explicit PZSOURCE_t(cosmosis::DataBlock& sample, std::vector<std::shared_ptr<y3_cluster::Interp1D const>> pzsources)
+      : pzsources(pzsources)
+      , _zbin(get_datablock<double>(sample, "cluster_abundance", "pzsource_zbin"))
       , _sigma(get_datablock<double>(sample, "cluster_abundance", "pzsource_sigma"))
     {}
 
@@ -23,6 +25,8 @@ namespace y3_cluster {
     }
 
   private:
+    // TODO move this to a different pzsource_t implementation?
+    std::vector<std::shared_ptr<y3_cluster::Interp1D const>> pzsources;
     double _zbin;
     double _sigma;
   };

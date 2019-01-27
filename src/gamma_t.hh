@@ -281,6 +281,7 @@ public:
   // Alternatively, can automatically construct each model component given a datablock.
   Gamma_T_Integrand(cosmosis::DataBlock& sample,
                     std::vector<double> radii,
+                    std::vector<std::shared_ptr<y3_cluster::Interp1D const>>& pzsources,
                     std::vector<y3_cluster::IntegrationRange> lo_bins,
                     std::vector<y3_cluster::IntegrationRange> zo_bins)
     : fcen_(get_datablock<double>(sample, "cluster_abundance", "fcen"))
@@ -288,7 +289,7 @@ public:
     , lo_lc(sample)
     , lc_lt(sample)
     , zo_zt(sample)
-    , pzsource(sample)
+    , pzsource(sample, pzsources)
     , roffset(sample)
     , T_cen(sample)
     , T_mis(sample)
