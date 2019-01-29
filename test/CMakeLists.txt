@@ -118,7 +118,7 @@ target_include_directories(sample_variance_test
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
-add_test(sample_variance_test sample_variance_test)
+#add_test(sample_variance_test sample_variance_test)
 
 add_executable(hmf_t_test hmf_t.test.cc)
 target_link_libraries(hmf_t_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
