@@ -51,27 +51,27 @@ struct Gamma_T_Integrated_Bin_Result {
       , gamma_t_errors(gt.r.size())
       , gamma_t_probs(gt.r.size())
   {
-    auto  const  NRADII  =  radius.size ();
+    auto const nradii = radius.size();
 
-    const auto base = (which_richness * gt.zo_ir_.size () + which_redshift) * (NRADII + 3);
+    const auto base = (which_richness * gt.zo_ir_.size () + which_redshift) * (nradii + 3);
 
-    for (auto i = 0u; i < NRADII; i++) {
+    for (auto i = 0u; i < nradii; i++) {
       gamma_ts[i] = results.value[base + i];
       gamma_t_errors[i] = results.error[base + i];
       gamma_t_probs[i] = results.prob[base + i];
     }
 
-    N = results.value[base + NRADII];
-    Nw = results.value[base + NRADII + 1];
-    Nb = results.value[base + NRADII + 2];
+    N = results.value[base + nradii];
+    Nw = results.value[base + nradii + 1];
+    Nb = results.value[base + nradii + 2];
 
-    N_error = results.error[base + NRADII];
-    Nw_error = results.error[base + NRADII + 1];
-    Nb_error = results.error[base + NRADII + 2];
+    N_error = results.error[base + nradii];
+    Nw_error = results.error[base + nradii + 1];
+    Nb_error = results.error[base + nradii + 2];
 
-    N_prob = results.prob[base + NRADII];
-    Nw_prob = results.prob[base + NRADII + 1];
-    Nb_prob = results.prob[base + NRADII + 2];
+    N_prob = results.prob[base + nradii];
+    Nw_prob = results.prob[base + nradii + 1];
+    Nb_prob = results.prob[base + nradii + 2];
   }
 };
 
@@ -355,7 +355,11 @@ public:
                    // Radially dependent function
                    Fgr gamma_radial_dep) const
   {
-    auto  return_arr  =  IntegrandResult  ((r.size () + 3)  *  lo_ir_.size ()  *  zo_ir_.size ());
+    std::size_t const nrichness = lo_ir_.size(),
+                      nredshift = zo_ir_.size(),
+                      nradii = r.size();
+
+    auto return_arr = IntegrandResult((nradii + 3) * nrichness * nredshift);
 
     auto const hmb_v = hmb(lnM, zt);
     auto const hmf_v = hmf(lnM, zt);
@@ -363,10 +367,10 @@ public:
     auto const dv_do_dz_v = dv_do_dz(zt);
     auto const omega_z_v = omega_z(zt);
 
-    for (std::size_t loi = 0; loi < lo_ir_.size (); loi++) {
-      auto const richness_bin_start = loi * zo_ir_.size () * (r.size () + 3);
+    for (std::size_t loi = 0; loi < nrichness; loi++) {
+      auto const richness_bin_start = loi * nredshift * (nradii + 3);
 
-      for (std::size_t zoi = 0; zoi < zo_ir_.size (); zoi++) {
+      for (std::size_t zoi = 0; zoi < nredshift; zoi++) {
         // Zo does not actually need to be integrated over
         double const zomin = zo_ir_[zoi].transform(0.0);
         double const zomax = zo_ir_[zoi].transform(1.0);
@@ -391,7 +395,7 @@ public:
         auto const gamma_t_int = jacob_G(loi) * N_int * w;
 
         // eq. (28)
-        auto gamma_t = std::vector<double> (r.size ());
+        auto gamma_t = std::vector<double> (nradii);
         std::transform  (begin (r),  end (r),
                          begin (gamma_t),
                          [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep]
@@ -401,12 +405,12 @@ public:
                              * gamma_t_int * N_mult * gamma_radial_dep(radius);
                          });
 
-        auto redshift_bin_start = richness_bin_start + zoi * (r.size () + 3);
+        auto redshift_bin_start = richness_bin_start + zoi * (nradii + 3);
 
         std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
-        return_arr[redshift_bin_start + r.size ()] = N;
-        return_arr[redshift_bin_start + r.size () + 1] = Nw;
-        return_arr[redshift_bin_start + r.size () + 2] = Nb;
+        return_arr[redshift_bin_start + nradii] = N;
+        return_arr[redshift_bin_start + nradii + 1] = Nw;
+        return_arr[redshift_bin_start + nradii + 2] = Nb;
       }
     }
 
