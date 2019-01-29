@@ -32,9 +32,12 @@ class Gamma_T_Integrand;
 struct Gamma_T_Integrated_Bin_Result {
   y3_cluster::IntegrationRange lo_ir, zo_ir;
   std::vector<double>  radius;
-  std::vector<double>  gamma_ts;
-  std::vector<double>  gamma_t_errors;
-  std::vector<double>  gamma_t_probs;
+
+  // Separate gamma_t values/errors/probs for each source bin
+  std::vector<std::vector<double>>  gamma_ts;
+  std::vector<std::vector<double>>  gamma_t_errors;
+  std::vector<std::vector<double>>  gamma_t_probs;
+
   double N, N_error, N_prob,
          Nw, Nw_error, Nw_prob,
          Nb, Nb_error, Nb_prob;
@@ -49,31 +52,46 @@ struct Gamma_T_Integrated_Bin_Result {
       : lo_ir(gt.lo_ir_[which_richness])
       , zo_ir(gt.zo_ir_[which_redshift])
       , radius(gt.r)
-      , gamma_ts(gt.r.size())
-      , gamma_t_errors(gt.r.size())
-      , gamma_t_probs(gt.r.size())
+      , gamma_ts()
+      , gamma_t_errors()
+      , gamma_t_probs()
   {
-    auto const nradii = radius.size();
+    auto const nradii = radius.size(),
+               npzsource = gt.npzsource;
 
-    const auto base = (which_richness * gt.zo_ir_.size () + which_redshift) * (nradii + 3);
+    const auto base = (which_richness * gt.zo_ir_.size () + which_redshift)
+                    * (nradii * npzsource + 3);
 
-    for (auto i = 0u; i < nradii; i++) {
-      gamma_ts[i] = results.value[base + i];
-      gamma_t_errors[i] = results.error[base + i];
-      gamma_t_probs[i] = results.prob[base + i];
+    // Collect gamma_t values for each source bin
+    for (auto i = 0u; i < npzsource; i++) {
+      std::vector<double> gamma_t_src_bin;
+      std::vector<double> errors_src_bin;
+      std::vector<double> probs_src_bin;
+
+      auto const zsrc_base = base + i * nradii;
+      for (auto j = 0u; j < nradii; j++) {
+        gamma_t_src_bin.push_back(results.value[zsrc_base + j]);
+        errors_src_bin.push_back(results.error[zsrc_base + j]);
+        probs_src_bin.push_back(results.prob[zsrc_base + j]);
+      }
+
+      gamma_ts.push_back(gamma_t_src_bin);
+      gamma_t_errors.push_back(errors_src_bin);
+      gamma_t_probs.push_back(probs_src_bin);
     }
 
-    N = results.value[base + nradii];
-    Nw = results.value[base + nradii + 1];
-    Nb = results.value[base + nradii + 2];
+    const auto nbase = base + nradii*npzsource;
+    N = results.value[nbase];
+    Nw = results.value[nbase + 1];
+    Nb = results.value[nbase + 2];
 
-    N_error = results.error[base + nradii];
-    Nw_error = results.error[base + nradii + 1];
-    Nb_error = results.error[base + nradii + 2];
+    N_error = results.error[nbase];
+    Nw_error = results.error[nbase + 1];
+    Nb_error = results.error[nbase + 2];
 
-    N_prob = results.prob[base + nradii];
-    Nw_prob = results.prob[base + nradii + 1];
-    Nb_prob = results.prob[base + nradii + 2];
+    N_prob = results.prob[nbase];
+    Nw_prob = results.prob[nbase + 1];
+    Nb_prob = results.prob[nbase + 2];
   }
 };
 
@@ -128,10 +146,11 @@ operator<<(std::ostream& os, Gamma_T_Integrated_Bin_Result_S const& res)
        << " prob: " << bin.Nb_prob << '\n';
 
     // Print out gamma_ts
-    for (auto i = 0u; i < bin.radius.size(); i++)
-      os << "gamma_t (R = " << bin.radius[i] << "): "
-         << bin.gamma_ts[i] << " +/- " << bin.gamma_t_errors[i]
-         << " prob: " << bin.gamma_t_probs[i] << '\n';
+    for (auto i = 0u; i < bin.gamma_ts.size(); i++)
+      for (auto j = 0u; j < bin.gamma_ts[0].size(); j++)
+        os << "gamma_t (src bin " << i << ", R = " << bin.radius[j] << "): "
+           << bin.gamma_ts[i][j] << " +/- " << bin.gamma_t_errors[i][j]
+           << " prob: " << bin.gamma_t_probs[i][j] << '\n';
   }
 
   return os;
@@ -216,6 +235,7 @@ struct  Gamma_T_Integrand {
   y3_cluster::IntegrationRange theta_ir_;
 
   std::vector<double> r;  /* radii array */
+  std::size_t npzsource; /* number of weak lensing source bins */
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -276,12 +296,12 @@ public:
     , A_ir_(A_ir)
     , theta_ir_(theta_ir)
     , r(rarray)
+    , npzsource(pzsource.nsources())
   {}
 
   // Alternatively, can automatically construct each model component given a datablock.
   Gamma_T_Integrand(cosmosis::DataBlock& sample,
                     std::vector<double> radii,
-                    std::vector<std::shared_ptr<y3_cluster::Interp1D const>>& pzsources,
                     std::vector<y3_cluster::IntegrationRange> lo_bins,
                     std::vector<y3_cluster::IntegrationRange> zo_bins)
     : fcen_(get_datablock<double>(sample, "cluster_abundance", "fcen"))
@@ -289,7 +309,7 @@ public:
     , lo_lc(sample)
     , lc_lt(sample)
     , zo_zt(sample)
-    , pzsource(sample, pzsources)
+    , pzsource(sample)
     , roffset(sample)
     , T_cen(sample)
     , T_mis(sample)
@@ -312,6 +332,7 @@ public:
     , A_ir_(sample, "A")
     , theta_ir_(sample, "theta")
     , r(radii)
+    , npzsource(pzsource.nsources())
   {}
 
   // Convert from one set of bins to another - useful for the
@@ -379,7 +400,9 @@ public:
                       nredshift = zo_ir_.size(),
                       nradii = r.size();
 
-    auto return_arr = IntegrandResult((nradii + 3) * nrichness * nredshift);
+    auto return_arr = IntegrandResult((nradii * npzsource + 3)
+                                      * nrichness
+                                      * nredshift);
 
     auto const hmb_v = hmb(lnM, zt);
     auto const hmf_v = hmf(lnM, zt);
@@ -388,15 +411,13 @@ public:
     auto const omega_z_v = omega_z(zt);
 
     for (std::size_t loi = 0; loi < nrichness; loi++) {
-      auto const richness_bin_start = loi * nredshift * (nradii + 3);
+      auto const richness_bin_start = loi * nredshift * (nradii * npzsource + 3);
 
       for (std::size_t zoi = 0; zoi < nredshift; zoi++) {
         // Zo does not actually need to be integrated over
         double const zomin = zo_ir_[zoi].transform(0.0);
         double const zomax = zo_ir_[zoi].transform(1.0);
         auto const zo_zt_v = zo_zt(zomin, zomax, zt);
-	// TODO: Left off here!
-        auto const pzsource_v = pzsource(zs);
 
         // TODO: These will eventually be passed by CosmoSIS
         double m_shear = 0.0;
@@ -417,22 +438,22 @@ public:
         auto const gamma_t_int = jacob_G(loi) * N_int * w;
 
         // eq. (28)
-        auto gamma_t = std::vector<double> (nradii);
-        std::transform  (begin (r),  end (r),
-                         begin (gamma_t),
-                         [m_shear, sig_crit_inv, gamma_t_int, N_mult, gamma_radial_dep, pzsource_v]
-                         (double radius) {
-                           // Nw intentionally left out - returned in return_arr to be used further on
-                           return (1.0 + m_shear) * sig_crit_inv * pzsource_v
-                             * gamma_t_int * N_mult * gamma_radial_dep(radius);
-                         });
+        auto gamma_t = std::vector<double> (nradii * npzsource);
+        for (auto srci = 0u; srci < npzsource; srci++) {
+          auto const pzsource_v = pzsource(srci, zs);
+          for (auto i = 0u; i < nradii; i++) {
+            // Nw intentionally left out - returned in return_arr to be used further on
+            gamma_t[srci * nradii + i] = (1.0 + m_shear) * sig_crit_inv * pzsource_v
+                                       * gamma_t_int * N_mult * gamma_radial_dep(r[i]);
+          }
+        }
 
-        auto redshift_bin_start = richness_bin_start + zoi * (nradii + 3);
+        auto redshift_bin_start = richness_bin_start + zoi * (nradii*npzsource + 3);
 
         std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
-        return_arr[redshift_bin_start + nradii] = N;
-        return_arr[redshift_bin_start + nradii + 1] = Nw;
-        return_arr[redshift_bin_start + nradii + 2] = Nb;
+        return_arr[redshift_bin_start + nradii*npzsource] = N;
+        return_arr[redshift_bin_start + nradii*npzsource + 1] = Nw;
+        return_arr[redshift_bin_start + nradii*npzsource + 2] = Nb;
       }
     }
 

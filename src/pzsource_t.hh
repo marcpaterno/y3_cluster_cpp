@@ -6,29 +6,32 @@
 #include "primitives.hh"
 
 namespace y3_cluster {
-
   class PZSOURCE_t {
   public:
     // TODO take in pzsource distributions
-    explicit PZSOURCE_t(double zbin, double sigma) : pzsources(), _zbin(zbin), _sigma(sigma) {}
+    explicit PZSOURCE_t(std::vector<std::shared_ptr<y3_cluster::Interp1D const>> pzsources)
+        : pzsources(pzsources)
+    {}
 
-    explicit PZSOURCE_t(cosmosis::DataBlock& sample, std::vector<std::shared_ptr<y3_cluster::Interp1D const>> pzsources)
-      : pzsources(pzsources)
-      , _zbin(get_datablock<double>(sample, "cluster_abundance", "pzsource_zbin"))
-      , _sigma(get_datablock<double>(sample, "cluster_abundance", "pzsource_sigma"))
+    explicit PZSOURCE_t(cosmosis::DataBlock& sample)
+      : pzsources(/* TODO */)
     {}
 
     double
-    operator()(double zs) const
+    operator()(std::size_t bin_no, double zs) const
     {
-      return y3_cluster::gaussian(zs, _zbin, _sigma);
+      return pzsources[bin_no]->eval(zs);
+    }
+
+    std::size_t
+    nsources() const
+    {
+      return pzsources.size();
     }
 
   private:
     // TODO move this to a different pzsource_t implementation?
     std::vector<std::shared_ptr<y3_cluster::Interp1D const>> pzsources;
-    double _zbin;
-    double _sigma;
   };
 }
 

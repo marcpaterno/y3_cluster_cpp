@@ -13,8 +13,6 @@ namespace y3_cluster {
   class ClustersModule {
     // The radii from the cluster center to predict gamma_t values for
     std::vector<double> radii_bins;
-    // The distribution sources in each weak lensing source bin
-    std::vector<std::shared_ptr<y3_cluster::Interp1D const>> pzsources;
     // The cluster bins in richness-space
     std::vector<y3_cluster::IntegrationRange> lo_bins;
     // The cluster bins in redshift-space
@@ -47,11 +45,9 @@ _get_ranges(cosmosis::DataBlock db, std::string name)
 template <class MODELS>
 y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
   // TODO: Possibly set up any optional parameters, like integration params?
-  : pzsources()
-  , lo_bins(_get_ranges(config, "lo"))
+  : lo_bins(_get_ranges(config, "lo"))
   , zo_bins(_get_ranges(config, "zo"))
 {
-  // TODO properly initialize pzsources - read them from data block?
   auto const radii = get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins");
 
   radii_bins = std::vector<double>(radii.begin(), radii.end());
@@ -78,7 +74,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   // Initialize our big computation stuff up here, so any DataBlock access
   // errors happen up front
   auto integrand = Gamma_T_Integrand<MODELS>
-                     {sample, radii_bins, pzsources, lo_bins, zo_bins};
+                     {sample, radii_bins, lo_bins, zo_bins};
 
   // Compute abundance counts and gamma_t's
   auto centered_result = integrand.integrate_centered(c, epsrel, epsabs);
@@ -112,8 +108,8 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
     centered_cluster_counts.push_back(bin.N);
     centered_count_errors.push_back(bin.N_error);
     centered_biased_counts.push_back(bin.Nb);
-    for (auto i = 0u; i < NRADII; i++)
-      centered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
+    //for (auto i = 0u; i < NRADII; i++)
+    //  centered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
   }
 
   // Sort miscentered abundance counts/biased counts/error bars and gamma_t's
@@ -122,21 +118,21 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
     miscentered_cluster_counts.push_back(bin.N);
     miscentered_count_errors.push_back(bin.N_error);
     miscentered_biased_counts.push_back(bin.Nb);
-    for (auto i = 0u; i < NRADII; i++)
-      miscentered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
+    //for (auto i = 0u; i < NRADII; i++)
+    //  miscentered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
   }
 
   // Store abundance counts and gamma_t's
-  sample.put_val<std::vector<double>>("cluster_abundance", "centered_gamma_ts",
-                                      centered_gamma_ts);
+  //sample.put_val<std::vector<double>>("cluster_abundance", "centered_gamma_ts",
+  //                                    centered_gamma_ts);
   sample.put_val<std::vector<double>>("cluster_abundance", "centered_cluster_counts",
                                       centered_cluster_counts);
   sample.put_val<std::vector<double>>("cluster_abundance", "centered_cluster_count_errors",
                                       centered_count_errors);
   sample.put_val<std::vector<double>>("cluster_abundance", "centered_cluster_biased_counts",
                                       centered_biased_counts);
-  sample.put_val<std::vector<double>>("cluster_abundance", "miscentered_gamma_ts",
-                                      miscentered_gamma_ts);
+  //sample.put_val<std::vector<double>>("cluster_abundance", "miscentered_gamma_ts",
+  //                                    miscentered_gamma_ts);
   sample.put_val<std::vector<double>>("cluster_abundance", "miscentered_cluster_counts",
                                       miscentered_cluster_counts);
   sample.put_val<std::vector<double>>("cluster_abundance", "miscentered_cluster_count_errors",
