@@ -26,7 +26,7 @@ namespace y3_cluster {
                                  LO_LC_t,
                                  LC_LT_t,
                                  ZO_ZT_t,
-                                 PZSOURCE_GAUSSIAN_t,
+                                 PZSOURCE_t,
                                  ROFFSET_t,
                                  T_CEN_t,
                                  T_MIS_t,
