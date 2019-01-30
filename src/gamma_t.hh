@@ -12,9 +12,9 @@
 #include <iostream>
 #include <string>
 
-// This class template is based
-// on https://www.overleaf.com/13697016cyvvqqfchfbg#/52989522/, and the example
-// provided by Spencer Everett.
+// The most up-to-date notes on this code are here:
+// on https://v1.overleaf.com/18758665bfvkhrtbqnvz#/70551749/.
+
 namespace y3_cluster {
 
 // Forward declaration of our integrand class
