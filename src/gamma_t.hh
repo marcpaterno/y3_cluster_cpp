@@ -59,27 +59,11 @@ struct Gamma_T_Integrated_Bin_Result {
     auto const nradii = radius.size(),
                npzsource = gt.npzsource;
 
+    // The location of these bin results, as an offset in the integration output
     const auto base = (which_richness * gt.zo_ir_.size () + which_redshift)
                     * (nradii * npzsource + 3);
 
-    // Collect gamma_t values for each source bin
-    for (auto i = 0u; i < npzsource; i++) {
-      std::vector<double> gamma_t_src_bin;
-      std::vector<double> errors_src_bin;
-      std::vector<double> probs_src_bin;
-
-      auto const zsrc_base = base + i * nradii;
-      for (auto j = 0u; j < nradii; j++) {
-        gamma_t_src_bin.push_back(results.value[zsrc_base + j]);
-        errors_src_bin.push_back(results.error[zsrc_base + j]);
-        probs_src_bin.push_back(results.prob[zsrc_base + j]);
-      }
-
-      gamma_ts.push_back(gamma_t_src_bin);
-      gamma_t_errors.push_back(errors_src_bin);
-      gamma_t_probs.push_back(probs_src_bin);
-    }
-
+    // First: obtain the various number count results
     const auto nbase = base + nradii*npzsource;
     N = results.value[nbase];
     Nw = results.value[nbase + 1];
@@ -92,6 +76,27 @@ struct Gamma_T_Integrated_Bin_Result {
     N_prob = results.prob[nbase];
     Nw_prob = results.prob[nbase + 1];
     Nb_prob = results.prob[nbase + 2];
+
+    // For each WL source bin: collect gamma_t values
+    for (auto i = 0u; i < npzsource; i++) {
+      std::vector<double> gamma_t_src_bin;
+      std::vector<double> errors_src_bin;
+      std::vector<double> probs_src_bin;
+
+      // At each radius from the cluster center: get the <gamma_t> value
+      auto const zsrc_base = base + i * nradii;
+      for (auto j = 0u; j < nradii; j++) {
+        // Integration result is a "weighted sum" over all clusters, must
+        // divide by number of clusters to obtain absolute gamma_t
+        gamma_t_src_bin.push_back(results.value[zsrc_base + j] / Nw);
+        errors_src_bin.push_back(results.error[zsrc_base + j] / Nw);
+        probs_src_bin.push_back(results.prob[zsrc_base + j]);
+      }
+
+      gamma_ts.push_back(gamma_t_src_bin);
+      gamma_t_errors.push_back(errors_src_bin);
+      gamma_t_probs.push_back(probs_src_bin);
+    }
   }
 };
 

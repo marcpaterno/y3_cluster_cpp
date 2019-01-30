@@ -69,8 +69,9 @@ namespace y3_cluster {
             auto bin_cen_single = gti_new.integrate_centered(I, epsrel, epsabs);
             CHECK(bin_cen_single.status == 0);
 
-            for(auto j = 0u; j < gti_new.r.size (); j++)
-                checker(bin_cen_single[0].gamma_ts[j], bin_cen.gamma_ts[j]);
+            for (auto j = 0u; j < bin_cen_single[0].gamma_ts.size(); j++)
+                for (auto k = 0u; k < bin_cen_single[0].gamma_ts[0].size(); k++)
+                    checker(bin_cen_single[0].gamma_ts[j][k], bin_cen.gamma_ts[j][k]);
 
             checker(bin_cen_single[0].N, bin_cen.N);
             checker(bin_cen_single[0].Nw, bin_cen.Nw);
@@ -81,8 +82,9 @@ namespace y3_cluster {
             auto bin_mis_single = gti_new.integrate_miscentered(I, epsrel, epsabs);
             CHECK(bin_mis_single.status == 0);
 
-            for(auto j = 0u; j < gti_new.r.size (); j++)
-                checker(bin_mis_single[0].gamma_ts[j], bin_mis.gamma_ts[j]);
+            for (auto j = 0u; j < bin_mis_single[0].gamma_ts.size(); j++)
+                for (auto k = 0u; k < bin_mis_single[0].gamma_ts[0].size(); k++)
+                    checker(bin_mis_single[0].gamma_ts[j][k], bin_mis.gamma_ts[j][k]);
 
             checker(bin_mis_single[0].N, bin_mis.N);
             checker(bin_mis_single[0].Nw, bin_mis.Nw);

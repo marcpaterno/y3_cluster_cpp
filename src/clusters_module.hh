@@ -63,8 +63,6 @@ template <class MODELS>
 void
 y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
 {
-  std::size_t const NRADII = radii_bins.size();
-
   // FIXME: Just a test placeholder! Should these come from CosmoSIS?
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
@@ -108,8 +106,9 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
     centered_cluster_counts.push_back(bin.N);
     centered_count_errors.push_back(bin.N_error);
     centered_biased_counts.push_back(bin.Nb);
-    //for (auto i = 0u; i < NRADII; i++)
-    //  centered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
+    for (const auto& zsrc_bin : bin.gamma_ts)
+      for (const auto gt : zsrc_bin)
+        centered_gamma_ts.push_back(gt);
   }
 
   // Sort miscentered abundance counts/biased counts/error bars and gamma_t's
@@ -118,8 +117,9 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
     miscentered_cluster_counts.push_back(bin.N);
     miscentered_count_errors.push_back(bin.N_error);
     miscentered_biased_counts.push_back(bin.Nb);
-    //for (auto i = 0u; i < NRADII; i++)
-    //  miscentered_gamma_ts.push_back(bin.gamma_ts[i] / bin.Nw);
+    for (const auto& zsrc_bin : bin.gamma_ts)
+      for (const auto gt : zsrc_bin)
+        miscentered_gamma_ts.push_back(gt);
   }
 
   // Store abundance counts and gamma_t's
