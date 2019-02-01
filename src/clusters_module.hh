@@ -15,7 +15,7 @@ namespace y3_cluster {
   template <class MODELS>
   class ClustersModule {
     // The radii from the cluster center to predict gamma_t values for
-    std::vector<double> radii_bins;
+    std::vector<double> radius_bins;
     // The distributions of weak lensing source bins
     std::vector<std::shared_ptr<Interp1D const>> pzsources;
     // The cluster bins in richness-space
@@ -30,21 +30,34 @@ namespace y3_cluster {
 }
 
 
-static inline std::vector<y3_cluster::IntegrationRange>
-_get_ranges(cosmosis::DataBlock db, std::string name)
-{
-  auto const edges = get_datablock<std::vector<double>>(db, OPTION_SECTION,
-                                                        (name + "_bins").c_str());
+namespace {
+  inline std::vector<y3_cluster::IntegrationRange>
+  into_ranges(cosmosis::DataBlock db, std::string name)
+  {
+    auto const edges = get_datablock<std::vector<double>>(db, OPTION_SECTION,
+                                                          (name + "_bins").c_str());
 
-  auto ret = std::vector<y3_cluster::IntegrationRange> (edges.size () - 1);
+    auto ret = std::vector<y3_cluster::IntegrationRange> (edges.size () - 1);
 
-  std::transform  (begin (edges),  end (edges) - 1,
-                   begin (edges) + 1,
-                   begin (ret),
-                   [] (double const &a,  double const &b)
-                   {  return y3_cluster::IntegrationRange {a, b}; });
+    std::transform  (begin (edges),  end (edges) - 1,
+                     begin (edges) + 1,
+                     begin (ret),
+                     [] (double const &a,  double const &b)
+                     {  return y3_cluster::IntegrationRange {a, b}; });
 
-  return ret;
+    return ret;
+  }
+
+  inline std::vector<double>
+  into_edges(const std::vector<y3_cluster::IntegrationRange>& ranges)
+  {
+    std::vector<double> output;
+    for (const auto& ir : ranges)
+      output.push_back(ir.transform(0.0));
+
+    output.push_back(ranges[ranges.size() - 1].transform(1.0));
+    return output;
+  }
 }
 
 template <class MODELS>
@@ -54,12 +67,12 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
               get_datablock<std::string>(config,
                                          "cluster_abundance",
                                          "y3_observables")))
-  , lo_bins(_get_ranges(config, "lo"))
-  , zo_bins(_get_ranges(config, "zo"))
+  , lo_bins(into_ranges(config, "lo"))
+  , zo_bins(into_ranges(config, "zo"))
 {
-  auto const radii = get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins");
+  auto const radii = get_datablock<std::vector<double>>(config, OPTION_SECTION, "radius_bins");
 
-  radii_bins = std::vector<double>(radii.begin(), radii.end());
+  radius_bins = std::vector<double>(radii.begin(), radii.end());
 }
 
 // TODO:
@@ -72,6 +85,12 @@ template <class MODELS>
 void
 y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
 {
+  // First - output the important parameters
+  sample.put_val<std::vector<double>>("cluster_abundance", "lo_bin_edges", into_edges(lo_bins));
+  sample.put_val<std::vector<double>>("cluster_abundance", "zo_bin_edges", into_edges(zo_bins));
+  sample.put_val<std::vector<double>>("cluster_abundance", "radius_bins", radius_bins);
+  sample.put_val<int>("cluster_abundance", "npzsources", pzsources.size());
+
   // FIXME: Just a test placeholder! Should these come from CosmoSIS?
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
@@ -81,7 +100,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   // Initialize our big computation stuff up here, so any DataBlock access
   // errors happen up front
   auto integrand = Gamma_T_Integrand<MODELS>
-                     {sample, radii_bins, pzsources, lo_bins, zo_bins};
+                     {sample, radius_bins, pzsources, lo_bins, zo_bins};
 
   // Compute abundance counts and gamma_t's
   auto centered_result = integrand.integrate_centered(c, epsrel, epsabs);
@@ -110,8 +129,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
                       miscentered_biased_counts;
 
   // Sort centered abundance counts/biased counts/error bars and gamma_t's
-  for (auto i = 0u; i < centered_result.size(); i++) {
-    const auto& bin = centered_result[i];
+  for (const auto& bin : centered_result) {
     centered_cluster_counts.push_back(bin.N);
     centered_count_errors.push_back(bin.N_error);
     centered_biased_counts.push_back(bin.Nb);
@@ -121,8 +139,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   }
 
   // Sort miscentered abundance counts/biased counts/error bars and gamma_t's
-  for (auto i = 0u; i < miscentered_result.size(); i++) {
-    const auto& bin = miscentered_result[i];
+  for (const auto& bin : miscentered_result) {
     miscentered_cluster_counts.push_back(bin.N);
     miscentered_count_errors.push_back(bin.N_error);
     miscentered_biased_counts.push_back(bin.Nb);
@@ -148,8 +165,6 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
                                       miscentered_count_errors);
   sample.put_val<std::vector<double>>("cluster_abundance", "miscentered_cluster_biased_counts",
                                       miscentered_biased_counts);
-
-  // TODO gamma_t covariance
 }
 
 #endif
