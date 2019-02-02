@@ -227,6 +227,7 @@ struct  Gamma_T_Integrand {
   typename MODELS::OMEGA_Z omega_z;
 
   y3_cluster::sigma_crit_inv sig_crit_inv_;
+  std::shared_ptr<y3_cluster::Interp1D const> da_;
 
   y3_cluster::IntegrationRange lnM_ir_;
   std::vector<y3_cluster::IntegrationRange> lo_ir_;   /* richness bins */
@@ -241,6 +242,7 @@ struct  Gamma_T_Integrand {
 
   std::vector<double> r;  /* radii array */
   std::size_t npzsource; /* number of weak lensing source bins */
+
 public:
   // A Gamma_T_Integrand object is constructed by passing in the bunch of
   // callable objects (function pointers or callable class instances)  that
@@ -262,6 +264,7 @@ public:
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
                     y3_cluster::sigma_crit_inv sci,
+                    std::shared_ptr<y3_cluster::Interp1D const> da,
                     y3_cluster::IntegrationRange lnM_ir,
                     std::vector<y3_cluster::IntegrationRange> lo_ir,
                     y3_cluster::IntegrationRange lt_ir,
@@ -290,6 +293,7 @@ public:
     , dv_do_dz(dv_do_dz)
     , omega_z(omega_z)
     , sig_crit_inv_(sci)
+    , da_(da)
     , lnM_ir_(lnM_ir)
     , lo_ir_(lo_ir)
     , lt_ir_(lt_ir)
@@ -327,6 +331,9 @@ public:
     , dv_do_dz(sample)
     , omega_z(sample)
     , sig_crit_inv_(sample)
+    , da_(std::make_shared<y3_cluster::Interp1D const>(
+                get_datablock<std::vector<double>>(sample, "distances", "z"),
+                get_datablock<std::vector<double>>(sample, "distances", "d_a")))
     , lnM_ir_(sample, "lnM")
     , lo_ir_(lo_bins)
     , lt_ir_(sample, "lt")
@@ -365,6 +372,7 @@ public:
             dv_do_dz,
             omega_z,
             sig_crit_inv_,
+            da_,
             lnM_ir_,
             // Different lir
             new_lir,
@@ -525,8 +533,11 @@ public:
     // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
     // paper
     // eq. (31)
-    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
-      double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
+    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double angle) {
+      // NB: Angle is in arcminutes, must convert to radians
+      // TODO: Check this math
+      double const radius = da_->eval(zt) * angle * pi() / 180.0 / 60.0,
+                   adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
       return (1.0 / 6.28318530718)
              * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
              * del_sig(adjusted_R, lnM, zt);
@@ -591,7 +602,10 @@ public:
     // eq. (30)
     // For the following lambda function, `radius` corresponds to what is called
     // `R` in the paper
-    auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
+    auto gamma_t_cen = [this, N_cen, A, lnM, zt](double angle) {
+      // NB: Angle is in arcminutes, must convert to radians
+      // TODO: Check this math
+      double const radius = da_->eval(zt) * angle * pi() / 180.0 / 60.0;
       return exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig(radius, lnM, zt);
     };
 
@@ -719,6 +733,7 @@ make_gamma_t_integrand(double fcen,
           dv_do_dz,
           omega_z,
           sci,
+          da_f,
           lnM_ir,
           lo_ir,
           lt_ir,
