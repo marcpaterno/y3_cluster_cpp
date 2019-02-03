@@ -94,6 +94,8 @@ struct Gamma_T_Integrated_Bin_Result_S
   std::size_t const n_richness;
   std::size_t const n_redshift;
 
+  Gamma_T_Integrated_Bin_Result_S() = delete;
+
   Gamma_T_Integrated_Bin_Result_S (std::size_t i, std::size_t e, long long neval, int nregions, int status)
     : std::vector<Gamma_T_Integrated_Bin_Result>  (i*e)
     , neval {neval}
@@ -335,7 +337,7 @@ public:
   }
 
   typedef std::vector<double> IntegrandResult;
-  
+
   /* Common integrand functionality. Do not call this directly, you can probably
    * ignore it.
    *
