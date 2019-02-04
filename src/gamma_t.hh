@@ -39,6 +39,8 @@ struct Gamma_T_Integrated_Bin_Result {
 
   Gamma_T_Integrated_Bin_Result() : lo_ir{0.0, 1.0}, zo_ir{0.0, 1.0} {}
 
+  Gamma_T_Integrated_Bin_Result(const Gamma_T_Integrated_Bin_Result&) = default;
+
   template<typename MODELS>
   Gamma_T_Integrated_Bin_Result(std::size_t which_richness,
                                 std::size_t which_redshift,
@@ -95,6 +97,7 @@ struct Gamma_T_Integrated_Bin_Result_S
   std::size_t const n_redshift;
 
   Gamma_T_Integrated_Bin_Result_S() = delete;
+  Gamma_T_Integrated_Bin_Result_S(const y3_cluster::Gamma_T_Integrated_Bin_Result_S&) = default;
 
   Gamma_T_Integrated_Bin_Result_S (std::size_t i, std::size_t e, long long neval, int nregions, int status)
     : std::vector<Gamma_T_Integrated_Bin_Result>  (i*e)
