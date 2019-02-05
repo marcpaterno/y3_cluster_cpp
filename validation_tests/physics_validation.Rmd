@@ -17,6 +17,7 @@ truecolor = "red"
 trueshape = 1
 testcolor = "blue"
 testshape = 3
+errormargin = 1.0e-6
 testresult <- function(bool) {
   checkmate::assert_logical(bool, len = 1)
   if (bool) return("passes")
@@ -28,7 +29,7 @@ testresult <- function(bool) {
 
 This document presents analysis to demonstrate the calculations done by the Y3 clusters analysis code.
 
-Our unit tests require fractional errors to be less than one part per million,
+Our unit tests require fractional errors to be less than `r errormargin`,
 unless otherwise indicated.
 
 In plots that show both *true* and *test* values,
@@ -64,15 +65,67 @@ $`r max(abs(omega_z$resid))`$;
 the maximum absolute fractional deviation is
 $`r max(abs(omega_z$resid/omega_z$ytrue))`$.
 
-For this test, we require the differences to be less than $10^{-6}$.
-This test `r testresult((max(abs(omega_z$resid)) < 1.0e-6))`. 
+For this test, we require the differences to be less than $`r errormargin`$.
+This test `r testresult((max(abs(omega_z$resid)) < errormargin))`.
+The red lines indicate the allowable error bounds.
 
-```{r fig.cap = "Relative comparison"}
+```{r fig.cap = "Relative comparison", fig.asp = 1/2}
 ggplot(omega_z, aes(x = z, y = resid/ytrue)) +
   geom_point() +
-  ylim(-1.0e-6, 1.0e-6) +
+  ylim(-1 * errormargin, errormargin) +
   xlab("redshift") +
-  ylab("relative difference in survey area") 
+  ylab("relative difference in survey area") +
+  geom_hline(yintercept = errormargin, color="red") +
+  geom_hline(yintercept = -1 * errormargin, color="red")
+```
+
+## Mass observable relation (MOR)
+
+```{r include = FALSE}
+mor_t2 <- read_tsv("../data/mor_tt_test.out")
+mor_t2$mbin <- as.factor(mor_t2$log10m)
+mor_t2 <- mutate(mor_t2, resid = probtrue - probtest)
+```
+
+Our calculation is implemented in the file `mor_t2.hh`.
+Our testing uses `r nlevels(mor_t2$mbin)` different mass values,
+and many $\lambda$ values.
+
+### Absolute comparision
+
+Each panel in the figure below corresponds to a (log) mass bin;
+the value of the (log) mass is specified in the panel top label.
+
+```{r fig.cap = "Absolute comparsion", fig.asp = 1/2}
+ggplot(mor_t2) +
+  geom_point(aes(x = lambda, y = probtrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = lambda, y = probtest), color = testcolor, shape = testshape) +
+  xlab(expression(lambda)) +
+  ylab("probability") +
+  facet_wrap(mbin~.)
+```
+
+### Relative comparison
+
+Over the range tested (`r min(mor_t2$lambda)` < $\lambda$ < `r max(mor_t2$lambda)`),
+the maximum magnitude of deviation between the expected value
+and our calculated value is
+$`r max(abs(mor_t2$resid))`$;
+the maximum absolute fractional deviation is
+$`r max(abs(mor_t2$resid/mor_t2$probtrue))`$.
+
+For this test, we require the differences to be less than $`r errormargin`$.
+This test `r testresult((max(abs(mor_t2$resid/mor_t2$probtrue)) < errormargin))`.
+The red lines indicate the allowable error bounds.
+
+```{r fig.cap = "Relative comparison", fig.asp = 1/2}
+ggplot(mor_t2, aes(x = lambda, y = resid/probtrue)) +
+  geom_point() +
+  xlab(expression(lambda)) +
+  ylab("relative difference probability") +
+  geom_hline(yintercept = errormargin, color="red") +
+  geom_hline(yintercept = -1 * errormargin, color="red") +
+  facet_wrap(mbin ~ .)
 ```
 
 ## Session information
