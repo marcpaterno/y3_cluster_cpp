@@ -62,6 +62,8 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   // FIXME: Just a test placeholder! Should these come from CosmoSIS?
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
+  // We have evdidence that at 64 mpi ranks (nut not at 32!) that cuba is forking. so, prepare to do so.
+  cubacores(0,0);
   cubacpp::Cuhre c;
   c.maxeval = 100000000;
 
