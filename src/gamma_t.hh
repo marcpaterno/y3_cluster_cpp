@@ -87,9 +87,16 @@ struct Gamma_T_Integrated_Bin_Result {
       auto const zsrc_base = base + i * nradii;
       for (auto j = 0u; j < nradii; j++) {
         // Integration result is a "weighted sum" over all clusters, must
-        // divide by number of clusters to obtain absolute gamma_t
-        gamma_t_src_bin.push_back(results.value[zsrc_base + j] / Nw);
-        errors_src_bin.push_back(results.error[zsrc_base + j] / Nw);
+        // divide by number of clusters to obtain absolute gamma_t.
+        // If we expected to see ~0 clusters, avoid divide-by-zero by making
+        // gamma_t zero.
+        if (Nw < 1e-2) {
+          gamma_t_src_bin.push_back(0.0);
+          errors_src_bin.push_back(0.0);
+        } else {
+          gamma_t_src_bin.push_back(results.value[zsrc_base + j] / Nw);
+          errors_src_bin.push_back(results.error[zsrc_base + j] / Nw);
+        }
         probs_src_bin.push_back(results.prob[zsrc_base + j]);
       }
 
