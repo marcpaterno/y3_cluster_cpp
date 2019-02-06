@@ -209,7 +209,7 @@ struct  Gamma_T_Integrand {
   std::vector<y3_cluster::IntegrationRange> lc_ir_;
   std::vector<y3_cluster::IntegrationRange> zo_ir_;   /* redshift bins */
   // TODO: Matteo uses {z_ir_[i].min - 3.5 * z_sigma, z_ir_[i].max + 3.5 * z_sigma}
-  y3_cluster::IntegrationRange zt_ir_;
+  std::vector<y3_cluster::IntegrationRange> zt_ir_;
   y3_cluster::IntegrationRange R_ir_;
   y3_cluster::IntegrationRange A_ir_;
   y3_cluster::IntegrationRange theta_ir_;
@@ -237,7 +237,6 @@ public:
                     y3_cluster::IntegrationRange lnM_ir,
                     std::vector<y3_cluster::IntegrationRange> lo_ir,
                     std::vector<y3_cluster::IntegrationRange> zo_ir,
-                    y3_cluster::IntegrationRange zt_ir,
                     y3_cluster::IntegrationRange R_ir,
                     y3_cluster::IntegrationRange A_ir,
                     y3_cluster::IntegrationRange theta_ir,
@@ -266,7 +265,11 @@ public:
                 })))
     , lc_ir_(lt_ir_)
     , zo_ir_(zo_ir)
-    , zt_ir_(zt_ir)
+    , zt_ir_(y3_cluster::transform(zo_ir, std::function([](y3_cluster::IntegrationRange const& ir) {
+                const double z_sigma = 0.01;
+                return y3_cluster::IntegrationRange{ir.transform(0.0) - 3.5 * z_sigma,
+                                                    ir.transform(1.0) + 3.5 * z_sigma};
+                })))
     , R_ir_(R_ir)
     , A_ir_(A_ir)
     , theta_ir_(theta_ir)
@@ -295,14 +298,18 @@ public:
     , omega_z(sample)
     , lnM_ir_(sample, "lnM")
     , lo_ir_(lo_bins)
-    , lt_ir_(y3_cluster::transform(lo_ir_, std::function([](y3_cluster::IntegrationRange const& ir) {
+    , lt_ir_(y3_cluster::transform(lo_bins, std::function([](y3_cluster::IntegrationRange const& ir) {
                 return y3_cluster::IntegrationRange{0.3 * ir.transform(0.0),
                                                     (2 * ir.transform(1.0) > 150)
                                                     ? 150 : 2 * ir.transform(1.0)};
                 })))
     , lc_ir_(lt_ir_)
     , zo_ir_(zo_bins)
-    , zt_ir_(sample, "zt")
+    , zt_ir_(y3_cluster::transform(zo_bins, std::function([&sample](y3_cluster::IntegrationRange const& ir) {
+                const double z_sigma = get_datablock<double>(sample, "cluster_abundance", "zo_zt_sigma");
+                return y3_cluster::IntegrationRange{ir.transform(0.0) - 3.5 * z_sigma,
+                                                    ir.transform(1.0) + 3.5 * z_sigma};
+                })))
     , R_ir_(sample, "R")
     , A_ir_(sample, "A")
     , theta_ir_(sample, "theta")
@@ -336,7 +343,6 @@ public:
             new_lir,
             // Different zir
             new_zir,
-            zt_ir_,
             R_ir_,
             A_ir_,
             theta_ir_,
@@ -354,7 +360,7 @@ public:
   template<typename Fjn, typename Fjg, typename Fnm, typename Fgr>
   IntegrandResult
   integrand_common(double scaled_lt,
-                   double zt,
+                   double scaled_zt,
                    double lnM,
                    // Jacobian for N term
                    Fjn jacob_N,
@@ -370,10 +376,6 @@ public:
 
     auto return_arr = IntegrandResult((nradii + 3) * nrichness * nredshift);
 
-    auto const hmb_v = hmb(lnM, zt);
-    auto const hmf_v = hmf(lnM, zt);
-    auto const dv_do_dz_v = dv_do_dz(zt);
-    auto const omega_z_v = omega_z(zt);
 
     for (std::size_t loi = 0; loi < nrichness; loi++) {
       auto const richness_bin_start = loi * nredshift * (nradii + 3);
@@ -382,7 +384,13 @@ public:
         // Zo does not actually need to be integrated over
         double const zomin = zo_ir_[zoi].transform(0.0);
         double const zomax = zo_ir_[zoi].transform(1.0);
+        double const zt = zt_ir_[zoi].transform(scaled_zt);
         double const lt = lt_ir_[loi].transform(scaled_lt);
+
+        auto const dv_do_dz_v = dv_do_dz(zt);
+        auto const omega_z_v = omega_z(zt);
+        auto const hmb_v = hmb(lnM, zt);
+        auto const hmf_v = hmf(lnM, zt);
         auto const zo_zt_v = zo_zt(zomin, zomax, zt);
         auto const mor_v = mor(lt, lnM, zt);
 
@@ -394,25 +402,25 @@ public:
 
         // eq. (25)
         double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
-        double const N_mult = N_multiplier(loi);
+        double const N_mult = N_multiplier(loi, zoi);
 
         // eq. (24)
-        double const N = jacob_N(loi) * N_int * N_mult;
+        double const N = jacob_N(loi, zoi) * N_int * N_mult;
         double const Nw = N * w;
         double const Nb = N * hmb_v;
 
         // eq. (29)
-        auto const gamma_t_int = jacob_G(loi) * N_int * w;
+        auto const gamma_t_int = jacob_G(loi, zoi) * N_int * w;
 
         // eq. (28)
         auto gamma_t = std::vector<double> (nradii);
         std::transform  (begin (r),  end (r),
                          begin (gamma_t),
-                         [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep]
+                         [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep, zt]
                          (double radius) {
                            // Nw intentionally left out - returned in return_arr to be used further on
                            return (1.0 + m_shear) / sig_crit
-                             * gamma_t_int * N_mult * gamma_radial_dep(radius);
+                             * gamma_t_int * N_mult * gamma_radial_dep(radius, zt);
                          });
 
         auto redshift_bin_start = richness_bin_start + zoi * (nradii + 3);
@@ -452,30 +460,30 @@ public:
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
     auto const lnM   = lnM_ir_   .transform(scaled_lnM);
-    auto const zt    = zt_ir_    .transform(scaled_zt);
     auto const R     = R_ir_     .transform(scaled_R);
     auto const A     = A_ir_     .transform(scaled_A);
     auto const theta = theta_ir_ .transform(scaled_theta);
 
-    auto jacob_N = [=](std::size_t loi) {
+    auto jacob_N = [=](std::size_t loi, std::size_t zoi) {
        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
               * lt_ir_[loi].jacobian() * lc_ir_[loi].jacobian()
-              * zt_ir_.jacobian()
+              * zt_ir_[zoi].jacobian()
               * R_ir_.jacobian();
     };
-    auto jacob_G = [=](std::size_t loi) {
+    auto jacob_G = [=](std::size_t loi, std::size_t zoi) {
        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
               * lt_ir_[loi].jacobian() * lc_ir_[loi].jacobian()
-              * zt_ir_.jacobian()
+              * zt_ir_[zoi].jacobian()
               * R_ir_.jacobian() * A_ir_.jacobian()
               * theta_ir_.jacobian();
     };
 
     // eq. (27)
-    auto N_mis = [=](std::size_t loi) {
-      auto const lo = lo_ir_[loi].transform(scaled_lo);
-      auto const lc = lc_ir_[loi].transform(scaled_lc);
-      auto const lt = lt_ir_[loi].transform(scaled_lt);
+    auto N_mis = [=](std::size_t loi, std::size_t zoi) {
+      auto const lo = lo_ir_[loi].transform(scaled_lo),
+                 lc = lc_ir_[loi].transform(scaled_lc),
+                 lt = lt_ir_[loi].transform(scaled_lt),
+                 zt = zt_ir_[zoi].transform(scaled_zt);
       return (1.0 - fcen_) * lo_lc(lo, lc, R) * lc_lt(lc, lt, zt) * roffset(R);
     };
 
@@ -484,7 +492,7 @@ public:
     // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
     // paper
     // eq. (31)
-    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double radius) {
+    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta](double radius, double zt) {
       double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
       return (1.0 / 6.28318530718)
              * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
@@ -492,7 +500,7 @@ public:
     };
 
     return integrand_common(scaled_lt,
-                            zt,
+                            scaled_zt,
                             lnM,
                             jacob_N,
                             jacob_G,
@@ -520,38 +528,38 @@ public:
   {
     // Necessary terms
     auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const zt = zt_ir_.transform(scaled_zt);
     auto const A = A_ir_.transform(scaled_A);
 
-    auto jacob_N = [=](std::size_t loi) {
+    auto jacob_N = [=](std::size_t loi, std::size_t zoi) {
       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
              * lt_ir_[loi].jacobian()
-             * zt_ir_.jacobian();
+             * zt_ir_[zoi].jacobian();
     };
 
-    auto jacob_G = [=](std::size_t loi) {
+    auto jacob_G = [=](std::size_t loi, std::size_t zoi) {
       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
              * lt_ir_[loi].jacobian()
-             * zt_ir_.jacobian()
+             * zt_ir_[zoi].jacobian()
              * A_ir_.jacobian();
     };
 
     // eq. (26)
-    auto N_cen = [=](std::size_t loi) {
-      auto const lo = lo_ir_[loi].transform(scaled_lo);
-      auto const lt = lt_ir_[loi].transform(scaled_lt);
+    auto N_cen = [=](std::size_t loi, std::size_t zoi) {
+      auto const lo = lo_ir_[loi].transform(scaled_lo),
+                 lt = lt_ir_[loi].transform(scaled_lt),
+                 zt = zt_ir_[zoi].transform(scaled_zt);
       return lc_lt(lo, lt, zt) * fcen_;
     };
 
     // eq. (30)
     // For the following lambda function, `radius` corresponds to what is called
     // `R` in the paper
-    auto gamma_t_cen = [this, N_cen, A, lnM, zt](double radius) {
+    auto gamma_t_cen = [this, N_cen, A, lnM](double radius, double zt) {
       return exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig(radius, lnM, zt);
     };
 
     return integrand_common(scaled_lt,
-                            zt,
+                            scaled_zt,
                             lnM,
                             jacob_N,
                             jacob_G,
@@ -660,7 +668,6 @@ make_gamma_t_integrand(double fcen,
           lnM_ir,
           lo_ir,
           zo_ir,
-          zt_ir,
           R_ir,
           A_ir,
           theta_ir,
