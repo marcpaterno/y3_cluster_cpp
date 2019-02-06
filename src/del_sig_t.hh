@@ -76,8 +76,8 @@ namespace y3_cluster
     std::shared_ptr<Interp2D const> _bias;
 
   public:
-    DEL_SIG_t(std::shared_ptr<Interp2D const> dsigma1, 
-              std::shared_ptr<Interp2D const> dsigma2, 
+    DEL_SIG_t(std::shared_ptr<Interp2D const> dsigma1,
+              std::shared_ptr<Interp2D const> dsigma2,
               std::shared_ptr<Interp2D const> bias)
               : _dsigma1(dsigma1), _dsigma2(dsigma2), _bias(bias) {}
 
@@ -86,17 +86,17 @@ namespace y3_cluster
     // TODO: This needs to be reading cosmosis datablock parameters
     explicit DEL_SIG_t(cosmosis::DataBlock& sample)
       : _dsigma1(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "del_sig_params", "x1"),
-          get_datablock<doubles>(sample, "del_sig_params", "y1"),
-          get_datablock<doubles>(sample, "del_sig_params", "z1")))
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_x1"),
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_y1"),
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_z1")))
       , _dsigma2(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "del_sig_params", "x2"),
-          get_datablock<doubles>(sample, "del_sig_params", "y2"),
-          get_datablock<doubles>(sample, "del_sig_params", "z2")))
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_x2"),
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_y2"),
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_z2")))
       , _bias(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "del_sig_params", "x3"),
-          get_datablock<doubles>(sample, "del_sig_params", "y3"),
-          get_datablock<doubles>(sample, "del_sig_params", "z3")))
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_x3"),
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_y3"),
+          get_datablock<doubles>(sample, "cluster_abundance", "del_sig_params_z3")))
     {}
 
     double

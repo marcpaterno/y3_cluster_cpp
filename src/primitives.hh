@@ -12,6 +12,14 @@ namespace y3_cluster {
 
   double constexpr pi() { return 4. * std::atan(1.0); };
 
+  // TODO: Get higher precision!
+  // Source: astropy's constants and unit conversion
+  double constexpr c() { return 9.71561189e-15;}; // Mpc/s
+
+  // TODO: Get higher precision!
+  // Source: astropy's constants and unit conversion
+  double constexpr G() { return 4.51710305e-48;}; // Mpc^3 / M_sol / s^2
+
   double constexpr invsqrt2pi() { return 1. / std::sqrt(2. * pi()); };
 
   inline double

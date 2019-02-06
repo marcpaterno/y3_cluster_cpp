@@ -277,6 +277,15 @@ target_include_directories(integrate_delta_sigma
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
+add_executable(sigma_crit_inv_test sigma_crit_inv.test.cc)
+target_link_libraries(sigma_crit_inv_test PRIVATE testmain interp)
+target_include_directories(sigma_crit_inv_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(sigma_crit_inv_test sigma_crit_inv_test)
+
 add_executable(sin_cos_analytic_integral_test sin_cos_analytic_integral.test.cc)
 target_link_libraries(sin_cos_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt smp_var)
 target_include_directories(sin_cos_analytic_integral_test

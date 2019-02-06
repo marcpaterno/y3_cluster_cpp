@@ -80,12 +80,12 @@ def execute(block, config):
 	#		Bias[i][j] = ct.bias.bias_at_M(M[i], k, P_k[j], omega_m)
 
 	logM = np.log(M)
-	block[cosmo, "deltasigma_1"] = Deltasigma_1
-	block[cosmo, "deltasigma_2"] = Deltasigma_2
-	block[cosmo, "bias"] = Bias
-	block[cosmo, "m_h"] = M
-	block[cosmo, "lnM"] = logM
-	block[cosmo, "R_perp"] = R_perp
+	block["deltasigma", "deltasigma_1"] = Deltasigma_1
+	block["deltasigma", "deltasigma_2"] = Deltasigma_2
+	block["deltasigma", "bias"] = Bias
+	block["deltasigma", "m_h"] = M
+	block["deltasigma", "lnM"] = logM
+	block["deltasigma", "R_perp"] = R_perp
 	return 0
 
 

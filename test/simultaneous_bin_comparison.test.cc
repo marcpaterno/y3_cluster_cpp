@@ -20,6 +20,7 @@
 #include "t_cen_t.hh"
 #include "t_mis_t.hh"
 #include "zo_zt_t.hh"
+#include "pzsource_t.hh"
 
 #include "default_models.hh"
 #include "interp_1d.hh"
@@ -81,6 +82,7 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
     y3_cluster::LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
     y3_cluster::LC_LT_t lc_lt;
     y3_cluster::ZO_ZT_t zo_zt{0.05};
+    y3_cluster::PZSOURCE_GAUSSIAN_t pzsource{0.4, 0.2};
     y3_cluster::ROFFSET_t roffset{0.2};
     y3_cluster::T_CEN_t t_cen;
     y3_cluster::T_MIS_t t_mis;
@@ -106,6 +108,7 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
                                       decltype(lo_lc),
                                       decltype(lc_lt),
                                       decltype(zo_zt),
+                                      decltype(pzsource),
                                       decltype(roffset),
                                       decltype(t_cen),
                                       decltype(t_mis),
@@ -121,6 +124,7 @@ TEST_CASE("Check that integrating multiple bins simultaneously does not change a
                                       lo_lc,
                                       lc_lt,
                                       zo_zt,
+                                      pzsource,
                                       roffset,
                                       t_cen,
                                       t_mis,
