@@ -27,6 +27,7 @@ target_link_libraries(cluster_abundance
 		      PRIVATE
 		      interp
 		      lc_lt
+              profiler
               smp_var
 		      ${CUBA_LIBRARIES}
 		      ${GSL_LIBRARIES}
