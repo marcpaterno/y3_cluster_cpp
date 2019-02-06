@@ -2,7 +2,7 @@
 #include "mor_t2.hh"
 
 #include <fstream>
-#include <iostream>
+#include <iomanip>
 
 using y3_cluster::MOR_t2;
 
@@ -40,11 +40,19 @@ TEST_CASE("mor_t2 works")
 
     MOR_t2 mor_t(pow(10,11.2), pow(10,12.42), alpha, sigma_intr);
    
+    std::ofstream out {"../data/mor_tt_test.out"};
+    out << std::setw(16);
+    out << std::setprecision(16);
+    out << "lambda\tlog10m\tprobtrue\tprobtest\n";
     for (std::size_t i = 0, sz = log10m.size(); i != sz; ++i)
     {
         double const fz = mor_t(lambda_true[i], log10m[i], 1.0);
-        double constexpr epsrel = 5.0e-5;
+        double constexpr epsrel = 5.0e-6;
         double constexpr epsabs = 1.0e-10;
         CHECK( fz == Approx(prob[i]).epsilon(epsrel).margin(epsabs) );
+        out << lambda_true[i] << '\t'
+            << log10m[i] << '\t'
+            << prob[i] << '\t'
+            << fz << '\n';
     }
 }
