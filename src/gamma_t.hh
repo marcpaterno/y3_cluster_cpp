@@ -536,6 +536,7 @@ public:
     auto gamma_t_mis = [this, N_mis, A, lnM, R, theta, zt](double angle) {
       // NB: Angle is in arcminutes, must convert to radians
       // TODO: Check this math
+      // YZ comment: TODO check unit, this might have been a mpc vs mpc/h thing going on
       double const radius = da_->eval(zt) * angle * pi() / 180.0 / 60.0,
                    adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
       return (1.0 / 6.28318530718)
