@@ -19,12 +19,11 @@ namespace y3_cluster {
     ProfilerOptions options;
     int verbosity = 1;
     bool profile = false;
-    // The radii from the cluster center to predict gamma_t values for
-    std::vector<double> radius_bins;
     // The distributions of weak lensing source bins
     std::vector<std::shared_ptr<Interp1D const>> pzsources;
+    // The radii from the cluster center to predict gamma_t values for
+    std::vector<double> radius_bins;
     // The cluster bins in richness-space
-    std::vector<double> radii_bins;
     std::vector<y3_cluster::IntegrationRange> lo_bins;
     // The cluster bins in redshift-space
     std::vector<y3_cluster::IntegrationRange> zo_bins;
@@ -88,13 +87,13 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
               get_datablock<std::string>(config,
                                          "cluster_abundance",
                                          "y3_observables")))
-  , radii_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins"))
+  , radius_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins"))
   , lo_bins(into_ranges(config, "lo"))
   , zo_bins(into_ranges(config, "zo"))
 {
   if (pzsources.size() == 0)
     throw std::runtime_error("What the hell??");
-  if (radii_bins.size() == 0)
+  if (radius_bins.size() == 0)
     throw std::runtime_error("What the hell??");
   if (profile)
     ProfilerStartWithOptions("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/cosmosis_run_dump.txt",
