@@ -22,11 +22,12 @@ target_include_directories(smp_var
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 set_property(TARGET smp_var PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-add_library(cluster_abundance SHARED cluster_abundance.cc datablock_reader.cc interp_1d.cc interp_2d.cc)
+add_library(cluster_abundance SHARED cluster_abundance.cc interp_1d.cc interp_2d.cc)
 target_link_libraries(cluster_abundance
                       PRIVATE
                       interp
                       lc_lt
+                      profiler
                       smp_var
                       cfitsio
                       ${CUBA_LIBRARIES}
@@ -40,7 +41,7 @@ target_include_directories(cluster_abundance
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
-add_library(cluster_abundance_covariance SHARED cluster_abundance_covariance.cc datablock_reader.cc)
+add_library(cluster_abundance_covariance SHARED cluster_abundance_covariance.cc)
 target_link_libraries(cluster_abundance_covariance
                       PRIVATE
                       interp
