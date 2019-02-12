@@ -177,7 +177,7 @@ This test `r testresult(mor_t2)`.
 Each panel in the figure below corresponds to a (ln) mass bin;
 the value of the (ln) mass is specified in the panel top label.
 
-```{r fig.cap = "Absolute comparsion of our approximation to the expected results for `mor_t2`."}
+```{r fig.cap = "Absolute comparsion of our approximation to the expected results for MOR."}
 ggplot(mor_t2) +
   geom_smallpoint(aes(x = lambda, y = probtrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = lambda, y = probtest), color = testcolor, shape = testshape) +
@@ -186,7 +186,7 @@ ggplot(mor_t2) +
   facet_wrap(mbin~.)
 ```
 
-```{r fig.cap = "Relative residual comparison of our approximation to the expected results for mor_t2. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
+```{r fig.cap = "Relative residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(mor_t2, aes(x = lambda, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   guides(color = FALSE) +
@@ -198,7 +198,7 @@ ggplot(mor_t2, aes(x = lambda, y = fracerr, color = within.abs)) +
   facet_wrap(mbin ~ .)
 ```
 
-```{r fig.cap = "Absolute residual comparison of our approximation to the expected results for mor_t2. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
+```{r fig.cap = "Absolute residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
 ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
   geom_smallpoint() +
   guides(color = FALSE) +
