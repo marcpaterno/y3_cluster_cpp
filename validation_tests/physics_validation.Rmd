@@ -6,6 +6,7 @@ output:
   html_document:
       toc: true
       toc_depth: 1
+      toc_float: true
       number_sections: true
   pdf_document: default
   word_document: default
@@ -16,18 +17,18 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.align = "center",
                       fig.asp = 1/3)
 library(tidyverse)
-truecolor = "red"
+truecolor = "black"
 trueshape = 1
-testcolor = "blue"
+testcolor = "cyan"
 testshape = 3
 frac.errormargin = 1.0e-6
 abs.errormargin = 1.0e-12
-textfor <- function(bool) {
-  checkmate::assert_logical(bool, len = 1)
-  if (bool) return("passes")
-  return("<span style=\"color:red\">fails</span>")
+
+testresult <-function(df) {
+  npass <- sum(df$pass)
+  npoints <- nrow(df)
+  str_interp("For this test, ${sum(df$pass)} of ${nrow(df)} points pass.")
 }
-testresult <- function(df) textfor(all(df$pass))
 
 geom_smallpoint <- function(...) geom_point(..., size = 0.5)
 
@@ -42,7 +43,7 @@ done in the Y3 clusters analysis code.
 Each section contains the validation testing results
 for a single function in our calculation.
 For each of these functions,
-we have results from a trusted sources that are assumed to be correct,
+we have results from a trusted source that are assumed to be correct,
 evaluated at some number of points.
 We test our approximations
 by comparing them to the expected answer at each of these points.
@@ -51,8 +52,19 @@ $`r frac.errormargin`$,
 **or** absolute errors less than
 $`r abs.errormargin`$,
 unless otherwise indicated.
+The relative error bound was chosen to be
+smaller than the systematic uncertainty
+to which the value is known from the trusted source.
+An absolute error bound is needed for the cases in which
+the predicted value is very small,
+and thus any non-zero residual is relatively largeis relatively large.
 For a test to pass,
 it is required that every calculated point pass.
+For each test reported in this document,
+this condition is verified automatically,
+and both the number of points tested,
+and the number of points that pass,
+is noted.
 
 In each section, we show both absolute and residual comparisons.
 The absolute comparisons are shown
@@ -101,7 +113,7 @@ omega_z <- mutate(omega_z,
 
 $\Omega_z$ is the area of the survey as a function of redshift $z$.
 Our calculation is implemented in the file `omega_z_sdss.hh`.
-Our testing uses `r nunique(omega_z$z)` $z$ values.
+Our testing uses `r nrow(omega_z)` $z$ values.
 Over the range tested
 $(`r min(omega_z$z)` < z < `r max(omega_z$z)`)$,
 the maximum magnitude of the absolute residual between the expected value
@@ -114,9 +126,9 @@ $`r local.frac.errormargin`$,
 or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
 
-This test `r testresult(omega_z)`.
+`r testresult(omega_z)`.
 
-```{r fig.cap = "Absolute comparision of our approximation to the expected results for $\\Omega_z$."}
+```{r fig.cap = "Absolute comparision of our approximation to the expected results for $\\Omega_z$. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(omega_z) +
   geom_smallpoint(aes(x = z, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = z, y = ytest), color = testcolor, shape = testshape) +
@@ -172,12 +184,12 @@ less than $`r local.frac.errormargin`$,
 **or** the absolute difference to be less than
 $`r local.abs.errormargin`$.
 
-This test `r testresult(mor_t2)`.
+`r testresult(mor_t2)`
 
 Each panel in the figure below corresponds to a (ln) mass bin;
 the value of the (ln) mass is specified in the panel top label.
 
-```{r fig.cap = "Absolute comparsion of our approximation to the expected results for MOR."}
+```{r fig.cap = "Absolute comparision of our approximation to the expected results for MOR. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(mor_t2) +
   geom_smallpoint(aes(x = lambda, y = probtrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = lambda, y = probtest), color = testcolor, shape = testshape) +
@@ -213,7 +225,7 @@ ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
 
 The following R package versions were used to prepare this document.
 
-```{r echo = TRUE}
+```{r}
 sessionInfo()
 ```
 
