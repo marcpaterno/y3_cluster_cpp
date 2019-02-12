@@ -1,45 +1,63 @@
+#include <vector>
+
 #include "catch2/catch.hpp"
+#include "read_vector.hh"
 #include "a_cen_t.hh"
 #include "t_cen_t.hh"
 
 using y3_cluster::A_CEN_t;
 using y3_cluster::T_CEN_t;
+using std::string;
+using std::vector;
+using std::pair;
+using doubles = vector<double>;
 
-TEST_CASE("a_cen_t and t_cen_t works")
+
+// Reads a file of radius - DeltaSigma values, and returns two vectors:
+//  { <radii>, <DeltaSigmas> }
+pair<doubles, doubles>
+read_DS_file(const string& filename)
 {
-  constexpr std::size_t ntests = 12;
-  // Unit test with the files: DS_M_2e+14_4e+14_z_0_0.34.dat and DS_M_2e+14_4e+14_z_0_0.34_cosi_0.8_1.dat
-  // rp: Units of [Mpc/h]
-  constexpr double rp[ntests] = {
-      0.125893, 0.199526, 0.316228, 0.501187,
-      0.794328, 1.25893, 1.99526, 3.16228,
-      5.01187, 7.94328, 12.5893, 19.9526
-  };
-  // units of [h Msun/pc^2]
-  constexpr double ds[ntests] = {
-      167.484, 141.745, 109.689, 79.222,
-      53.9142, 34.3401, 19.7749, 10.0391,
-      4.9866, 2.79118, 1.71323, 1.09489
-  };
-  // units of [h Msun/pc^2]
-  constexpr double dsmu[ntests] = {
-      215.694, 179.938, 136.966, 97.6729,
-      65.1235, 39.7234, 22.1475, 11.6005,
-      6.06163, 3.45574, 2.09941, 1.32538
-  };
+  auto const data = read_vector(filename.c_str());
+  CHECK((data.size() % 2) == 0);
+  doubles radii, ds;
+  for (auto i = 0u; i < data.size(); i += 2) {
+    radii.push_back(data[i]);
+    ds.push_back(data[i + 1]);
+  }
+  return { radii, ds };
+}
+
+TEST_CASE("a_cen_t and t_cen_t match simulation data")
+{
+  const vector<pair<double, string>> mass_bins{{
+          {7.5e13, "DeltaSigma_for_Maria/DS_M_5e+13_1e+14_z_0_0.34"},
+          {1.5e14, "DeltaSigma_for_Maria/DS_M_1e+14_2e+14_z_0_0.34"},
+          {3e14, "DeltaSigma_for_Maria/DS_M_2e+14_4e+14_z_0_0.34"},
+          {5.2e15, "DeltaSigma_for_Maria/DS_M_4e+14_1e+16_z_0_0.34"}}};
+  const vector<pair<double, string>> mu_bins{{
+          {0.1, "_cosi_0_0.2.dat"},
+          {0.3, "_cosi_0.2_0.4.dat"},
+          {0.5, "_cosi_0.4_0.6.dat"},
+          {0.6, "_cosi_0.6_0.8.dat"},
+          {0.9, "_cosi_0.8_1.dat"}}};
 
   A_CEN_t acen;
   T_CEN_t tcen;
 
-  for (std::size_t i = 0, sz = ntests; i != sz; ++i)
-  {
-    // For the bin 0.8<mu<1
-    const double mu = 0.9;
-    // TODO: The 0.0 is filling in for ln(Mass) right now.
-    // Should there be a mass dependence? Zhang, Wu, and Zhang does not
-    // list one, so if we are using their model we don't need it.
-    double const fz = std::exp(acen(mu) * tcen(rp[i], 0.0));
-    double constexpr epsrel = 1.0e-1;
-    CHECK(fz == Approx(dsmu[i]/ds[i]).epsilon(epsrel));
+  for (const auto [mass, mbinname] : mass_bins) {
+    const auto [rs, ds] = read_DS_file(mbinname + ".dat");
+    for (const auto [mu_mid, tail] : mu_bins) {
+      const auto [rsmu, dsmu] = read_DS_file(mbinname + tail);
+      CHECK(rs.size() == rsmu.size());
+
+      for (auto i = 0u; i < rs.size(); ++i) {
+        CHECK(rs[i] == Approx(rsmu[i]).epsilon(1e-12));
+        double const fz = std::exp(acen(mu_mid) * tcen(rs[i], std::log(mass)));
+        // TODO: This precision causes 4 assertions to fail!
+        double constexpr epsrel = 1.0e-1;
+        CHECK(fz == Approx(dsmu[i]/ds[i]).epsilon(epsrel));
+      }
+    }
   }
 }
