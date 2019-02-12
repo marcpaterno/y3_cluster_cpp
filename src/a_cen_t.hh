@@ -17,7 +17,7 @@ namespace y3_cluster {
         // Coefficients are best-fit vals from
         // "Effects of Cluster Triaxiality on DES Stacked Weak Lensing Analysis"
         // Zhang, Wu, and Zhang, (in preparation)
-        static constexpr polynomial<4> acen{{{0.637, -0.191, 0.182, -0.191}}};
+        static constexpr polynomial<4> acen{{{0.627, -0.191, 0.182, -0.191}}};
         return acen(mu);
       }
   };

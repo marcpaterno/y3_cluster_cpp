@@ -10,6 +10,7 @@ namespace y3_cluster {
     double const gamma;
   public:
     // hard-coded values are best-fits from triaxiality paper
+    // FIXME: get these as parameters
     T_CEN_t()
       : ln_r0(0.632)
       , gamma(1.634)
