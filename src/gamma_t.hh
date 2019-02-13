@@ -422,7 +422,7 @@ public:
   IntegrandResult
   integrand_common(double scaled_lt,
                    double scaled_zt,
-                   double zs,
+                   double scaled_zs,
                    double lnM,
                    // Jacobian for N term
                    Fjn jacob_N,
@@ -451,6 +451,10 @@ public:
         double const zt = zt_ir_[zoi].transform(scaled_zt);
         double const lt = lt_ir_[loi].transform(scaled_lt);
 
+        const y3_cluster::IntegrationRange this_zs_ir{std::max(zt, zs_ir_.transform(0.0)),
+                                                      zs_ir_.transform(1.0)};
+        double const zs = this_zs_ir.transform(scaled_zs);
+
         auto const dv_do_dz_v = dv_do_dz(zt);
         auto const omega_z_v = omega_z(zt);
         auto const hmb_v = hmb(lnM, zt);
@@ -474,7 +478,7 @@ public:
         double const Nb = N * hmb_v;
 
         // eq. (29)
-        auto const gamma_t_int = jacob_G(loi, zoi) * N_int * w;
+        auto const gamma_t_int = jacob_G(loi, zoi) * this_zs_ir.jacobian() * N_int * w;
 
         // eq. (28)
         auto gamma_t = std::vector<double> (nradii * npzsource);
@@ -525,7 +529,6 @@ public:
     // relying upon the optimizer to do a perfect job of this for us. This
     // seems to be the intent of the commented-out code below.
     auto const lnM   = lnM_ir_   .transform(scaled_lnM);
-    auto const zs    = zs_ir_    .transform(scaled_zs);
     auto const R     = R_ir_     .transform(scaled_R);
     auto const A     = A_ir_     .transform(scaled_A);
     auto const theta = theta_ir_ .transform(scaled_theta);
@@ -539,7 +542,7 @@ public:
     auto jacob_G = [=](std::size_t loi, std::size_t zoi) {
        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
               * lt_ir_[loi].jacobian() * lc_ir_[loi].jacobian()
-              * zt_ir_[zoi].jacobian() * zs_ir_.jacobian()
+              * zt_ir_[zoi].jacobian()
               * R_ir_.jacobian() * A_ir_.jacobian()
               * theta_ir_.jacobian();
     };
@@ -571,7 +574,7 @@ public:
 
     return integrand_common(scaled_lt,
                             scaled_zt,
-                            zs,
+                            scaled_zs,
                             lnM,
                             jacob_N,
                             jacob_G,
@@ -600,7 +603,6 @@ public:
   {
     // Necessary terms
     auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const zs = zs_ir_.transform(scaled_zs);
     auto const A = A_ir_.transform(scaled_A);
 
     auto jacob_N = [=](std::size_t loi, std::size_t zoi) {
@@ -613,7 +615,6 @@ public:
       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
              * lt_ir_[loi].jacobian()
              * zt_ir_[zoi].jacobian()
-             * zs_ir_.jacobian()
              * A_ir_.jacobian();
     };
 
@@ -637,7 +638,7 @@ public:
 
     return integrand_common(scaled_lt,
                             scaled_zt,
-                            zs,
+                            scaled_zs,
                             lnM,
                             jacob_N,
                             jacob_G,
