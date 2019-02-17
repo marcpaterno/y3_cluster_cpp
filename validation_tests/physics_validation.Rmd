@@ -1,6 +1,6 @@
 ---
 title: "Physics Validation of Y3 Clusters Code"
-author: "Y3 Cluster Team"
+author: "Y3 Cluster Team (3CT)"
 date: "`r Sys.Date()`"
 output:
   html_document:
