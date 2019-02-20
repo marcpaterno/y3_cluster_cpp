@@ -1,138 +1,231 @@
 ---
 title: "Physics Validation of Y3 Clusters Code"
-author: "Y3 Cluster Team"
-date: "12/12/2018"
+author: "Y3 Cluster Team (3CT)"
+date: "`r Sys.Date()`"
 output:
-  html_document: default
+  html_document:
+      toc: true
+      toc_depth: 1
+      toc_float: true
+      number_sections: true
   pdf_document: default
   word_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
-                      fig.align = "center"
-                      )
+                      fig.align = "center",
+                      fig.asp = 1/3)
 library(tidyverse)
-truecolor = "red"
+truecolor = "black"
 trueshape = 1
-testcolor = "blue"
+testcolor = "cyan"
 testshape = 3
-errormargin = 1.0e-6
-testresult <- function(bool) {
-  checkmate::assert_logical(bool, len = 1)
-  if (bool) return("passes")
-  return("<span style=\"color:red\">fails</span>")
+frac.errormargin = 1.0e-6
+abs.errormargin = 1.0e-12
+
+testresult <-function(df) {
+  npass <- sum(df$pass)
+  npoints <- nrow(df)
+  str_interp("For this test, ${sum(df$pass)} of ${nrow(df)} points pass.")
 }
+
+geom_smallpoint <- function(...) geom_point(..., size = 0.5)
+
+nunique <- function(x) length(unique(x))
 ```
 
-## Introduction
+# Introduction
 
-This document presents analysis to demonstrate the calculations done by the Y3 clusters analysis code.
-
-Our unit tests require fractional errors to be less than `r errormargin`,
+This document presents
+demonstrations of the validity of calculations
+done in the Y3 clusters analysis code.
+Each section contains the validation testing results
+for a single function in our calculation.
+For each of these functions,
+we have results from a trusted source that are assumed to be correct,
+evaluated at some number of points.
+We test our approximations
+by comparing them to the expected answer at each of these points.
+Our unit tests require fractional errors to be less than
+$`r frac.errormargin`$,
+**or** absolute errors less than
+$`r abs.errormargin`$,
 unless otherwise indicated.
+The relative error bound was chosen to be
+smaller than the systematic uncertainty
+to which the value is known from the trusted source.
+An absolute error bound is needed for the cases in which
+the predicted value is very small,
+and thus any non-zero residual is relatively largeis relatively large.
+For a test to pass,
+it is required that every calculated point pass.
+For each test reported in this document,
+this condition is verified automatically,
+and both the number of points tested,
+and the number of points that pass,
+is noted.
 
-In plots that show both *true* and *test* values,
-the *true* value plotted in `r truecolor`
-and the *test* value is plotted in `r testcolor`.
+In each section, we show both absolute and residual comparisons.
+The absolute comparisons are shown
+to discover any gross discrepencies
+between the correct result and our approximations.
+In the absolute comparison plots,
+the *expected* (or *true*) values are shown in `r truecolor`,
+and our *approximations* (or *test* values) are shown in `r testcolor`.
+The residual comparisons show more detail.
+In each case, we show fractional (relative) residuals;
+we plot the absolute residuals only when the fractional residual test fails
+for one or more points.
+Because the criterion for the calculation at each point to pass is a logical
+**or** of the comparison to the relative and absolute error bounds,
+each plot contains information about both tests.
+In the plot of the fractional residuals,
+the color of each point is determined by whether or not that point
+passes the absolute residual test.
+In the plot of the absolute residuals,
+the color of each point is determined by whether or not that point
+passes the fractional residual test.
+Thus, in each plot, a point passes the test if *either* it is within
+the error envelope shown by the blue horizontal lines on the plot,
+*or* it is blue.
+Points that fail the test will be both outside of the allowable error
+envelope and red.
 
-## Omega_z
+# $\Omega_z$
 
-$\Omega_z$ is the area of the survey as a function of redshift $z$.
-Our calculation is implemented in the file `omega_z_sdss.hh`.
+```{r}
+local.frac.errormargin = frac.errormargin
+local.abs.errormargin = abs.errormargin
+```
 
 ```{r, include = FALSE}
 omega_z <- read_tsv("../data/omega_z_sdss.out")
-omega_z <- mutate(omega_z, resid = ytrue - ytest)
+omega_z <- mutate(omega_z,
+                  resid = ytrue - ytest,
+                  fracerr = resid/ytrue,
+                  lo = pmin(-local.frac.errormargin * ytrue, -local.abs.errormargin),
+                  hi = pmax(local.frac.errormargin * ytrue, local.abs.errormargin),
+                  within.frac = (abs(fracerr) < local.frac.errormargin),
+                  within.abs = (abs(resid) < local.abs.errormargin),
+                  pass = within.frac | within.abs)
 ```
 
-### Absolute comparison of omega_z
-
-```{r fig.cap = "Absolute comparision", fig.asp = 1/2}
-ggplot(omega_z) +
-  geom_point(aes(x = z, y = ytrue), color = truecolor, shape = trueshape) +
-  geom_point(aes(x = z, y = ytest), color = testcolor, shape = testshape) +
-  xlab("redshift") +
-  ylab("survey area")  
-```
-
-### Relative error
-
-Over the range tested (`r min(omega_z$z)` < $z$ < `r max(omega_z$z)`),
-the maximum magnitude of deviation between the expected value
-and our calculated value is
+$\Omega_z$ is the area of the survey as a function of redshift $z$.
+Our calculation is implemented in the file `omega_z_sdss.hh`.
+Our testing uses `r nrow(omega_z)` $z$ values.
+Over the range tested
+$(`r min(omega_z$z)` < z < `r max(omega_z$z)`)$,
+the maximum magnitude of the absolute residual between the expected value
+and our approximation is
 $`r max(abs(omega_z$resid))`$;
-the maximum absolute fractional deviation is
-$`r max(abs(omega_z$resid/omega_z$ytrue))`$.
+the maximum magnitude of the fractional residual is
+$`r max(abs(omega_z$fracerr))`$.
+For this test, we require the relative residuals to be less than
+$`r local.frac.errormargin`$,
+or the absolute residuals to be less than
+$`r local.abs.errormargin`$.
 
-For this test, we require the differences to be less than $`r errormargin`$.
-This test `r testresult((max(abs(omega_z$resid)) < errormargin))`.
-The red lines indicate the allowable error bounds.
+`r testresult(omega_z)`.
 
-```{r fig.cap = "Relative comparison", fig.asp = 1/2}
-ggplot(omega_z, aes(x = z, y = resid/ytrue)) +
-  geom_point() +
-  ylim(-1 * errormargin, errormargin) +
-  xlab("redshift") +
-  ylab("relative difference in survey area") +
-  geom_hline(yintercept = errormargin, color="red") +
-  geom_hline(yintercept = -1 * errormargin, color="red")
+```{r fig.cap = "Absolute comparision of our approximation to the expected results for $\\Omega_z$. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+ggplot(omega_z) +
+  geom_smallpoint(aes(x = z, y = ytrue), color = truecolor, shape = trueshape) +
+  geom_smallpoint(aes(x = z, y = ytest), color = testcolor, shape = testshape) +
+  xlab(expression(z)) +
+  ylab(expression(Omega))
 ```
 
-## Mass observable relation (MOR)
+```{r fig.cap = "Relative residual comparison or our approximation to the expected results for $\\Omega_z$. Points in blue pass, and points in red fail, the absolute residual test."}
+ggplot(omega_z, aes(x = z, y = fracerr, color = within.abs)) +
+  geom_smallpoint() +
+  guides(color = FALSE) +
+  ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
+  xlab(expression(z)) +
+  ylab("fractional residual") +
+  geom_hline(yintercept = local.frac.errormargin, color="blue") +
+  geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
+```
+
+# Mass-observable relation
+
+```{r}
+local.frac.errormargin = 5 * frac.errormargin
+local.abs.errormargin = abs.errormargin
+```
 
 ```{r include = FALSE}
 mor_t2 <- read_tsv("../data/mor_tt_test.out")
 mor_t2$mbin <- as.factor(mor_t2$log10m)
-mor_t2 <- mutate(mor_t2, resid = probtrue - probtest)
+mor_t2 <- mutate(mor_t2,
+                 resid = probtrue - probtest,
+                 fracerr = resid/probtrue,
+                 lo = pmin(-local.frac.errormargin * probtrue, -local.abs.errormargin),
+                 hi = pmax(local.frac.errormargin * probtrue, local.abs.errormargin),
+                 within.frac = (abs(fracerr) < local.frac.errormargin),
+                 within.abs = (abs(resid) < local.abs.errormargin),
+                 pass = within.frac | within.abs)
 ```
 
+*We need a description of what probability is being calculated.*
 Our calculation is implemented in the file `mor_t2.hh`.
 Our testing uses `r nlevels(mor_t2$mbin)` different mass values,
-and many $\lambda$ values.
+and `r nunique(mor_t2$lambda)` different $\lambda$ values.
+Over the range tested 
+($`r min(mor_t2$lambda)` < \lambda < `r max(mor_t2$lambda)`$),
+the maximum magnitude of the absoluteresidual between the expected value
+and our calculated value is
+$`r max(abs(mor_t2$resid))`$;
+the maximum magnitude of the fractional residual is
+$`r max(abs(mor_t2$fracerr))`$.
+For this test,
+we require the relative differences to be 
+less than $`r local.frac.errormargin`$,
+**or** the absolute difference to be less than
+$`r local.abs.errormargin`$.
 
-### Absolute comparision
+`r testresult(mor_t2)`
 
-Each panel in the figure below corresponds to a (log) mass bin;
-the value of the (log) mass is specified in the panel top label.
+Each panel in the figure below corresponds to a (ln) mass bin;
+the value of the (ln) mass is specified in the panel top label.
 
-```{r fig.cap = "Absolute comparsion", fig.asp = 1/2}
+```{r fig.cap = "Absolute comparision of our approximation to the expected results for MOR. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(mor_t2) +
-  geom_point(aes(x = lambda, y = probtrue), color = truecolor, shape = trueshape) +
-  geom_point(aes(x = lambda, y = probtest), color = testcolor, shape = testshape) +
+  geom_smallpoint(aes(x = lambda, y = probtrue), color = truecolor, shape = trueshape) +
+  geom_smallpoint(aes(x = lambda, y = probtest), color = testcolor, shape = testshape) +
   xlab(expression(lambda)) +
   ylab("probability") +
   facet_wrap(mbin~.)
 ```
 
-### Relative comparison
-
-Over the range tested (`r min(mor_t2$lambda)` < $\lambda$ < `r max(mor_t2$lambda)`),
-the maximum magnitude of deviation between the expected value
-and our calculated value is
-$`r max(abs(mor_t2$resid))`$;
-the maximum absolute fractional deviation is
-$`r max(abs(mor_t2$resid/mor_t2$probtrue))`$.
-
-For this test, we require the differences to be less than $`r errormargin`$.
-This test `r testresult((max(abs(mor_t2$resid/mor_t2$probtrue)) < errormargin))`.
-The red lines indicate the allowable error bounds.
-
-```{r fig.cap = "Relative comparison", fig.asp = 1/2}
-ggplot(mor_t2, aes(x = lambda, y = resid/probtrue)) +
-  geom_point() +
+```{r fig.cap = "Relative residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
+ggplot(mor_t2, aes(x = lambda, y = fracerr, color = within.abs)) +
+  geom_smallpoint() +
+  guides(color = FALSE) +
   xlab(expression(lambda)) +
-  ylab("relative difference probability") +
-  geom_hline(yintercept = errormargin, color="red") +
-  geom_hline(yintercept = -1 * errormargin, color="red") +
+  ylab("fractional residual") +
+  geom_hline(yintercept = local.frac.errormargin, color = "blue") +
+  geom_hline(yintercept = -1 * local.frac.errormargin, color = "blue") +
+  ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   facet_wrap(mbin ~ .)
 ```
 
-## Session information
+```{r fig.cap = "Absolute residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
+ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
+  geom_smallpoint() +
+  guides(color = FALSE) +
+  geom_hline(yintercept = local.abs.errormargin, color = "blue") +
+  geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
+  ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
+  xlab(expression(lambda)) +
+  facet_wrap(mbin ~ .)
+```
+
+# Session information
 
 The following R package versions were used to prepare this document.
 
-```{r echo = TRUE}
+```{r}
 sessionInfo()
 ```
 
