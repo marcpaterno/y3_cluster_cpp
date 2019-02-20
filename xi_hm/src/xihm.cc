@@ -2,6 +2,7 @@
 #include <datablock_reader.hh>
 #include <nfw.hh>
 #include <xinl.hh>
+#include <sig_y3.hh>
 #include <del_sig_y3.hh>
 
 namespace y3_cluster {
@@ -46,8 +47,7 @@ y3_cluster::DeltaSigmaModule::execute(cosmosis::DataBlock& sample)
 {
 
   // Pull arrays from the data block:
-  const double concentration = 5.0;
-  nfw_dsigma nfw(concentration);
+  nfw_dsigma nfw(5.0, 0.3);
   xi_nl xinl(sample);
   std::vector<double>  xi_1halo(R_perp_bins * M_bins);
   std::vector<double>  xi_2halo(R_perp_bins * z_bins);
@@ -87,12 +87,20 @@ y3_cluster::DeltaSigmaModule::execute(cosmosis::DataBlock& sample)
   sample.put_val<std::vector<double>>("cluster_abundance", "z", z);
   sample.put_val<std::vector<double>>("cluster_abundance", "lnM", lnM);
   
+  SIG_y3 sig(sample);
+  auto res = std::vector<double> (300);
+  for (std::size_t i = 0; i < 300; i++)
+  {   res[i] = sig(R_perp[i],33.3874838484, 0.201010);
+      //std::cout<< R_perp[i] << " "<<res[i] <<" \n";
+  } 
+  sample.put_val<std::vector<double>>("cluster_abundance", "sigma", res);
+
   DEL_SIG_y3 ds(sample);
-  double temp_m, res;
-  for (std::size_t i = 0; i < 500; i++) {
-    temp_m = (33.0 - 32.0) / 500.0 * i + 32.0;
-    res= ds(0.3, temp_m, 0.3);
-				         }
+  auto res2 = std::vector<double> (300);
+  for (std::size_t i = 0; i < 300; i++)
+  {   res2[i] = ds(R_perp[i],33.3874838484, 0.201010);
+      std::cout<< R_perp[i] << " "<<res2[i] <<" \n"; } 
+  sample.put_val<std::vector<double>>("cluster_abundance", "delsigma", res2);
   return DBS_SUCCESS;
 }
 

@@ -7,6 +7,7 @@
 #include <math.h>
 using namespace y3_cluster;
 #define PI 3.14159265
+#include <cubacpp/cubacpp.hh>
 
 class xi_nl{
 public:
@@ -23,15 +24,15 @@ public:
   double
   operator()(double r, double z) const
   {
-      double tmp = 0.0;
-      for (std::size_t i = 0; i < 1000; i++)
-      {  
-         double k = 0.01/r * exp(i*0.01);
-         double x = k * r;
-         double w = sin(x) / x;
-         tmp = tmp + w * k*k * _pkz->eval(k, z) / (2.0 * PI);
-       }
-       return tmp;
+
+      cubacpp::QAG integrator(0.0001, 100.0, GSL_INTEG_GAUSS61, 5000000);
+      const auto res = integrator.integrate([=](double k) {
+		       double x=k*r;
+	       	       double w=sin(x)/x;
+                       double rest = w * k * k * _pkz->eval(k, z)/(2.0 * PI * PI);
+                       return rest;
+   	            }, 1e-3, 1e-5);
+      return res.value;
     }
 
 private:
