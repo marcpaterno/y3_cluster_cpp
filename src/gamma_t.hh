@@ -376,29 +376,38 @@ public:
 
     auto return_arr = IntegrandResult((nradii + 3) * nrichness * nredshift);
 
+    // We want to minimize the amount of computation - so, avoid recomputation
+    // To do this, we will iterate over `z` first and compute only the `z`
+    // dependent terms
+    for (std::size_t zoi = 0; zoi < nredshift; zoi++) {
+      double const zomin = zo_ir_[zoi].transform(0.0);
+      double const zomax = zo_ir_[zoi].transform(1.0);
+      double const zt = zt_ir_[zoi].transform(scaled_zt);
 
-    for (std::size_t loi = 0; loi < nrichness; loi++) {
-      auto const richness_bin_start = loi * nredshift * (nradii + 3);
+      auto const dv_do_dz_v = dv_do_dz(zt);
+      auto const omega_z_v = omega_z(zt);
+      auto const hmb_v = hmb(lnM, zt);
+      auto const hmf_v = hmf(lnM, zt);
+      auto const zo_zt_v = zo_zt(zomin, zomax, zt);
 
-      for (std::size_t zoi = 0; zoi < nredshift; zoi++) {
+      // These will eventually be passed by CosmoSIS
+      double m_shear = 0.0;
+      double sig_crit = 1.0;
+      // This is the lambda-redshift bin weight that we don't fully understand
+      double w = 1.0;
+
+      // eq. (28)
+      // Compute the z-dependent parts of the gamma_t up front
+      auto gamma_t = std::vector<double>(nradii);
+      for (auto i = 0u; i < nradii; i++)
+        gamma_t[i] = (1.0 + m_shear) / sig_crit * gamma_radial_dep(r[i], zt);
+
+      for (std::size_t loi = 0; loi < nrichness; loi++) {
+        auto const richness_bin_start = loi * nredshift * (nradii + 3);
         // Zo does not actually need to be integrated over
-        double const zomin = zo_ir_[zoi].transform(0.0);
-        double const zomax = zo_ir_[zoi].transform(1.0);
-        double const zt = zt_ir_[zoi].transform(scaled_zt);
         double const lt = lt_ir_[loi].transform(scaled_lt);
 
-        auto const dv_do_dz_v = dv_do_dz(zt);
-        auto const omega_z_v = omega_z(zt);
-        auto const hmb_v = hmb(lnM, zt);
-        auto const hmf_v = hmf(lnM, zt);
-        auto const zo_zt_v = zo_zt(zomin, zomax, zt);
         auto const mor_v = mor(lt, lnM, zt);
-
-        // These will eventually be passed by CosmoSIS
-        double m_shear = 0.0;
-        double sig_crit = 1.0;
-        // This is the lambda-redshift bin weight that we don't fully understand
-        double w = 1.0;
 
         // eq. (25)
         double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
@@ -413,19 +422,10 @@ public:
         auto const gamma_t_int = jacob_G(loi, zoi) * N_int * w;
 
         // eq. (28)
-        auto gamma_t = std::vector<double> (nradii);
-        std::transform  (begin (r),  end (r),
-                         begin (gamma_t),
-                         [m_shear, sig_crit, gamma_t_int, N_mult, gamma_radial_dep, zt]
-                         (double radius) {
-                           // Nw intentionally left out - returned in return_arr to be used further on
-                           return (1.0 + m_shear) / sig_crit
-                             * gamma_t_int * N_mult * gamma_radial_dep(radius, zt);
-                         });
-
         auto redshift_bin_start = richness_bin_start + zoi * (nradii + 3);
+        for (auto i = 0u; i < nradii; i++)
+          return_arr[redshift_bin_start + i] = gamma_t[i] * gamma_t_int * N_mult;
 
-        std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
         return_arr[redshift_bin_start + nradii] = N;
         return_arr[redshift_bin_start + nradii + 1] = Nw;
         return_arr[redshift_bin_start + nradii + 2] = Nb;
