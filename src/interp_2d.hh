@@ -13,20 +13,12 @@
 
 // Interp2D is used for linear interpolation in 1 dimension.
 // It uses the GSL library to do the actual interpolation.
-// Interp2D object allow extrapolation as well as supporting
-// interpolation; no warnings or errors are given when
-// extrapolating.
+// Interp2D object do not allow extrapolation.
 //
 namespace y3_cluster {
 
   class Interp2D {
   public:
-    /*
-     commented out awaiting implementation...
-
-    Interp2D(std::vector<double> const& xs, std::vector<double> const& ys,
-             cosmosis::ndarray<double> const& zs);
-    */
 
     // Interpolator created from two arrays; compiler assures they are of the
     // same length.
@@ -46,7 +38,8 @@ namespace y3_cluster {
              std::vector<double> const& ys,
              std::vector<double> const& zs);
 
-    // Interpolator created from vector, vector, 2D vector, compiler assures they are of the same length; Added by Yuanyuan Zhang
+    // Interpolator created from vector, vector, 2D vector, compiler assures they
+    // are of the same length; Added by Yuanyuan Zhang
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
              std::vector< std::vector<double> > const& zs);
