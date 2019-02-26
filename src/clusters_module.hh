@@ -4,6 +4,7 @@
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "/cosmosis/cubacpp/cubacpp/cubacpp.hh"
 #include "gamma_t.hh"
+#include <datablock_reader.hh>
 
 namespace y3_cluster {
   template <class MODELS>
@@ -62,7 +63,6 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   // FIXME: Just a test placeholder! Should these come from CosmoSIS?
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
-  // We have evdidence that at 64 mpi ranks (nut not at 32!) that cuba is forking. so, prepare to do so.
   cubacores(0,0);
   cubacpp::Cuhre c;
   c.maxeval = 100000000;
@@ -76,13 +76,42 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   auto centered_result = integrand.integrate_centered(c, epsrel, epsabs);
   auto miscentered_result = integrand.integrate_miscentered(c, epsrel, epsabs);
 
-  if (centered_result.status != 0)
+  if (centered_result.status != 0) {
+    std::cout << "h0 " << get_datablock<double>(sample, "cosmological_parameters", "h0") << "\n";
+    std::cout << "Omega_m " << get_datablock<double>(sample, "cosmological_parameters", "omega_m") << "\n";
+    std::cout << "Omega_b " << get_datablock<double>(sample, "cosmological_parameters", "omega_b") << "\n";
+    std::cout << "Omega_nu " << get_datablock<double>(sample, "cosmological_parameters", "omega_nu") << "\n";
+    std::cout << "log1e10As " << get_datablock<double>(sample, "cosmological_parameters", "log1e10As") << "\n";
+    std::cout << "n_s " << get_datablock<double>(sample, "cosmological_parameters", "n_s") << "\n";
+    std::cout << "mor_A " << get_datablock<double>(sample, "cluster_abundance", "mor_A") << "\n";
+    std::cout << "mor_B " << get_datablock<double>(sample, "cluster_abundance", "mor_B") << "\n";
+    std::cout << "mor_alpha " << get_datablock<double>(sample, "cluster_abundance", "mor_alpha") << "\n";
+    std::cout << "mor_sigma " << get_datablock<double>(sample, "cluster_abundance", "mor_sigma") << "\n";
+    std::cout << "hmf_s " << get_datablock<double>(sample, "cluster_abundance", "hmf_s") << "\n";
+    std::cout << "hmf_q " << get_datablock<double>(sample, "cluster_abundance", "hmf_q") << "\n";
     throw std::runtime_error("Centered integration did not converge!");
-  if (miscentered_result.status != 0)
+  }
+  if (miscentered_result.status != 0) {
+    std::cout << "h0 " << get_datablock<double>(sample, "cosmological_parameters", "h0") << "\n";
+    std::cout << "Omega_m " << get_datablock<double>(sample, "cosmological_parameters", "omega_m") << "\n";
+    std::cout << "Omega_b " << get_datablock<double>(sample, "cosmological_parameters", "omega_b") << "\n";
+    std::cout << "Omega_nu " << get_datablock<double>(sample, "cosmological_parameters", "omega_nu") << "\n";
+    std::cout << "log1e10As " << get_datablock<double>(sample, "cosmological_parameters", "log1e10As") << "\n";
+    std::cout << "n_s " << get_datablock<double>(sample, "cosmological_parameters", "n_s") << "\n";
+    std::cout << "mor_A " << get_datablock<double>(sample, "cluster_abundance", "mor_A") << "\n";
+    std::cout << "mor_B " << get_datablock<double>(sample, "cluster_abundance", "mor_B") << "\n";
+    std::cout << "mor_alpha " << get_datablock<double>(sample, "cluster_abundance", "mor_alpha") << "\n";
+    std::cout << "mor_sigma " << get_datablock<double>(sample, "cluster_abundance", "mor_sigma") << "\n";
+    std::cout << "hmf_s " << get_datablock<double>(sample, "cluster_abundance", "hmf_s") << "\n";
+    std::cout << "hmf_q " << get_datablock<double>(sample, "cluster_abundance", "hmf_q") << "\n";
     throw std::runtime_error("Miscentered integration did not converge!");
-
-  std::cout << "Centered:\n" << centered_result;
-  std::cout << "Miscentered:\n" << miscentered_result;
+  }
+  if (get_datablock<double>(sample, "cluster_abundance", "verbose") > 0 ) {
+    std::cout << "Centered:\n" << centered_result;
+    std::cout << "Miscentered:\n" << miscentered_result;
+  } else {
+    std::cout << "Centered and miscentered integration\n";
+  }
 
   // All of our output vectors, centered and miscentered for each of:
   //  - gamma_ts
