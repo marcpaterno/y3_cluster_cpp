@@ -57,8 +57,8 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
   // TODO: Possibly set up any optional parameters, like integration params?
   : clusters_module_on(false)
   , options{filter_in_thread, &clusters_module_on}
-  , verbosity(get_datablock<int>(config, "cluster_abundance", "verbosity", 1))
-  , profile(get_datablock<bool>(config, "cluster_abundance", "profile", false))
+  , verbosity(get_datablock<int>(config, "cluster_abundance", "verbosity"))
+  , profile(get_datablock<bool>(config, "cluster_abundance", "profile"))
   , radii_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins"))
   , lo_bins(_get_ranges(config, "lo"))
   , zo_bins(_get_ranges(config, "zo"))
