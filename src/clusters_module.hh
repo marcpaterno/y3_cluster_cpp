@@ -21,8 +21,8 @@ namespace y3_cluster {
   public:
     explicit ClustersModule(cosmosis::DataBlock& config);
     ~ClustersModule() {
-      ProfilerFlush();
-      ProfilerStop();
+      // ProfilerFlush();
+      // ProfilerStop();
     };
     void execute(cosmosis::DataBlock& sample);
   };
@@ -63,9 +63,9 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
   , lo_bins(_get_ranges(config, "lo"))
   , zo_bins(_get_ranges(config, "zo"))
 {
-  if (profile)
-    ProfilerStartWithOptions("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/cosmosis_run_dump.txt",
-                             &options);
+  // if (profile)
+  //   ProfilerStartWithOptions("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/cosmosis_run_dump.txt",
+  //                            &options);
 }
 
 // TODO:
