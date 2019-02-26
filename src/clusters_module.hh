@@ -21,8 +21,10 @@ namespace y3_cluster {
   public:
     explicit ClustersModule(cosmosis::DataBlock& config);
     ~ClustersModule() {
-      // ProfilerFlush();
-      // ProfilerStop();
+      if (profile) {
+        ProfilerFlush();
+        ProfilerStop();
+      }
     };
     void execute(cosmosis::DataBlock& sample);
   };
@@ -58,14 +60,14 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
   : clusters_module_on(false)
   , options{filter_in_thread, &clusters_module_on}
   , verbosity(get_datablock<int>(config, "cluster_abundance", "verbosity"))
-  , profile(get_datablock<bool>(config, "cluster_abundance", "profile"))
+  , profile(get_datablock<bool>(config, "cluster_abundance", "profile", false))
   , radii_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins"))
   , lo_bins(_get_ranges(config, "lo"))
   , zo_bins(_get_ranges(config, "zo"))
 {
-  // if (profile)
-  //   ProfilerStartWithOptions("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/cosmosis_run_dump.txt",
-  //                            &options);
+  if (profile)
+    ProfilerStartWithOptions("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/cosmosis_run_dump.txt",
+                             &options);
 }
 
 // TODO:
