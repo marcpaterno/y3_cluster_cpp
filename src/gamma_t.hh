@@ -440,33 +440,52 @@ public:
                                       * nrichness
                                       * nredshift);
 
+    // We want to minimize the amount of computation - so, avoid recomputation
+    // To do this, we will iterate over `z` first and compute only the `z`
+    // dependent terms
+    for (std::size_t zoi = 0; zoi < nredshift; zoi++) {
+      double const zomin = zo_ir_[zoi].transform(0.0);
+      double const zomax = zo_ir_[zoi].transform(1.0);
+      double const zt = zt_ir_[zoi].transform(scaled_zt);
 
-    for (std::size_t loi = 0; loi < nrichness; loi++) {
-      auto const richness_bin_start = loi * nredshift * (nradii * npzsource + 3);
+      const y3_cluster::IntegrationRange this_zs_ir{std::max(zt, zs_ir_.transform(0.0)),
+                                                    zs_ir_.transform(1.0)};
+      double const zs = this_zs_ir.transform(scaled_zs);
 
-      for (std::size_t zoi = 0; zoi < nredshift; zoi++) {
+      auto const dv_do_dz_v = dv_do_dz(zt);
+      auto const omega_z_v = omega_z(zt);
+      auto const hmb_v = hmb(lnM, zt);
+      auto const hmf_v = hmf(lnM, zt);
+      auto const zo_zt_v = zo_zt(zomin, zomax, zt);
+
+      // These will eventually be passed by CosmoSIS
+      double m_shear = 0.0;
+      // This is the lambda-redshift bin weight that we don't fully understand
+      double w = 1.0;
+
+      // eq. (28)
+      // Compute the z-dependent parts of the gamma_t up front
+      //auto gamma_t = std::vector<double>(nradii * npzsource);
+      //for (auto i = 0u; i < nradii; i++)
+      //  gamma_t[i] = (1.0 + m_shear) / sig_crit * gamma_radial_dep(r[i], zt);
+      auto gamma_t = std::vector<double> (nradii * npzsource);
+      for (auto srci = 0u; srci < npzsource; srci++) {
+        auto const pzsource_v = pzsource(srci, zs);
+        for (auto i = 0u; i < nradii; i++) {
+          // Nw intentionally left out - returned in return_arr to be used further on
+          gamma_t[srci * nradii + i] = (1.0 + m_shear) * pzsource_v * gamma_radial_dep(r[i], zt);
+        }
+      }
+
+      for (std::size_t loi = 0; loi < nrichness; loi++) {
+        auto const richness_bin_start = loi * nredshift * (nradii + 3);
         // Zo does not actually need to be integrated over
-        double const zomin = zo_ir_[zoi].transform(0.0);
-        double const zomax = zo_ir_[zoi].transform(1.0);
-        double const zt = zt_ir_[zoi].transform(scaled_zt);
         double const lt = lt_ir_[loi].transform(scaled_lt);
 
-        const y3_cluster::IntegrationRange this_zs_ir{std::max(zt, zs_ir_.transform(0.0)),
-                                                      zs_ir_.transform(1.0)};
-        double const zs = this_zs_ir.transform(scaled_zs);
 
-        auto const dv_do_dz_v = dv_do_dz(zt);
-        auto const omega_z_v = omega_z(zt);
-        auto const hmb_v = hmb(lnM, zt);
-        auto const hmf_v = hmf(lnM, zt);
-        auto const zo_zt_v = zo_zt(zomin, zomax, zt);
         auto const mor_v = mor(lt, lnM, zt);
 
-        // TODO: These will eventually be passed by CosmoSIS
-        double m_shear = 0.0;
         double sig_crit_inv = sig_crit_inv_(zt, zs);
-        // TODO: The lambda-redshift bin weight that we don't fully understand
-        double w = 1.0;
 
         // eq. (25)
         double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
@@ -481,19 +500,14 @@ public:
         auto const gamma_t_int = jacob_G(loi, zoi) * this_zs_ir.jacobian() * N_int * w;
 
         // eq. (28)
-        auto gamma_t = std::vector<double> (nradii * npzsource);
-        for (auto srci = 0u; srci < npzsource; srci++) {
-          auto const pzsource_v = pzsource(srci, zs);
-          for (auto i = 0u; i < nradii; i++) {
-            // Nw intentionally left out - returned in return_arr to be used further on
-            gamma_t[srci * nradii + i] = (1.0 + m_shear) * sig_crit_inv * pzsource_v
-                                       * gamma_t_int * N_mult * gamma_radial_dep(r[i], zt);
-          }
-        }
-
         auto redshift_bin_start = richness_bin_start + zoi * (nradii*npzsource + 3);
 
-        std::copy_n( gamma_t.begin(), gamma_t.size(), &return_arr[redshift_bin_start] );
+        for (auto srci = 0u; srci < npzsource; srci++) {
+          for (auto i = 0u; i < nradii; i++) {
+            // Nw intentionally left out - returned in return_arr to be used further on
+            return_arr[redshift_bin_start + nradii*srci + i] = gamma_t[srci * nradii + i] * sig_crit_inv * gamma_t_int * N_mult;
+          }
+        }
         return_arr[redshift_bin_start + nradii*npzsource] = N;
         return_arr[redshift_bin_start + nradii*npzsource + 1] = Nw;
         return_arr[redshift_bin_start + nradii*npzsource + 2] = Nb;

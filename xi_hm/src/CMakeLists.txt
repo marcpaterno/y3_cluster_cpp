@@ -9,7 +9,7 @@ target_include_directories(interp
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/../../../cubacpp)
 
-add_library(xihm SHARED xihm.cc datablock_reader.cc interp_1d.cc interp_2d.cc)
+add_library(xihm SHARED xihm.cc interp_1d.cc interp_2d.cc)
 target_link_libraries(xihm
                       PRIVATE
 		      interp

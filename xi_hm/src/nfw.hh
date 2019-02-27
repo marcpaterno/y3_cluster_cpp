@@ -4,13 +4,14 @@
 
 class nfw_dsigma{
 public:
-  explicit nfw_dsigma(double c)
-    : _c(c)
+  explicit nfw_dsigma(double c, double om)
+    : _c(c), _om(om)
   {}
 
   explicit nfw_dsigma(cosmosis::DataBlock& sample)
   { // remember to read this in from the values.ini file
     sample.get_val<double>("nfw_dsigma_params", "c", _c);
+    sample.get_val<double>("cosmological_parameters", "omega_m", _om);
   }
 
   double
@@ -18,7 +19,7 @@ public:
   {
     double delta_c = 200.*_c*_c*_c / 3./(std::log(1.+ _c) - _c/(1.+ _c));
 
-    double rho_crit = 2.77526157E11;
+    double rho_crit = 2.77526157E11*_om;
     // this needs to be rho_m rather than rho_crit which is rho_crit*om
 
     double r_200 = std::pow(3.*M/(800.*M_PI*rho_crit) , 1./3.);
@@ -29,5 +30,5 @@ public:
     return xi_nfw; 
  }
 private:
-  double _c;
+  double _c, _om;
 };

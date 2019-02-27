@@ -22,7 +22,7 @@ namespace y3_cluster {
     // The distributions of weak lensing source bins
     std::vector<std::shared_ptr<Interp1D const>> pzsources;
     // The radii from the cluster center to predict gamma_t values for
-    std::vector<double> radius_bins;
+    std::vector<double> radii_bins;
     // The cluster bins in richness-space
     std::vector<y3_cluster::IntegrationRange> lo_bins;
     // The cluster bins in redshift-space
@@ -87,13 +87,13 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
               get_datablock<std::string>(config,
                                          "cluster_abundance",
                                          "y3_observables")))
-  , radius_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radius_bins"))
+  , radii_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins"))
   , lo_bins(into_ranges(config, "lo"))
   , zo_bins(into_ranges(config, "zo"))
 {
   if (pzsources.size() == 0)
     throw std::runtime_error("What the hell??");
-  if (radius_bins.size() == 0)
+  if (radii_bins.size() == 0)
     throw std::runtime_error("What the hell??");
   if (profile)
     ProfilerStartWithOptions("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/cosmosis_run_dump.txt",
@@ -113,7 +113,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   // First - output the important parameters
   sample.put_val<std::vector<double>>("cluster_abundance", "lo_bin_edges", into_edges(lo_bins));
   sample.put_val<std::vector<double>>("cluster_abundance", "zo_bin_edges", into_edges(zo_bins));
-  sample.put_val<std::vector<double>>("cluster_abundance", "radius_bins", radius_bins);
+  sample.put_val<std::vector<double>>("cluster_abundance", "radii_bins", radii_bins);
   sample.put_val<int>("cluster_abundance", "npzsources", pzsources.size());
 
   // FIXME: Just a test placeholder! Should these come from CosmoSIS?
@@ -127,7 +127,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   // Initialize our big computation stuff up here, so any DataBlock access
   // errors happen up front
   auto integrand = Gamma_T_Integrand<MODELS>
-                     {sample, radius_bins, pzsources, lo_bins, zo_bins};
+                     {sample, radii_bins, pzsources, lo_bins, zo_bins};
 
   // Compute abundance counts and gamma_t's
   // Profile if necessary
