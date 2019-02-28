@@ -31,8 +31,10 @@ namespace y3_cluster {
   public:
     explicit ClustersModule(cosmosis::DataBlock& config);
     ~ClustersModule() {
-      ProfilerFlush();
-      ProfilerStop();
+      if (profile) {
+        ProfilerFlush();
+        ProfilerStop();
+      }
     };
     void execute(cosmosis::DataBlock& sample);
   };
@@ -87,7 +89,7 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
               get_datablock<std::string>(config,
                                          "cluster_abundance",
                                          "y3_observables")))
-  , radii_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radii_bins"))
+  , radii_bins(get_datablock<std::vector<double>>(config, OPTION_SECTION, "radius_bins"))
   , lo_bins(into_ranges(config, "lo"))
   , zo_bins(into_ranges(config, "zo"))
 {
