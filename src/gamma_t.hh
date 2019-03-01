@@ -460,6 +460,7 @@ public:
 
       // These will eventually be passed by CosmoSIS
       double m_shear = 0.0;
+      double sig_crit_inv = sig_crit_inv_(zt, zs);
       // This is the lambda-redshift bin weight that we don't fully understand
       double w = 1.0;
 
@@ -473,19 +474,16 @@ public:
         auto const pzsource_v = pzsource(srci, zs);
         for (auto i = 0u; i < nradii; i++) {
           // Nw intentionally left out - returned in return_arr to be used further on
-          gamma_t[srci * nradii + i] = (1.0 + m_shear) * pzsource_v * gamma_radial_dep(r[i], zt);
+          gamma_t[srci * nradii + i] = (1.0 + m_shear) * pzsource_v * sig_crit_inv * gamma_radial_dep(r[i], zt);
         }
       }
 
       for (std::size_t loi = 0; loi < nrichness; loi++) {
-        auto const richness_bin_start = loi * nredshift * (nradii + 3);
+        auto const richness_bin_start = loi * nredshift * (nradii*npzsource + 3);
         // Zo does not actually need to be integrated over
         double const lt = lt_ir_[loi].transform(scaled_lt);
 
-
         auto const mor_v = mor(lt, lnM, zt);
-
-        double sig_crit_inv = sig_crit_inv_(zt, zs);
 
         // eq. (25)
         double const N_int = omega_z_v * dv_do_dz_v * zo_zt_v * hmf_v * mor_v;
@@ -505,7 +503,7 @@ public:
         for (auto srci = 0u; srci < npzsource; srci++) {
           for (auto i = 0u; i < nradii; i++) {
             // Nw intentionally left out - returned in return_arr to be used further on
-            return_arr[redshift_bin_start + nradii*srci + i] = gamma_t[srci * nradii + i] * sig_crit_inv * gamma_t_int * N_mult;
+            return_arr[redshift_bin_start + nradii*srci + i] = gamma_t[srci * nradii + i] * gamma_t_int * N_mult;
           }
         }
         return_arr[redshift_bin_start + nradii*npzsource] = N;

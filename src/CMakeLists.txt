@@ -28,7 +28,6 @@ target_link_libraries(cluster_abundance
                       interp
                       lc_lt
                       profiler
-                      smp_var
                       cfitsio
                       ${CUBA_LIBRARIES}
                       ${GSL_LIBRARIES}
