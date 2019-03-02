@@ -138,9 +138,9 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   auto miscentered_result = integrand.integrate_miscentered(c, epsrel, epsabs);
   clusters_module_on = false;
 
-  if (centered_result.status != 0)
+  if (!centered_result.all_converged())
     throw std::runtime_error("Centered integration did not converge!");
-  if (miscentered_result.status != 0)
+  if (!miscentered_result.all_converged())
     throw std::runtime_error("Miscentered integration did not converge!");
 
   if (verbosity > 0) {

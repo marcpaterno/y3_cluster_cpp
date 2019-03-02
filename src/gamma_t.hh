@@ -119,16 +119,16 @@ struct Gamma_T_Integrated_Bin_Result {
 struct Gamma_T_Integrated_Bin_Result_S
   : std::vector <Gamma_T_Integrated_Bin_Result>
 {
-  long long neval;
-  int nregions = -1;
-  int status = 1;
+  std::vector<long long> neval;
+  std::vector<int> nregions;
+  std::vector<int> status;
 
   std::size_t const n_richness;
   std::size_t const n_redshift;
 
   Gamma_T_Integrated_Bin_Result_S() = delete;
 
-  Gamma_T_Integrated_Bin_Result_S (std::size_t i, std::size_t e, long long neval, int nregions, int status)
+  Gamma_T_Integrated_Bin_Result_S (std::size_t i, std::size_t e, std::vector<long long> neval, std::vector<int> nregions, std::vector<int> status)
     : std::vector<Gamma_T_Integrated_Bin_Result>  (i*e)
     , neval {neval}
     , nregions {nregions}
@@ -136,13 +136,25 @@ struct Gamma_T_Integrated_Bin_Result_S
     , n_richness {i}
     , n_redshift {e}
   {}
+
+  bool
+  all_converged() const
+  {
+    for (auto s : status)
+      if (s != 0)
+        return false;
+    return true;
+  }
 };
 
 inline std::ostream&
 operator<<(std::ostream& os, Gamma_T_Integrated_Bin_Result_S const& res)
 {
-  os << "neval: " << res.neval << " nregions: " << res.nregions
-     << " status: " << res.status << '\n';
+  for (auto i = 0u; i < res.neval.size(); i++) {
+    os << "redshift bin " << i << ": neval: " << res.neval[i]
+       << " nregions: " << res.nregions[i]
+       << " status: " << res.status[i] << '\n';
+  }
   for (auto const& bin : res) {
     // Print out bin info
     os << "Bin: [zmin, zmax] = ["
@@ -181,11 +193,39 @@ namespace {
                                const size_t n_richness,
                                const size_t n_redshift)
   {
-    Gamma_T_Integrated_Bin_Result_S return_arr (n_richness, n_redshift, results.neval, results.nregions, results.status);
+    Gamma_T_Integrated_Bin_Result_S return_arr (n_richness, n_redshift, {results.neval}, {results.nregions}, {results.status});
 
     for (auto loi = 0u; loi < n_richness; loi++) {
       for (auto zoi = 0u; zoi < n_redshift; zoi++) {
         return_arr[loi * n_redshift + zoi] = Gamma_T_Integrated_Bin_Result (loi, zoi, gt, results);
+      }
+    }
+
+    return return_arr;
+  }
+
+  template<typename INTEGRAND>
+  Gamma_T_Integrated_Bin_Result_S
+  make_gamma_t_integrated_bins(const std::vector<std::pair<INTEGRAND, cubacpp::integration_results_v>> &  results,
+                               const size_t n_richness)
+  {
+    std::vector<long long> neval;
+    std::vector<int> nregions;
+    std::vector<int> status;
+
+    for (const auto& res : results) {
+      neval.push_back(res.second.neval);
+      nregions.push_back(res.second.nregions);
+      status.push_back(res.second.status);
+    }
+
+    Gamma_T_Integrated_Bin_Result_S return_arr (n_richness, results.size(), neval, nregions, status);
+
+    const auto n_redshift = results.size();
+    for (auto zoi = 0u; zoi < n_redshift; zoi++) {
+      for (auto loi = 0u; loi < n_richness; loi++) {
+        const auto& [igrnd, res] = results[zoi];
+        return_arr[loi * n_redshift + zoi] = Gamma_T_Integrated_Bin_Result (loi, 0, igrnd, res);
       }
     }
 
@@ -658,6 +698,42 @@ public:
                             gamma_t_cen);
   }
 
+  /* Integrates the _centered_ component of gamma_t, N expressions, and returns
+   * the raw results of the integrand.
+   * Same arguments as `integrate_centered`, `integrate_miscentered`.
+   */
+  template<typename Integrator>
+  cubacpp::integration_results_v
+  raw_integrate_centered(Integrator i, double epsrel, double epsabs)
+  {
+    return i.integrate([this](double scaled_lo, double scaled_lt,
+                              double scaled_zt, double scaled_zs,
+                              double scaled_lnM, double scaled_A)
+            {  return centered(scaled_lo,  scaled_lt,
+                               scaled_zt, scaled_zs,
+                               scaled_lnM, scaled_A);  },
+            epsrel, epsabs);
+  }
+
+  /* Integrates the _miscentered_ component of gamma_t, N expressions, and
+   * returns the raw results of the integrand.
+   * Same arguments as `integrate_centered`, `integrate_miscentered`.
+   */
+  template<typename Integrator>
+  cubacpp::integration_results_v
+  raw_integrate_miscentered(Integrator i, double epsrel, double epsabs)
+  {
+    return i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
+                              double scaled_zt, double scaled_zs,
+                              double scaled_R, double scaled_lnM,
+                              double scaled_A, double scaled_theta)
+            {  return miscentered(scaled_lo, scaled_lc, scaled_lt,
+                                  scaled_zt, scaled_zs,
+                                  scaled_R, scaled_lnM,
+                                  scaled_A, scaled_theta);  },
+            epsrel, epsabs);
+  }
+
   /* Integrates the _centered_ component of the gamma_T, N expressions, and returns
    * a pair of (results, bins), where `results` is the raw `cubacpp` output, and
    * `bins` is an array of `Gamma_T_Integrated_Bin_Result`
@@ -672,16 +748,12 @@ public:
   Gamma_T_Integrated_Bin_Result_S
   integrate_centered(Integrator i, double epsrel, double epsabs)
   {
-    auto result
-        = i.integrate ([this] (double scaled_lo, double scaled_lt,
-                               double scaled_zt, double scaled_zs,
-                               double scaled_lnM, double scaled_A)
-                           {  return centered(scaled_lo,  scaled_lt,
-                                              scaled_zt, scaled_zs,
-                                              scaled_lnM, scaled_A);  },
-                       epsrel, epsabs);
-
-    return make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ());
+    std::vector<std::pair<Gamma_T_Integrand<MODELS>, cubacpp::integration_results_v>> results;
+    for (const auto zir : zo_ir_) {
+      Gamma_T_Integrand<MODELS> igrnd = (*this).with_bins(lo_ir_, {{zir}});
+      results.push_back({igrnd, igrnd.raw_integrate_centered(i, epsrel, epsabs)});
+    }
+    return make_gamma_t_integrated_bins(results, lo_ir_.size());
   }
 
   /* Integrates the _mis_centered component of the gamma_T, N expressions, and returns
@@ -698,17 +770,12 @@ public:
   Gamma_T_Integrated_Bin_Result_S
   integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
-    auto result = i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
-                                     double scaled_zt, double scaled_zs,
-                                     double scaled_R, double scaled_lnM,
-                                     double scaled_A, double scaled_theta) {
-                                 return miscentered(scaled_lo, scaled_lc,
-                                                    scaled_lt, scaled_zs,
-                                                    scaled_zt, scaled_R, scaled_lnM,
-                                                    scaled_A, scaled_theta);
-                              },
-                              epsrel, epsabs);
-    return make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ());
+    std::vector<std::pair<Gamma_T_Integrand<MODELS>, cubacpp::integration_results_v>> results;
+    for (const auto zir : zo_ir_) {
+      Gamma_T_Integrand<MODELS> igrnd = (*this).with_bins(lo_ir_, {{zir}});
+      results.push_back({igrnd, igrnd.raw_integrate_miscentered(i, epsrel, epsabs)});
+    }
+    return make_gamma_t_integrated_bins(results, lo_ir_.size());
   }
 };
 
