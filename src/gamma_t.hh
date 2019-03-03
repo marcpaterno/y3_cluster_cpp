@@ -534,7 +534,7 @@ public:
     auto jacob_G = [=](std::size_t loi, std::size_t zoi) {
       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
              * lt_ir_[loi].jacobian()
-             * zt_ir_[zoi].jacobian()
+             * zt_ir_[zoi].jacobian();
     };
 
     // eq. (26)
