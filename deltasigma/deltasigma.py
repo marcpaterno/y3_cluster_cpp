@@ -53,39 +53,53 @@ def execute(block, config):
 	M = np.logspace(np.log10(M_min), np.log10(M_max), M_bins)
 
 	Deltasigma_1 = np.zeros((M_bins, R_perp_bins))
+	Xi_1 = np.zeros((M_bins, Radii_bins))
+	Sigma_1 = np.zeros((M_bins, R_perp_bins))
 	for i in range(M_bins):
-		Sigma1 = ct.deltasigma.Sigma_nfw_at_R(
+		sigma1 = ct.deltasigma.Sigma_nfw_at_R(
 				R_perp, M[i], concentration, omega_m
 				)
 		Deltasigma_1[i] = ct.deltasigma.DeltaSigma_at_R(
-				R_perp, R_perp, Sigma1,
+				R_perp, R_perp, sigma1,
 				M[i], concentration, omega_m
 				)
+                Xi_1[i] = ct.xi.xi_nfw_at_R(Radii, M[i], concentration, omega_m)
+                Sigma_1[i] = sigma1
 
 	Deltasigma_2 = np.zeros((nz, R_perp_bins))
+	Xi_2 = np.zeros((nz, Radii_bins))
+	Sigma_2 = np.zeros((M_bins, R_perp_bins))
 	for i in range(nz):
 		xi_mm = ct.xi.xi_mm_at_R(Radii, k_nl, P_k_nl[i])
-		Sigma2 = ct.deltasigma.Sigma_at_R(
+	        Xi_2[i] = xi_mm
+		sigma2 = ct.deltasigma.Sigma_at_R(
 				R_perp, Radii, xi_mm, M[0], concentration, omega_m
 				)
 		Deltasigma_2[i] = ct.deltasigma.DeltaSigma_at_R(
-				R_perp, R_perp, Sigma2,
+				R_perp, R_perp, sigma2,
 				M[0], concentration, omega_m
 				)
+	        Sigma_2[i] = sigma2
 
 	# FIXME make bias real
 	Bias = np.zeros((M_bins, nz))
-	#for i in range(M_bins):
-	#	for j in range(nz):
-	#		Bias[i][j] = ct.bias.bias_at_M(M[i], k, P_k[j], omega_m)
+	for i in range(M_bins):
+		for j in range(nz):
+			Bias[i][j] = ct.bias.bias_at_M(M[i], k, P_k[j], omega_m)
 
 	logM = np.log(M)
+	block["deltasigma", "Xi_1"] = Xi_1
+	block["deltasigma", "Xi_2"] = Xi_2
+	block["deltasigma", "R_Xi"] = Radii
 	block["deltasigma", "deltasigma_1"] = Deltasigma_1
 	block["deltasigma", "deltasigma_2"] = Deltasigma_2
+	block["deltasigma", "sigma_1"] = Sigma_1
+	block["deltasigma", "sigma_2"] = Sigma_2
 	block["deltasigma", "bias"] = Bias
 	block["deltasigma", "m_h"] = M
+	block["deltasigma", "z"] = z
 	block["deltasigma", "lnM"] = logM
-	block["deltasigma", "R_perp"] = R_perp
+	block["deltasigma", "R_sigma_deltasigma"] = R_perp
 	return 0
 
 
