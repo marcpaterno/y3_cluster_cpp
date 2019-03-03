@@ -6,16 +6,28 @@
 namespace y3_cluster {
 
   class T_CEN_t {
+    double const ln_r0;
+    double const gamma;
   public:
-      T_CEN_t() {}
-      explicit T_CEN_t(cosmosis::DataBlock&) {}
+    // hard-coded values are best-fits from triaxiality paper
+    // FIXME: get these as parameters
+    T_CEN_t()
+      : ln_r0(0.632)
+      , gamma(1.634)
+    {}
+    explicit T_CEN_t(cosmosis::DataBlock&)
+      : T_CEN_t()
+    {}
 
-      double
-      operator()(double, double) const
-      {
-        // Will update with a model eventually!
-        return 1.0;
-      }
+    double
+    operator()(double r, double lnM [[maybe_unused]]) const
+    {
+      // FIXME: What should units of r be before log? Mpc, Mpc/h?
+      // Consult triaxiality paper
+      double const ln_r = std::log(r),
+                   ln_r_diff = ln_r0 - ln_r;
+      return 1 - 1.0 / ((ln_r_diff * ln_r_diff) + gamma);
+    }
   };
 }
 

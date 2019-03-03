@@ -211,7 +211,6 @@ struct  Gamma_T_Integrand {
   // TODO: Matteo uses {z_ir_[i].min - 3.5 * z_sigma, z_ir_[i].max + 3.5 * z_sigma}
   std::vector<y3_cluster::IntegrationRange> zt_ir_;
   y3_cluster::IntegrationRange R_ir_;
-  y3_cluster::IntegrationRange A_ir_;
   y3_cluster::IntegrationRange theta_ir_;
 
   std::vector<double> r;  /* radii array */
@@ -238,7 +237,6 @@ public:
                     std::vector<y3_cluster::IntegrationRange> lo_ir,
                     std::vector<y3_cluster::IntegrationRange> zo_ir,
                     y3_cluster::IntegrationRange R_ir,
-                    y3_cluster::IntegrationRange A_ir,
                     y3_cluster::IntegrationRange theta_ir,
                     std::vector<double> const& rarray)
     : fcen_(fcen)
@@ -271,7 +269,6 @@ public:
                                                     ir.transform(1.0) + 3.5 * z_sigma};
                 })))
     , R_ir_(R_ir)
-    , A_ir_(A_ir)
     , theta_ir_(theta_ir)
     , r(rarray)
   {}
@@ -311,7 +308,6 @@ public:
                                                     ir.transform(1.0) + 3.5 * z_sigma};
                 })))
     , R_ir_(sample, "R")
-    , A_ir_(sample, "A")
     , theta_ir_(sample, "theta")
     , r(radii)
   {}
@@ -344,7 +340,6 @@ public:
             // Different zir
             new_zir,
             R_ir_,
-            A_ir_,
             theta_ir_,
             r};
   }
@@ -444,7 +439,7 @@ public:
    * * zt - z^{true}
    * * R - R
    * * lnM - ln(M)
-   * * A - ???
+   * * mu - Cosine of angle between LOS and cluster's major axis
    * */
   IntegrandResult
   miscentered(double scaled_lo,
@@ -453,7 +448,7 @@ public:
               double scaled_zt,
               double scaled_R,
               double scaled_lnM,
-              double scaled_A,
+              double mu,
               double scaled_theta) const
   {
     // We probably should factor out the common subexpressions, rather than
@@ -461,7 +456,6 @@ public:
     // seems to be the intent of the commented-out code below.
     auto const lnM   = lnM_ir_   .transform(scaled_lnM);
     auto const R     = R_ir_     .transform(scaled_R);
-    auto const A     = A_ir_     .transform(scaled_A);
     auto const theta = theta_ir_ .transform(scaled_theta);
 
     auto jacob_N = [=](std::size_t loi, std::size_t zoi) {
@@ -474,7 +468,7 @@ public:
        return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
               * lt_ir_[loi].jacobian() * lc_ir_[loi].jacobian()
               * zt_ir_[zoi].jacobian()
-              * R_ir_.jacobian() * A_ir_.jacobian()
+              * R_ir_.jacobian()
               * theta_ir_.jacobian();
     };
 
@@ -492,10 +486,12 @@ public:
     // `R` in the paper, and `R` corresponds to what is called `R_{mis}` in the
     // paper
     // eq. (31)
-    auto gamma_t_mis = [this, N_mis, A, lnM, R, theta](double radius, double zt) {
+    auto gamma_t_mis = [this, R, theta, mu, lnM](double radius, double zt) {
       double const adjusted_R = std::sqrt(radius*radius + R*R + 2*R*radius * std::cos(theta));
+      // FIXME: Implement A
+      double const A = A_mis(mu);
       return (1.0 / 6.28318530718)
-             * exp(A * T_cen(adjusted_R, lnM))/A_ir_.jacobian()
+             * exp(A * T_cen(adjusted_R, lnM))
              * del_sig(adjusted_R, lnM, zt);
     };
 
@@ -517,18 +513,17 @@ public:
    * * zt - z^{true}
    * * R - R
    * * lnM - ln(M)
-   * * A - ???
+   * * mu - Cosine of angle between LOS and cluster's major axis
    * */
   IntegrandResult
   centered(double scaled_lo,
            double scaled_lt,
            double scaled_zt,
            double scaled_lnM,
-           double scaled_A) const
+           double mu) const
   {
     // Necessary terms
     auto const lnM = lnM_ir_.transform(scaled_lnM);
-    auto const A = A_ir_.transform(scaled_A);
 
     auto jacob_N = [=](std::size_t loi, std::size_t zoi) {
       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
@@ -539,8 +534,7 @@ public:
     auto jacob_G = [=](std::size_t loi, std::size_t zoi) {
       return lnM_ir_.jacobian() * lo_ir_[loi].jacobian()
              * lt_ir_[loi].jacobian()
-             * zt_ir_[zoi].jacobian()
-             * A_ir_.jacobian();
+             * zt_ir_[zoi].jacobian();
     };
 
     // eq. (26)
@@ -554,8 +548,10 @@ public:
     // eq. (30)
     // For the following lambda function, `radius` corresponds to what is called
     // `R` in the paper
-    auto gamma_t_cen = [this, N_cen, A, lnM](double radius, double zt) {
-      return exp(A * T_cen(radius, lnM)) / A_ir_.jacobian() * del_sig(radius, lnM, zt);
+    auto gamma_t_cen = [this, mu, lnM](double radius, double zt) {
+      // FIXME: Implement A
+      const auto A = A_cen(mu);
+      return exp(A * T_cen(radius, lnM)) * del_sig(radius, lnM, zt);
     };
 
     return integrand_common(scaled_lt,
@@ -584,9 +580,9 @@ public:
     auto result
         = i.integrate ([this] (double scaled_lo, double scaled_lt,
                                double scaled_zt, double scaled_lnM,
-                               double scaled_A)
+                               double mu)
                            {  return centered(scaled_lo,  scaled_lt, scaled_zt,
-                                              scaled_lnM, scaled_A);  },
+                                              scaled_lnM, mu);  },
                        epsrel, epsabs);
 
     return make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ());
@@ -608,10 +604,10 @@ public:
   {
     auto result = i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
                                      double scaled_zt, double scaled_R, double scaled_lnM,
-                                     double scaled_A, double scaled_theta) {
+                                     double mu, double scaled_theta) {
                                  return miscentered(scaled_lo, scaled_lc, scaled_lt,
                                                     scaled_zt, scaled_R, scaled_lnM,
-                                                    scaled_A, scaled_theta);
+                                                    mu, scaled_theta);
                               },
                               epsrel, epsabs);
     return make_gamma_t_integrated_bins(*this, result, lo_ir_.size (), zo_ir_.size ());
@@ -643,7 +639,6 @@ make_gamma_t_integrand(double fcen,
   y3_cluster::IntegrationRange lnM_ir{29.0, 38.0};
   y3_cluster::IntegrationRange zt_ir{0.05, 0.35};
   y3_cluster::IntegrationRange R_ir{0., 3.0};
-  y3_cluster::IntegrationRange A_ir{-0.01, 0.01};
   y3_cluster::IntegrationRange theta_ir{0.,6.28318530718};
 
   auto rarray = std::vector<double> (n_radii);
@@ -669,7 +664,6 @@ make_gamma_t_integrand(double fcen,
           lo_ir,
           zo_ir,
           R_ir,
-          A_ir,
           theta_ir,
           rarray };
 }

@@ -4,6 +4,7 @@ Makefile
 bessel_analytic_integral_test
 bessel_integral_equivalence_test
 cmake_install.cmake
+a_t_cen_t_test
 dv_do_dz_t_test
 ez_sq_test
 ez_test
