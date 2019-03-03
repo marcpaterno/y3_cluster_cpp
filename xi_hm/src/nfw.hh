@@ -1,7 +1,7 @@
 /* Here I use Omega_m=0.3, Omega_l=0.7 , in class EZ */
 /* We would need redshift of the cluster as an input?! */
 #include <math.h>
-
+#include <datablock_reader.hh>
 class nfw_dsigma{
 public:
   explicit nfw_dsigma(double c, double om)
