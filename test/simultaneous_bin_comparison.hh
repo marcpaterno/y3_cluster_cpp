@@ -17,11 +17,11 @@ namespace y3_cluster {
     {
         auto bins_cen = gti.integrate_centered(I, epsrel, epsabs);
         if (test)
-            CHECK(bins_cen.status == 0);
+            CHECK(bins_cen.all_converged());
 
         auto bins_mis = gti.integrate_miscentered(I, epsrel, epsabs);
         if (test)
-            CHECK(bins_mis.status == 0);
+            CHECK(bins_mis.all_converged());
 
         // CSV Output Header
         if (print)
@@ -57,8 +57,8 @@ namespace y3_cluster {
                               << cen_or_mis << ","
                               << bin_single.N << ", "
                               << bin.N << ", "
-                              << res_single.status << ", "
-                              << res.status << ", "
+                              << res_single.all_converged() << ", "
+                              << res.all_converged() << ", "
                               << bin_single.N_error << ", "
                               << bin.N_error << ", "
                               << bin_single.N_prob << ", "
@@ -67,7 +67,7 @@ namespace y3_cluster {
 
             // First, check that the centered term gives comparable results
             auto bin_cen_single = gti_new.integrate_centered(I, epsrel, epsabs);
-            CHECK(bin_cen_single.status == 0);
+            CHECK(bin_cen_single.all_converged());
 
             for (auto j = 0u; j < bin_cen_single[0].gamma_ts.size(); j++)
                 for (auto k = 0u; k < bin_cen_single[0].gamma_ts[0].size(); k++)
@@ -80,7 +80,7 @@ namespace y3_cluster {
 
             // Now test the miscentered term
             auto bin_mis_single = gti_new.integrate_miscentered(I, epsrel, epsabs);
-            CHECK(bin_mis_single.status == 0);
+            CHECK(bin_mis_single.all_converged());
 
             for (auto j = 0u; j < bin_mis_single[0].gamma_ts.size(); j++)
                 for (auto k = 0u; k < bin_mis_single[0].gamma_ts[0].size(); k++)
