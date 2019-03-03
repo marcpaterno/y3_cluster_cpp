@@ -18,3 +18,4 @@ find_package(cuba REQUIRED)
 find_package(GSL REQUIRED)
 
 add_subdirectory(src)
+add_subdirectory(test)
