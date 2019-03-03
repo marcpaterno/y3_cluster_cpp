@@ -8,9 +8,7 @@
 
 // Interp1D is used for linear interpolation in 1 dimension.
 // It uses the GSL library to do the actual interpolation.
-// Interp1D object allow extrapolation as well as supporting
-// interpolation; no warnings or errors are given when
-// extrapolating.
+// Interp1D objects do not allow extrapolation.
 //
 namespace y3_cluster {
   class Interp1D {
@@ -32,6 +30,7 @@ namespace y3_cluster {
     Interp1D(Interp1D const&) = delete;
 
     double operator()(double x) const;
+
     double
     eval(double x) const
     {

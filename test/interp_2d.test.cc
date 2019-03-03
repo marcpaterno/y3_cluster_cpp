@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+#include "gsl/gsl_errno.h"
+
 using y3_cluster::Interp2D;
 using y3_cluster::Point3D;
 auto infinity = std::numeric_limits<double>::infinity;
@@ -54,6 +56,7 @@ TEST_CASE("Interp2D exact at knots", "[interpolation][2d]")
 
 TEST_CASE("Interp2D on bilinear")
 {
+  gsl_set_error_handler_off();
   constexpr std::size_t nx = 3;
   constexpr std::size_t ny = 4;
   std::array<double, nx> const xs = {1., 2., 3.};
@@ -75,14 +78,14 @@ TEST_CASE("Interp2D on bilinear")
   // Pure interpolation.
   CHECK(f(2.5, 1.5) == 4.5);
   // Extrapolate, only in x.
-  CHECK(f(0.0, 3.0) == 4.0);
-  CHECK(f(5.0, 3.0) == 14.0);
+  CHECK_THROWS_AS(f(0.0, 3.0) == 4.0, std::domain_error);
+  CHECK_THROWS_AS(f(5.0, 3.0) == 14.0, std::domain_error);
   // Extrapolate, only in y.
-  CHECK(f(2.5, -1.0) == -3.0);
-  CHECK(f(2.5, 5.0) == 15.0);
+  CHECK_THROWS_AS(f(2.5, -1.0) == -3.0, std::domain_error);
+  CHECK_THROWS_AS(f(2.5, 5.0) == 15.0, std::domain_error);
   // Extrapolate in both x and y.
-  CHECK(f(0.0, 0.0) == -5.0);
-  CHECK(f(5.0, 5.0) == 20.0);
+  CHECK_THROWS_AS(f(0.0, 0.0) == -5.0, std::domain_error);
+  CHECK_THROWS_AS(f(5.0, 5.0) == 20.0, std::domain_error);
 }
 
 TEST_CASE("construction from Point3Ds")
