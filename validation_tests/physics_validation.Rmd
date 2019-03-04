@@ -221,7 +221,6 @@ ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
   xlab(expression(lambda)) +
   facet_wrap(mbin ~ .)
 ```
-
 # The mass function: HMF$_t$
 
 ```{r}
@@ -328,6 +327,65 @@ ggplot(tester, aes(x = lambda_o, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue") +
   facet_wrap(R_mis~.)
+```
+
+
+## Xi_hm Module test
+
+```{r}
+local.frac.errormargin = 5 * frac.errormargin
+local.abs.errormargin = abs.errormargin
+```
+
+```{r include = FALSE}
+xi_nfw <- read_tsv("../xi_hm/data/xi_14.5_nfw.out")
+xi_nfw <- mutate(xi_nfw,
+                 resid = ytrue - ytest,
+                 fracerr = resid/ytrue,
+                 lo = pmin(-local.frac.errormargin * ytrue, -local.abs.errormargin),
+                 hi = pmax(local.frac.errormargin * ytrue, local.abs.errormargin),
+                 within.frac = (abs(fracerr) < local.frac.errormargin),
+                 within.abs = (abs(resid) < local.abs.errormargin),
+                 pass = within.frac | within.abs)
+```
+
+*We need a description of what probability is being calculated.*
+Our calculation is implemented in the folder `xi_hm`.
+Our test uses `r nrow(xi_nfw)` values of R
+Over the range tested 
+($`r min(xi_nfw$z)` < R < `r max(xi_nfw$z)`$),
+the maximum magnitude of the absoluteresidual between the expected value
+and our calculated value is
+$`r max(abs(xi_nfw$resid))`$;
+the maximum magnitude of the fractional residual is
+$`r max(abs(xi_nfw$fracerr))`$.
+For this test,
+we require the relative differences to be 
+less than $`r local.frac.errormargin`$,
+**or** the absolute difference to be less than
+$`r local.abs.errormargin`$.
+
+`r testresult(xi_nfw)`.
+
+```{r fig.cap = "Absolute comparision of our approximation to the expected results for $\\Omega_z$. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+ggplot(xi_nfw) +
+  geom_smallpoint(aes(x = z, y = ytrue), color = truecolor, shape = trueshape) +
+  geom_smallpoint(aes(x = z, y = ytest), color = testcolor, shape = testshape) +
+  scale_x_log10() +
+  xlab("R") +
+  ylab(expression(xi))
+```
+
+```{r fig.cap = "Relative residual comparison or our approximation to the expected results for $\\Omega_z$. Points in blue pass, and points in red fail, the absolute residual test."}
+ggplot(xi_nfw, aes(x = z, y = fracerr, color = within.abs)) +
+  geom_smallpoint() +
+  scale_x_log10() +
+  guides(color = FALSE) +
+  #ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
+  xlab("R") +
+  ylab("fractional residual") +
+  geom_hline(yintercept = local.frac.errormargin, color="blue") +
+  geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
 
