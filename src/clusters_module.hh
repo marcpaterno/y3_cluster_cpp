@@ -10,6 +10,7 @@
 #include "gamma_t.hh"
 #include "gperftools/profiler.h"
 
+#include <chrono>
 #include <memory>
 
 namespace y3_cluster {
@@ -20,7 +21,7 @@ namespace y3_cluster {
     int verbosity = 1;
     bool profile = false;
     // The distributions of weak lensing source bins
-    std::vector<std::shared_ptr<Interp1D const>> pzsources;
+    std::pair<std::vector<double>, std::vector<std::vector<double>>> pzsources;
     // The radii from the cluster center to predict gamma_t values for
     std::vector<double> radii_bins;
     // The cluster bins in richness-space
@@ -85,7 +86,7 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
   , options{filter_in_thread, &clusters_module_on}
   , verbosity(get_datablock<int>(config, "cluster_abundance", "verbosity", 1))
   , profile(get_datablock<bool>(config, "cluster_abundance", "profile", false))
-  , pzsources(load_pzsources(
+  , pzsources(load_pzsource_data(
               get_datablock<std::string>(config,
                                          "cluster_abundance",
                                          "y3_observables")))
@@ -93,7 +94,7 @@ y3_cluster::ClustersModule<MODELS>::ClustersModule(cosmosis::DataBlock& config)
   , lo_bins(into_ranges(config, "lo"))
   , zo_bins(into_ranges(config, "zo"))
 {
-  if (pzsources.size() == 0)
+  if (pzsources.second.size() == 0)
     throw std::runtime_error("What the hell??");
   if (radii_bins.size() == 0)
     throw std::runtime_error("What the hell??");
@@ -116,7 +117,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   sample.put_val<std::vector<double>>("cluster_abundance", "lo_bin_edges", into_edges(lo_bins));
   sample.put_val<std::vector<double>>("cluster_abundance", "zo_bin_edges", into_edges(zo_bins));
   sample.put_val<std::vector<double>>("cluster_abundance", "radii_bins", radii_bins);
-  sample.put_val<int>("cluster_abundance", "npzsources", pzsources.size());
+  sample.put_val<int>("cluster_abundance", "npzsources", pzsources.second.size());
 
   // FIXME: Just a test placeholder! Should these come from CosmoSIS?
   double const epsrel = 1.0e-3;
@@ -129,7 +130,7 @@ y3_cluster::ClustersModule<MODELS>::execute(cosmosis::DataBlock& sample)
   // Initialize our big computation stuff up here, so any DataBlock access
   // errors happen up front
   auto integrand = Gamma_T_Integrand<MODELS>
-                     {sample, radii_bins, pzsources, lo_bins, zo_bins};
+                     {sample, radii_bins, pzsources.first, pzsources.second, lo_bins, zo_bins};
 
   // Compute abundance counts and gamma_t's
   // Profile if necessary

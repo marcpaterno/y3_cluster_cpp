@@ -94,7 +94,6 @@ main(int argc, char* argv[])
   struct MODELS : public y3_cluster::DefaultModels {
       using MOR = y3_cluster::MOR_t2;
       using DEL_SIG = y3_cluster::DEL_SIG_y1;
-      using PZSOURCE = y3_cluster::PZSOURCE_GAUSSIAN_t;
   };
   long long maxeval = std::stoll(args[0]);
   double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis
@@ -103,7 +102,6 @@ main(int argc, char* argv[])
   MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
   MODELS::LC_LT lc_lt;
   MODELS::ZO_ZT zo_zt{0.005};
-  MODELS::PZSOURCE pzsource{0.4, 0.2};
   MODELS::ROFFSET roffset{0.2};
   MODELS::T_CEN t_cen;
   MODELS::T_MIS t_mis;
@@ -133,7 +131,6 @@ main(int argc, char* argv[])
                                     lo_lc,
                                     lc_lt,
                                     zo_zt,
-                                    pzsource,
                                     roffset,
                                     t_cen,
                                     t_mis,

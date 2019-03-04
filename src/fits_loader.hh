@@ -43,8 +43,9 @@ namespace y3_cluster {
         }
     }
 
-    std::vector<std::shared_ptr<Interp1D const>>
-    load_pzsources(const std::string& filename)
+    /* Returns a pair of {zgrid, {pz1, pz2, pz3, pz4}} */
+    std::pair<std::vector<double>, std::vector<std::vector<double>>>
+    load_pzsource_data(const std::string& filename)
     {
         fitsfile *file = NULL;
         int status = 0;
@@ -62,23 +63,29 @@ namespace y3_cluster {
         long nrows = 0;
         fits_get_num_rows(file, &nrows, &status);
 
-        std::vector<std::shared_ptr<Interp1D const>> output;
         if (nrows > 0) {
             // First: read redshifts - Z_MID
             auto [success1, zs] = load_fits_column(file, "Z_MID", nrows, &status);
+            bool success = success1;
 
-            if (success1) {
+            if (success) {
                 // If that worked - read in each bin one at a time
                 std::vector<std::string> colnames{"BIN1", "BIN2", "BIN3", "BIN4"};
+                std::vector<std::vector<double>> pzs;
                 for (auto& colname : colnames) {
                     auto [success2, bin] = load_fits_column(file, colname.c_str(), nrows, &status);
+                    success = success && success2;
 
-                    if (!success2)
+                    if (!success)
                         break;
 
-                    // Recourd this PZSOURCE distribution
-                    output.push_back(std::make_shared<Interp1D const>(zs, bin));
+                    // Record this PZSOURCE distribution
+                    pzs.push_back(bin);
                 }
+
+                // If it worked - then great!
+                if (success)
+                    return {zs, pzs};
             }
         }
 
@@ -93,8 +100,17 @@ namespace y3_cluster {
             fits_get_errstatus(status, errmsg);
             errmsg[FLEN_ERRMSG - 1] = '\0';
             throw std::runtime_error(std::string("Fits error: ") + errmsg);
-        }
+        } else
+            throw std::runtime_error("Could not find one of (Z_MID, BIN1, BIN2, BIN3, BIN4) in fits file");
+    }
 
+    std::vector<std::shared_ptr<Interp1D const>>
+    load_pzsources(const std::string& filename)
+    {
+        const auto [zgrid, pzs] = load_pzsource_data(filename);
+        std::vector<std::shared_ptr<Interp1D const>> output;
+        for (auto pz : pzs)
+            output.push_back(std::make_shared<Interp1D const>(zgrid, pz));
         return output;
     }
 }

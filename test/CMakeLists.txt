@@ -26,7 +26,7 @@ target_include_directories(integration_test
 add_test(integration_test integration_test)
 
 add_executable(trivial_gamma_t trivial_gamma_t.cc)
-target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} profiler interp lc_lt)
+target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} profiler interp cfitsio lc_lt)
 target_include_directories(trivial_gamma_t
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -320,7 +320,7 @@ target_include_directories(bessel_integral_equivalence_test
 add_test(bessel_integral_equivalence_test bessel_integral_equivalence_test)
 
 add_executable(simultaneous_bin_comparison_test simultaneous_bin_comparison.test.cc)
-target_link_libraries(simultaneous_bin_comparison_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_link_libraries(simultaneous_bin_comparison_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt cfitsio)
 target_include_directories(simultaneous_bin_comparison_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -370,7 +370,7 @@ target_include_directories(integrate_roffset
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
 
 add_executable(simultaneous_bin_comparison simultaneous_bin_comparison.cc)
-target_link_libraries(simultaneous_bin_comparison PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
+target_link_libraries(simultaneous_bin_comparison PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt cfitsio)
 target_include_directories(simultaneous_bin_comparison
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}

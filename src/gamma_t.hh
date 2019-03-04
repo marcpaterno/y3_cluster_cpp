@@ -6,6 +6,7 @@
 #include <integration_range.hh>
 #include <read_vector.hh>
 #include <transform.hh>
+#include <weighted_sigma_crit_inv.hh>
 
 #include <algorithm>
 #include <array>
@@ -263,7 +264,6 @@ struct  Gamma_T_Integrand {
   typename MODELS::LO_LC lo_lc;
   typename MODELS::LC_LT lc_lt;
   typename MODELS::ZO_ZT zo_zt;
-  typename MODELS::PZSOURCE pzsource;
   typename MODELS::ROFFSET roffset;
   typename MODELS::T_CEN T_cen;
   typename MODELS::T_MIS T_mis;
@@ -275,7 +275,7 @@ struct  Gamma_T_Integrand {
   typename MODELS::DV_DO_DZ dv_do_dz;
   typename MODELS::OMEGA_Z omega_z;
 
-  y3_cluster::sigma_crit_inv sig_crit_inv_;
+  weighted_sigma_crit_inv sig_crit_inv_;
   std::shared_ptr<y3_cluster::Interp1D const> da_;
 
   y3_cluster::IntegrationRange lnM_ir_;
@@ -304,7 +304,6 @@ public:
                     typename MODELS::LO_LC lo_lc,
                     typename MODELS::LC_LT lc_lt,
                     typename MODELS::ZO_ZT zo_zt,
-                    typename MODELS::PZSOURCE pzsource,
                     typename MODELS::ROFFSET roffset,
                     typename MODELS::T_CEN T_cen,
                     typename MODELS::T_MIS T_mis,
@@ -315,7 +314,7 @@ public:
                     typename MODELS::DEL_SIG del_sig,
                     typename MODELS::DV_DO_DZ dv_do_dz,
                     typename MODELS::OMEGA_Z omega_z,
-                    y3_cluster::sigma_crit_inv sci,
+                    y3_cluster::weighted_sigma_crit_inv sci,
                     std::shared_ptr<y3_cluster::Interp1D const> da,
                     y3_cluster::IntegrationRange lnM_ir,
                     std::vector<y3_cluster::IntegrationRange> lo_ir,
@@ -330,7 +329,6 @@ public:
     , lo_lc(lo_lc)
     , lc_lt(lc_lt)
     , zo_zt(zo_zt)
-    , pzsource(pzsource)
     , roffset(roffset)
     , T_cen(T_cen)
     , T_mis(T_mis)
@@ -362,13 +360,14 @@ public:
     , A_ir_(A_ir)
     , theta_ir_(theta_ir)
     , r(rarray)
-    , npzsource(pzsource.nsources())
+    , npzsource(sig_crit_inv_.nsources())
   {}
 
   // Alternatively, can automatically construct each model component given a datablock.
   Gamma_T_Integrand(cosmosis::DataBlock& sample,
                     std::vector<double> radii,
-                    std::vector<std::shared_ptr<y3_cluster::Interp1D const>> pzsources,
+                    std::vector<double> src_zs,
+                    std::vector<std::vector<double>> pzsources,
                     std::vector<y3_cluster::IntegrationRange> lo_bins,
                     std::vector<y3_cluster::IntegrationRange> zo_bins)
     : fcen_(get_datablock<double>(sample, "cluster_abundance", "fcen"))
@@ -376,7 +375,6 @@ public:
     , lo_lc(sample)
     , lc_lt(sample)
     , zo_zt(sample)
-    , pzsource(sample, pzsources)
     , roffset(sample)
     , T_cen(sample)
     , T_mis(sample)
@@ -387,7 +385,7 @@ public:
     , del_sig(sample)
     , dv_do_dz(sample)
     , omega_z(sample)
-    , sig_crit_inv_(sample)
+    , sig_crit_inv_(sample, src_zs, pzsources)
     , da_(std::make_shared<y3_cluster::Interp1D const>(
                 get_datablock<std::vector<double>>(sample, "distances", "z"),
                 get_datablock<std::vector<double>>(sample, "distances", "d_a")))
@@ -410,7 +408,7 @@ public:
     , A_ir_(sample, "A")
     , theta_ir_(sample, "theta")
     , r(radii)
-    , npzsource(pzsource.nsources())
+    , npzsource(sig_crit_inv_.nsources())
   {}
 
   // Convert from one set of bins to another - useful for the
@@ -425,7 +423,6 @@ public:
             lo_lc,
             lc_lt,
             zo_zt,
-            pzsource,
             roffset,
             T_cen,
             T_mis,
@@ -462,7 +459,6 @@ public:
   IntegrandResult
   integrand_common(double scaled_lt,
                    double scaled_zt,
-                   double scaled_zs,
                    double lnM,
                    // Jacobian for N term
                    Fjn jacob_N,
@@ -488,10 +484,6 @@ public:
       double const zomax = zo_ir_[zoi].transform(1.0);
       double const zt = zt_ir_[zoi].transform(scaled_zt);
 
-      const y3_cluster::IntegrationRange this_zs_ir{std::max(zt, zs_ir_.transform(0.0)),
-                                                    zs_ir_.transform(1.0)};
-      double const zs = this_zs_ir.transform(scaled_zs);
-
       auto const dv_do_dz_v = dv_do_dz(zt);
       auto const omega_z_v = omega_z(zt);
       auto const hmb_v = hmb(lnM, zt);
@@ -500,7 +492,6 @@ public:
 
       // These will eventually be passed by CosmoSIS
       double m_shear = 0.0;
-      double sig_crit_inv = sig_crit_inv_(zt, zs);
       // This is the lambda-redshift bin weight that we don't fully understand
       double w = 1.0;
 
@@ -511,10 +502,10 @@ public:
       //  gamma_t[i] = (1.0 + m_shear) / sig_crit * gamma_radial_dep(r[i], zt);
       auto gamma_t = std::vector<double> (nradii * npzsource);
       for (auto srci = 0u; srci < npzsource; srci++) {
-        auto const pzsource_v = pzsource(srci, zs);
         for (auto i = 0u; i < nradii; i++) {
           // Nw intentionally left out - returned in return_arr to be used further on
-          gamma_t[srci * nradii + i] = (1.0 + m_shear) * pzsource_v * sig_crit_inv * gamma_radial_dep(r[i], zt);
+          double sig_crit_inv = sig_crit_inv_(srci, zt);
+          gamma_t[srci * nradii + i] = (1.0 + m_shear) * sig_crit_inv * gamma_radial_dep(r[i], zt);
         }
       }
 
@@ -535,7 +526,7 @@ public:
         double const Nb = N * hmb_v;
 
         // eq. (29)
-        auto const gamma_t_int = jacob_G(loi, zoi) * this_zs_ir.jacobian() * N_int * w;
+        auto const gamma_t_int = jacob_G(loi, zoi) * N_int * w;
 
         // eq. (28)
         auto redshift_bin_start = richness_bin_start + zoi * (nradii*npzsource + 3);
@@ -571,7 +562,6 @@ public:
               double scaled_lc,
               double scaled_lt,
               double scaled_zt,
-              double scaled_zs,
               double scaled_R,
               double scaled_lnM,
               double scaled_A,
@@ -626,7 +616,6 @@ public:
 
     return integrand_common(scaled_lt,
                             scaled_zt,
-                            scaled_zs,
                             lnM,
                             jacob_N,
                             jacob_G,
@@ -649,7 +638,6 @@ public:
   centered(double scaled_lo,
            double scaled_lt,
            double scaled_zt,
-           double scaled_zs,
            double scaled_lnM,
            double scaled_A) const
   {
@@ -690,7 +678,6 @@ public:
 
     return integrand_common(scaled_lt,
                             scaled_zt,
-                            scaled_zs,
                             lnM,
                             jacob_N,
                             jacob_G,
@@ -707,10 +694,10 @@ public:
   raw_integrate_centered(Integrator i, double epsrel, double epsabs)
   {
     return i.integrate([this](double scaled_lo, double scaled_lt,
-                              double scaled_zt, double scaled_zs,
+                              double scaled_zt,
                               double scaled_lnM, double scaled_A)
             {  return centered(scaled_lo,  scaled_lt,
-                               scaled_zt, scaled_zs,
+                               scaled_zt,
                                scaled_lnM, scaled_A);  },
             epsrel, epsabs);
   }
@@ -724,11 +711,11 @@ public:
   raw_integrate_miscentered(Integrator i, double epsrel, double epsabs)
   {
     return i.integrate([this](double scaled_lo, double scaled_lc, double scaled_lt,
-                              double scaled_zt, double scaled_zs,
+                              double scaled_zt,
                               double scaled_R, double scaled_lnM,
                               double scaled_A, double scaled_theta)
             {  return miscentered(scaled_lo, scaled_lc, scaled_lt,
-                                  scaled_zt, scaled_zs,
+                                  scaled_zt,
                                   scaled_R, scaled_lnM,
                                   scaled_A, scaled_theta);  },
             epsrel, epsabs);
@@ -787,7 +774,6 @@ make_gamma_t_integrand(double fcen,
                        typename MODELS::LO_LC lo_lc,
                        typename MODELS::LC_LT lc_lt,
                        typename MODELS::ZO_ZT zo_zt,
-                       typename MODELS::PZSOURCE pzsource,
                        typename MODELS::ROFFSET roffset,
                        typename MODELS::T_CEN t_cen,
                        typename MODELS::T_MIS t_mis,
@@ -818,14 +804,13 @@ make_gamma_t_integrand(double fcen,
 
   auto da_f = std::make_shared<y3_cluster::Interp1D const>(z_da, da_arr);
 
-  y3_cluster::sigma_crit_inv sci(da_f);
+  y3_cluster::weighted_sigma_crit_inv sci({}, z_da, da_arr, {}, {});
 
   return {fcen,
           mor,
           lo_lc,
           lc_lt,
           zo_zt,
-          pzsource,
           roffset,
           t_cen,
           t_mis,
