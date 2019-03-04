@@ -222,7 +222,7 @@ ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
   facet_wrap(mbin ~ .)
 ```
 
-# HMF$_t$
+# The mass function: HMF$_t$
 
 ```{r}
 local.frac.errormargin = frac.errormargin
@@ -239,10 +239,6 @@ hmf_t <- mutate(hmf_t,
                   within.frac = (abs(fracerr) < local.frac.errormargin),
                   within.abs = (abs(resid) < local.abs.errormargin),
                   pass = within.frac | within.abs)
-```
-```{r}
-#length(unique(hmf_t$z))
-#print(hmf_t)
 ```
 
 HMF$_t$ is the mass function.
@@ -268,7 +264,7 @@ ggplot(hmf_t) +
   geom_smallpoint(aes(x = log10(exp(mass)), y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = log10(exp(mass)), y = ytest), color = testcolor, shape = testshape) +
   xlab("log(mass)") +
-  ylab("log(#/Mpc^3)") +
+  ylab("log(#/Mpc^3/lnM/h)") +
   scale_y_log10() +
   facet_wrap(z~.)
 ```
