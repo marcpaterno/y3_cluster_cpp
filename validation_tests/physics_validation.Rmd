@@ -270,8 +270,56 @@ ggplot(hmf_t) +
 ```
 
 
-```{r fig.cap = "Relative residual comparison or our approximation to the expected results for HMF$\\_t$. Points in blue pass, and points in red fail, the absolute residual test."}
-ggplot(hmf_t, aes(x = log10(exp(mass)), y = fracerr, color = within.abs)) +
+
+# $P(\lambda_{obs}$|$\lambda_{true}, R_{mis})$: $lo\_lc\_t$
+
+```{r}
+local.frac.errormargin = frac.errormargin
+local.abs.errormargin = abs.errormargin
+```
+
+```{r, include = FALSE}
+tester <- read_tsv("../data/test_lolc.out")
+tester <- mutate(tester,
+                  resid = ytrue - ytest,
+                  fracerr = resid/ytrue,
+                  lo = pmin(-local.frac.errormargin * ytrue, -local.abs.errormargin),
+                  hi = pmax(local.frac.errormargin * ytrue, local.abs.errormargin),
+                  within.frac = (abs(fracerr) < local.frac.errormargin),
+                  within.abs = (abs(resid) < local.abs.errormargin),
+                  pass = within.frac | within.abs)
+```
+
+
+Examine $\lambda_{obs}$ given $\lambda_{true}$ given the miscentering.
+Our calculation is implemented in the file `lo_lc_t.hh`.
+Our testing uses `r length(unique(tester$R_mis))` $R_{mis}$ values over the range 
+$(`r min(tester$R_mis)` < z < `r max(tester$R_mis)`)$, and
+the maximum magnitude of the absolute residual between the expected value
+and our approximation is
+$`r max(abs(tester$resid))`$;
+the maximum magnitude of the fractional residual is
+$`r max(abs(tester$fracerr))`$.
+For this test, we require the relative residuals to be less than
+$`r local.frac.errormargin`$,
+or the absolute residuals to be less than
+$`r local.abs.errormargin`$.
+
+`r testresult(tester)`.
+
+```{r fig.cap = "Absolute comparision of our approximation to the expected results for lo_lc_t. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+ggplot(tester) +
+  geom_smallpoint(aes(x = lambda_o, y = ytrue), color = truecolor, shape = trueshape) +
+  geom_smallpoint(aes(x = lambda_o, y = ytest), color = testcolor, shape = testshape) +
+  xlab("lambda_o") +
+  ylab("probability") +
+  scale_y_log10() +
+  facet_wrap(R_mis~.)
+```
+
+
+```{r fig.cap = "Relative residual comparison or our approximation to the expected results for lo_lc_t. Points in blue pass, and points in red fail, the absolute residual test."}
+ggplot(tester, aes(x = lambda_o, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   guides(color = FALSE) +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
@@ -279,7 +327,7 @@ ggplot(hmf_t, aes(x = log10(exp(mass)), y = fracerr, color = within.abs)) +
   ylab("fractional residual") +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue") +
-  facet_wrap(z~.)
+  facet_wrap(R_mis~.)
 ```
 
 
