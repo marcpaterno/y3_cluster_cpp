@@ -1,7 +1,7 @@
 # distutils: language=c++
 
 from cluster_abundance cimport IntegrationRange as cIR
-from cluster_abundance cimport size_t, Cuhre, Vegas, Suave
+from cluster_abundance cimport size_t, ostringstream, cubacores, Cuhre, Vegas, Suave
 from cython.operator cimport dereference as deref
 
 import cosmosis.datablock as db
@@ -170,6 +170,11 @@ cdef class IntegrandResults:
         for i in range(self._results.size()):
             yield self[i]
 
+    def __str__(self):
+        cdef ostringstream out
+        out << deref(self._results)
+        return out.str()
+
     @staticmethod
     cdef create(Gamma_T_Integrated_Bin_Result_S results):
         obj = IntegrandResults(__allow_empty=True)
@@ -190,23 +195,59 @@ cdef class Integrand:
         if isinstance(sample, db.DataBlock):
             raw_ptr = sample._ptr
             ptr = <DataBlock*> raw_ptr
-            _igrnd = new Gamma_T_Integrand[DefaultModels](deref(ptr),
-                                                          radii,
-                                                          _into_integration_ranges(lo_bins),
-                                                          _into_integration_ranges(zo_bins))
+            self._igrnd = new Gamma_T_Integrand[DefaultModels](deref(ptr),
+                                                               radii,
+                                                               _into_integration_ranges(lo_bins),
+                                                               _into_integration_ranges(zo_bins))
         else:
             raise TypeError('Needs DataBlock argument, got {}'.format(type(sample)))
 
     def __dealloc__(self):
-        del self._igrnd
+        if self._igrnd is not NULL:
+            del self._igrnd
 
-    def integrate_centered(self, epsrel=1e-3, epsabs=1e-18, algo='Cuhre'):
+    def integrate_centered(self, epsrel=1e-3, epsabs=1e-12, maxeval=100000000, algo='Cuhre'):
         cdef Cuhre cuhre
         cdef Vegas vegas
         cdef Suave suave
+
+        if self._igrnd is NULL:
+            raise RuntimeError('Attempting to integrate NULL integrand')
+
+        cubacores(0, 0)
+
+        cuhre.maxeval = maxeval
+        suave.maxeval = maxeval
+        vegas.maxeval = maxeval
+
         if algo == 'Cuhre':
-            return IntegrandResults.create(self._igrnd.integrate_centered(cuhre, epsrel, epsabs))
+            return IntegrandResults.create(deref(self._igrnd).integrate_centered(cuhre, epsrel, epsabs))
         if algo == 'Vegas':
-            return IntegrandResults.create(self._igrnd.integrate_centered(vegas, epsrel, epsabs))
+            return IntegrandResults.create(deref(self._igrnd).integrate_centered(vegas, epsrel, epsabs))
         if algo == 'Suave':
-            return IntegrandResults.create(self._igrnd.integrate_centered(suave, epsrel, epsabs))
+            return IntegrandResults.create(deref(self._igrnd).integrate_centered(suave, epsrel, epsabs))
+
+        raise ValueError('invalid integration algorithm: {}'.format(algo))
+
+    def integrate_miscentered(self, epsrel=1e-3, epsabs=1e-12, maxeval=100000000, algo='Cuhre'):
+        cdef Cuhre cuhre
+        cdef Vegas vegas
+        cdef Suave suave
+
+        if self._igrnd is NULL:
+            raise RuntimeError('Attempting to integrate NULL integrand')
+
+        cubacores(0, 0)
+
+        cuhre.maxeval = maxeval
+        suave.maxeval = maxeval
+        vegas.maxeval = maxeval
+
+        if algo == 'Cuhre':
+            return IntegrandResults.create(deref(self._igrnd).integrate_miscentered(cuhre, epsrel, epsabs))
+        if algo == 'Vegas':
+            return IntegrandResults.create(deref(self._igrnd).integrate_miscentered(vegas, epsrel, epsabs))
+        if algo == 'Suave':
+            return IntegrandResults.create(deref(self._igrnd).integrate_miscentered(suave, epsrel, epsabs))
+
+        raise ValueError('invalid integration algorithm: {}'.format(algo))
