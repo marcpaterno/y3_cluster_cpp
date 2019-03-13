@@ -10,7 +10,11 @@ add_library(smp_var
             sample_variance.cc
             bessel_polynomial_integral.cc
             sin_cos_polynomial_integral.cc)
-target_link_libraries(smp_var PRIVATE ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_link_libraries(smp_var
+                      PRIVATE
+                      interp
+                      ${GSL_LIBRARIES}
+                      ${CUBA_LIBRARIES})
 target_include_directories(smp_var
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
