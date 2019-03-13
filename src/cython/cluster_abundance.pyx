@@ -14,7 +14,7 @@ cdef class PyIntegrationRange:
         self._ir = new cIR(start, end)
 
     @staticmethod
-    cdef from_cpp(cIR ir):
+    cdef create(cIR ir):
         return PyIntegrationRange(ir.transform(0.0), ir.transform(1.0))
 
     def __dealloc__(self):
@@ -51,8 +51,9 @@ cdef class VecWrapper:
     cdef vector[double] vec
     cdef Py_ssize_t shape[1]
     cdef Py_ssize_t strides[1]
+    cdef object suboffsets
 
-    cdef set_data(self, const vector[double]& data):
+    cpdef set_data(self, const vector[double]& data):
         cdef Py_ssize_t itemsize = sizeof(double)
 
         self.vec = data
@@ -82,24 +83,30 @@ cdef class VecWrapper:
 
 cdef class IntegrandResult:
     cdef Gamma_T_Integrated_Bin_Result *_res
+    cdef object _lo_ir
+    cdef object _zo_ir
+    cdef object __radius
+    cdef object __gamma_ts
+    cdef object __gamma_t_errors
+    cdef object __gamma_t_probs
     def __cinit__(self, __allow_empty=False):
         if not __allow_empty:
             raise RuntimeError('Cannot directly construct IntegrandResult')
         self._res = NULL
-        self.__lo_ir = None
-        self.__zo_ir = None
+        self._lo_ir = None
+        self._zo_ir = None
 
     def __dealloc__(self):
-        if self._results:
-            del self._results
+        if self._res:
+            del self._res
 
     @staticmethod
     cdef create(const Gamma_T_Integrated_Bin_Result& result):
         obj = IntegrandResult(__allow_empty=True)
         obj._res = new Gamma_T_Integrated_Bin_Result(result)
 
-        obj.__lo_ir = PyIntegrationRange.from_cpp(result.lo_ir)
-        obj.__zo_ir = PyIntegrationRange.from_cpp(result.zo_ir)
+        obj._lo_ir = PyIntegrationRange.create(result.lo_ir)
+        obj._zo_ir = PyIntegrationRange.create(result.zo_ir)
 
         obj.__radius = VecWrapper()
         obj.__radius.set_data(obj._res.radius)
@@ -117,11 +124,11 @@ cdef class IntegrandResult:
 
     @property
     def lo_ir(self):
-        return self.__lo_ir
+        return self._lo_ir
 
     @property
     def zo_ir(self):
-        return self.__zo_ir
+        return self._zo_ir
 
     @property
     def gamma_ts(self):
@@ -137,15 +144,23 @@ cdef class IntegrandResult:
 
     @property
     def N(self):
-        return self._res.N
+        if self._res is not NULL:
+            return self._res.N
+
+    @property
+    def N_error(self):
+        if self._res is not NULL:
+            return self._res.N_error
 
     @property
     def Nw(self):
-        return self._res.Nw
+        if self._res is not NULL:
+            return self._res.Nw
 
     @property
     def Nb(self):
-        return self._res.Nb
+        if self._res is not NULL:
+            return self._res.Nb
 
 
 cdef class IntegrandResults:
@@ -205,6 +220,63 @@ cdef class Integrand:
     def __dealloc__(self):
         if self._igrnd is not NULL:
             del self._igrnd
+
+    def with_bins(self, lo_bins, zo_bins):
+        cdef Integrand out = None
+        cdef vector[IntegrationRange] clo_bins = _into_integration_ranges(lo_bins)
+        cdef vector[IntegrationRange] czo_bins = _into_integration_ranges(zo_bins)
+        out._igrnd = deref(self._igrnd).new_with_bins(clo_bins, czo_bins)
+        return out
+
+    def centered(self,
+                 double scaled_lo,
+                 double scaled_lt,
+                 double scaled_zt,
+                 double scaled_lnM,
+                 double mu):
+        """
+        Computes the centered integrand at a specific point, returning the
+        entire data vector at that point.
+
+        NB: each input is the _Cuba_ input to the integrand, so each must be
+        in the range [0, 1]. To figure out what values of [lo, lt, zt, lnM]
+        those correspond to, consult `gamma_t.hh`.
+        """
+        if self._igrnd is NULL:
+            raise RuntimeError('Integrand is NULL')
+        return deref(self._igrnd).centered(scaled_lo,
+                                           scaled_lt,
+                                           scaled_zt,
+                                           scaled_lnM,
+                                           mu)
+
+    def miscentered(self,
+                    double scaled_lo,
+                    double scaled_lc,
+                    double scaled_lt,
+                    double scaled_zt,
+                    double scaled_R,
+                    double scaled_lnM,
+                    double mu,
+                    double scaled_theta):
+        """
+        Computes the miscentered integrand at a specific point, returning the
+        entire data vector at that point.
+
+        NB: each input is the _Cuba_ input to the integrand, so each must be
+        in the range [0, 1]. To figure out what actual values
+        those correspond to, consult `gamma_t.hh`.
+        """
+        if self._igrnd is NULL:
+            raise RuntimeError('Integrand is NULL')
+        return deref(self._igrnd).miscentered(scaled_lo,
+                                              scaled_lc,
+                                              scaled_lt,
+                                              scaled_zt,
+                                              scaled_R,
+                                              scaled_lnM,
+                                              mu,
+                                              scaled_theta)
 
     def integrate_centered(self, epsrel=1e-3, epsabs=1e-12, maxeval=100000000, algo='Cuhre'):
         cdef Cuhre cuhre

@@ -347,6 +347,38 @@ public:
             r};
   }
 
+  // Like `with_bins`, but allocates a new `Gamma_T_Integrand` object.
+  // This is useful for the Cython wrapper, which has trouble with default
+  // initializing objects.
+  Gamma_T_Integrand<MODELS> *
+  new_with_bins(std::vector<y3_cluster::IntegrationRange> new_lir,
+            std::vector<y3_cluster::IntegrationRange> new_zir)
+  {
+    return new Gamma_T_Integrand<MODELS>{fcen_,
+                                         mor,
+                                         lo_lc,
+                                         lc_lt,
+                                         zo_zt,
+                                         roffset,
+                                         T_cen,
+                                         T_mis,
+                                         A_cen,
+                                         A_mis,
+                                         hmb,
+                                         hmf,
+                                         del_sig,
+                                         dv_do_dz,
+                                         omega_z,
+                                         lnM_ir_,
+                                         // Different lir
+                                         new_lir,
+                                         // Different zir
+                                         new_zir,
+                                         R_ir_,
+                                         theta_ir_,
+                                         r};
+  }
+
   typedef std::vector<double> IntegrandResult;
 
   /* Common integrand functionality. Do not call this directly, you can probably

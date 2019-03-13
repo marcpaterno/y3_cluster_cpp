@@ -6,6 +6,8 @@
 from __future__ import division, print_function
 from cosmosis.datablock import option_section
 from cython import Integrand
+import numpy as np
+import traceback
 
 
 def process_ranges(block, name):
@@ -28,14 +30,12 @@ def execute(sample, config):
                       config['lo_bins'], config['zo_bins'])
     print('Initialized integrand.')
 
-    print('About to integrate...')
     ctrd_res = igrnd.integrate_centered()
     if config['verbosity'] > 0:
         print('Centered:')
         print(ctrd_res)
 
     misctrd_res = igrnd.integrate_miscentered()
-    print('Finished integration.')
 
     if config['verbosity'] > 0:
         print('Miscentered:')
@@ -43,13 +43,33 @@ def execute(sample, config):
     else:
         print('Centered and miscentered integration')
 
+    # Store all of the results in the integrand in the datablock
+    # Centered and miscentered values stored separately
+    try:
+        for name, res in [('centered', ctrd_res),
+                          ('miscentered', misctrd_res)]:
+            results = {'gamma_ts': [],
+                       'cluster_counts': [],
+                       'cluster_count_errors': [],
+                       'cluster_biased_counts': []}
+
+            for bin_ in res:
+                for gt in bin_.gamma_ts:
+                    results['gamma_ts'].append(gt)
+                results['cluster_counts'].append(bin_.N)
+                results['cluster_count_errors'].append(bin_.N_error)
+                results['cluster_biased_counts'].append(bin_.Nb)
+
+            for vname, value in results.items():
+                sample['cluster_abundance',
+                       name + '_' + vname] = np.array(value)
+    except:
+        traceback.print_exc()
+        raise
+
     del igrnd
     return 0
 
 
 def cleanup(config):
-    pass
-
-
-if __name__ == '__main__':
     pass

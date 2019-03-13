@@ -62,6 +62,24 @@ cdef extern from "gamma_t.hh" namespace "y3_cluster":
                           vector[double] radii,
                           vector[IntegrationRange] lo_bins,
                           vector[IntegrationRange] zo_bins) except +
+        Gamma_T_Integrand(const Gamma_T_Integrand&) except +
+
+        Gamma_T_Integrand *new_with_bins(vector[IntegrationRange] lo_bins, vector[IntegrationRange] zo_bins) except +
+
+        vector[double] centered(double scaled_lo,
+                                double scaled_lt,
+                                double scaled_zt,
+                                double scaled_lnM,
+                                double mu) const
+        vector[double] miscentered(double scaled_lo,
+                                   double scaled_lc,
+                                   double scaled_lt,
+                                   double scaled_zt,
+                                   double scaled_R,
+                                   double scaled_lnM,
+                                   double mu,
+                                   double scaled_theta) const
+
         Gamma_T_Integrated_Bin_Result_S integrate_centered[I](I, double epsrel, double epsabs)
         Gamma_T_Integrated_Bin_Result_S integrate_miscentered[I](I, double epsrel, double epsabs)
 
