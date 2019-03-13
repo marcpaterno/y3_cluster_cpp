@@ -1,6 +1,6 @@
 ---
 title: "Physics Validation of Y3 Clusters Code"
-author: "Y3 Cluster Team (3CT)"
+author: "Y3 Cluster Team (3ct)"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -126,7 +126,7 @@ $`r local.frac.errormargin`$,
 or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
 
-`r testresult(omega_z)`.
+`r testresult(omega_z)`
 
 ```{r fig.cap = "Absolute comparision of our approximation to the expected results for $\\Omega_z$. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(omega_z) +
@@ -156,7 +156,7 @@ local.abs.errormargin = abs.errormargin
 
 ```{r include = FALSE}
 mor_t2 <- read_tsv("../data/mor_tt_test.out")
-mor_t2$mbin <- as.factor(mor_t2$log10m)
+mor_t2$mbin <- as.factor(mor_t2$log10m/log(10))
 mor_t2 <- mutate(mor_t2,
                  resid = probtrue - probtest,
                  fracerr = resid/probtrue,
@@ -167,7 +167,8 @@ mor_t2 <- mutate(mor_t2,
                  pass = within.frac | within.abs)
 ```
 
-*We need a description of what probability is being calculated.*
+
+Given a set of scaling relation parameters between richness and mass -- average richnesses at different mass values, and an intrinsic scatter -- this function calcules $P(\lambda_{true})$ values at a given mass. 
 Our calculation is implemented in the file `mor_t2.hh`.
 Our testing uses `r nlevels(mor_t2$mbin)` different mass values,
 and `r nunique(mor_t2$lambda)` different $\lambda$ values.
@@ -195,7 +196,7 @@ ggplot(mor_t2) +
   geom_smallpoint(aes(x = lambda, y = probtest), color = testcolor, shape = testshape) +
   xlab(expression(lambda)) +
   ylab("probability") +
-  facet_wrap(mbin~.)
+  facet_wrap("log10(M) = "+mbin~.)
 ```
 
 ```{r fig.cap = "Relative residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
@@ -207,7 +208,7 @@ ggplot(mor_t2, aes(x = lambda, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = local.frac.errormargin, color = "blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color = "blue") +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
-  facet_wrap(mbin ~ .)
+  facet_wrap(mbin~ .)
 ```
 
 ```{r fig.cap = "Absolute residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
@@ -221,7 +222,7 @@ ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
   facet_wrap(mbin ~ .)
 ```
 
-# Delta_sigma Module test
+# Delta_sigma python Module test
 
 ## Xi NFW module test
 
