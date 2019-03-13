@@ -48,7 +48,7 @@ namespace y3_cluster
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     { 
       double del_sig_1 = _dsigma1->eval(r,lnM);
-      double del_sig_2 = _bias->eval(zt,lnM) * _dsigma2->eval(r,zt);
+      //double del_sig_2 = _bias->eval(zt,lnM) * _dsigma2->eval(r,zt);
       // NB: The 1e12 factor is to convert from the M_{sol} / kpc^2 of the input
       // to the M_{sol} / Mpc^2 we need
       // TODO: h factor?
