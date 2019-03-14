@@ -1,4 +1,6 @@
 #ifndef __Y3_CLUSTER_GENERATE_COSMOSIS_MODULE_HH
+// Nobody should need to touch this in a normal circumcstance.
+// you shouldn't need to fiddle this if you are trying to set up another cluster cosmology implementation
 #define __Y3_CLUSTER_GENERATE_COSMOSIS_MODULE_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"

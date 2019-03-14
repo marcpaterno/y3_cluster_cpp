@@ -1,3 +1,4 @@
+//in normal circumstance, you don't need to modify this file
 #ifndef Y3_CLUSTER_MODELS_HH
 #define Y3_CLUSTER_MODELS_HH
 
