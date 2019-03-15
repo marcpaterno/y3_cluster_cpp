@@ -82,7 +82,3 @@ cdef extern from "gamma_t.hh" namespace "y3_cluster":
 
         Gamma_T_Integrated_Bin_Result_S integrate_centered[I](I, double epsrel, double epsabs)
         Gamma_T_Integrated_Bin_Result_S integrate_miscentered[I](I, double epsrel, double epsabs)
-
-cdef extern from "default_models.hh" namespace "y3_cluster":
-    cdef cppclass DefaultModels:
-        pass

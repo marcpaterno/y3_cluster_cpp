@@ -5,9 +5,12 @@
 
 from __future__ import division, print_function
 from cosmosis.datablock import option_section
-from cython import Integrand
+from cython import models
 import numpy as np
 import traceback
+
+
+Integrand = models[0]
 
 
 def process_ranges(block, name):

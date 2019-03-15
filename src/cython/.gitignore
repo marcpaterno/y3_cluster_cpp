@@ -2,3 +2,5 @@ build/
 cluster_abundance.cpp
 cluster_abundance.html
 cluster_abundance.so
+cluster_abundance.pyx
+cluster_abundance.pxd

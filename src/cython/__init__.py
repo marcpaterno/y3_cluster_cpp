@@ -1,1 +1,1 @@
-from cluster_abundance import Integrand
+from cluster_abundance import models
