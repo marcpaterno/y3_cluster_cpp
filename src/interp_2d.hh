@@ -34,15 +34,29 @@ namespace y3_cluster {
     // and the column-major (N.B: not the natural-for-C++ row-major) storage of
     // the z values. We require the column-major ordering
     // because that is what is used by GSL.
+    Interp2D(std::vector<double> && xs,
+             std::vector<double> && ys,
+             std::vector<double> && zs);
+
+    // As above, but take deep copies of the incoming vectors.
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
-             std::vector<double> const& zs);
+             std::vector<double> const& zs)
+      : Interp2D {std::vector<double>(xs), std::vector<double>(ys), std::vector<double>(zs)}
+      {}
 
     // Interpolator created from vector, vector, 2D vector, compiler assures they
     // are of the same length; Added by Yuanyuan Zhang
+    Interp2D(std::vector<double> && xs,
+             std::vector<double> && ys,
+             std::vector< std::vector<double> > const& zs);
+
+    // As above, but take deep copies of the xs and ys.
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
-             std::vector< std::vector<double> > const& zs);
+             std::vector< std::vector<double> > const& zs)
+      : Interp2D{std::vector<double>(xs), std::vector<double>(ys), zs}
+    {}
 
     // Like above - assumes ndarray is 2D and fits it appropriately
     Interp2D(std::vector<double> const& xs,
@@ -62,11 +76,13 @@ namespace y3_cluster {
 
     // Interpolator created from vector of triplets: throws std::logic_error if
     // the points do not lie on a grid in (x,y) space, or if any values are NaN
-    // or infinities. Any denormalized x- or y-values are flushed to zero. We
-    // take the vector by value because we will have to copy it anyway; taking
-    // the argument by value forces the copy at the point of the call, and
-    // allows passing an rvalue.
-    Interp2D(std::vector<Point3D> data);
+    // or infinities. Any denormalized x- or y-values are flushed to zero.
+    Interp2D(std::vector<Point3D> &&data);
+
+    // As above, but take a deep copy of the argument for working space.
+    Interp2D(std::vector<Point3D> const &data)
+      : Interp2D (std::vector<Point3D> (data))
+    {}
 
     // Destructor must clean up allocated GSL resources.
     ~Interp2D() noexcept;
@@ -74,6 +90,9 @@ namespace y3_cluster {
     // Interp2D objects can not be copied because the GSL resources can not
     // be copied.
     Interp2D(Interp2D const&) = delete;
+
+    // Ditto for the copy-assignment.
+    Interp2D operator=(Interp2D const &)  =  delete;
 
     double operator()(double x, double y) const;
 
@@ -95,7 +114,7 @@ namespace y3_cluster {
 
     // Discover the (x,y) grid implicit in the supplied set of points, or throw
     // a std::domain_error if no grid can be constructed from these points.
-    void make_grid_(std::vector<Point3D>& data);
+    void make_grid_(std::vector<Point3D>&& data);
   };
 }
 
@@ -111,41 +130,6 @@ inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
       zs_[i + j * M] = row[j];
     }
   }
-  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
-  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
-}
-
-// below are added by Yuanyuan Zhang July 17
-inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
-                                      std::vector<double> const& ys,
-                                      std::vector< std::vector<double> > const& zs)
-       : xs_(xs), ys_(ys), zs_(xs.size() * ys.size())
-{
-  if (zs.size() != xs.size())
-    throw std::domain_error("Interp2D -- wrong number of rows in z values");
-
-  for (std::size_t i = 0; i < xs.size(); ++i) {
-    std::vector<double> const& row = zs[i];
-    if (row.size() != ys.size())
-      throw std::domain_error("Interp2D -- wrong number of columns in z values");
-    for (std::size_t j = 0; j < ys.size(); ++j) {
-      zs_[i + j * ys.size()] = row[j];
-    }
-  }
-  
-  if (zs_.size() != nx() * ny())
-    throw std::domain_error("Interp2D -- wrong number of z values passed");
-  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
-  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
-}
-
-inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
-                                      std::vector<double> const& ys,
-                                      std::vector<double> const& zs)
-  : xs_(xs), ys_(ys), zs_(zs)
-{
-  if (zs_.size() != nx() * ny())
-    throw std::domain_error("Interp2D -- wrong number of z values passed");
   interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
   gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
 }
