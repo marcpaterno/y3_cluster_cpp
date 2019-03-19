@@ -18,6 +18,7 @@ namespace y3_cluster {
         const std::array<double, Order> coeffs;
 
     public:
+        // NB: Highest-order coefficient first
         constexpr polynomial(std::array<double, Order> coeffs) : coeffs(coeffs) {}
 
         constexpr double

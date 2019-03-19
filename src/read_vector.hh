@@ -5,11 +5,12 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 #include <string>
 #include <vector>
 
 template <class XFORM>
-std::vector<double>
+inline std::vector<double>
 read_vector(char const* filename, XFORM xform)
 {
     std::string fname = std::string("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/data/")
@@ -20,14 +21,23 @@ read_vector(char const* filename, XFORM xform)
         errmsg += fname;
         throw std::runtime_error(errmsg);
     }
-    double tmp;
+    std::string line;
     std::vector<double> res;
-    while (file >> tmp)
-        res.push_back(xform(tmp));
+    while (std::getline(file, line)) {
+        // Skip lines that start with comment character
+        if (line.find('#') == 0)
+            continue;
+
+        // Read all the numbers on this line
+        std::istringstream linestream(line);
+        double tmp;
+        while (linestream >> tmp)
+            res.push_back(xform(tmp));
+    }
     return res;
 }
 
-std::vector<double>
+inline std::vector<double>
 read_vector(char const* filename)
 {
     return read_vector(filename, [](double x) { return x; });

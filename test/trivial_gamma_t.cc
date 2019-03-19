@@ -84,31 +84,30 @@ main(int argc, char* argv[])
   const double h = 7.71358152e-01;
 
   // ============ Scaling Functions ============
-  auto identity = [](double x) { return x; };
   auto log = [](double x) { return std::log(x); };
   auto log_omega_m = [Omega_M](double x) { return std::log(x*Omega_M); };
 
   // ============ Input Data Tables ============
   // dndlnmh.txt, m_h.txt, z.txt came from the cosmosis tinker_mf_module.so
   // d_a.txt, z_da.txt came from the cosmosis camb.so
-  auto const dndlnmh = read_vector("dndlnmh.txt", identity);
+  auto const dndlnmh = read_vector("dndlnmh.txt");
   // m_h.txt is in units of: 
   //    \Omega_M M_{solar} h^{-1}
   // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
   // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
   // dndlnmh is in unit of (h^3 Mpc^{-3})
   auto mh = read_vector("m_h.txt", log_omega_m);
-  auto const zz = read_vector("z.txt", identity);
+  auto const zz = read_vector("z.txt");
   // da_arr in Mpc
-  auto const zz_da = read_vector("z.txt", identity);
-  auto const da_arr = read_vector("d_a.txt", identity);
+  auto const zz_da = read_vector("z.txt");
+  auto const da_arr = read_vector("d_a.txt");
 
-  auto const del_sig_1 = read_vector("deltasigma_1.txt", identity);
-  auto const del_sig_2 = read_vector("deltasigma_2.txt", identity);
-  auto const bm = read_vector("deltasigma_bias.txt", identity);
+  auto const del_sig_1 = read_vector("deltasigma_1.txt");
+  auto const del_sig_2 = read_vector("deltasigma_2.txt");
+  auto const bm = read_vector("deltasigma_bias.txt");
   auto const mh1 = read_vector("deltasigma_m_h.txt", log);
-  auto const r_perp = read_vector("deltasigma_r_perp.txt", identity);
-  auto const zz1 = read_vector("deltasigma_z.txt", identity);
+  auto const r_perp = read_vector("deltasigma_r_perp.txt");
+  auto const zz1 = read_vector("deltasigma_z.txt");
 
   // ============ Integral Components ============
   // Create each term which will comprise the gamma_t integral
@@ -147,7 +146,7 @@ main(int argc, char* argv[])
   IntegrationRange lo_ir{20, 27.9};
   IntegrationRange zo_ir{0.1, 0.3};
 
-  auto gti = make_gamma_t_integrand<MODELS, 10>(0.7,
+  auto gti = make_gamma_t_integrand<MODELS>(0.7,
                                     mor,
                                     lo_lc,
                                     lc_lt,
@@ -163,7 +162,8 @@ main(int argc, char* argv[])
                                     dvdodz,
                                     omega_z,
                                     {lo_ir},//, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
-                                    {zo_ir});
+                                    {zo_ir},
+                                    10);
 
   // ============ Actual Integrations ============
   // Integrate centered and miscentered, simultaneously over all bins,
@@ -174,10 +174,10 @@ main(int argc, char* argv[])
   ProfilerStart("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/dump.txt");
   cubacpp::Cuhre c;
   c.maxeval = maxeval;
-  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs).first; },
+  time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs); },
                    "centered-cuhre");
 
-  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs).first; },
+  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
                    "miscentered-cuhre");
 
   ProfilerFlush();

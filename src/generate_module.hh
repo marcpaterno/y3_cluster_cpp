@@ -6,18 +6,19 @@
 #include "/cosmosis/cosmosis/datablock/section_names.h"
 #include "/cosmosis/cosmosis/datablock/section.hh"
 #include <clusters_module.hh>
-#define GENERATE_Y3_COSMOSIS_MODULE(models, nradii, nrichness, nredshift) \
+
+#define GENERATE_Y3_COSMOSIS_MODULE(klass) \
 \
 extern "C" { \
 \
 void * setup(cosmosis::DataBlock * options) \
 { \
-	return new y3_cluster::ClustersModule<y3_cluster::DefaultModels, nradii, nrichness, nredshift>(*options); \
+	return new klass(*options); \
 } \
 \
 DATABLOCK_STATUS execute(cosmosis::DataBlock * block, void * config) \
 { \
-    auto mod = static_cast<y3_cluster::ClustersModule<y3_cluster::DefaultModels, nradii, nrichness, nredshift> *>(config); \
+    auto mod = static_cast<klass *>(config); \
     mod->execute(*block); \
 \
     DATABLOCK_STATUS status = DBS_SUCCESS; \
@@ -27,7 +28,7 @@ DATABLOCK_STATUS execute(cosmosis::DataBlock * block, void * config) \
 \
 int cleanup(void * config) \
 { \
-    delete static_cast<y3_cluster::ClustersModule<y3_cluster::DefaultModels, nradii, nrichness, nredshift> *>(config); \
+    delete static_cast<klass *>(config); \
     return 0;\
 } \
 \
