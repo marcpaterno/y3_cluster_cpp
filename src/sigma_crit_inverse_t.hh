@@ -11,7 +11,7 @@ namespace y3_cluster {
     {}
 
     double
-    operator()(double zt, zs) const
+    operator()(double const zt, double const zs) const
     {
       double _sig_crit_inv=0;
       if (zs > zt) {
@@ -24,8 +24,8 @@ namespace y3_cluster {
     }
 
   private:
-    std::shared_ptr<Interp1D const> _da;
-    double _c;
-    double _G;
+    std::shared_ptr<Interp1D const>  const  _da;
+    double  const _c;
+    double const  _G;
   };
 }
