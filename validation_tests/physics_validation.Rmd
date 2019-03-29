@@ -3,12 +3,12 @@ title: "Physics Validation of Y3 Clusters Code"
 author: "Y3 Cluster Team (3ct)"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document:
       toc: true
       toc_depth: 1
       toc_float: true
       number_sections: true
+  pdf_document: default
   word_document: default
 ---
 
@@ -495,7 +495,9 @@ ggplot(lo_lc, aes(x= deltal, y = resid, color = within.frac)) +
 
 # Cluster Mass Profile
 
-The Cluster Mass profiles are calculated by a **separate CosmoSIS module**, which is a python wrapper to Tom McClintock's Cluster_toolkit code. The code exists in the folder `delta_sigma`
+The Cluster Mass profiles are calculated by a **separate CosmoSIS module**, which is a python wrapper to Tom McClintock's Cluster_toolkit code. The code exists in the folder `delta_sigma`.
+
+**Before your run this test, Make sure to go to the folder `deltasigma` and run `cosmosis deltasigma.ini` to produce the proper test files.**
 
 ## $\xi$ NFW
 
