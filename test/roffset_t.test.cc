@@ -2,6 +2,7 @@
 #include "roffset_t.hh"
 
 #include <fstream>
+#include <iomanip>
 
 using y3_cluster::ROFFSET_t;
 
@@ -39,10 +40,19 @@ TEST_CASE("roffset_t works")
     const double tau = 0.150000;
     ROFFSET_t roffset(tau);
 
+    std::ofstream out {"../data/Rmis_gammadist_test.out"};
+    out << std::setw(16);
+    out << std::setprecision(16);
+    out << "rmis\tprobtrue\tprobtest\n";
     for (std::size_t i = 0, sz = rmis.size(); i != sz; ++i)
     {
         double const fz = roffset(rmis[i]);
         double constexpr epsrel = 1.0e-6;
-        CHECK(fz == Approx(prob[i]).epsilon(epsrel));
+	double constexpr epsabs = 1.0e-12;
+        CHECK(fz == Approx(prob[i]).epsilon(epsrel).margin(epsabs));
+        out << rmis[i] << '\t'
+            << prob[i] << '\t'
+            << fz << '\n';
+
     }
 }
