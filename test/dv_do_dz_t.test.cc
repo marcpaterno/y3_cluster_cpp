@@ -4,6 +4,7 @@
 #include "ez.hh"
 #include "read_vector.hh"
 #include <fstream>
+#include <iomanip>
 
 using y3_cluster::DV_DO_DZ_t;
 using y3_cluster::Interp1D;
@@ -37,10 +38,18 @@ TEST_CASE("dv_do_dz_t works")
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
 
 
-  for (std::size_t i = 0, sz = zs.size(); i != sz; ++i)
+  std::ofstream out {"../data/dvdodz_test.out"};
+  out << std::setw(16);
+  out << std::setprecision(16);
+  out << "z\tytrue\tytest\n";
+  for (std::size_t i = 1, sz = zs.size(); i != sz; ++i)
   {
     double const fz = dvdodz(zs[i]);
-    double constexpr epsrel = 1.0e-2;
-    CHECK(fz == Approx(ys[i]).epsilon(epsrel));
+    double constexpr epsrel = 1.0e-6;
+    double constexpr epsabs = 1.0e-12;
+    CHECK(fz == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
+    out << zs[i] << '\t'
+        << ys[i] << '\t'
+        << fz << '\n';
   }
 }

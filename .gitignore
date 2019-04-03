@@ -1,3 +1,4 @@
+.DS_Store
 CMakeFiles/
 Testing/
 cosmosis_test_output/
@@ -13,6 +14,9 @@ cmake_install.cmake
 ez_sq_test
 ez_test
 *~
+*.so
+OUTPUT/
+*.out
 *.pdf
 *.ps
 gmon.out

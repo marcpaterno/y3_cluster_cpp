@@ -65,6 +65,38 @@ def execute(block, config):
             for ii in range(len(test_r)):
                 outf.write('%f\t%f\t%f\n'%(test_r[ii], test_test[ii], test_values[ii]))
 
+        dat=np.genfromtxt('test/Sigma_14.5_2halo.txt', delimiter=',')
+        test_r=dat[:, 0]; test_test=dat[:, 1]
+        test_interp=interp2d(RDS, zz, S2, kind='cubic')
+        test_values=test_interp(test_r, test_z)
+        with open('test/Sigma_14.5_2halo.out', 'w') as outf:
+            outf.write('r\t ytrue\t ytest\n')
+            for ii in range(len(test_r)):
+                outf.write('%f\t%f\t%f\n'%(test_r[ii], test_test[ii], test_values[ii]))
+
+        dat=np.genfromtxt('test/DS_14.5_2halo.txt', delimiter=',')
+        test_r=dat[:, 0]; test_test=dat[:, 1]
+        test_interp=interp2d(RDS, zz, DS2, kind='cubic')
+        print RDS.shape, zz.shape, DS2.shape
+        test_values=test_interp(test_r, test_z)
+        with open('test/DS_14.5_2halo.out', 'w') as outf:
+            outf.write('r\t ytrue\t ytest\n')
+            for ii in range(len(test_r)):
+                outf.write('%f\t%f\t%f\n'%(test_r[ii], test_test[ii], test_values[ii]))
+
+
+        dat=np.genfromtxt('test/bias.txt', delimiter=',')
+        test_mass=dat[:, 0]; test_test=dat[:, 2]
+        test_z=dat[:, 1];
+        print zz.shape, M.shape, Bias.shape
+        test_interp=interp2d(zz, M, Bias, kind='cubic')
+        test_value=test_interp(test_z, test_mass)
+        with open('test/bias.out', 'w') as outf:
+            outf.write('M\t z\t ytrue\t ytest\n')
+            for ii in range(len(test_mass)):
+                test_value=test_interp(test_z[ii], test_mass[ii])
+                outf.write('%f\t%f\t%f\t%f\n'%(test_mass[ii], test_z[ii], test_test[ii], test_value))
+
 
         return 0
 

@@ -29,23 +29,22 @@ def setup(options):
 	M_max = options[section,"M_max"]
 	M_bins = int(options[section,"M_bins"])
 
-	concentration = options[section,"concentration"]
-
-	return R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins, concentration
+	return R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins
 
 
 def execute(block, config):
-	R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins, concentration = config
+	R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins= config
 
 	omega_m = block[cosmo, "omega_m"]
-
+        concentration = block["cluster_mass_profile", "concentration"]
 	k = block["matter_power_lin", "k_h"]
 	P_k = block["matter_power_lin", "p_k"]
+	z_k = block["matter_power_lin", "z"]
 
 	k_nl = block["matter_power_nl", "k_h"]
 	P_k_nl = block["matter_power_nl", "p_k"]
 
-	z = block["matter_power_lin", "z"]
+	z = block["matter_power_nl", "z"]
 	nz = len(z)
 
 	R_perp = np.logspace(np.log10(R_perp_min), np.log10(R_perp_max), R_perp_bins)
@@ -68,16 +67,16 @@ def execute(block, config):
 
 	Deltasigma_2 = np.zeros((nz, R_perp_bins))
 	Xi_2 = np.zeros((nz, Radii_bins))
-	Sigma_2 = np.zeros((M_bins, R_perp_bins))
+	Sigma_2 = np.zeros((nz, R_perp_bins))
 	for i in range(nz):
 		xi_mm = ct.xi.xi_mm_at_R(Radii, k_nl, P_k_nl[i])
 	        Xi_2[i] = xi_mm
 		sigma2 = ct.deltasigma.Sigma_at_R(
-				R_perp, Radii, xi_mm, M[0], concentration, omega_m
+				R_perp, Radii, xi_mm, 10.0**14.5, concentration, omega_m
 				)
 		Deltasigma_2[i] = ct.deltasigma.DeltaSigma_at_R(
 				R_perp, R_perp, sigma2,
-				M[0], concentration, omega_m
+				10.0**14.5, concentration, omega_m
 				)
 	        Sigma_2[i] = sigma2
 
