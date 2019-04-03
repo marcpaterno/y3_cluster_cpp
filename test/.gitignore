@@ -47,3 +47,5 @@ trivial_gamma_t
 *.so
 lo_lc_probability_unity_test
 mor_probability_unity_test
+a_t_cen_t_test
+ExampleIntegrand_test

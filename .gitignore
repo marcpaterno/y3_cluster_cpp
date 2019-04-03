@@ -22,3 +22,5 @@ OUTPUT/
 gmon.out
 dump.txt
 cross_output.txt
+*.out
+*.so
