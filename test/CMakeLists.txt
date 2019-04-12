@@ -4,28 +4,18 @@ target_include_directories(testmain
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 
-add_executable(ExampleIntegrand_test ExampleIntegrand.test.cc)
-target_link_libraries(ExampleIntegrand_test
-                      PRIVATE
-                      example_integrand
-                      interp
-                      /cosmosis/cosmosis/datablock/libcosmosis.so
-                      testmain)
-target_include_directories(ExampleIntegrand_test
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/externals)
-add_test(ExampleIntegrand_test ExampleIntegrand_test)
-
-add_executable(integrand_test integrand.test.cc)
-target_link_libraries(integrand_test PRIVATE testmain ${CUBA_LIBRARIES})
-target_include_directories(integrand_test
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/externals
-                           ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
-add_test(integrand_test integrand_test)
+# add_executable(ExampleIntegrand_test ExampleIntegrand.test.cc)
+# target_link_libraries(ExampleIntegrand_test
+#                       PRIVATE
+#                       example_integrand
+#                       interp
+#                       /cosmosis/cosmosis/datablock/libcosmosis.so
+#                       testmain)
+# target_include_directories(ExampleIntegrand_test
+#                            PRIVATE
+#                            ${CMAKE_SOURCE_DIR}/src
+#                            ${CMAKE_SOURCE_DIR}/externals)
+# add_test(ExampleIntegrand_test ExampleIntegrand_test)
 
 add_executable(integration_test integration.test.cc)
 target_link_libraries(integration_test PRIVATE testmain ${CUBA_LIBRARIES})
@@ -34,7 +24,8 @@ target_include_directories(integration_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 add_test(integration_test integration_test)
 
 add_executable(trivial_gamma_t trivial_gamma_t.cc)
@@ -43,7 +34,8 @@ target_include_directories(trivial_gamma_t
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(transform_test transform.test.cc)
 target_link_libraries(transform_test PRIVATE testmain)
@@ -119,7 +111,8 @@ target_include_directories(sample_variance_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 #add_test(sample_variance_test sample_variance_test)
 
 add_executable(hmf_t_test hmf_t.test.cc)
@@ -178,7 +171,8 @@ target_include_directories(lc_lt_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 add_test(lc_lt_probability_test lc_lt_probability_test)
 
 add_executable(dv_do_dz_t_test dv_do_dz_t.test.cc)
@@ -215,7 +209,8 @@ target_include_directories(lo_lc_probability_unity_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 add_test(lo_lc_probability_unity_test lo_lc_probability_unity_test)
 
 add_executable(mor_t2_test mor_t2.test.cc)
@@ -234,7 +229,8 @@ target_include_directories(mor_probability_unity_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 add_test(mor_probability_unity_test mor_probability_unity_test)
 
 add_executable(mor2_probability_test mor2_probability_unity.test.cc)
@@ -245,7 +241,8 @@ target_include_directories(mor2_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 add_test(mor2_probability_test mor2_probability_test)
 
 add_executable(roffset_probability_test roffset_probability_unity.test.cc)
@@ -256,7 +253,8 @@ target_include_directories(roffset_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 add_test(roffset_probability_test roffset_probability_test)
 
 add_executable(integrate_delta_sigma integrate_delta_sigma.cc)
@@ -267,7 +265,8 @@ target_include_directories(integrate_delta_sigma
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(sigma_crit_inv_test sigma_crit_inv.test.cc)
 target_link_libraries(sigma_crit_inv_test PRIVATE testmain interp)
@@ -314,7 +313,8 @@ target_include_directories(simultaneous_bin_comparison_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_lc_lt integrate_lc_lt.cc)
 target_link_libraries(integrate_lc_lt PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt)
@@ -324,7 +324,8 @@ target_include_directories(integrate_lc_lt
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_lo_lc integrate_lo_lc.cc)
 target_link_libraries(integrate_lo_lc PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
@@ -334,7 +335,8 @@ target_include_directories(integrate_lo_lc
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_mor integrate_mor.cc)
 target_link_libraries(integrate_mor PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
@@ -344,7 +346,8 @@ target_include_directories(integrate_mor
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_roffset integrate_roffset.cc)
 target_link_libraries(integrate_roffset PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
@@ -354,7 +357,8 @@ target_include_directories(integrate_roffset
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(simultaneous_bin_comparison simultaneous_bin_comparison.cc)
 target_link_libraries(simultaneous_bin_comparison PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt cfitsio)
@@ -363,7 +367,8 @@ target_include_directories(simultaneous_bin_comparison
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(sample_variance sample_variance.cc)
 target_link_libraries(sample_variance PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp lc_lt profiler smp_var)
@@ -372,4 +377,5 @@ target_include_directories(sample_variance
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})

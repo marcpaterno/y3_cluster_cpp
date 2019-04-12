@@ -2,7 +2,6 @@
 #define Y3_CLUSTER_EXAMPLE_INTEGRAND_H
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "hmf_t.hh"
 #include "integration_range.hh"
 
 #include <optional>
@@ -30,15 +29,12 @@ class ExampleIntegrand {
 private:
   // State obtained from configuration. These things should be set in the
   // constructor.
-  std::vector<double> Rs_;
+  std::vector<double> radii_;
   std::vector<y3_cluster::IntegrationRange> lnM_ranges_;
   std::vector<y3_cluster::IntegrationRange> z_ranges_;
 
-  // State obtained from each sample. We use std::optional to hold the function
-  // object(s), so that we do not need to require then to be
-  // default-constructible and assignable.
+  // State obtained from each sample.
   double sigma_8_;
-  std::optional<y3_cluster::HMF_t> hmf_;
 
 public:
   // Initialize my integrand object from the parameters read

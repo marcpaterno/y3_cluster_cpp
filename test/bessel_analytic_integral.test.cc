@@ -1,4 +1,4 @@
-#include <cubacpp/cubacpp.hh>
+#include <cubacpp/gsl.hh>
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_errno.h>
 #include <iostream>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-project(y3_cluster_cpp VERSION 0.1.0 LANGUAGES CXX)
+project(y3_cluster_cpp VERSION 0.2.0 LANGUAGES CXX)
 enable_testing()
 
 # These flags are used by everything in the project. Put anything that affects
@@ -16,6 +16,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 
 find_package(cuba REQUIRED)
 find_package(GSL REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+
 
 add_subdirectory(src)
 add_subdirectory(test)

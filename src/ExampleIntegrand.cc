@@ -13,21 +13,18 @@ namespace {
   // We make the modulelabel const because it should never be modified.
   std::string const modulelabel("example_integrand");
 } // namespace
+
 ExampleIntegrand::ExampleIntegrand(DataBlock& config)
-  : R_(config.view<double>(modulelabel, "radius"))
-  , lnM_range_(make_integration_range(config, modulelabel, "lnM_range"))
-  , z_range_(make_integration_range(config, modulelabel, "z_range"))
+  : radii_(config.view<double>(modulelabel, "radii"))
+  , lnM_ranges_(make_integration_range(config, modulelabel, "lnM_range"))
+  , z_ranges_(make_integration_range(config, modulelabel, "z_range"))
   , sigma_8_()
-  , hmf_()
 {}
 
 void
 ExampleIntegrand::set_sample(DataBlock& sample)
 {
   sigma_8_ = sample.view<double>("cosmological_parameters", "sigma_8");
-  // We pass to std::optional<T>::emplace the arguments that will be given to
-  // the constructor of T.
-  hmf_.emplace(sample);
 }
 
 // This math is totally non-physical and stupid, but it uses all the values
