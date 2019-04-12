@@ -1,5 +1,5 @@
 #include <cmath>
-#include <cubacpp/cubacpp.hh>
+#include <cubacpp/gsl.hh>
 #include <iostream>
 #include <memory>
 
@@ -12,7 +12,7 @@
 
 TEST_CASE("Check that different ways to integrate bessel functions are equivalent")
 {
-    cubacores(0, 0);
+    //cubacores(0, 0);
     const double h = 0.771358152;
     auto const zz = read_vector("distances/z.txt");
     auto const da_arr = read_vector("distances/d_a.txt");

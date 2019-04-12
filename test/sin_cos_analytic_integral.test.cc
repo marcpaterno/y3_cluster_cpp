@@ -1,4 +1,4 @@
-#include <cubacpp/cubacpp.hh>
+#include <cubacpp/gsl.hh>
 #include <iostream>
 
 #include "catch2/catch.hpp"
