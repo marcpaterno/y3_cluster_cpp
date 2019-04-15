@@ -62,14 +62,14 @@ def execute(block, config):
 				R_perp, R_perp, sigma1,
 				M[i], concentration, omega_m
 				)
-                Xi_1[i] = ct.xi.xi_nfw_at_R(Radii, M[i], concentration, omega_m)
+                Xi_1[i] = ct.xi.xi_nfw_at_r(Radii, M[i], concentration, omega_m)
                 Sigma_1[i] = sigma1
 
 	Deltasigma_2 = np.zeros((nz, R_perp_bins))
 	Xi_2 = np.zeros((nz, Radii_bins))
 	Sigma_2 = np.zeros((nz, R_perp_bins))
 	for i in range(nz):
-		xi_mm = ct.xi.xi_mm_at_R(Radii, k_nl, P_k_nl[i])
+		xi_mm = ct.xi.xi_mm_at_r(Radii, k_nl, P_k_nl[i])
 	        Xi_2[i] = xi_mm
 		sigma2 = ct.deltasigma.Sigma_at_R(
 				R_perp, Radii, xi_mm, 10.0**14.5, concentration, omega_m
