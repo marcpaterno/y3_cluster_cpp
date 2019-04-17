@@ -7,7 +7,7 @@
 #include <optional>
 
 // ExampleIntegrand is a class that models the concept of "CosmoSISIntegrand",
-// and is suitable for use as the template parameter for the class template
+// and is thus suitable for use as the template parameter for the class template
 // CosmosisIntegrationModule.
 //
 // Notes:
@@ -28,12 +28,16 @@
 class ExampleIntegrand {
 private:
   // State obtained from configuration. These things should be set in the
-  // constructor.
+  // constructor. Our integrand is a vector-valued function; it will return
+  // a vector the same length as radii_, which is the result of evaluating
+  // the function to be integrated at that radius.
   std::vector<double> radii_;
-  std::vector<y3_cluster::IntegrationRange> lnM_ranges_;
-  std::vector<y3_cluster::IntegrationRange> z_ranges_;
+  std::vector<y3_cluster::IntegrationRange> x_ranges_;
+  std::vector<y3_cluster::IntegrationRange> y_ranges_;
 
   // State obtained from each sample.
+  // If there were a type X that did not have a default constructor,
+  // we would use std::optional<X> as our data member. 
   double sigma_8_;
 
 public:
@@ -49,7 +53,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  std::vector<double> execute(double z, double lambda) const;
+  std::vector<double> execute(double x, double y) const;
 };
 
 #endif
