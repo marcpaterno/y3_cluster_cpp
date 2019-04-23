@@ -1,16 +1,20 @@
 add_library(interp SHARED interp_1d.cc interp_2d.cc)
 target_link_libraries(interp PRIVATE ${GSL_LIBRARIES})
-
+    
 add_library(lc_lt SHARED lc_lt_t.cc)
 target_link_libraries(lc_lt PRIVATE ${GSL_LIBRARIES})
 target_include_directories(lc_lt PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
 add_library(example_integrand SHARED ExampleIntegrand.cc)
 target_link_libraries(example_integrand PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so)
-target_include_directories(example_integrand PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(example_integrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
 
 add_library(smp_var
-	    SHARED
+            SHARED
             sample_variance.cc
             bessel_polynomial_integral.cc
             sin_cos_polynomial_integral.cc)

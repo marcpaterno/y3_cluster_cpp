@@ -4,18 +4,33 @@ target_include_directories(testmain
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 
-# add_executable(ExampleIntegrand_test ExampleIntegrand.test.cc)
-# target_link_libraries(ExampleIntegrand_test
-#                       PRIVATE
-#                       example_integrand
-#                       interp
-#                       /cosmosis/cosmosis/datablock/libcosmosis.so
-#                       testmain)
-# target_include_directories(ExampleIntegrand_test
-#                            PRIVATE
-#                            ${CMAKE_SOURCE_DIR}/src
-#                            ${CMAKE_SOURCE_DIR}/externals)
-# add_test(ExampleIntegrand_test ExampleIntegrand_test)
+add_executable(make_integration_volume_test make_integration_volume.test.cc)
+target_link_libraries(make_integration_volume_test
+                      PRIVATE
+                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      testmain)
+target_include_directories(make_integration_volume_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR}
+                       ${CMAKE_SOURCE_DIR}/externals)
+add_test(make_integration_volume_test make_integration_volume_test)
+
+add_executable(ExampleIntegrand_test ExampleIntegrand.test.cc)
+target_link_libraries(ExampleIntegrand_test
+                      PRIVATE
+                      example_integrand
+                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      ${CUBA_LIBRARIES}
+                      testmain)
+target_include_directories(ExampleIntegrand_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ExampleIntegrand_test ExampleIntegrand_test)
 
 add_executable(integration_test integration.test.cc)
 target_link_libraries(integration_test PRIVATE testmain ${CUBA_LIBRARIES})

@@ -1,0 +1,38 @@
+#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "make_integration_volumes.hh"
+#include "catch2/catch.hpp"
+
+#include <vector>
+#include <string>
+
+std::string const module_label("something");
+
+TEST_CASE("2d volume")
+{
+  SECTION("vector length 1")
+  {
+    cosmosis::DataBlock cfg;
+    cfg.put_val(module_label, "x_low", std::vector<double>{-3.0});
+    cfg.put_val(module_label, "x_high", std::vector<double>{2.0});
+    cfg.put_val(module_label, "y_low", std::vector<double>{4.0});
+    cfg.put_val(module_label, "y_high", std::vector<double>{7.0});
+    auto volumes = y3_cluster_cpp::make_integration_volumes(cfg, module_label, "x", "y");
+    CHECK(volumes.size() == 1);
+    cubacpp::IntegrationVolume<2> expected({-3.0, 4.0},{2.0, 7.0});
+    CHECK(volumes[0] == expected);
+    CHECK(volumes[0].jacobian() == 5.0 * 3.0);
+  }
+  SECTION("vector length 2")
+  {
+    cosmosis::DataBlock cfg;
+    cfg.put_val(module_label, "x_low", std::vector<double>{0.0, -3.0});
+    cfg.put_val(module_label, "x_high", std::vector<double>{1.0, 2.0});
+    cfg.put_val(module_label, "y_low", std::vector<double>{0.0, 4.0});
+    cfg.put_val(module_label, "y_high", std::vector<double>{1.0, 7.0});
+    auto volumes = y3_cluster_cpp::make_integration_volumes(cfg, module_label, "x", "y");
+    CHECK(volumes.size() == 2);
+    cubacpp::IntegrationVolume<2> expected({-3.0, 4.0},{2.0, 7.0});
+    CHECK(volumes[0] == cubacpp::IntegrationVolume<2>{});
+    CHECK(volumes[1] == expected);
+  }
+}

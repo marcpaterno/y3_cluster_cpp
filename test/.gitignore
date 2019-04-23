@@ -49,3 +49,4 @@ lo_lc_probability_unity_test
 mor_probability_unity_test
 a_t_cen_t_test
 ExampleIntegrand_test
+make_integration_volume_test

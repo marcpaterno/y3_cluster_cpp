@@ -2,9 +2,10 @@
 #define Y3_CLUSTER_EXAMPLE_INTEGRAND_H
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "integration_range.hh"
+#include "cubacpp/integration_volume.hh"
 
 #include <optional>
+#include <vector>
 
 // ExampleIntegrand is a class that models the concept of "CosmoSISIntegrand",
 // and is thus suitable for use as the template parameter for the class template
@@ -27,17 +28,21 @@
 //
 class ExampleIntegrand {
 private:
+  // We define the type alias volume_t to be the right dimensionality
+  // of integration volume for our integrand. If we were to change the
+  // number of arguments required by the function call operator (below),
+  // we would need to also modify this type alias to keep consistent.
+  using volume_t = cubacpp::IntegrationVolume<2>;
+
   // State obtained from configuration. These things should be set in the
   // constructor. Our integrand is a vector-valued function; it will return
   // a vector the same length as radii_, which is the result of evaluating
   // the function to be integrated at that radius.
   std::vector<double> radii_;
-  std::vector<y3_cluster::IntegrationRange> x_ranges_;
-  std::vector<y3_cluster::IntegrationRange> y_ranges_;
 
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
-  // we would use std::optional<X> as our data member. 
+  // we would use std::optional<X> as our data member.
   double sigma_8_;
 
 public:
@@ -53,7 +58,13 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  std::vector<double> execute(double x, double y) const;
+  std::vector<double> operator()(double x, double y) const;
+
+  // The following non-member (static) function creates a vector of integration
+  // volumes (the type alias defined above) based on the parameters read from
+  // the configuration block for the module.
+  static std::vector<volume_t> make_integration_volumes(
+    cosmosis::DataBlock& cfg);
 };
 
 #endif
