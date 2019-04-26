@@ -67,3 +67,14 @@ target_include_directories(cluster_abundance_covariance
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/../../cubacpp)
+
+add_library(ExampleIntegration SHARED ExampleIntegration_module.cc)
+target_link_libraries(ExampleIntegration
+                     PRIVATE
+                     example_integrand)
+target_include_directories(ExampleIntegration
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})

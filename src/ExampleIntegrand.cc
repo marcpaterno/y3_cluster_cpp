@@ -52,5 +52,5 @@ ExampleIntegrand::operator()(double x, double y) const
 std::vector<ExampleIntegrand::volume_t>
 ExampleIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster_cpp::make_integration_volumes(cfg, modulelabel, "x", "y");
+  return y3_cluster::make_integration_volumes(cfg, modulelabel, "x", "y");
 }

@@ -10,9 +10,7 @@
 #include <type_traits>
 #include <vector>
 
-#include <iostream>
-
-namespace y3_cluster_cpp {
+namespace y3_cluster {
   // This variadic function template takes as arguments:
   //   1. a cosmosis::DataBlock (by reference), and
   //   2. one or more arguments that are convertible to strings.
@@ -40,10 +38,6 @@ namespace y3_cluster_cpp {
                              std::vector<cubacpp::array<N>>& lowbounds,
                              std::vector<cubacpp::array<N>>& highbounds)
   {
-    std::cerr << "In get_integration_boundaries\n" << modulelabel << " ";
-    for (auto const& name : names)
-      std::cerr << name << " ";
-
     if (names.empty())
       return;
 
@@ -56,9 +50,6 @@ namespace y3_cluster_cpp {
     auto highs = cfg.view<vec>(modulelabel, names[0] + "_high");
     if (nvolumes != highs.size()) {
       // TODO: Improve this error handling.
-      std::cerr << "highs.size() is wrong: expected " << nvolumes
-                << " got: " << highs.size();
-      abort();
       throw std::runtime_error("bad, bad user!");
     }
 
@@ -80,16 +71,10 @@ namespace y3_cluster_cpp {
       highs = cfg.view<vec>(modulelabel, names[iname] + "_high");
       if (nvolumes != lows.size()) {
         // TODO: Improve this error handling.
-        std::cerr << "lows.size() is wrong: expected " << nvolumes
-                  << " got: " << highs.size();
-        abort();
         throw std::runtime_error("bad, bad user!");
       }
 
       if (nvolumes != highs.size()) {
-        // TODO: Improve this error handling.
-        std::cerr << "highs.size() is wrong: expected " << nvolumes
-                  << " got: " << highs.size();
         abort();
         throw std::runtime_error("bad, bad user!");
       }
@@ -97,11 +82,11 @@ namespace y3_cluster_cpp {
         fill_bounds(iname, ivol);
     }
   }
-} // namespace y3_cluster_cpp
+} // namespace y3_cluster
 
 template <typename... Ts>
 std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
-y3_cluster_cpp::make_integration_volumes(cosmosis::DataBlock& cfg,
+y3_cluster::make_integration_volumes(cosmosis::DataBlock& cfg,
                                          std::string const& modulelabel,
                                          Ts... ts)
 {
@@ -115,7 +100,7 @@ y3_cluster_cpp::make_integration_volumes(cosmosis::DataBlock& cfg,
 
   using boundary_t = cubacpp::array<n>;
   std::vector<boundary_t> lows, highs;
-  y3_cluster_cpp::get_integration_boundaries(
+  y3_cluster::get_integration_boundaries(
     cfg, modulelabel, names, lows, highs);
 
   std::vector<cubacpp::IntegrationVolume<n>> result;
