@@ -3,6 +3,7 @@
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_volume.hh"
+#include "cubacpp/integration_result.hh"
 
 #include <optional>
 #include <vector>
@@ -51,6 +52,7 @@ public:
   explicit ExampleIntegrand(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
+  // Do not attempt to copy the sample!.
   void set_sample(cosmosis::DataBlock& sample);
 
   // The function to be integrated. All arguments to this function must be of
@@ -59,6 +61,15 @@ public:
   // function is const because calling it does not change the state of the
   // object.
   std::vector<double> operator()(double x, double y) const;
+
+  // finalize_sample() is where products can be put into the cosmosis::DataBlock
+  // representing the current sample. The object 'sample' passed to this function
+  // will be the exact same object as was passed to the most recent call to
+  // set_sample(). The object 'results' will be the results of the integration
+  // that has just been done for that sample. This is generally the item which
+  // should be put into the sample.
+  void finalize_sample(cosmosis::DataBlock& sample,
+                       std::vector<cubacpp::integration_results_v> const& results) const;
 
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from

@@ -2,8 +2,9 @@
 #include "make_integration_volumes.hh"
 
 // We write using declarations so that we don't have to type the namespace name
-// each time we use DataBlock or make_integration_range.
+// each time we use these names
 using cosmosis::DataBlock;
+using cubacpp::integration_results_v;
 
 // We put the module label "modulelabel" in an anonymous namespace to make sure
 // no other compilation unit can see it, and so that it has static lifetime.
@@ -40,6 +41,19 @@ ExampleIntegrand::operator()(double x, double y) const
     results[i] = (x / radii_[i]) + (delta * delta);
   }
   return results;
+}
+
+//
+void
+ExampleIntegrand::finalize_sample(cosmosis::DataBlock& sample,
+                                  std::vector<integration_results_v> const& results)
+  const
+{
+  // TODO: fix this to handle the whole vector of integration_results.
+  sample.put_val(modulelabel, "integral_vals", results[0].value);
+  sample.put_val(modulelabel, "integral_errors", results[0].error);
+  sample.put_val(modulelabel, "integral_probs", results[0].prob);
+  sample.put_val(modulelabel, "integral_status", results[0].status);
 }
 
 // The implementation of make_integration_volumes can be almost the same for

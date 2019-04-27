@@ -4,6 +4,7 @@
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "cubacpp/cuhre.hh"
 #include "cubacpp/integrand_traits.hh"
+#include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
 #include <vector>
@@ -40,6 +41,9 @@ namespace y3_cluster {
   };
 } // namespace y3_cluster
 
+// transform_all is a function template that simplifies use of std::transform
+// for the very common case in which an entire input sequence is being
+// transformed.
 template <typename F, typename IN, typename OUT>
 void
 transform_all(IN const& in, OUT& out, F&& f)
@@ -52,16 +56,19 @@ void
 y3_cluster::CosmoSISIntegrationModule<I, A>::execute(
   cosmosis::DataBlock& sample)
 {
+  // Prepare the integrand for this sample.
   integrand_.set_sample(sample);
+
+  // Perform the (vectorized) integration for each volume.
   std::vector<integration_results_type> results;
   results.reserve(volumes_.size());
-
   auto integrate_volume = [this](auto const& vol) {
     return algorithm_.integrate(integrand_, eps_rel_, eps_abs_, vol);
   };
   transform_all(volumes_, results, integrate_volume);
 
-  // TODO: put results that into sample...
+  // Put the result into the sample.
+  integrand_.finalize_sample(sample, results);
 };
 
 #endif
