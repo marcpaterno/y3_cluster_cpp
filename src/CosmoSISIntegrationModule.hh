@@ -52,6 +52,15 @@ transform_all(IN const& in, OUT& out, F&& f)
 }
 
 template <typename I, typename A>
+y3_cluster::CosmoSISIntegrationModule<I, A>::CosmoSISIntegrationModule(cosmosis::DataBlock& cfg) :
+  integrand_(cfg),
+  algorithm_(),
+  volumes_(IntegrandType::make_integration_volumes(cfg)),
+  eps_rel_(1.0e-3),
+  eps_abs_(1.0e-12)
+{ }
+
+template <typename I, typename A>
 void
 y3_cluster::CosmoSISIntegrationModule<I, A>::execute(
   cosmosis::DataBlock& sample)
