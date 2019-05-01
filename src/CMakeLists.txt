@@ -13,6 +13,14 @@ target_include_directories(example_integrand
                            ${CMAKE_SOURCE_DIR}/../../cubacpp
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(y1_analysis SHARED y1_analysis.cc)
+target_link_libraries(y1_analysis PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so lc_lt interp ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(y1_analysis
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
+
 add_library(smp_var
             SHARED
             sample_variance.cc
