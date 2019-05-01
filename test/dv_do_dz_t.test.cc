@@ -45,7 +45,7 @@ TEST_CASE("dv_do_dz_t works")
   for (std::size_t i = 1, sz = zs.size(); i != sz; ++i)
   {
     double const fz = dvdodz(zs[i]);
-    double constexpr epsrel = 1.0e-6;
+    double constexpr epsrel = 1.0e-3;
     double constexpr epsabs = 1.0e-12;
     CHECK(fz == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
     out << zs[i] << '\t'
