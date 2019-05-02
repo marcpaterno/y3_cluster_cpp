@@ -1,12 +1,13 @@
+#include "module_macros.hh"
 #include "make_integration_volumes.hh"
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
+#include "cubacpp/integration_volume.hh"
 
+#include "lc_lt_t.hh"
 #include <optional>
 #include <vector>
-#include "lc_lt_t.hh"
 using namespace y3_cluster;
 
 // y1_analysis is a class that models the concept of "CosmoSISIntegrand",
@@ -58,13 +59,14 @@ public:
   std::vector<double> operator()(double lc, double lt, double zt) const;
 
   // finalize_sample() is where products can be put into the cosmosis::DataBlock
-  // representing the current sample. The object 'sample' passed to this function
-  // will be the exact same object as was passed to the most recent call to
-  // set_sample(). The object 'results' will be the results of the integration
-  // that has just been done for that sample. This is generally the item which
-  // should be put into the sample.
-  void finalize_sample(cosmosis::DataBlock& sample,
-                       std::vector<cubacpp::integration_results_v> const& results) const;
+  // representing the current sample. The object 'sample' passed to this
+  // function will be the exact same object as was passed to the most recent
+  // call to set_sample(). The object 'results' will be the results of the
+  // integration that has just been done for that sample. This is generally the
+  // item which should be put into the sample.
+  void finalize_sample(
+    cosmosis::DataBlock& sample,
+    std::vector<cubacpp::integration_results_v> const& results) const;
 
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
@@ -87,9 +89,7 @@ namespace {
   std::string const modulelabel("y1_analysis");
 } // anonymous namespace
 
-y1_analysis::y1_analysis(DataBlock& )
-  : lc_lt()
-{}
+y1_analysis::y1_analysis(DataBlock&) : lc_lt() {}
 
 void
 y1_analysis::set_sample(DataBlock& sample)
@@ -112,21 +112,21 @@ y1_analysis::operator()(double lc, double lt, double zt) const
 
 //
 void
-y1_analysis::finalize_sample(cosmosis::DataBlock& sample,
-                                  std::vector<integration_results_v> const& results)
-  const
+y1_analysis::finalize_sample(
+  cosmosis::DataBlock& sample,
+  std::vector<integration_results_v> const& results) const
 {
   // TODO: fix this to handle the whole vector of integration_results.
   std::vector<double> N_vals;
   std::vector<double> N_errors;
   std::vector<double> N_probs;
   std::vector<int> N_status;
-  for (auto const &result : results){
-      N_vals.push_back(result.value[0]);
-      N_errors.push_back(result.error[0]);
-      N_probs.push_back(result.prob[0]);
-      N_status.push_back(result.status);
-  } 
+  for (auto const& result : results) {
+    N_vals.push_back(result.value[0]);
+    N_errors.push_back(result.error[0]);
+    N_probs.push_back(result.prob[0]);
+    N_status.push_back(result.status);
+  }
   sample.put_val(modulelabel, "N_vals", N_vals);
   sample.put_val(modulelabel, "N_errors", N_errors);
   sample.put_val(modulelabel, "N_probs", N_probs);
@@ -143,58 +143,14 @@ y1_analysis::finalize_sample(cosmosis::DataBlock& sample,
 std::vector<y1_analysis::volume_t>
 y1_analysis::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  try{
-  return y3_cluster::make_integration_volumes(cfg, modulelabel, "lo", "lt", "zt");
-  } catch (std::exception const & ex){
-	    std::cerr << ex.what();
-             throw ;
-      };
+  try {
+    return y3_cluster::make_integration_volumes(
+      cfg, modulelabel, "lc", "lt", "zt");
+  }
+  catch (std::exception const& ex) {
+    std::cerr << ex.what();
+    throw;
+  };
 }
 
-
-#include "CosmoSISIntegrationModule.hh"
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cosmosis/datablock/entry.hh"
-#include "/cosmosis/cosmosis/datablock/section.hh"
-#include "/cosmosis/cosmosis/datablock/section_names.h"
-#include <exception>
-#include <iostream>
-
-using y1_analysis_module =
-  y3_cluster::CosmoSISIntegrationModule<y1_analysis>;
-
-extern "C"
-{
-  void*
-  setup(cosmosis::DataBlock* config)
-  {
-    try {
-    return new y1_analysis_module(*config);
-    } catch (std::exception const & ex){
-	    std::cerr << ex.what();
-             throw ;
-      };
-  }
-
-  DATABLOCK_STATUS
-  execute(cosmosis::DataBlock* sample, void* module)
-  {
-    try {
-    auto mod = static_cast<y1_analysis_module*>(module);
-    mod->execute(*sample);
-    return DBS_SUCCESS;
-    } catch (std::exception const & ex){
-	    std::cerr << ex.what();
-             throw ;
-      };
-  }
-
-  int
-  cleanup(void* module)
-  {
-    delete static_cast<y1_analysis_module*>(module);
-    return 0;
-  }
-}
-
-
+DEFINE_COSMOSIS_MODULE(y1_analysis);
