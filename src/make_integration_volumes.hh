@@ -50,7 +50,7 @@ namespace y3_cluster {
     auto highs = cfg.view<vec>(modulelabel, names[0] + "_high");
     if (nvolumes != highs.size()) {
       // TODO: Improve this error handling.
-      throw std::runtime_error("bad, bad user!");
+      throw std::runtime_error(names[0]+" bad, bad user!");
     }
 
     lowbounds.resize(nvolumes);
@@ -71,12 +71,12 @@ namespace y3_cluster {
       highs = cfg.view<vec>(modulelabel, names[iname] + "_high");
       if (nvolumes != lows.size()) {
         // TODO: Improve this error handling.
-        throw std::runtime_error("bad, bad user!");
+        throw std::runtime_error(names[iname]+" bad, bad user!");
       }
 
       if (nvolumes != highs.size()) {
         abort();
-        throw std::runtime_error("bad, bad user!");
+        throw std::runtime_error(names[iname]+" bad, bad user!");
       }
       for (std::size_t ivol = 0; ivol != nvolumes; ++ivol)
         fill_bounds(iname, ivol);
