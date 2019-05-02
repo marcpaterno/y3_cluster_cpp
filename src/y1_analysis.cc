@@ -144,7 +144,7 @@ std::vector<y1_analysis::volume_t>
 y1_analysis::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try{
-  return y3_cluster::make_integration_volumes(cfg, modulelabel, "lc", "lt", "zt");
+  return y3_cluster::make_integration_volumes(cfg, modulelabel, "lo", "lt", "zt");
   } catch (std::exception const & ex){
 	    std::cerr << ex.what();
              throw ;
