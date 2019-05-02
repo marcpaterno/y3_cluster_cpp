@@ -1,3 +1,4 @@
+#include "module_macros.hh"
 #include "make_integration_volumes.hh"
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
@@ -152,48 +153,4 @@ y1_analysis::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cosmosis/datablock/entry.hh"
-#include "/cosmosis/cosmosis/datablock/section.hh"
-#include "/cosmosis/cosmosis/datablock/section_names.h"
-#include "CosmoSISIntegrationModule.hh"
-#include <exception>
-#include <iostream>
-
-using y1_analysis_module = y3_cluster::CosmoSISIntegrationModule<y1_analysis>;
-
-extern "C"
-{
-  void*
-  setup(cosmosis::DataBlock* config)
-  {
-    try {
-      return new y1_analysis_module(*config);
-    }
-    catch (std::exception const& ex) {
-      std::cerr << ex.what();
-      throw;
-    };
-  }
-
-  DATABLOCK_STATUS
-  execute(cosmosis::DataBlock* sample, void* module)
-  {
-    try {
-      auto mod = static_cast<y1_analysis_module*>(module);
-      mod->execute(*sample);
-      return DBS_SUCCESS;
-    }
-    catch (std::exception const& ex) {
-      std::cerr << ex.what();
-      throw;
-    };
-  }
-
-  int
-  cleanup(void* module)
-  {
-    delete static_cast<y1_analysis_module*>(module);
-    return 0;
-  }
-}
+DEFINE_COSMOSIS_MODULE(y1_analysis);
