@@ -1,16 +1,16 @@
-#ifndef Y3_CLUSTER_ZO_ZT_HH
-#define Y3_CLUSTER_ZO_ZT_HH
+#ifndef Y3_CLUSTER_INT_ZO_ZT_HH
+#define Y3_CLUSTER_INT_ZO_ZT_HH
 
 #include <datablock_reader.hh>
 #include <cmath>
 
 namespace y3_cluster {
 
-  class ZO_ZT_t {
+  class INT_ZO_ZT_t {
   public:
-    explicit ZO_ZT_t(double sigma) : _sigma(sigma) {}
+    explicit INT_ZO_ZT_t(double sigma) : _sigma(sigma) {}
 
-    explicit ZO_ZT_t(cosmosis::DataBlock& sample)
+    explicit INT_ZO_ZT_t(cosmosis::DataBlock& sample)
       : _sigma(get_datablock<double>(sample, "cluster_abundance", "zo_zt_sigma"))
     {}
 
