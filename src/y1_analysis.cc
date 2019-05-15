@@ -10,6 +10,7 @@
 #include "hmf_t.hh"
 #include "dv_do_dz_t.hh"
 #include "omega_z_sdss.hh"
+#include "int_zo_zt_t.hh"
 #include <optional>
 #include <vector>
 using namespace y3_cluster;
@@ -49,6 +50,9 @@ private:
   std::optional<OMEGA_Z_SDSS> omega_z_sdss;
   std::optional<DV_DO_DZ_t> dv_do_dz;
   std::optional<HMF_t> hmf;
+  std::optional<INT_ZO_ZT_t> int_zo_zt;
+  std::vector<double> zo_low_;
+  std::vector<double> zo_high_;
 
 public:
   // Initialize my integrand object from the parameters read
@@ -97,7 +101,15 @@ namespace {
   std::string const modulelabel("y1_analysis");
 } // anonymous namespace
 
-y1_analysis::y1_analysis(DataBlock&) : lc_lt(), mor(), omega_z_sdss(), dv_do_dz(), hmf() {}
+y1_analysis::y1_analysis(DataBlock& config) : 
+	lc_lt(),
+       	mor(),
+       	omega_z_sdss(),
+       	dv_do_dz(),
+       	hmf(), 
+        int_zo_zt(),
+	zo_low_(config.view<std::vector<double>>(modulelabel, "zo_low")),
+        zo_high_(config.view<std::vector<double>>(modulelabel, "zo_high")){}
 
 void
 y1_analysis::set_sample(DataBlock& sample)
@@ -110,6 +122,7 @@ y1_analysis::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   omega_z_sdss.emplace(sample);
+  int_zo_zt.emplace(sample);
 }
 
 std::vector<double>
@@ -117,9 +130,19 @@ y1_analysis::operator()(double lo, double lt, double zt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  std::vector<double> results(2);
-  results[0] = (*lc_lt)(lo, lt, zt)  * (*mor)(lt, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z_sdss)(zt);
-  results[1] = std::exp(lnM) * (*lc_lt)(lo, lt, zt)  * (*mor)(lt, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z_sdss)(zt);
+  std::vector<double> results(2 * zo_low_.size());
+  double mass = std::exp(lnM);
+  double common_term = (*lc_lt)(lo, lt, zt)
+	  	     * (*mor)(lt, lnM, zt)
+		     * (*dv_do_dz)(zt)
+		     * (*hmf)(lnM, zt)
+		     * (*omega_z_sdss)(zt);
+  // Number counts first in the returned results, followed by the masses 
+  for (std::size_t i =0; i != zo_low_.size(); i++){
+  	results[i]= (*int_zo_zt)(zo_low_[i], zo_high_[i], zt)
+			* common_term;
+        results[i+zo_low_.size()] = mass * results[i];
+  }
   return results;
 }
 
@@ -129,30 +152,46 @@ y1_analysis::finalize_sample(
   cosmosis::DataBlock& sample,
   std::vector<integration_results_v> const& results) const
 {
-  // TODO: fix this to handle the whole vector of integration_results.
-  std::vector<double> N_vals;
-  std::vector<double> N_errors;
-  std::vector<double> N_probs;
   std::vector<int> NM_status;
-  
-  std::vector<double> M_vals;
-  std::vector<double> M_errors;
-  std::vector<double> M_probs;
+  std::vector<int> NM_nregions;
+  std::vector<int> NM_nevals;
 
+  std::vector<double> N_vals_temp;  
+  std::vector<double> N_errors_temp;  
+  std::vector<double> N_probs_temp;  
+  std::vector<double> M_vals_temp;  
+  std::vector<double> M_errors_temp;  
+  std::vector<double> M_probs_temp;  
+
+  ///// how do I know how many dimensions zo_low_ or zo_high_ or radiii have?
+  std::size_t n_zo_bins = zo_low_.size();
   for (auto const& result : results) {
-    N_vals.push_back(result.value[0]);
-    N_errors.push_back(result.error[0]);
-    N_probs.push_back(result.prob[0]);
     NM_status.push_back(result.status);
+    NM_nregions.push_back(result.nregions);
+    NM_nevals.push_back(result.neval);
 
-    M_vals.push_back(std::log10(result.value[1]/result.value[0]) );
-    M_errors.push_back(result.error[1]);
-    M_probs.push_back(result.prob[1]);
+    N_vals_temp.insert(N_vals_temp.end(), result.value.begin(), result.value.begin()+n_zo_bins);
+    N_errors_temp.insert(N_errors_temp.end(), result.error.begin(), result.error.begin()+n_zo_bins);
+    N_probs_temp.insert(N_probs_temp.end(), result.prob.begin(), result.prob.begin()+n_zo_bins);
+
+    M_vals_temp.insert(M_vals_temp.end(), result.value.begin()+n_zo_bins, result.value.end());
+    M_errors_temp.insert(M_errors_temp.end(), result.error.begin()+n_zo_bins, result.error.end());
+    M_probs_temp.insert(M_probs_temp.end(), result.prob.begin()+n_zo_bins, result.prob.end());
   }
+  std::vector<std::size_t> extents{results.size(), n_zo_bins};
+  cosmosis::ndarray<double> N_vals(N_vals_temp, extents);
+  cosmosis::ndarray<double> N_errors(N_errors_temp, extents);
+  cosmosis::ndarray<double> N_probs(N_probs_temp, extents);
+  cosmosis::ndarray<double> M_vals(M_vals_temp, extents);
+  cosmosis::ndarray<double> M_errors(M_errors_temp, extents);
+  cosmosis::ndarray<double> M_probs(M_probs_temp, extents);
+
   sample.put_val(modulelabel, "N_vals", N_vals);
   sample.put_val(modulelabel, "N_errors", N_errors);
   sample.put_val(modulelabel, "N_probs", N_probs);
   sample.put_val(modulelabel, "NM_status", NM_status);
+  sample.put_val(modulelabel, "NM_nregions", NM_nregions);
+  sample.put_val(modulelabel, "NM_nevals", NM_nevals);
 
   sample.put_val(modulelabel, "M_vals", M_vals);
   sample.put_val(modulelabel, "M_errors", M_errors);
