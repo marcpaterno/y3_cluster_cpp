@@ -159,9 +159,9 @@ y1_analysis::finalize_sample(
   std::vector<double> N_vals_temp;  
   std::vector<double> N_errors_temp;  
   std::vector<double> N_probs_temp;  
-  std::vector<double> M_vals_temp;  
-  std::vector<double> M_errors_temp;  
-  std::vector<double> M_probs_temp;  
+  std::vector<double> totM_vals_temp;  
+  std::vector<double> totM_errors_temp;  
+  std::vector<double> totM_probs_temp;  
 
   ///// how do I know how many dimensions zo_low_ or zo_high_ or radiii have?
   std::size_t n_zo_bins = zo_low_.size();
@@ -174,17 +174,17 @@ y1_analysis::finalize_sample(
     N_errors_temp.insert(N_errors_temp.end(), result.error.begin(), result.error.begin()+n_zo_bins);
     N_probs_temp.insert(N_probs_temp.end(), result.prob.begin(), result.prob.begin()+n_zo_bins);
 
-    M_vals_temp.insert(M_vals_temp.end(), result.value.begin()+n_zo_bins, result.value.end());
-    M_errors_temp.insert(M_errors_temp.end(), result.error.begin()+n_zo_bins, result.error.end());
-    M_probs_temp.insert(M_probs_temp.end(), result.prob.begin()+n_zo_bins, result.prob.end());
+    totM_vals_temp.insert(totM_vals_temp.end(), result.value.begin()+n_zo_bins, result.value.end());
+    totM_errors_temp.insert(totM_errors_temp.end(), result.error.begin()+n_zo_bins, result.error.end());
+    totM_probs_temp.insert(totM_probs_temp.end(), result.prob.begin()+n_zo_bins, result.prob.end());
   }
   std::vector<std::size_t> extents{results.size(), n_zo_bins};
   cosmosis::ndarray<double> N_vals(N_vals_temp, extents);
   cosmosis::ndarray<double> N_errors(N_errors_temp, extents);
   cosmosis::ndarray<double> N_probs(N_probs_temp, extents);
-  cosmosis::ndarray<double> M_vals(M_vals_temp, extents);
-  cosmosis::ndarray<double> M_errors(M_errors_temp, extents);
-  cosmosis::ndarray<double> M_probs(M_probs_temp, extents);
+  cosmosis::ndarray<double> totM_vals(totM_vals_temp, extents);
+  cosmosis::ndarray<double> totM_errors(totM_errors_temp, extents);
+  cosmosis::ndarray<double> totM_probs(totM_probs_temp, extents);
 
   sample.put_val(modulelabel, "N_vals", N_vals);
   sample.put_val(modulelabel, "N_errors", N_errors);
@@ -193,9 +193,9 @@ y1_analysis::finalize_sample(
   sample.put_val(modulelabel, "NM_nregions", NM_nregions);
   sample.put_val(modulelabel, "NM_nevals", NM_nevals);
 
-  sample.put_val(modulelabel, "M_vals", M_vals);
-  sample.put_val(modulelabel, "M_errors", M_errors);
-  sample.put_val(modulelabel, "M_probs", M_probs);
+  sample.put_val(modulelabel, "totM_vals", totM_vals);
+  sample.put_val(modulelabel, "totM_errors", totM_errors);
+  sample.put_val(modulelabel, "totM_probs", totM_probs);
 }
 
 // The implementation of make_integration_volumes can be almost the same for
