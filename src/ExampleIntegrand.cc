@@ -6,17 +6,8 @@
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-// We put the module label "modulelabel" in an anonymous namespace to make sure
-// no other compilation unit can see it, and so that it has static lifetime.
-// This means it is created when the library is loaded, and is destroyed when
-// the program is shut down.
-namespace {
-  // We make the modulelabel const because it should never be modified.
-  std::string const modulelabel("example_integrand");
-} // anonymous namespace
-
 ExampleIntegrand::ExampleIntegrand(DataBlock& config)
-  : radii_(config.view<std::vector<double>>(modulelabel, "radii")), sigma_8_()
+  : radii_(config.view<std::vector<double>>(module_label(), "radii")), sigma_8_()
 {}
 
 void
@@ -50,10 +41,16 @@ ExampleIntegrand::finalize_sample(cosmosis::DataBlock& sample,
   const
 {
   // TODO: fix this to handle the whole vector of integration_results.
-  sample.put_val(modulelabel, "integral_vals", results[0].value);
-  sample.put_val(modulelabel, "integral_errors", results[0].error);
-  sample.put_val(modulelabel, "integral_probs", results[0].prob);
-  sample.put_val(modulelabel, "integral_status", results[0].status);
+  sample.put_val(module_label(), "integral_vals", results[0].value);
+  sample.put_val(module_label(), "integral_errors", results[0].error);
+  sample.put_val(module_label(), "integral_probs", results[0].prob);
+  sample.put_val(module_label(), "integral_status", results[0].status);
+}
+
+char const*
+ExampleIntegrand::module_label()
+{
+  return "example_integrand";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -66,5 +63,8 @@ ExampleIntegrand::finalize_sample(cosmosis::DataBlock& sample,
 std::vector<ExampleIntegrand::volume_t>
 ExampleIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes(cfg, modulelabel, "x", "y");
+  return y3_cluster::make_integration_volumes(cfg,
+                                              ExampleIntegrand::module_label(),
+                                              "x",
+                                              "y");
 }

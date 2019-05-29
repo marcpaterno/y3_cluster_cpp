@@ -80,6 +80,13 @@ public:
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_results_v> const& results) const;
 
+  // module_label() should return the label for this module. The name this returns
+  // is the name that must be used in the 'ini file' for configuring the module
+  // made with this class.
+  // We return char const* rather than std::string to avoid some needless memory
+  // allocations.
+  static char const* module_label();
+
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
@@ -92,15 +99,6 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-// We put the module label "modulelabel" in an anonymous namespace to make sure
-// no other compilation unit can see it, and so that it has static lifetime.
-// This means it is created when the library is loaded, and is destroyed when
-// the program is shut down.
-namespace {
-  // We make the modulelabel const because it should never be modified.
-  std::string const modulelabel("y1_analysis");
-} // anonymous namespace
-
 y1_analysis::y1_analysis(DataBlock& config) : 
 	lc_lt(),
        	mor(),
@@ -108,8 +106,8 @@ y1_analysis::y1_analysis(DataBlock& config) :
        	dv_do_dz(),
        	hmf(), 
         int_zo_zt(),
-	zo_low_(config.view<std::vector<double>>(modulelabel, "zo_low")),
-        zo_high_(config.view<std::vector<double>>(modulelabel, "zo_high")){}
+	zo_low_(config.view<std::vector<double>>(y1_analysis::module_label(), "zo_low")),
+        zo_high_(config.view<std::vector<double>>(y1_analysis::module_label(), "zo_high")){}
 
 void
 y1_analysis::set_sample(DataBlock& sample)
@@ -164,6 +162,9 @@ y1_analysis::finalize_sample(
   std::vector<double> totM_probs_temp;  
 
   ///// how do I know how many dimensions zo_low_ or zo_high_ or radiii have?
+  //
+  // TODO: Try to refactor this code, to abstract away the manipulations done for
+  // each physics quantity.
   std::size_t n_zo_bins = zo_low_.size();
   for (auto const& result : results) {
     NM_status.push_back(result.status);
@@ -186,16 +187,22 @@ y1_analysis::finalize_sample(
   cosmosis::ndarray<double> totM_errors(totM_errors_temp, extents);
   cosmosis::ndarray<double> totM_probs(totM_probs_temp, extents);
 
-  sample.put_val(modulelabel, "N_vals", N_vals);
-  sample.put_val(modulelabel, "N_errors", N_errors);
-  sample.put_val(modulelabel, "N_probs", N_probs);
-  sample.put_val(modulelabel, "NM_status", NM_status);
-  sample.put_val(modulelabel, "NM_nregions", NM_nregions);
-  sample.put_val(modulelabel, "NM_nevals", NM_nevals);
+  sample.put_val(module_label(), "N_vals", N_vals);
+  sample.put_val(module_label(), "N_errors", N_errors);
+  sample.put_val(module_label(), "N_probs", N_probs);
+  sample.put_val(module_label(), "NM_status", NM_status);
+  sample.put_val(module_label(), "NM_nregions", NM_nregions);
+  sample.put_val(module_label(), "NM_nevals", NM_nevals);
 
-  sample.put_val(modulelabel, "totM_vals", totM_vals);
-  sample.put_val(modulelabel, "totM_errors", totM_errors);
-  sample.put_val(modulelabel, "totM_probs", totM_probs);
+  sample.put_val(module_label(), "totM_vals", totM_vals);
+  sample.put_val(module_label(), "totM_errors", totM_errors);
+  sample.put_val(module_label(), "totM_probs", totM_probs);
+}
+
+char const*
+y1_analysis::module_label()
+{
+  return "y1_analysis";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -210,7 +217,7 @@ y1_analysis::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
     return y3_cluster::make_integration_volumes(
-      cfg, modulelabel, "lo", "lt", "zt", "lnm");
+      cfg, module_label(), "lo", "lt", "zt", "lnm");
   }
   catch (std::exception const& ex) {
     std::cerr << ex.what();
