@@ -1,1 +1,0 @@
-_cosmosis_order_sigma2 = u'r_cosmosis_order_z'

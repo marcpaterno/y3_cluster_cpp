@@ -23,7 +23,10 @@ namespace y3_cluster {
       //    \int P(zo|zt) d(zo), zo in [zomin, zomax]
       //     == (erf((zomax - zt) / base) - erf((zomin - zt) / base)) / 2
       using std::erf;
-      double base = std::sqrt(2) * _sigma;
+      double _sigma2;
+      _sigma2 = 0.02129638-0.25085154*zt+1.11756659*zt*zt-1.22925508*zt*zt*zt;
+      //_sigma2 = 0.02009036-0.24311016*zt+1.0778892*zt*zt-1.20483017*zt*zt*zt;
+      double base = std::sqrt(2) * _sigma2;
       return (erf((zomax - zt) / base) -
               erf((zomin - zt) / base)) / 2.0;
     }

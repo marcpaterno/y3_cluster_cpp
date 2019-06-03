@@ -51,32 +51,22 @@ def execute(block, config):
 	Radii = np.logspace(np.log10(Radii_min), np.log10(Radii_max), Radii_bins)
 	M = np.logspace(np.log10(M_min), np.log10(M_max), M_bins)
 
-	Deltasigma_1 = np.zeros((M_bins, R_perp_bins))
 	Xi_1 = np.zeros((M_bins, Radii_bins))
 	Sigma_1 = np.zeros((M_bins, R_perp_bins))
 	for i in range(M_bins):
 		sigma1 = ct.deltasigma.Sigma_nfw_at_R(
 				R_perp, M[i], concentration, omega_m
 				)
-		Deltasigma_1[i] = ct.deltasigma.DeltaSigma_at_R(
-				R_perp, R_perp, sigma1,
-				M[i], concentration, omega_m
-				)
                 Xi_1[i] = ct.xi.xi_nfw_at_r(Radii, M[i], concentration, omega_m)
                 Sigma_1[i] = sigma1
 
-	Deltasigma_2 = np.zeros((nz, R_perp_bins))
 	Xi_2 = np.zeros((nz, Radii_bins))
 	Sigma_2 = np.zeros((nz, R_perp_bins))
 	for i in range(nz):
 		xi_mm = ct.xi.xi_mm_at_r(Radii, k_nl, P_k_nl[i])
 	        Xi_2[i] = xi_mm
 		sigma2 = ct.deltasigma.Sigma_at_R(
-				R_perp, Radii, xi_mm, 10.0**14.5, concentration, omega_m
-				)
-		Deltasigma_2[i] = ct.deltasigma.DeltaSigma_at_R(
-				R_perp, R_perp, sigma2,
-				10.0**14.5, concentration, omega_m
+				R_perp, Radii, xi_mm, 3.199267137797384375e+14, concentration, omega_m
 				)
 	        Sigma_2[i] = sigma2
 
@@ -90,8 +80,6 @@ def execute(block, config):
 	block["deltasigma", "Xi_1"] = Xi_1
 	block["deltasigma", "Xi_2"] = Xi_2
 	block["deltasigma", "R_Xi"] = Radii
-	block["deltasigma", "deltasigma_1"] = Deltasigma_1
-	block["deltasigma", "deltasigma_2"] = Deltasigma_2
 	block["deltasigma", "sigma_1"] = Sigma_1
 	block["deltasigma", "sigma_2"] = Sigma_2
 	block["deltasigma", "bias"] = Bias
