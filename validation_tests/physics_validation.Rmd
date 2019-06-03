@@ -130,14 +130,7 @@ ggplot(omega_z, aes(x = z, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-# Mass function
-
-## Mass function interpolation
-
-**Hmmh Do we really need this test**
-
-
-## Halo Mass function computation
+# Halo Mass Function
 
 **This test requires running test.ini in cosmosis_tests first**
 Need to do better than this in the future.
@@ -190,7 +183,7 @@ ggplot(hmf) +
   xlab(expression(mass)) +
   ylab("Number Density") +
   scale_y_log10() +
-  facet_wrap(zbin~.)
+  facet_wrap(zbin~ .)
 ```
 
 ```{r fig.asp=0.4,fig.cap = "Relative residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
@@ -204,18 +197,6 @@ ggplot(hmf, aes(x = mass, y = fracerr, color = within.abs)) +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   facet_wrap(zbin~ .)
 ```
-
-```{r fig.asp=0.4, fig.cap = "Absolute residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
-ggplot(hmf, aes(x= mass, y = resid, color = within.frac)) +
-  geom_smallpoint() +
-  guides(color = FALSE) +
-  geom_hline(yintercept = local.abs.errormargin, color = "blue") +
-  geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
-  ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
-  xlab(expression(M)) +
-  facet_wrap(zbin ~ .)
-```
-
 
 # Volume Element
 
@@ -502,27 +483,41 @@ ggplot(lo_lc, aes(x= deltal, y = resid, color = within.frac)) +
 # Number Counts and Masses
 
 **This test requires running y1_anallysis.ini in cosmosis_tests first**
-Need to do better than this in the future.
 
 ```{r}
-local.frac.errormargin =  0.01
+local.frac.errormargin =  0.05
 local.abs.errormargin = abs.errormargin
 ```
 
-In this section, we compare the stacked number counts and mass predictions in stacked richness/mass bins for a SDSS like analysis. These values are the integrated results using components listed above. For this testing, we compare results from our implementation to the implementations from Matteo Costanzi for the SDSS cosmology analysis (Costanzi et al. 2019). The test is conducted for the following set of cosmology and scaling relation parameters: **to be filled in**.
+In this section, we compare the stacked number counts and mass predictions in stacked richness/mass bins for a SDSS like analysis. These values are the integrated results using components listed above. For this testing, we compare results from our implementation to the implementations from Matteo Costanzi for the SDSS cosmology analysis (Costanzi et al. 2019). The test is conducted for the following set of cosmology and scaling relation parameters specified in **cosmosis_tests/values_comp.in**
 
 ```{r include = FALSE}
 inte <- read_tsv("../data/integrated_bin_test.out")
 inte <- mutate(inte,
                lambda = (llo+lhi)/2.0,
-               resid = yntrue - yntest,
-                 fracerr = resid/yntrue,
+               residn = yntrue - yntest,
+                 fracerrn = residn/yntrue,
+                 residm = ymtrue - ymtest,
+                 fracerrm = residm/ymtrue,
                  lo = pmin(-local.frac.errormargin * yntrue, -local.abs.errormargin),
                  hi = pmax(local.frac.errormargin * yntrue, local.abs.errormargin),
-                 within.frac = (abs(fracerr) < local.frac.errormargin),
-                 within.abs = (abs(resid) < local.abs.errormargin),
+                 within.frac = (abs(fracerrn) < local.frac.errormargin),
+                 within.abs = (abs(residn) < local.abs.errormargin),
                  pass = within.frac | within.abs)
 ```
+a. The comparisons are made at `r nunique(inte$lambda)` unique values of $\lambda$ bins.
+a. Over the **number of bins** tested and for the stacked **number counts**,
+the maximum magnitude of the absolute residual between the expected value
+and our calculated value is
+$`r max(abs(inte$residn))`$;
+the maximum magnitude of the fractional residual is
+$`r max(abs(inte$fracerrn))`$.
+a. Over the **number of bins** tested and for the stacked **average masses**,
+the maximum magnitude of the absolute residual between the expected value
+and our calculated value is
+$`r max(abs(inte$residm))`$;
+the maximum magnitude of the fractional residual is
+$`r max(abs(inte$fracerrm))`$. 
 
 ```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
@@ -533,21 +528,19 @@ ggplot(inte) +
 ```
 
 ```{r fig.cap = "Relative residual implementation or our approximation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
-ggplot(inte, aes(x = lambda, y = fracerr, color = within.abs)) +
+ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
   guides(color = FALSE) +
   xlab("richness") +
-  ylab("fractional residual") +
+  ylab("fractional residual for number counts") +
    ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
 
-
-
-```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results for average masses. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
   geom_smallpoint(aes(x =lambda , y = ymtrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = lambda , y = ymtest), color = testcolor, shape = testshape) +
@@ -555,11 +548,23 @@ ggplot(inte) +
   ylab("LogMass")
 ```
 
+```{r fig.cap = "Relative residual implementation or our approximation to the expected results for average masses. Points in blue pass, and points in red fail, the absolute residual test."}
+ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
+  geom_smallpoint() +
+  scale_x_log10() +
+  guides(color = FALSE) +
+  xlab("richness") +
+  ylab("fractional residual for average mass") +
+   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
+  geom_hline(yintercept = local.frac.errormargin, color="blue") +
+  geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
+```
+
 # Cluster Mass Profile
 
 The Cluster Mass profiles are calculated by a **separate CosmoSIS module**, which is a python wrapper to Tom McClintock's Cluster_toolkit code. The code exists in the folder `delta_sigma`.
 
-**Before your run this test, Make sure to go to the folder `deltasigma` and run `cosmosis deltasigma.ini` to produce the proper test files.**
+**Before your run this test, Make sure to go to the folder `deltasigma` and run `cosmosis deltasigma_test.ini` to produce the proper test files.**
 
 ## $\xi$ NFW
 
@@ -569,7 +574,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-xi_nfw <- read_tsv("../deltasigma/test/xi_14.5_nfw.out")
+xi_nfw <- read_tsv("../deltasigma/test/xi_nfwonly.out")
 print(xi_nfw)
 xi_nfw <- mutate(xi_nfw,
                  resid = ytrue - ytest,
@@ -582,7 +587,7 @@ xi_nfw <- mutate(xi_nfw,
 ```
 $\xi_{NFW}(r)$ is the cluster matter correlation function in the 1-halo regime, adopting an NFW model. 
 
-For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for a cluster of $M_{200m}=10^{14.5} M_\odot/h$ and $c=5$.
+For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for a cluster of $M_{200m}=3.199267137797384375e+14 M_\odot/h$ and $c=5$.
 
 a.  The comparisons are made at `r nrow(xi_nfw)` unique values of $r$. 
 b. Over the range tested 
@@ -604,6 +609,7 @@ ggplot(xi_nfw) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
   scale_x_log10() +
+  scale_y_log10() +
   xlab(expression(r)) +
   ylab(expression(xi))
 ```
@@ -631,7 +637,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-xi_2h <- read_tsv("../deltasigma/test/xi_2halo.out")
+xi_2h <- read_tsv("../deltasigma/test/xi_mm_2halo.out")
 print(xi_2h)
 xi_2h <- mutate(xi_2h,
                  resid = ytrue - ytest,
@@ -643,7 +649,7 @@ xi_2h <- mutate(xi_2h,
                  pass = within.frac | within.abs)
 ```
 
-$\xi_{2h}(r)$ is the cluster matter correlation function in the 2-halo regime, adopting a non-linear matter power spectrum 
+$\xi_{mm}(r)$ is the matter correlation function in the cluster 2-halo regime, adopting a non-linear matter power spectrum, and not accounting for cluster bias.
 
 For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for $z=0.201010$.
 
@@ -667,6 +673,7 @@ ggplot(xi_2h) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
   scale_x_log10() +
+  scale_y_log10() +
   xlab(expression(r)) +
   ylab(expression(xi))
 ```
@@ -691,7 +698,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-sig_nfw <- read_tsv("../deltasigma/test/Sigma_14.5_nfw.out")
+sig_nfw <- read_tsv("../deltasigma/test/Sigma_nfwonly.out")
 print(sig_nfw)
 sig_nfw <- mutate(sig_nfw,
                  resid = ytrue - ytest,
@@ -705,7 +712,7 @@ sig_nfw <- mutate(sig_nfw,
 
 $\Sigma_{NFW}(R)$ is the cluster surface mass density profile in the 1-halo regime, adopting an NFW model.
 
-For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c pacakge, for a cluster of $M_{200m} = 10^{14.5} M_\odot/h$ and $c=5$.
+For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for a cluster of $M_{200m}=3.199267137797384375e+14 M_\odot/h$ and $c=5$.
 
 a. The comparisons are done at `r nrow(sig_nfw)` unique values of $R$.
 b. Over the range tested 
@@ -727,6 +734,7 @@ ggplot(sig_nfw) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
   scale_x_log10() +
+  scale_y_log10() +
   xlab("R [Mpc/h]") +
   ylab(expression(Sigma))
 ```
@@ -745,12 +753,12 @@ ggplot(sig_nfw, aes(x = r, y = fracerr, color = within.abs)) +
 ## $\Sigma$ 2-halo
 
 ```{r}
-local.frac.errormargin = 0.001
+local.frac.errormargin = 0.01
 local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-sig_nfw <- read_tsv("../deltasigma/test/Sigma_14.5_2halo.out")
+sig_nfw <- read_tsv("../deltasigma/test/Sigma_mm_2halo.out")
 print(sig_nfw)
 sig_nfw <- mutate(sig_nfw,
                  resid = ytrue - ytest,
@@ -762,9 +770,7 @@ sig_nfw <- mutate(sig_nfw,
                  pass = within.frac | within.abs)
 ```
 
-$\Sigma_{NFW}(R)$ is the cluster surface mass density profile in the 1-halo regime, adopting an NFW model.
-
-For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c pacakge, for a cluster of $M_{200m} = 10^{14.5} M_\odot/h$ and $c=5$.
+$\Sigma_{mm}(R)$ is the cluster surface mass density profile in the cluster 2-halo regime, adopting a non-linear matter power spectrum, and not accounting for cluster bias.
 
 a. The comparisons are done at `r nrow(sig_nfw)` unique values of $R$.
 b. Over the range tested 
@@ -786,6 +792,7 @@ ggplot(sig_nfw) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
   scale_x_log10() +
+  scale_y_log10() +
   xlab("R [Mpc/h]") +
   ylab(expression(Sigma))
 ```
@@ -797,129 +804,6 @@ ggplot(sig_nfw, aes(x = r, y = fracerr, color = within.abs)) +
   guides(color = FALSE) +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab("R [Mpc/h]") +
-  ylab("fractional residual") +
-  geom_hline(yintercept = local.frac.errormargin, color="blue") +
-  geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
-```
-
-
-## $\Delta\Sigma$ NFW
-
-```{r}
-local.frac.errormargin = 0.001
-local.abs.errormargin = abs.errormargin
-```
-
-```{r include = FALSE}
-ds_nfw <- read_tsv("../deltasigma/test/DS_14.5_nfw.out")
-print(ds_nfw)
-ds_nfw <- mutate(ds_nfw,
-                 resid = ytrue - ytest,
-                 fracerr = resid/ytrue,
-                 lo = pmin(-local.frac.errormargin * ytrue, -local.abs.errormargin),
-                 hi = pmax(local.frac.errormargin * ytrue, local.abs.errormargin),
-                 within.frac = (abs(fracerr) < local.frac.errormargin),
-                 within.abs = (abs(resid) < local.abs.errormargin),
-                 pass = within.frac | within.abs)
-```
-
-$\Delta\Sigma_{NFW}(R)$ is the cluster differential surface mass density profile in the 1-halo regime, adopting an NFW model.
-
-For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c pacakge, for a cluster of $M_{200m} = 10^{14.5} M_\odot/h$ and $c=5$.
-
-a. The comparisons are done at `r nrow(ds_nfw)` unique values of $R$.
-b. Over the range tested 
-($`r min(ds_nfw$r)` < R < `r max(ds_nfw$r)`$),
-the maximum magnitude of the absoluteresidual between the expected value
-and our calculated value is
-$`r max(abs(ds_nfw$resid))`$;
-the maximum magnitude of the fractional residual is
-$`r max(abs(ds_nfw$fracerr))`$.
-c. For this test,
-we require the relative differences to be 
-less than $`r local.frac.errormargin`$,
-or the absolute difference to be less than
-$`r local.abs.errormargin`$.
-d. **`r testresult(ds_nfw)`**
-
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
-ggplot(ds_nfw) +
-  geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
-  scale_x_log10() +
-  xlab("R") +
-  ylab("$\\Delta\\Sigma$")
-```
-
-```{r fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
-ggplot(ds_nfw, aes(x = r, y = fracerr, color = within.abs)) +
-  geom_smallpoint() +
-  scale_x_log10() +
-  guides(color = FALSE) +
-  ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
-  xlab("R") +
-  ylab("fractional residual") +
-  geom_hline(yintercept = local.frac.errormargin, color="blue") +
-  geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
-```
-
-## $\Delta\Sigma$ 2-halo
-
-**These plots are not realistic**
-
-```{r}
-local.frac.errormargin = 0.001
-local.abs.errormargin = abs.errormargin
-```
-
-```{r include = FALSE}
-ds_nfw <- read_tsv("../deltasigma/test/DS_14.5_2halo.out")
-print(ds_nfw)
-ds_nfw <- mutate(ds_nfw,
-                 resid = ytrue - ytest,
-                 fracerr = resid/ytrue,
-                 lo = pmin(-local.frac.errormargin * ytrue, -local.abs.errormargin),
-                 hi = pmax(local.frac.errormargin * ytrue, local.abs.errormargin),
-                 within.frac = (abs(fracerr) < local.frac.errormargin),
-                 within.abs = (abs(resid) < local.abs.errormargin),
-                 pass = within.frac | within.abs)
-```
-
-$\Delta\Sigma_{NFW}(R)$ is the cluster differential surface mass density profile in the 1-halo regime, adopting an NFW model.
-
-For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c pacakge, for a cluster of $M_{200m} = 10^{14.5} M_\odot/h$ and $c=5$.
-
-a. The comparisons are done at `r nrow(ds_nfw)` unique values of $R$.
-b. Over the range tested 
-($`r min(ds_nfw$r)` < R < `r max(ds_nfw$r)`$),
-the maximum magnitude of the absoluteresidual between the expected value
-and our calculated value is
-$`r max(abs(ds_nfw$resid))`$;
-the maximum magnitude of the fractional residual is
-$`r max(abs(ds_nfw$fracerr))`$.
-c. For this test,
-we require the relative differences to be 
-less than $`r local.frac.errormargin`$,
-or the absolute difference to be less than
-$`r local.abs.errormargin`$.
-d. **`r testresult(ds_nfw)`**
-
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
-ggplot(ds_nfw) +
-  geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
-  scale_x_log10() +
-  xlab("R") +
-  ylab("$\\Delta\\Sigma$")
-```
-
-```{r fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
-ggplot(ds_nfw, aes(x = r, y = fracerr, color = within.abs)) +
-  geom_smallpoint() +
-  scale_x_log10() +
-  guides(color = FALSE) +
-  ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
-  xlab("R") +
   ylab("fractional residual") +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
@@ -1055,12 +939,9 @@ ggplot(miscent, aes(x = rmis, y = fracerr, color = within.abs)) +
 
 ## Critical density
 
-
-**recompute the test files for one cosmology consistent with the rest of the test?**
-
 ```{r}
-local.frac.errormargin =  frac.errormargin
-local.abs.errormargin = 1.0e-20
+local.frac.errormargin =  0.0001
+local.abs.errormargin = 1.0e-21
 ```
 
 ```{r include = FALSE}
@@ -1068,7 +949,7 @@ sig_crit <- read_tsv("../data/Sigma_crit_test.out")
 sig_crit$zbin <- as.factor(sig_crit$zl)
 sig_crit <- mutate(sig_crit,
                  resid = ytrue - ytest,
-                 fracerr = resid/ytrue,
+                 fracerr = resid/(ytrue+as.numeric(ytrue==0)),
                  lo = pmin(-local.frac.errormargin * ytrue, -local.abs.errormargin, 0),
                  hi = pmax(local.frac.errormargin * ytrue, local.abs.errormargin),
                  within.frac = (abs(fracerr) < local.frac.errormargin),
@@ -1079,7 +960,7 @@ sig_crit <- mutate(sig_crit,
 
 $\Sigma_{crit}(z_l, z_s)$ is the inverse of the critical surface density of a lens system, which changes with the redshift of the lens $z_l$ and the redshift of the source galaxy $z_s$. Our calculation is implemented in the file `sigma_crit_inverse_t.hh`. 
 
-For this testing, we compare our function output to the evaluations using the astropy package with a flat cosmology $\Omega_m=$, $\Omega_\Lambda=$, $h_0=$.
+For this testing, we compare our function output to the evaluations using the astropy package with a flat cosmology $\Omega_m=0.3$, $\Omega_b=0.06$, $h_0=0.7$.
 
 a. The comparisons are done at, `r nunique(sig_crit$zs)` unique $z_s$ values, with `r nlevels(sig_crit$zbin)` different $z_l$ values
 b. Over the range tested 
@@ -1115,6 +996,17 @@ ggplot(sig_crit, aes(x= zs, y = resid, color = within.frac)) +
   geom_hline(yintercept = local.abs.errormargin, color = "blue") +
   geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
   ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
+  xlab("z_s") +
+  facet_wrap(zbin ~ .)
+```
+
+```{r fig.asp=0.7, fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test. In this plot, the relative residual is forced to be 0 when both the true and test values are 0, as is the case when zs <= zl"}
+ggplot(sig_crit, aes(x = zs, y = fracerr, color = within.abs)) +
+  geom_smallpoint() +
+  guides(color = FALSE) +
+  geom_hline(yintercept = local.frac.errormargin, color="blue") +
+  geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")+
+  ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab("z_s") +
   facet_wrap(zbin ~ .)
 ```
