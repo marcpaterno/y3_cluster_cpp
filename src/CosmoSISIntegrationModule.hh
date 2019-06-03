@@ -56,8 +56,8 @@ y3_cluster::CosmoSISIntegrationModule<I, A>::CosmoSISIntegrationModule(cosmosis:
   integrand_(cfg),
   algorithm_(),
   volumes_(IntegrandType::make_integration_volumes(cfg)),
-  eps_rel_(1.0e-3),
-  eps_abs_(1.0e-12)
+  eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
+  eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs"))
 { }
 
 template <typename I, typename A>

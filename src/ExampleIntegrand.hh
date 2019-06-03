@@ -71,6 +71,14 @@ public:
   void finalize_sample(cosmosis::DataBlock& sample,
                        std::vector<cubacpp::integration_results_v> const& results) const;
 
+  // module_label() is a non-member (static) function that returns the label for
+  // this module. The name this returns
+  // is the name that must be used in the 'ini file' for configuring the module
+  // made with this class.
+  // We return char const* rather than std::string to avoid some needless memory
+  // allocations.
+  static char const* module_label();
+
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
