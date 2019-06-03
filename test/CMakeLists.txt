@@ -130,13 +130,13 @@ target_include_directories(sample_variance_test
                            ${EIGEN3_INCLUDE_DIR})
 #add_test(sample_variance_test sample_variance_test)
 
-add_executable(hmf_t_test hmf_t.test.cc)
-target_link_libraries(hmf_t_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
-target_include_directories(hmf_t_test
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/externals)
-add_test(hmf_t_test hmf_t_test)
+#add_executable(hmf_t_test hmf_t.test.cc)
+#target_link_libraries(hmf_t_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} interp)
+#target_include_directories(hmf_t_test
+#                           PRIVATE
+#                           ${CMAKE_SOURCE_DIR}/src
+#                           ${CMAKE_SOURCE_DIR}/externals)
+#add_test(hmf_t_test hmf_t_test)
 
 add_executable(lo_lc_t_test lo_lc_t.test.cc)
 target_link_libraries(lo_lc_t_test PRIVATE testmain)

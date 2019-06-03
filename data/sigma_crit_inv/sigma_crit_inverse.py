@@ -31,8 +31,7 @@ def sig_crit_inv(zs, zl, cosmo):
 if __name__ == '__main__':
     zl = np.arange(0.01, 1.005, 0.01)
     zs = np.copy(zl)
-    cosmologies = [FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.7, Ob0=0.06),
-                   FlatLambdaCDM(H0=50, Om0=0.5, Tcmb0=2.7, Ob0=0.03)]
+    cosmologies = [FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.7, Ob0=0.06)]
 
     folder = os.path.dirname(__file__)
     np.savetxt(os.path.join(folder, 'zl.txt'), zl,

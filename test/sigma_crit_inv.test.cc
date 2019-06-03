@@ -24,7 +24,7 @@ TEST_CASE("Compare sigma_crit_inv against astropy", "[sigma_crit_inverse]")
   const auto zl = read_vector(path + "zl.txt"),
              zs = read_vector(path + "zs.txt");
 
-  const size_t NCOSMO = 2;
+  const size_t NCOSMO = 1;
   std::ofstream out {"../data/Sigma_crit_test.out"};
   out << std::setw(16);
   out << std::setprecision(16);
@@ -40,9 +40,9 @@ TEST_CASE("Compare sigma_crit_inv against astropy", "[sigma_crit_inverse]")
     auto k = 0u;
     for (auto j = 0u; j < zs.size(); j++) {
       for (auto i = 0u; i < zl.size(); i=i+10) {
-        // Pop the first item from astropy_sci
+      	 // Pop the first item from astropy_sci
         const auto expected_val = astropy_sci[k];
-        auto expected = Approx(expected_val).epsilon(1e-6).margin(1e-20);
+        auto expected = Approx(expected_val).epsilon(1e-4).margin(1e-21);
         if (sci(zl[i], zs[j]) != expected)
           std::cerr << "(zl, zs) = (" << zl[i] << ", " << zs[j] << ")\n"
                     << "expected = " << expected_val << "\n"
