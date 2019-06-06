@@ -58,7 +58,7 @@ y3_cluster::CosmoSISIntegrationModule<I, A>::CosmoSISIntegrationModule(cosmosis:
   volumes_(IntegrandType::make_integration_volumes(cfg)),
   eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
   eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs"))
-{ }
+{ algorithm_.maxeval=1000*1000*100; }
 
 template <typename I, typename A>
 void

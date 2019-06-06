@@ -21,6 +21,22 @@ target_include_directories(y1_analysis
                            ${CMAKE_SOURCE_DIR}/../../cubacpp
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(sigma_miscent SHARED sigma_miscent.cc)
+target_link_libraries(sigma_miscent PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so lc_lt interp ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(sigma_miscent
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(sigma_cent SHARED sigma_cent.cc)
+target_link_libraries(sigma_cent PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so lc_lt interp ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(sigma_cent
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})
+
 add_library(smp_var
             SHARED
             sample_variance.cc
