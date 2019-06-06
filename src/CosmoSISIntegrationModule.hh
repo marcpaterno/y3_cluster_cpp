@@ -2,11 +2,13 @@
 #define Y3_CLUSTER_COSMOSIS_INTEGRATION_MODULE_HH
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "/cosmosis/cosmosis/datablock/entry.hh"
 #include "cubacpp/cuhre.hh"
 #include "cubacpp/integrand_traits.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
+#include <iostream>
 #include <vector>
 
 namespace y3_cluster {
@@ -52,13 +54,24 @@ transform_all(IN const& in, OUT& out, F&& f)
 }
 
 template <typename I, typename A>
-y3_cluster::CosmoSISIntegrationModule<I, A>::CosmoSISIntegrationModule(cosmosis::DataBlock& cfg) :
-  integrand_(cfg),
-  algorithm_(),
-  volumes_(IntegrandType::make_integration_volumes(cfg)),
-  eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
-  eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs"))
-{ algorithm_.maxeval=1000*1000*100; }
+y3_cluster::CosmoSISIntegrationModule<I, A>::CosmoSISIntegrationModule(
+  cosmosis::DataBlock& cfg)
+try : integrand_(cfg),
+      algorithm_(),
+      volumes_(IntegrandType::make_integration_volumes(cfg)),
+      eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
+      eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")) {
+  algorithm_.maxeval = cfg.view<int>(IntegrandType::module_label(), "max_eval");
+}
+catch (cosmosis::Entry::BadEntry const&) {
+  std::cerr << "\nDuring construction of a CosmoSISIntegrationModule, the "
+               "lookup of some parameter"
+            << "\nfailed. It may be a wrong name, or a wrong type.\n";
+}
+catch (...) {
+  std::cerr << "\nUnknown exception type thrown while constructing a "
+               "CosmoSISIntegrationModule.\n\n";
+}
 
 template <typename I, typename A>
 void
