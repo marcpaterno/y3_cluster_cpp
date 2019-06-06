@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "polynomial.hh"
+#include "utils/polynomial.hh"
 
 using y3_cluster::polynomial;
 

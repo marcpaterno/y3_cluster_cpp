@@ -1,6 +1,6 @@
 #include "catch2/catch.hpp"
 #include "cubacpp/cubacpp.hh"
-#include "integration_range.hh"
+#include "utils/integration_range.hh"
 #include <array>
 #include <cmath>
 #include <iostream>

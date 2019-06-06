@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "primitives.hh"
+#include "utils/primitives.hh"
 
 using y3_cluster::integer_pow,
       y3_cluster::pi;

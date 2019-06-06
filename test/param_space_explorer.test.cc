@@ -4,8 +4,8 @@
 #include <tuple>
 #include <utility>
 
-#include <integration_range.hh>
-#include <test/param_space_explorer.hh>
+#include "utils/integration_range.hh"
+#include "param_space_explorer.hh"
 
 using y3_cluster::IntegrationRange,
       std::array,

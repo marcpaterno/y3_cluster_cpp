@@ -1,0 +1,17 @@
+add_library(models
+            SHARED
+            sample_variance.cc
+            lc_lt_t.cc)
+target_link_libraries(models
+                      PRIVATE
+                      utils
+                      ${GSL_LIBRARIES}
+                      ${CUBA_LIBRARIES})
+target_include_directories(models
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${EIGEN3_INCLUDE_DIR})

@@ -1,8 +1,10 @@
 #include "catch2/catch.hpp"
-#include "interp_1d.hh"
-#include "dv_do_dz_t.hh"
-#include "ez.hh"
-#include "read_vector.hh"
+#include "utils/interp_1d.hh"
+#include "utils/read_vector.hh"
+
+#include "models/dv_do_dz_t.hh"
+#include "models/ez.hh"
+
 #include <fstream>
 #include <iomanip>
 

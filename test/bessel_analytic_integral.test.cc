@@ -3,10 +3,10 @@
 #include <gsl/gsl_errno.h>
 #include <iostream>
 
-#include "bessel_polynomial_integral.hh"
+#include "utils/bessel_polynomial_integral.hh"
 #include "catch2/catch.hpp"
-#include "primitives.hh"
-#include "sin_cos_polynomial_integral.hh"
+#include "utils/primitives.hh"
+#include "utils/sin_cos_polynomial_integral.hh"
 
 using y3_cluster::bessel_polynomial_integral,
       y3_cluster::bessel_polynomial_integrals,

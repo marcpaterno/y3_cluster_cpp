@@ -1,13 +1,13 @@
 #include "catch2/catch.hpp"
-#include "lc_lt_t.hh"
-#include "lo_lc_t.hh"
-#include "mor_t.hh"
-#include "mor_t2.hh"
-#include "roffset_t.hh"
-#include "test/param_space_explorer.hh"
+#include "models/lc_lt_t.hh"
+#include "models/lo_lc_t.hh"
+#include "models/mor_t.hh"
+#include "models/mor_t2.hh"
+#include "models/roffset_t.hh"
 #include "cubacpp/cubacpp.hh"
-#include "integration_range.hh"
+#include "utils/integration_range.hh"
 
+#include "param_space_explorer.hh"
 #include <iostream>
 
 

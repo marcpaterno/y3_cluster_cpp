@@ -1,13 +1,13 @@
 #include <iostream>
 #include <cubacpp/cubacpp.hh>
-#include <integration_range.hh>
+#include "utils/integration_range.hh"
 
-#include <del_sig_y1.hh>
-#include <lc_lt_t.hh>
-#include <lo_lc_t.hh>
-#include <roffset_t.hh>
-#include <t_cen_t.hh>
-#include <test/param_space_explorer.hh>
+#include "models/del_sig_y1.hh"
+#include "models/lc_lt_t.hh"
+#include "models/lo_lc_t.hh"
+#include "models/roffset_t.hh"
+#include "models/t_cen_t.hh"
+#include "test/param_space_explorer.hh"
 
 struct delta_sigma_parameters {
     double lo, lt, zt, R, lnM;

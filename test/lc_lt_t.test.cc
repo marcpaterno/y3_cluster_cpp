@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "lc_lt_t.hh"
+#include "models/lc_lt_t.hh"
 
 #include <fstream>
 #include <iostream>

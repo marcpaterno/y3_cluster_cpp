@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "mor_t2.hh"
+#include "models/mor_t2.hh"
 
 #include <fstream>
 #include <iomanip>

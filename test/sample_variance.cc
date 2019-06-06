@@ -3,8 +3,8 @@
 #include <gperftools/profiler.h>
 #include <iostream>
 
-#include "omega_z_sdss.hh"
-#include "sample_variance.hh"
+#include "models/omega_z_sdss.hh"
+#include "models/sample_variance.hh"
 
 using y3_cluster::SampleVariance_t,
       y3_cluster::IntegrationRange,

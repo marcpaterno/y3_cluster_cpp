@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <numeric>
 
-#include <integration_range.hh>
+#include "utils/integration_range.hh"
 
 /* Explore a grid of parameters.
  */

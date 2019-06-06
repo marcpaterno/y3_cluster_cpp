@@ -1,6 +1,6 @@
 #include "catch2/catch.hpp"
-#include "interp_1d.hh"
-#include "transform.hh"
+#include "utils/interp_1d.hh"
+#include "utils/transform.hh"
 
 #include <array>
 #include <cmath>

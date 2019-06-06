@@ -1,8 +1,8 @@
 #include <cubacpp/cubacpp.hh>
 
 #include "catch2/catch.hpp"
-#include "omega_z_sdss.hh"
-#include "sample_variance.hh"
+#include "models/omega_z_sdss.hh"
+#include "models/sample_variance.hh"
 
 using y3_cluster::IntegrationRange,
       y3_cluster::OMEGA_Z_SDSS,

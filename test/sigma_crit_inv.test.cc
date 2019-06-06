@@ -1,8 +1,8 @@
 #include "catch2/catch.hpp"
 
-#include <sigma_crit_inverse_t.hh>
-#include <read_vector.hh>
-#include <interp_1d.hh>
+#include "models/sigma_crit_inverse_t.hh"
+#include "utils/read_vector.hh"
+#include "utils/interp_1d.hh"
 
 #include <algorithm>
 #include <cmath>

@@ -4,11 +4,11 @@
 #include <memory>
 
 #include "catch2/catch.hpp"
-#include "dv_do_dz_t.hh"
-#include "ez.hh"
-#include "interp_1d.hh"
-#include "integration_range.hh"
-#include "read_vector.hh"
+#include "models/dv_do_dz_t.hh"
+#include "models/ez.hh"
+#include "utils/interp_1d.hh"
+#include "utils/integration_range.hh"
+#include "utils/read_vector.hh"
 
 TEST_CASE("Check that different ways to integrate bessel functions are equivalent")
 {

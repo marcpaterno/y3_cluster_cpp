@@ -1,6 +1,6 @@
 #include "catch2/catch.hpp"
-#include "fpsupport.hh"
-#include "point_3d.hh"
+#include "utils/fpsupport.hh"
+#include "utils/point_3d.hh"
 
 #include <cmath>
 #include <limits>

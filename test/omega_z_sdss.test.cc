@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "omega_z_sdss.hh"
+#include "models/omega_z_sdss.hh"
 
 #include <fstream>
 #include <iomanip>
