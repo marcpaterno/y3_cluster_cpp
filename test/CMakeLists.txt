@@ -12,7 +12,7 @@ target_link_libraries(make_integration_volume_test
 target_include_directories(make_integration_volume_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR}
                        ${CMAKE_SOURCE_DIR}/externals)
 add_test(make_integration_volume_test make_integration_volume_test)
@@ -25,7 +25,7 @@ target_include_directories(integration_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 add_test(integration_test integration_test)
 
@@ -35,7 +35,7 @@ add_test(integration_test integration_test)
 #                           PRIVATE
 #                           ${CMAKE_SOURCE_DIR}/src
 #                           ${CUBA_INCLUDE_DIR}
-#                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+#                           ${CUBACPP_DIR}
 #                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(transform_test transform.test.cc)
@@ -112,7 +112,7 @@ target_include_directories(sample_variance_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 #add_test(sample_variance_test sample_variance_test)
 
@@ -172,7 +172,7 @@ target_include_directories(lc_lt_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 add_test(lc_lt_probability_test lc_lt_probability_test)
 
@@ -182,7 +182,7 @@ target_include_directories(dv_do_dz_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CUBACPP_DIR})
 add_test(dv_do_dz_t_test dv_do_dz_t_test)
 
 add_executable(polynomial_test polynomial.test.cc)
@@ -191,7 +191,7 @@ target_include_directories(polynomial_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CUBACPP_DIR})
 add_test(polynomial_test polynomial_test)
 
 add_executable(integer_pow_test integer_pow.test.cc)
@@ -210,7 +210,7 @@ target_include_directories(lo_lc_probability_unity_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 add_test(lo_lc_probability_unity_test lo_lc_probability_unity_test)
 
@@ -230,7 +230,7 @@ target_include_directories(mor_probability_unity_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 add_test(mor_probability_unity_test mor_probability_unity_test)
 
@@ -242,7 +242,7 @@ target_include_directories(mor2_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 add_test(mor2_probability_test mor2_probability_test)
 
@@ -254,7 +254,7 @@ target_include_directories(roffset_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 add_test(roffset_probability_test roffset_probability_test)
 
@@ -266,7 +266,7 @@ target_include_directories(integrate_delta_sigma
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(sigma_crit_inv_test sigma_crit_inv.test.cc)
@@ -284,7 +284,7 @@ target_include_directories(sin_cos_analytic_integral_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CUBACPP_DIR})
 add_test(sin_cos_analytic_integral_test sin_cos_analytic_integral_test)
 
 add_executable(bessel_analytic_integral_test bessel_analytic_integral.test.cc)
@@ -294,7 +294,7 @@ target_include_directories(bessel_analytic_integral_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CUBACPP_DIR})
 add_test(bessel_analytic_integral_test bessel_analytic_integral_test)
 
 add_executable(bessel_integral_equivalence_test bessel_integral_equivalence.test.cc)
@@ -304,7 +304,7 @@ target_include_directories(bessel_integral_equivalence_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CUBACPP_DIR})
 add_test(bessel_integral_equivalence_test bessel_integral_equivalence_test)
 
 #add_executable(simultaneous_bin_comparison_test simultaneous_bin_comparison.test.cc)
@@ -314,7 +314,7 @@ add_test(bessel_integral_equivalence_test bessel_integral_equivalence_test)
 #                           ${CMAKE_SOURCE_DIR}/src
 #                           ${CMAKE_SOURCE_DIR}/externals
 #                           ${CUBA_INCLUDE_DIR}
-#                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+#                           ${CUBACPP_DIR}
 #                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_lc_lt integrate_lc_lt.cc)
@@ -325,7 +325,7 @@ target_include_directories(integrate_lc_lt
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_lo_lc integrate_lo_lc.cc)
@@ -336,7 +336,7 @@ target_include_directories(integrate_lo_lc
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_mor integrate_mor.cc)
@@ -347,7 +347,7 @@ target_include_directories(integrate_mor
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_roffset integrate_roffset.cc)
@@ -358,7 +358,7 @@ target_include_directories(integrate_roffset
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 #add_executable(simultaneous_bin_comparison simultaneous_bin_comparison.cc)
@@ -368,7 +368,7 @@ target_include_directories(integrate_roffset
 #                           ${CMAKE_SOURCE_DIR}/src
 #                           ${CMAKE_SOURCE_DIR}/externals
 #                           ${CUBA_INCLUDE_DIR}
-#                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+#                           ${CUBACPP_DIR}
 #                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(sample_variance sample_variance.cc)
@@ -378,5 +378,5 @@ target_include_directories(sample_variance
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})

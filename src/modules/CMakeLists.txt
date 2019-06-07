@@ -3,7 +3,7 @@ target_link_libraries(example_integrand PRIVATE /cosmosis/cosmosis/datablock/lib
 target_include_directories(example_integrand
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(ExampleIntegrand_test ExampleIntegrand.test.cc)
@@ -16,7 +16,7 @@ target_link_libraries(ExampleIntegrand_test
 target_include_directories(ExampleIntegrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ExampleIntegrand_test ExampleIntegrand_test)
@@ -26,7 +26,7 @@ target_link_libraries(y1_analysis PRIVATE /cosmosis/cosmosis/datablock/libcosmos
 target_include_directories(y1_analysis
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 
@@ -45,7 +45,7 @@ target_include_directories(y1_analysis
 #                           ${CMAKE_SOURCE_DIR}/externals
 #                           ${CMAKE_SOURCE_DIR}/src
 #                           ${CUBA_INCLUDE_DIR}
-#                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+#                           ${CUBACPP_DIR}
 #                           ${EIGEN3_INCLUDE_DIR})
 
 add_library(cluster_abundance_covariance SHARED cluster_abundance_covariance.cc)
@@ -62,7 +62,7 @@ target_include_directories(cluster_abundance_covariance
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp)
+                           ${CUBACPP_DIR})
 
 add_library(ExampleIntegration SHARED ExampleIntegration_module.cc)
 target_link_libraries(ExampleIntegration
@@ -76,7 +76,7 @@ target_include_directories(ExampleIntegration
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(sigma_miscent SHARED sigma_miscent.cc)
@@ -84,7 +84,7 @@ target_link_libraries(sigma_miscent PRIVATE /cosmosis/cosmosis/datablock/libcosm
 target_include_directories(sigma_miscent
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
  
 add_library(sigma_cent SHARED sigma_cent.cc)
@@ -92,6 +92,6 @@ target_link_libraries(sigma_cent PRIVATE /cosmosis/cosmosis/datablock/libcosmosi
 target_include_directories(sigma_cent
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 

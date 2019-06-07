@@ -13,5 +13,5 @@ target_include_directories(models
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CMAKE_SOURCE_DIR}/../../cubacpp
+                           ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})

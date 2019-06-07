@@ -18,7 +18,5 @@ find_package(cuba REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-
-
 add_subdirectory(src)
 add_subdirectory(test)
