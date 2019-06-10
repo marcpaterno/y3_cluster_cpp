@@ -5,11 +5,11 @@
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/lc_lt_t.hh"
+#include "models/lc_lt_des_t.hh"
 #include "models/mor_t2.hh"
 #include "models/hmf_t.hh"
 #include "models/dv_do_dz_t.hh"
-#include "models/omega_z_sdss.hh"
+#include "models/omega_z_des.hh"
 #include "models/int_zo_zt_t.hh"
 #include <optional>
 #include <vector>
@@ -45,9 +45,9 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<LC_LT_t> lc_lt;
+  std::optional<LC_LT_DES_t> lc_lt;
   std::optional<MOR_t2> mor;
-  std::optional<OMEGA_Z_SDSS> omega_z_sdss;
+  std::optional<OMEGA_Z_DES> omega_z;
   std::optional<DV_DO_DZ_t> dv_do_dz;
   std::optional<HMF_t> hmf;
   std::optional<INT_ZO_ZT_t> int_zo_zt;
@@ -102,7 +102,7 @@ using cubacpp::integration_results_v;
 y1_analysis::y1_analysis(DataBlock& config) : 
 	lc_lt(),
        	mor(),
-       	omega_z_sdss(),
+       	omega_z(),
        	dv_do_dz(),
        	hmf(), 
         int_zo_zt(),
@@ -119,7 +119,7 @@ y1_analysis::set_sample(DataBlock& sample)
   mor.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
-  omega_z_sdss.emplace(sample);
+  omega_z.emplace(sample);
   int_zo_zt.emplace(sample);
 }
 
@@ -134,7 +134,7 @@ y1_analysis::operator()(double lo, double lt, double zt, double lnM) const
 	  	     * (*mor)(lt, lnM, zt)
 		     * (*dv_do_dz)(zt)
 		     * (*hmf)(lnM, zt)
-		     * (*omega_z_sdss)(zt);
+		     * (*omega_z)(zt);
   // Number counts first in the returned results, followed by the masses 
   for (std::size_t i =0; i != zo_low_.size(); i++){
   	results[i]= (*int_zo_zt)(zo_low_[i], zo_high_[i], zt)
