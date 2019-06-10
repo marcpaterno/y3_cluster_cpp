@@ -6,7 +6,7 @@ from scipy.interpolate import RectBivariateSpline
 import scipy.special
 import cluster_toolkit as ct
 from scipy import optimize
-section_name="y1_analysis"
+section_name="sdss_analysis"
 
 def setup(options):
     section = option_section

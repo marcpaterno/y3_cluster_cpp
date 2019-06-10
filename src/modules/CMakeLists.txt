@@ -29,6 +29,13 @@ target_include_directories(y1_analysis
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(sdss_analysis SHARED sdss_analysis.cc)
+target_link_libraries(sdss_analysis PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(sdss_analysis
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
 
 #add_library(default_cluster_abundance SHARED default_cluster_abundance.cc)
 #target_link_libraries(default_cluster_abundance
