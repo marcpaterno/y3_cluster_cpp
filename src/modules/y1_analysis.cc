@@ -6,11 +6,11 @@
 #include "cubacpp/integration_volume.hh"
 
 #include "models/lc_lt_des_t.hh"
-#include "models/mor_t2.hh"
+#include "models/mor_des_t.hh"
 #include "models/hmf_t.hh"
 #include "models/dv_do_dz_t.hh"
 #include "models/omega_z_des.hh"
-#include "models/int_zo_zt_t.hh"
+#include "models/int_zo_zt_des_t.hh"
 #include <optional>
 #include <vector>
 using namespace y3_cluster;
@@ -46,11 +46,11 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<LC_LT_DES_t> lc_lt;
-  std::optional<MOR_t2> mor;
+  std::optional<MOR_DES_t> mor;
   std::optional<OMEGA_Z_DES> omega_z;
   std::optional<DV_DO_DZ_t> dv_do_dz;
   std::optional<HMF_t> hmf;
-  std::optional<INT_ZO_ZT_t> int_zo_zt;
+  std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
   std::vector<double> zo_low_;
   std::vector<double> zo_high_;
 
@@ -120,7 +120,6 @@ y1_analysis::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   omega_z.emplace(sample);
-  int_zo_zt.emplace(sample);
 }
 
 std::vector<double>
