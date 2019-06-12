@@ -21,7 +21,7 @@
 #include <vector>
 using namespace y3_cluster;
 
-// kappa_cent_y1 is a class that models the concept of "CosmoSISIntegrand",
+// kappa_cent_y1 is a class that models the concept of "CosmoSISVectorIntegrand",
 // and is thus suitable for use as the template parameter for the class template
 // CosmosisIntegrationModule.
 //
@@ -228,7 +228,7 @@ kappa_cent_y1::module_label()
 }
 
 // The implementation of make_integration_volumes can be almost the same for
-// any CosmoSISIntegrand-type class. Only the names and number of the parameters
+// any CosmoSISVectorIntegrand-type class. Only the names and number of the parameters
 // provided need to be changed. It is critical that the names be given in the
 // order that correspond to the order of arguments in the class's function call
 // operator. While the compiler can verify the number of arguments provided is
@@ -247,4 +247,4 @@ kappa_cent_y1::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_MODULE(kappa_cent_y1);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(kappa_cent_y1);

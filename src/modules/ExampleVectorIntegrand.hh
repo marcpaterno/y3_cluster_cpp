@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_EXAMPLE_INTEGRAND_H
-#define Y3_CLUSTER_EXAMPLE_INTEGRAND_H
+#ifndef Y3_CLUSTER_EXAMPLE_VECTOR_INTEGRAND_H
+#define Y3_CLUSTER_EXAMPLE_VECTOR_INTEGRAND_H
 
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_volume.hh"
@@ -8,7 +8,7 @@
 #include <optional>
 #include <vector>
 
-// ExampleIntegrand is a class that models the concept of "CosmoSISIntegrand",
+// ExampleVectorIntegrand is a class that models the concept of "CosmoSISIntegrand",
 // and is thus suitable for use as the template parameter for the class template
 // CosmosisIntegrationModule.
 //
@@ -27,7 +27,7 @@
 //    set_sample.
 //
 //
-class ExampleIntegrand {
+class ExampleVectorIntegrand {
 private:
   // We define the type alias volume_t to be the right dimensionality
   // of integration volume for our integrand. If we were to change the
@@ -49,7 +49,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit ExampleIntegrand(cosmosis::DataBlock& config);
+  explicit ExampleVectorIntegrand(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -67,7 +67,10 @@ public:
   // will be the exact same object as was passed to the most recent call to
   // set_sample(). The object 'results' will be the results of the integration
   // that has just been done for that sample. This is generally the item which
-  // should be put into the sample.
+  // should be put into the sample. This vector has one entry per integration
+  // volume specified in the configuration of the module. Each of these entries
+  // is an integration_results_v object, which contains an integration result for
+  // each value in the vectorized integrand.
   void finalize_sample(cosmosis::DataBlock& sample,
                        std::vector<cubacpp::integration_results_v> const& results) const;
 

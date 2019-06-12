@@ -1,4 +1,4 @@
-#include "ExampleIntegrand.hh"
+#include "ExampleVectorIntegrand.hh"
 #include "utils/make_integration_volumes.hh"
 
 // We write using declarations so that we don't have to type the namespace name
@@ -6,12 +6,12 @@
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-ExampleIntegrand::ExampleIntegrand(DataBlock& config)
+ExampleVectorIntegrand::ExampleVectorIntegrand(DataBlock& config)
   : radii_(config.view<std::vector<double>>(module_label(), "radii")), sigma_8_()
 {}
 
 void
-ExampleIntegrand::set_sample(DataBlock& sample)
+ExampleVectorIntegrand::set_sample(DataBlock& sample)
 {
   sigma_8_ = sample.view<double>("cosmological_parameters", "sigma_8");
   // If we had a data member of type std::optional<X>, we would set the
@@ -22,7 +22,7 @@ ExampleIntegrand::set_sample(DataBlock& sample)
 // This math is totally non-physical and stupid, but it uses all the values
 // provided.
 std::vector<double>
-ExampleIntegrand::operator()(double x, double y) const
+ExampleVectorIntegrand::operator()(double x, double y) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
@@ -36,7 +36,7 @@ ExampleIntegrand::operator()(double x, double y) const
 
 //
 void
-ExampleIntegrand::finalize_sample(cosmosis::DataBlock& sample,
+ExampleVectorIntegrand::finalize_sample(cosmosis::DataBlock& sample,
                                   std::vector<integration_results_v> const& results)
   const
 {
@@ -47,10 +47,11 @@ ExampleIntegrand::finalize_sample(cosmosis::DataBlock& sample,
   sample.put_val(module_label(), "integral_status", results[0].status);
 }
 
+
 char const*
-ExampleIntegrand::module_label()
+ExampleVectorIntegrand::module_label()
 {
-  return "example_integrand";
+  return "example_vector_integrand";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -60,11 +61,11 @@ ExampleIntegrand::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<ExampleIntegrand::volume_t>
-ExampleIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+std::vector<ExampleVectorIntegrand::volume_t>
+ExampleVectorIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes(cfg,
-                                              ExampleIntegrand::module_label(),
+                                              ExampleVectorIntegrand::module_label(),
                                               "x",
                                               "y");
 }

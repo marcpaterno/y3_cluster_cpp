@@ -247,4 +247,4 @@ sigma_miscent::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_MODULE(sigma_miscent);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(sigma_miscent);

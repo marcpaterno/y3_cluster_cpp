@@ -238,4 +238,4 @@ sigma_cent::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_MODULE(sigma_cent);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(sigma_cent);

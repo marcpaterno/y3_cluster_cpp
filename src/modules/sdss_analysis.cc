@@ -15,9 +15,9 @@
 #include <vector>
 using namespace y3_cluster;
 
-// sdss_analysis is a class that models the concept of "CosmoSISIntegrand",
+// sdss_analysis is a class that models the concept of "CosmoSISVectorIntegrand",
 // and is thus suitable for use as the template parameter for the class template
-// CosmosisIntegrationModule.
+// CosmoSISVectorIntegrationModule.
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
@@ -225,4 +225,4 @@ sdss_analysis::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_MODULE(sdss_analysis);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(sdss_analysis);

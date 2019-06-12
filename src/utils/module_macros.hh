@@ -2,7 +2,8 @@
 #define Y3_CLUSTER_CPP_MODULE_MACROS_HH
 ////////////////////////////////////////////////////////////////////////
 //
-// Defines the macro DEFINE_COSMOSIS_MODULE(<module_classname>) to be used in
+// Defines the macro
+// DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(<module_classname>) to be used in
 // XXX_module.cc to declare a CosmoSIS module.
 //
 // Note: Libraries that include these symbol definitions cannot be
@@ -11,32 +12,32 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "CosmoSISIntegrationModule.hh"
+#include "CosmoSISVectorIntegrationModule.hh"
 
 // Produce the injected functions
-#define DEFINE_COSMOSIS_MODULE(klass)                                \
-  using module_type = y3_cluster::CosmoSISIntegrationModule<klass>;  \
-  extern "C" {                                                       \
-    void*                                                            \
-    setup(cosmosis::DataBlock* cfg)                                  \
-    {                                                                \
-      return new module_type(*cfg);                                  \
-    }                                                                \
-                                                                     \
-    DATABLOCK_STATUS                                                 \
-    execute(cosmosis::DataBlock* sample, void* module)               \
-    {                                                                \
-      auto mod = static_cast<module_type*>(module);                  \
-      mod->execute(*sample);                                         \
-      return DBS_SUCCESS;                                            \
-    }                                                                \
-                                                                     \
-    int                                                              \
-    cleanup(void* module)                                            \
-    {                                                                \
-      delete static_cast<module_type*>(module);                      \
-      return 0;                                                      \
-    }                                                                \
-  }                                                                  \
+#define DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(klass)                                \
+  using module_type = y3_cluster::CosmoSISVectorIntegrationModule<klass>;  \
+  extern "C" {                                                             \
+    void*                                                                  \
+    setup(cosmosis::DataBlock* cfg)                                        \
+    {                                                                      \
+      return new module_type(*cfg);                                        \
+    }                                                                      \
+                                                                           \
+    DATABLOCK_STATUS                                                       \
+    execute(cosmosis::DataBlock* sample, void* module)                     \
+    {                                                                      \
+      auto mod = static_cast<module_type*>(module);                        \
+      mod->execute(*sample);                                               \
+      return DBS_SUCCESS;                                                  \
+    }                                                                      \
+                                                                           \
+    int                                                                    \
+    cleanup(void* module)                                                  \
+    {                                                                      \
+      delete static_cast<module_type*>(module);                            \
+      return 0;                                                            \
+    }                                                                      \
+  }                                                                        \
 
 #endif

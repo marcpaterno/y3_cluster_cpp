@@ -19,7 +19,7 @@
 #include <vector>
 using namespace y3_cluster;
 
-// sigma_cent_y1 is a class that models the concept of "CosmoSISIntegrand",
+// sigma_cent_y1 is a class that models the concept of "CosmoSISVectorIntegrand",
 // and is thus suitable for use as the template parameter for the class template
 // CosmosisIntegrationModule.
 //
@@ -237,4 +237,4 @@ sigma_cent_y1::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_MODULE(sigma_cent_y1);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(sigma_cent_y1);

@@ -1,5 +1,5 @@
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "modules/ExampleIntegrand.hh"
+#include "modules/ExampleScalarIntegrand.hh"
 #include "catch2/catch.hpp"
 #include "cubacpp/cuhre.hh"
 
@@ -12,7 +12,7 @@ TEST_CASE("2D example integrand")
   cosmosis::DataBlock cfg;
   std::vector<double> radii{2.5, 5.0};
   cfg.put_val(module_label, "radii", radii);
-  ExampleIntegrand f(cfg);
+  ExampleScalarIntegrand f(cfg);
   cosmosis::DataBlock sample;
   std::string const cosmo("cosmological_parameters");
   sample.put_val(cosmo, "sigma_8", 0.75);
@@ -55,7 +55,7 @@ TEST_CASE("2D example integrand")
     cfg2.put_val(module_label, "y_low", std::vector<double>{4.0});
     cfg2.put_val(module_label, "y_high", std::vector<double>{7.0});
     using iv_t = cubacpp::IntegrationVolume<2>;
-    std::vector<iv_t> vols = ExampleIntegrand::make_integration_volumes(cfg2);
+    std::vector<iv_t> vols = ExampleScalarIntegrand::make_integration_volumes(cfg2);
     CHECK(vols.size() == 1);
     CHECK(vols[0].jacobian() == 15.0);
     auto res = alg.integrate(f, epsrel, epsabs, vols[0]);

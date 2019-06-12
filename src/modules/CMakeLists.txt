@@ -1,25 +1,57 @@
-add_library(example_integrand SHARED ExampleIntegrand.cc)
-target_link_libraries(example_integrand PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so)
-target_include_directories(example_integrand
+add_library(ExampleVectorIntegrationModule SHARED ExampleVectorIntegration_module.cc)
+target_link_libraries(ExampleVectorIntegrationModule
+                      PRIVATE
+                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      example_vector_integrand
+                      ${CUBA_LIBRARIES})
+target_include_directories(ExampleVectorIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_executable(ExampleIntegrand_test ExampleIntegrand.test.cc)
-target_link_libraries(ExampleIntegrand_test
+add_executable(test_ExampleVectorIntegrationModule test_ExampleVectorIntegrationModule.cc)
+target_link_libraries(test_ExampleVectorIntegrationModule
                       PRIVATE
-                      example_integrand
+                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      example_vector_integrand
+                      ExampleVectorIntegrationModule
+                      example_vector_integrand)
+target_include_directories(test_ExampleVectorIntegrationModule
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src)
+add_test(test_ExampleVectorIntegrationModule test_ExampleVectorIntegrationModule)
+
+add_library(example_vector_integrand SHARED ExampleVectorIntegrand.cc)
+target_link_libraries(example_vector_integrand PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so)
+target_include_directories(example_vector_integrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(example_scalar_integrand SHARED ExampleScalarIntegrand.cc)
+target_link_libraries(example_scalar_integrand PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so)
+target_include_directories(example_scalar_integrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_executable(ExampleVectorIntegrand_test ExampleVectorIntegrand.test.cc)
+target_link_libraries(ExampleVectorIntegrand_test
+                      PRIVATE
+                      example_vector_integrand
                       /cosmosis/cosmosis/datablock/libcosmosis.so
                       ${CUBA_LIBRARIES}
                       testmain)
-target_include_directories(ExampleIntegrand_test
+target_include_directories(ExampleVectorIntegrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
-add_test(ExampleIntegrand_test ExampleIntegrand_test)
+add_test(ExampleVectorIntegrand_test ExampleVectorIntegrand_test)
 
 add_library(y1_analysis SHARED y1_analysis.cc)
 target_link_libraries(y1_analysis PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
@@ -71,14 +103,14 @@ target_include_directories(cluster_abundance_covariance
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR})
 
-add_library(ExampleIntegration SHARED ExampleIntegration_module.cc)
-target_link_libraries(ExampleIntegration
+add_library(ExampleVectorIntegration SHARED ExampleVectorIntegration_module.cc)
+target_link_libraries(ExampleVectorIntegration
                      PRIVATE
                      /cosmosis/cosmosis/datablock/libcosmosis.so
-                     example_integrand
+                     example_vector_integrand
                      ${CUBA_LIBRARIES})                     
 
-target_include_directories(ExampleIntegration
+target_include_directories(ExampleVectorIntegration
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src

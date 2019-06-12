@@ -12,8 +12,8 @@
 #include <vector>
 
 namespace y3_cluster {
-  // CosmoSISIntegrationModule is a class template used to create a class that
-  // is a CosmoSIS physics module, and which, or each CosmoSIS sample,
+  // CosmoSISVectorIntegrationModule is a class template used to create a class that
+  // is a CosmoSIS physics module, and which, for each CosmoSIS sample,
   // calculates the definite integral of a vector-valued function, storing the
   // result in the cosmosis::DataBlock for that sample.
   //
@@ -21,12 +21,12 @@ namespace y3_cluster {
   // done by a separate CosmoSIS module.
 
   template <typename COSMOSISINTEGRAND, typename ALG = cubacpp::Cuhre>
-  class CosmoSISIntegrationModule {
+  class CosmoSISVectorIntegrationModule {
   public:
     using IntegrandType = COSMOSISINTEGRAND;
     using Algorithm = ALG;
 
-    explicit CosmoSISIntegrationModule(cosmosis::DataBlock& cfg);
+    explicit CosmoSISVectorIntegrationModule(cosmosis::DataBlock& cfg);
 
     void execute(cosmosis::DataBlock& sample);
 
@@ -54,7 +54,7 @@ transform_all(IN const& in, OUT& out, F&& f)
 }
 
 template <typename I, typename A>
-y3_cluster::CosmoSISIntegrationModule<I, A>::CosmoSISIntegrationModule(
+y3_cluster::CosmoSISVectorIntegrationModule<I, A>::CosmoSISVectorIntegrationModule(
   cosmosis::DataBlock& cfg)
 try : integrand_(cfg),
       algorithm_(),
@@ -65,18 +65,18 @@ try : integrand_(cfg),
   cubacores(0, 0);
 }
 catch (cosmosis::Entry::BadEntry const&) {
-  std::cerr << "\nDuring construction of a CosmoSISIntegrationModule, the "
+  std::cerr << "\nDuring construction of a CosmoSISVectorIntegrationModule, the "
                "lookup of some parameter"
             << "\nfailed. It may be a wrong name, or a wrong type.\n";
 }
 catch (...) {
   std::cerr << "\nUnknown exception type thrown while constructing a "
-               "CosmoSISIntegrationModule.\n\n";
+               "CosmoSISVectorIntegrationModule.\n\n";
 }
 
 template <typename I, typename A>
 void
-y3_cluster::CosmoSISIntegrationModule<I, A>::execute(
+y3_cluster::CosmoSISVectorIntegrationModule<I, A>::execute(
   cosmosis::DataBlock& sample)
 {
   // Prepare the integrand for this sample.
