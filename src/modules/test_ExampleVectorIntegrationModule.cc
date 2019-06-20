@@ -35,7 +35,8 @@ int main()
   if (rc != 0)  return 2;
 
   // Check values in 'sample' here.
-  
+  auto vals = sample.view<std::vector<double>>(module_label, "integral_vals");
+  if (vals.size() != 2) return 3;
 
   // Delete the module.
   rc = cleanup(mod);
