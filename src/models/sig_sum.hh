@@ -48,12 +48,10 @@ namespace y3_cluster
     { 
       double _sig_1 = _sigma1->eval(r,lnM);
       double _sig_2 = _bias->eval(zt,lnM) * _sigma2->eval(r,zt);
-      // NB: The 1e12 factor is to convert from the M_{sol} / kpc^2 of the input
-      // to the M_{sol} / Mpc^2 we need
       // TODO: h factor?
-      // TODO: Get deltasigma_2 working.
       //if (del_sig_1 >= del_sig_2) {
-        return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
+      //return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
+        return (_sig_1+_sig_2);
       /*} else {
         return 1e12*(1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
       } */

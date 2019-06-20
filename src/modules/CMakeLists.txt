@@ -102,3 +102,36 @@ target_include_directories(sigma_cent
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
+
+add_library(sigma_cent_y1 SHARED sigma_cent_y1.cc)
+target_link_libraries(sigma_cent_y1 PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(sigma_cent_y1
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+
+add_library(sigma_miscent_y1 SHARED sigma_miscent_y1.cc)
+target_link_libraries(sigma_miscent_y1 PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(sigma_miscent_y1
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(kappa_cent_y1 SHARED kappa_cent_y1.cc)
+target_link_libraries(kappa_cent_y1 PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(kappa_cent_y1
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(kappa_miscent_y1 SHARED kappa_miscent_y1.cc)
+target_link_libraries(kappa_miscent_y1 PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(kappa_miscent_y1
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
