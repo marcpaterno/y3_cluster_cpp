@@ -39,8 +39,11 @@ namespace y3_cluster {
   private:
     using volume_t = cubacpp::integration_volume_for_t<IntegrandType>;
     using grid_point_t = typename IntegrandType::grid_point_t;
-    using integration_results_type = typename cubacpp::integrand_traits<
-      IntegrandType>::integration_results_type;
+    using integration_results_t =
+      typename cubacpp::integrand_traits<IntegrandType>::integration_results_t;
+
+    void integrate_one_volume(volume_t const& vol,
+                              std::vector<integration_results_t>& results);
 
     IntegrandType integrand_;
     Algorithm algorithm_;
@@ -76,22 +79,32 @@ catch (...) {
 
 template <typename I, typename A>
 void
+y3_cluster::CosmoSISScalarIntegrationModule<I, A>::integrate_one_volume(
+  volume_t const& volume,
+  std::vector<integration_results_t>& results)
+{
+  for (auto const& grid_point : grid_points_) {
+    integrand_.set_grid_point(grid_point);
+    auto result = algorithm_.integrate(integrand_, eps_rel_, eps_abs_, volume);
+    results.push_back(result);
+  }
+}
+
+template <typename I, typename A>
+void
 y3_cluster::CosmoSISScalarIntegrationModule<I, A>::execute(
   cosmosis::DataBlock& sample)
 {
   // Prepare the integrand for this sample.
   integrand_.set_sample(sample);
 
-  std::vector<integration_results_type> results;
+  std::vector<integration_results_t> results;
   results.reserve(volumes_.size() * grid_points_.size());
 
   for (auto const& volume : volumes_) {
-    for (auto const& grid_point : grid_points_) {
-      integrand_.set_grid_point(grid_point);
-      auto result = algorithm_.integrate(integrand_, eps_rel_, eps_abs_, volume);
-      results.push_back(result);
-    }
+    integrate_one_volume(volume, results);
   }
+
   // Put the result into the sample.
   integrand_.finalize_sample(sample, grid_points_, results);
 }
