@@ -6,7 +6,7 @@
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-ExampleScalarIntegrand::ExampleScalarIntegrand(DataBlock& /* config */)
+ExampleScalarIntegrand::ExampleScalarIntegrand(DataBlock&)
   : sigma_8_(), radius_()
 {}
 
@@ -20,9 +20,9 @@ ExampleScalarIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-ExampleScalarIntegrand::set_bin(bin_t const& bin)
+ExampleScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
-  radius_ = bin[0];
+  radius_ = grid_point[0];
 }
 
 // This math is totally non-physical and stupid, but it uses all the values

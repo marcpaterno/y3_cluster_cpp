@@ -8,24 +8,20 @@
 
 TEST_CASE("2D example integrand")
 {
-  std::string const module_label("example_integrand");
+  std::string const module_label("example_scalar_integrand");
   cosmosis::DataBlock cfg;
-  std::vector<double> radii{2.5, 5.0};
-  cfg.put_val(module_label, "radii", radii);
   ExampleScalarIntegrand f(cfg);
   cosmosis::DataBlock sample;
   std::string const cosmo("cosmological_parameters");
   sample.put_val(cosmo, "sigma_8", 0.75);
   f.set_sample(sample);
+  f.set_grid_point({2.5});
 
   SECTION("evaluation")
   {
-    std::vector<double> expected{3.0, 2.0};
-    std::vector<double> fxy = f(5.0, 1.75);
-    CHECK(fxy.size() == 2);
-    for (std::size_t i = 0; i != fxy.size(); ++i) {
-      CHECK(fxy[i] == Approx(expected[i]).epsilon(1.0e-12));
-    }
+    double expected {3.0};
+    double fxy = f(5.0, 1.75);
+    CHECK(fxy == Approx(expected).epsilon(1.0e-12));
   } // evaluation
   
   SECTION("integrate unit volume")
@@ -38,10 +34,8 @@ TEST_CASE("2D example integrand")
     iv_t unitvolume {};
     auto res = alg.integrate(f, epsrel, epsabs, unitvolume);
     CHECK(res.converged());
-    std::vector<double> expected { 0.345833, 0.245833 };
-    for (std::size_t i = 0, sz = res.value.size(); i != sz; ++i) {
-      CHECK(res.value[i] == Approx(expected[i]).epsilon(1.0e-3));
-    }
+    double expected { 0.345833 };
+    CHECK(res.value == Approx(expected).epsilon(1.0e-3));
   }
 
   SECTION("integrate non-default volumes")
@@ -60,9 +54,7 @@ TEST_CASE("2D example integrand")
     CHECK(vols[0].jacobian() == 15.0);
     auto res = alg.integrate(f, epsrel, epsabs, vols[0]);
     CHECK(res.converged());
-    std::vector<double> expected { 346.688, 348.187 };
-    for (std::size_t i = 0, sz = res.value.size(); i != sz; ++i) {
-     CHECK(res.value[i] == Approx(expected[i]).epsilon(1.0e-3));
-    }
+    double expected { 346.688 };
+    CHECK(res.value == Approx(expected).epsilon(1.0e-3));
   }
 }

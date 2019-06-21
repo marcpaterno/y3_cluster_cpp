@@ -8,9 +8,9 @@
 #include <optional>
 #include <vector>
 
-// ExampleScalarIntegrand is a class that models the concept of "CosmoSISIntegrand",
+// ExampleScalarIntegrand is a class that models the concept of "CosmoSISScalarIntegrand",
 // and is thus suitable for use as the template parameter for the class template
-// CosmosisIntegrationModule.
+// CosmoSISScalarIntegrationModule.
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
@@ -19,7 +19,7 @@
 //    2) The object as created by the only constructor does not need to be
 //    in a callable state.
 //
-//    3) After calls to both set_sample and set_bin have been made, the object must be in a
+//    3) After calls to both set_sample and set_grid_point have been made, the object must be in a
 //    callable state.
 //
 //    4) State that *can* be correctly set by the constructor *should* be set by
@@ -28,6 +28,13 @@
 //
 //
 class ExampleScalarIntegrand {
+public:
+  // Define the data-type describing a grid point; this should be an
+  // instance of std::array<double, N> with N set to the number
+  // of different paramaters being varied in the grid.
+  // The alias we define must be grid_point_t.
+  using grid_point_t = std::array<double, 1>; // we only vary radius.
+
 private:
   // We define the type alias volume_t to be the right dimensionality
   // of integration volume for our integrand. If we were to change the
@@ -48,12 +55,6 @@ private:
   double radius_;
 
 public:
-  // Define the data-type describing a 'bin'; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different paramaters being varied in the 'bins'.
-  // The alias we define must be bin_t.
-  using bin_t = std::array<double, 1>; // we only vary radius.
-
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
   explicit ExampleScalarIntegrand(cosmosis::DataBlock& config);
@@ -63,7 +64,7 @@ public:
   void set_sample(cosmosis::DataBlock& sample);
 
   // Set the data for the current bin.
-  void set_bin(bin_t const& b);
+  void set_grid_point(grid_point_t const& pt);
 
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our

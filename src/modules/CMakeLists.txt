@@ -1,3 +1,4 @@
+
 add_library(ExampleVectorIntegrationModule SHARED ExampleVectorIntegration_module.cc)
 target_link_libraries(ExampleVectorIntegrationModule
                       PRIVATE
@@ -21,6 +22,7 @@ target_include_directories(test_ExampleVectorIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src)
 add_test(test_ExampleVectorIntegrationModule test_ExampleVectorIntegrationModule)
+
 
 add_library(example_vector_integrand SHARED ExampleVectorIntegrand.cc)
 target_link_libraries(example_vector_integrand PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so)
@@ -52,6 +54,21 @@ target_include_directories(ExampleVectorIntegrand_test
                            ${EIGEN3_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ExampleVectorIntegrand_test ExampleVectorIntegrand_test)
+
+add_executable(ExampleScalarIntegrand_test ExampleScalarIntegrand.test.cc)
+target_link_libraries(ExampleScalarIntegrand_test
+                      PRIVATE
+                      example_scalar_integrand
+                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      ${CUBA_LIBRARIES}
+                      testmain)
+target_include_directories(ExampleScalarIntegrand_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ExampleScalarIntegrand_test ExampleScalarIntegrand_test)
 
 add_library(y1_analysis SHARED y1_analysis.cc)
 target_link_libraries(y1_analysis PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
