@@ -80,6 +80,7 @@ public:
   // that has just been done for that sample. This is generally the item which
   // should be put into the sample.
   void finalize_sample(cosmosis::DataBlock& sample,
+                       std::vector<grid_point_t> const& grid_points,
                        std::vector<cubacpp::integration_result> const& results) const;
 
   // module_label() is a non-member (static) function that returns the label for
@@ -93,8 +94,12 @@ public:
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static std::vector<volume_t> make_integration_volumes(
-    cosmosis::DataBlock& cfg);
+  static std::vector<volume_t> make_integration_volumes(cosmosis::DataBlock& cfg);
+
+  // The following non-member (static) function creates a vector of grid points
+  // on which the integration results are to be evaluated, based on parameters
+  // read from the configuration block for the module.
+  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 #endif
