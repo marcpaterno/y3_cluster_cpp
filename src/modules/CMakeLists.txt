@@ -151,6 +151,14 @@ target_include_directories(sigma_cent
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(buzzard_sigma_halos SHARED buzzard_sigma_halos.cc)
+target_link_libraries(buzzard_sigma_halos PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(buzzard_sigma_halos
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
 
 add_library(sigma_cent_y1 SHARED sigma_cent_y1.cc)
 target_link_libraries(sigma_cent_y1 PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
