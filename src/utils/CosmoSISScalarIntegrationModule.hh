@@ -39,8 +39,7 @@ namespace y3_cluster {
   private:
     using volume_t = cubacpp::integration_volume_for_t<IntegrandType>;
     using grid_point_t = typename IntegrandType::grid_point_t;
-    using integration_results_t =
-      typename cubacpp::integrand_traits<IntegrandType>::integration_results_t;
+    using integration_results_t = cubacpp::integration_result;
 
     void integrate_one_volume(volume_t const& vol,
                               std::vector<integration_results_t>& results);

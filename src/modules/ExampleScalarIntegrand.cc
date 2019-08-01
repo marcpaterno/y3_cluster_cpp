@@ -1,5 +1,6 @@
 #include "ExampleScalarIntegrand.hh"
 #include "utils/make_integration_volumes.hh"
+#include "utils/make_grid_points.hh"
 
 // We write using declarations so that we don't have to type the namespace name
 // each time we use these names
@@ -39,10 +40,14 @@ ExampleScalarIntegrand::operator()(double x, double y) const
 //
 void
 ExampleScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
-                                  std::vector<integration_result> const& results)
+                                        std::vector<grid_point_t> const& /* grid_points */,
+                                        std::vector<integration_result> const& results)
   const
 {
   // TODO: fix this to handle the whole vector of integration_results.
+  // Currently, we put just one double into the DataBlock.
+  // What is the sensible organization of results for all the grid points?
+  // Do we need to store data for the grid point locations?
   sample.put_val(module_label(), "integral_vals", results[0].value);
   sample.put_val(module_label(), "integral_errors", results[0].error);
   sample.put_val(module_label(), "integral_probs", results[0].prob);
@@ -70,3 +75,12 @@ ExampleScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
                                               "x",
                                               "y");
 }
+
+std::vector<ExampleScalarIntegrand::grid_point_t>
+ExampleScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+{
+  return y3_cluster::make_grid_points(cfg,
+                                      ExampleScalarIntegrand::module_label(),
+                                      "radii");
+}
+
