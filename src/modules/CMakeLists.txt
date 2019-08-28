@@ -94,6 +94,15 @@ target_include_directories(ExampleScalarIntegrand_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ExampleScalarIntegrand_test ExampleScalarIntegrand_test)
 
+
+add_library(snapshotsim_scalarintegrand SHARED Snapshotsim_ScalarIntegrand.cc)
+target_link_libraries(snapshotsim_scalarintegrand PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(snapshotsim_scalarintegrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
 add_library(y1_analysis SHARED y1_analysis.cc)
 target_link_libraries(y1_analysis PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(y1_analysis
