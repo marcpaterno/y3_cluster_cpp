@@ -64,7 +64,7 @@ try : integrand_(cfg),
   algorithm_.maxeval = cfg.view<int>(IntegrandType::module_label(), "max_eval");
   cubacores(0, 0);
 }
-catch (cosmosis::Entry::BadEntry const&) {
+catch (cosmosis::Exception const&) {
   std::cerr << "\nDuring construction of a CosmoSISVectorIntegrationModule, the "
                "lookup of some parameter"
             << "\nfailed. It may be a wrong name, or a wrong type.\n";
