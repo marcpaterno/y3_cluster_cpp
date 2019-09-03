@@ -4,6 +4,19 @@ target_include_directories(testmain
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 
+add_executable(make_grid_points_test make_grid_points.test.cc)
+target_link_libraries(make_grid_points_test
+                      PRIVATE
+                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      testmain)
+target_include_directories(make_grid_points_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                       ${CMAKE_SOURCE_DIR}/externals)
+add_test(make_grid_points_test make_grid_points_test)
+
 add_executable(make_integration_volume_test make_integration_volume.test.cc)
 target_link_libraries(make_integration_volume_test
                       PRIVATE

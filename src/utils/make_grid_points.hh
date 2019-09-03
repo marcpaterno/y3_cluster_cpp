@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <tuple> // for std::apply
 #include <vector>
 
 namespace y3_cluster {
@@ -25,6 +26,8 @@ namespace y3_cluster {
     std::string const& modulelabel,
     Ts... names);
 
+  namespace detail {
+
   // Given a vector of N names of configuration parameters, look up
   // the N vectors of grid locations for each of the Nm axes, and
   // put them into 'axes'.
@@ -41,36 +44,93 @@ namespace y3_cluster {
     std::transform(names.begin(), names.end(), axes.begin(), get_axis);
   }
 
-} // namespace y3_cluster
 
-template <typename... Ts>
-std::vector<std::array<double, sizeof...(Ts)>>
-y3_cluster::make_grid_points(cosmosis::DataBlock& cfg,
-                            std::string const& modulelabel,
-                            Ts... ts)
-{
-  // Make sure that all arguments are convertible to std::string.
-  static_assert(std::conjunction_v<std::is_convertible<Ts, std::string>...>,
-                "\n\nCosmoSIS error!\nAll trailing arguments in "
-                "make_grid_points must be convertible to string.\n\n");
-  constexpr std::size_t n_axes = sizeof...(Ts);
-  using grid_point = std::array<double, n_axes>;
+    // cartesian_product_aux(f, v...) means "do `f` for each element of
+    // cartesian product of v..."
 
-  std::array<std::string, n_axes> const names{std::forward<Ts>(ts)...};
-  std::array<std::vector<double>, n_axes> axes;
-  get_grid_axes(cfg, modulelabel, names, axes);
-  std::size_t n_grid_points = 1;
-  for (auto const& axis : axes) n_grid_points *= axis.size();
-  std::vector<grid_point> result(n_grid_points);
-  
-  for (std::size_t i = 0; i !=  n_axes; ++i) {
-    std::size_t const n_points_this_axis = axes[i].size();
-    for (std::size_t j = 0; j != n_points_this_axis; ++j) {
-      double const current_coor_value = axes[i][j];
-      result[i*n_axes + j][i] = current_coor_value;
+    // Base case: execute the now-fully-bound sub-accumulator, to execute
+    // the originally-bound 'f' using the bound set of arguments.
+    template <typename F>
+    void
+    cartesian_product_aux(F f)
+    {
+      f();
+    }
+
+    // When we have a head and tail, loop over each element in the head,
+    // binding each into a nested sub-accumulator, and run that sub-accumulator
+    // over the remaining input arguments.
+    template <typename F, typename H, typename... Ts>
+    void
+    cartesian_product_aux(F f,
+                          std::vector<H> const& head,
+                          std::vector<Ts> const&... tail)
+    {
+      for (H const& h : head) {
+        auto sub_accumulator = [&h, &f](Ts const&... ts) { f(h, ts...); };
+        cartesian_product_aux(sub_accumulator, tail...);
+      }
     }
   }
-  return result;
+
+  // make_grid_splatted takes N vectors of floating point numbers, where N is any
+  // positive integer,
+  // and returns a vector of grid points, where each grid point is an array
+  // of N doubles.
+  template <typename... Ts>
+  std::vector<std::array<double, sizeof...(Ts)>>
+  make_grid_splatted(std::vector<Ts> const&... in)
+  {
+    // Make sure all the vectors are carrying floating point numbers;
+    // we convert everything to double, 'cause doing otherwise is hard.
+    static_assert(std::conjunction_v<std::is_floating_point<Ts>...>);
+
+    std::vector<std::array<double, sizeof...(Ts)>> res;
+    auto accumulator = [&res](Ts const&... ts) {
+      // Construct an array from all the elements we pass in ts...
+      res.push_back({ts...});
+    };
+    detail::cartesian_product_aux(accumulator, in...);
+    return res;
+  }
+
+  // make_grid is called with an array of arbitrary length, and an
+  // index_sequence of matching length.
+  template <std::size_t... Is>
+  std::vector<std::array<double, sizeof...(Is)>>
+  make_grid_aux(std::array<std::vector<double>, sizeof...(Is)> const& axes,
+            std::index_sequence<Is...> /*unused*/) {
+    return make_grid_splatted(axes[Is]...);
+  }
+
+  // use this one!
+  template <std::size_t N>
+  std::vector<std::array<double, N>>
+  make_grid(std::array<std::vector<double>, N> const& axes) {
+    return make_grid_aux(axes, std::make_index_sequence<N>());
+  }
+
+} // namespace y3_cluster
+
+// This is the function users of CosmoSIS should use to create a
+// grid for the calculation of integrals.
+template <typename... STRINGLIKEs>
+std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
+y3_cluster::make_grid_points(cosmosis::DataBlock& cfg,
+                            std::string const& modulelabel,
+                            STRINGLIKEs... stringlikes)
+{
+  // Make sure that all arguments are convertible to std::string.
+  static_assert(std::conjunction_v<std::is_convertible<STRINGLIKEs, std::string>...>,
+                "\n\nCosmoSIS error!\nAll trailing arguments in "
+                "make_grid_points must be convertible to string.\n\n");
+  constexpr std::size_t n_axes = sizeof...(STRINGLIKEs);
+
+  std::array<std::string, n_axes> const axis_names{std::forward<STRINGLIKEs>(stringlikes)...};
+  std::array<std::vector<double>, n_axes> axes;
+  detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
+  return make_grid(axes);
 }
 
 #endif
+
