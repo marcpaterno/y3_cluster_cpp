@@ -1,4 +1,5 @@
 #include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "/cosmosis/cosmosis/datablock/ndarray.hh"
 
 // To test the module, we need to declare the functions
 // that the module library exports. This is because modules
@@ -35,7 +36,7 @@ int main()
   if (rc != 0)  return 2;
 
   // Check values in 'sample' here.
-  auto vals = sample.view<double>(module_label, "integral_vals");
+  auto vals = sample.view<cosmosis::ndarray<double>>(module_label, "integral_vals");
 
   // Delete the module.
   rc = cleanup(mod);

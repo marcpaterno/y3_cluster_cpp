@@ -92,6 +92,7 @@ public:
   // should be put into the sample.
   void finalize_sample(cosmosis::DataBlock& sample,
                        std::vector<grid_point_t> const& grid_points,
+                       std::size_t nvolumes,
                        std::vector<cubacpp::integration_result> const& results) const;
 
   // module_label() is a non-member (static) function that returns the label for
@@ -161,6 +162,7 @@ SnapshotScalarIntegrand::operator()(double lt, double lnM) const
 void
 SnapshotScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
                                         std::vector<grid_point_t> const& /* grid_points */,
+                                        std::size_t /* nvolumes */,
                                         std::vector<integration_result> const& results)
   const
 {

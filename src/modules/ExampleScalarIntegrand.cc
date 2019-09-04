@@ -1,10 +1,12 @@
 #include "ExampleScalarIntegrand.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/make_grid_points.hh"
+#include "/cosmosis/cosmosis/datablock/ndarray.hh"
 
 // We write using declarations so that we don't have to type the namespace name
 // each time we use these names
 using cosmosis::DataBlock;
+using cosmosis::ndarray;
 using cubacpp::integration_result;
 
 ExampleScalarIntegrand::ExampleScalarIntegrand(DataBlock&)
@@ -40,18 +42,44 @@ ExampleScalarIntegrand::operator()(double x, double y) const
 //
 void
 ExampleScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
-                                        std::vector<grid_point_t> const& /* grid_points */,
-                                        std::vector<integration_result> const& results)
+                                        std::vector<grid_point_t> const& grid_points,
+                                        std::size_t nvolumes,
+                                        std::vector<integration_result> const& res)
   const
 {
-  // TODO: fix this to handle the whole vector of integration_results.
-  // Currently, we put just one double into the DataBlock.
-  // What is the sensible organization of results for all the grid points?
-  // Do we need to store data for the grid point locations?
-  sample.put_val(module_label(), "integral_vals", results[0].value);
-  sample.put_val(module_label(), "integral_errors", results[0].error);
-  sample.put_val(module_label(), "integral_probs", results[0].prob);
-  sample.put_val(module_label(), "integral_status", results[0].status);
+  auto ngrid_points = grid_points.size();
+  auto nresults = nvolumes * ngrid_points;
+
+  // Create ndarray to give a view into the 'res' vector.
+  ndarray<integration_result> results(res, {nvolumes, ngrid_points});
+
+  // Create storage buffers for ndarrays to be inserted into the sample, and then
+  // create the ndarrays.
+  std::vector<double> vals_buffer(nresults);
+  ndarray<double> vals(vals_buffer, {nvolumes, ngrid_points});
+  
+  std::vector<double> errors_buffer(nresults);
+  ndarray<double> errors(errors_buffer, {nvolumes, ngrid_points});
+
+  std::vector<double> probs_buffer(nresults);
+  ndarray<double> probs(probs_buffer, {nvolumes, ngrid_points});
+
+  std::vector<int> statuses_buffer(nresults);
+  ndarray<int> statuses(statuses_buffer, {nvolumes, ngrid_points});
+
+  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
+    for (std::size_t jgp = 0; jgp != ngrid_points; ++jgp) {
+      vals(ivol, jgp) = results(ivol, jgp).value;
+      errors(ivol, jgp) = results(ivol, jgp).error;
+      probs(ivol, jgp) = results(ivol, jgp).prob;
+      statuses(ivol, jgp) = results(ivol, jgp).status;
+    }
+  }
+
+  sample.put_val(module_label(), "integral_vals", vals);
+  sample.put_val(module_label(), "integral_errors", errors);
+  sample.put_val(module_label(), "integral_probs", probs);
+  sample.put_val(module_label(), "integral_status", statuses);
 }
 
 char const*

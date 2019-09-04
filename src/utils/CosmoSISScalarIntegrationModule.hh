@@ -105,7 +105,7 @@ y3_cluster::CosmoSISScalarIntegrationModule<I, A>::execute(
   }
 
   // Put the result into the sample.
-  integrand_.finalize_sample(sample, grid_points_, results);
+  integrand_.finalize_sample(sample, grid_points_, volumes_.size(), results);
 }
 
 #endif
