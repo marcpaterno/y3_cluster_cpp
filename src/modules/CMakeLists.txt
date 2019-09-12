@@ -103,6 +103,15 @@ target_include_directories(snapshotsim_scalarintegrand
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(snapshotsim_scalarintegrand_NC SHARED Snapshotsim_ScalarIntegrand_NC.cc)
+target_link_libraries(snapshotsim_scalarintegrand_NC PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(snapshotsim_scalarintegrand_NC
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+
 add_library(y1_analysis SHARED y1_analysis.cc)
 target_link_libraries(y1_analysis PRIVATE /cosmosis/cosmosis/datablock/libcosmosis.so utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(y1_analysis

@@ -18,7 +18,7 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// SnapshotScalarIntegrand is a class that models the concept of "CosmoSISScalarIntegrand",
+// SnapshotScalarNCIntegrand is a class that models the concept of "CosmoSISScalarIntegrand",
 // and is thus suitable for use as the template parameter for the class template
 // CosmoSISScalarIntegrationModule.
 //
@@ -37,7 +37,7 @@ using cubacpp::integration_result;
 //    set_sample.
 //
 //
-class SnapshotScalarIntegrand {
+class SnapshotScalarNCIntegrand {
 public:
   // Define the data-type describing a grid point; this should be an
   // instance of std::array<double, N> with N set to the number
@@ -71,7 +71,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit SnapshotScalarIntegrand(cosmosis::DataBlock& config);
+  explicit SnapshotScalarNCIntegrand(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -122,7 +122,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-SnapshotScalarIntegrand::SnapshotScalarIntegrand(DataBlock&)  : 
+SnapshotScalarNCIntegrand::SnapshotScalarNCIntegrand(DataBlock&)  : 
 	mor(),
 	hmf(),
         sigma(),
@@ -131,7 +131,7 @@ SnapshotScalarIntegrand::SnapshotScalarIntegrand(DataBlock&)  :
 {}
 
 void
-SnapshotScalarIntegrand::set_sample(DataBlock& sample)
+SnapshotScalarNCIntegrand::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -142,7 +142,7 @@ SnapshotScalarIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-SnapshotScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
+SnapshotScalarNCIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
   radius_ = grid_point[1];
   zt_ = grid_point[0];
@@ -150,20 +150,20 @@ SnapshotScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
 }
 
 double
-SnapshotScalarIntegrand::operator()(double lt, double lnM) const
+SnapshotScalarNCIntegrand::operator()(double lt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  auto const  val = 300.0 *300.0 * 300.0 // this is the simulation cosmic volume
+  auto const  val = 300.0*300.0*300.0 // this is the simulation cosmic volume
 	            * (*mor)(lt, lnM, zt_)
-  		    * (*hmf)(lnM, zt_)
-	            * (*sigma)(radius_, lnM, zt_);
+  		    * (*hmf)(lnM, zt_);
+	            //* (*sigma)(radius_, lnM, zt_);
   return  val;
 }
 
 //
 void
-SnapshotScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
+SnapshotScalarNCIntegrand::finalize_sample(cosmosis::DataBlock& sample,
                                         std::vector<grid_point_t> const& grid_points,
                                         std::size_t nvolumes,
                                         std::vector<integration_result> const& res)
@@ -210,9 +210,9 @@ SnapshotScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
 }
 
 char const*
-SnapshotScalarIntegrand::module_label()
+SnapshotScalarNCIntegrand::module_label()
 {
-  return "SnapshotScalarIntegrand";
+  return "SnapshotScalarNCIntegrand";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -222,21 +222,21 @@ SnapshotScalarIntegrand::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<SnapshotScalarIntegrand::volume_t>
-SnapshotScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+std::vector<SnapshotScalarNCIntegrand::volume_t>
+SnapshotScalarNCIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes(cfg,
-                                              SnapshotScalarIntegrand::module_label(),
+                                              SnapshotScalarNCIntegrand::module_label(),
                                               "lt",
                                               "lnm");
 }
 
-std::vector<SnapshotScalarIntegrand::grid_point_t>
-SnapshotScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+std::vector<SnapshotScalarNCIntegrand::grid_point_t>
+SnapshotScalarNCIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points(cfg,
-                                      SnapshotScalarIntegrand::module_label(),
+                                      SnapshotScalarNCIntegrand::module_label(),
                                       "snapshot_zs", "radii");
 }
 
-DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarIntegrand);
+DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarNCIntegrand);
