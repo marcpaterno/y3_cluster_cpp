@@ -1,4 +1,5 @@
 #include <cmath>
+#include <stdexcept>
 #include <gsl/gsl_sf_expint.h>
 
 #include "sin_cos_polynomial_integral.hh"
