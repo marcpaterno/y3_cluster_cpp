@@ -4,4 +4,10 @@ add_library(utils SHARED
             bessel_polynomial_integral.cc
             sin_cos_polynomial_integral.cc)
 target_link_libraries(utils PRIVATE ${GSL_LIBRARIES})
-target_include_directories(utils PRIVATE ${CUBACPP_DIR} ${EIGEN3_INCLUDE_DIR})
+message(STATUS "CUBACPP_DIR is: ${CUBACPP_DIR}")
+target_include_directories(utils PRIVATE
+                           $ENV{COSMOSIS_SRC_DIR}
+                           /usr/local/include
+                           ${GSL_INCLUDE_DIRS}
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})

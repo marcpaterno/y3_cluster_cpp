@@ -1,7 +1,7 @@
 #include <chrono>
-#include <cubacpp/cubacpp.hh>
-#include <gperftools/profiler.h>
 #include <iostream>
+#include "cubacpp/cubacpp.hh"
+#include "gperftools/profiler.h"
 
 #include "models/omega_z_sdss.hh"
 #include "models/sample_variance.hh"

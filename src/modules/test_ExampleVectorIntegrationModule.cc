@@ -1,4 +1,4 @@
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 
 // To test the module, we need to declare the functions
 // that the module library exports. This is because modules

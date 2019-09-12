@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_CPP_MAKE_INTEGRATION_VOLUME_HH
 #define Y3_CLUSTER_CPP_MAKE_INTEGRATION_VOLUME_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/array.hh"
 #include "cubacpp/integration_volume.hh"
 

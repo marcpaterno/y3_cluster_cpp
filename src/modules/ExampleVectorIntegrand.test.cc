@@ -1,4 +1,4 @@
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "modules/ExampleVectorIntegrand.hh"
 #include "catch2/catch.hpp"
 #include "cubacpp/cuhre.hh"

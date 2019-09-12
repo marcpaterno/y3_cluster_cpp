@@ -1,6 +1,8 @@
 #ifndef Y3_CLUSTER_MZ_POWER_LAW_HH
 #define Y3_CLUSTER_MZ_POWER_LAW_HH
 
+#include <cmath>
+
 namespace y3_cluster {
   // mz_power_law represents a commonly-used power law relationship, with the
   // form

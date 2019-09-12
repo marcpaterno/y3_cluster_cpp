@@ -1,18 +1,20 @@
-add_library(models
-            SHARED
+add_library(models SHARED
             sample_variance.cc
             lc_lt_t.cc
             lc_lt_des_t.cc)
+
 target_link_libraries(models
                       PRIVATE
                       utils
                       ${GSL_LIBRARIES}
                       ${CUBA_LIBRARIES})
+
 target_include_directories(models
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
+                           $ENV{COSMOSIS_SRC_DIR}
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})

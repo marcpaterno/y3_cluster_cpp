@@ -15,9 +15,6 @@ namespace {
     40.,         47.22222137, 57.77777863, 68.33332825, 78.8888855, 89.44444275,
     100.,        120.,        140.,        160.,        lt_max};
 
-  std::size_t constexpr zt_len = zt_bins.size() - 1;
-  std::size_t constexpr lt_len = lt_bins.size() - 1;
-
   std::array<double, 110> constexpr sigma_arr = {
     8.12748540e-01, 1.32292795e+00, 1.70726638e+00, 1.74780086e+00,
     2.01806368e+00, 2.23657343e+00, 2.40010333e+00, 2.70710073e+00,

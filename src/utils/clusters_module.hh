@@ -1,8 +1,8 @@
 #ifndef Y3CLUSTER_CLUSTERS_MODULE_HH
 #define Y3CLUSTER_CLUSTERS_MODULE_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cubacpp/cubacpp/cubacpp.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cubacpp/cubacpp.hh"
 
 #include "datablock_reader.hh"
 #include "interp_1d.hh"

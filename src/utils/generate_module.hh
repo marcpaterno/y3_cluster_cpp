@@ -3,10 +3,10 @@
 // you shouldn't need to fiddle this if you are trying to set up another cluster cosmology implementation
 #define __Y3_CLUSTER_GENERATE_COSMOSIS_MODULE_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cosmosis/datablock/entry.hh"
-#include "/cosmosis/cosmosis/datablock/section_names.h"
-#include "/cosmosis/cosmosis/datablock/section.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/entry.hh"
+#include "cosmosis/datablock/section_names.h"
+#include "cosmosis/datablock/section.hh"
 #include "clusters_module.hh"
 
 #define GENERATE_Y3_COSMOSIS_MODULE(klass) \

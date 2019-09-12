@@ -25,3 +25,4 @@ cross_output.txt
 *.out
 *.so
 validation_tests/.RData
+*.dylib

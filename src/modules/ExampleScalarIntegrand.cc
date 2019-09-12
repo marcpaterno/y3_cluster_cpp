@@ -1,7 +1,7 @@
 #include "ExampleScalarIntegrand.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/make_grid_points.hh"
-#include "/cosmosis/cosmosis/datablock/ndarray.hh"
+#include "cosmosis/datablock/ndarray.hh"
 
 // We write using declarations so that we don't have to type the namespace name
 // each time we use these names

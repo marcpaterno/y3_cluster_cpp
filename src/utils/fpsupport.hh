@@ -1,6 +1,7 @@
 #ifndef Y3_CLUSTER_FPSUPPORT_HH
 #define Y3_CLUSTER_FPSUPPORT_HH
 
+#include <algorithm>
 #include <cmath>
 
 namespace fpsupport {

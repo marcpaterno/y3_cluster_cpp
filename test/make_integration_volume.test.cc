@@ -1,4 +1,4 @@
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "utils/make_integration_volumes.hh"
 #include "catch2/catch.hpp"
 

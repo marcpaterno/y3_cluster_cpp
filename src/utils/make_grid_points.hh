@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_CPP_MAKE_GRID_POINTS_HH
 #define Y3_CLUSTER_CPP_MAKE_GRID_POINTS_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 
 #include <algorithm>
 #include <array>

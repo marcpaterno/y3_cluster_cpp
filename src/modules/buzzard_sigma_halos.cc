@@ -1,7 +1,7 @@
 #include "utils/module_macros.hh"
 #include "utils/make_integration_volumes.hh"
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 

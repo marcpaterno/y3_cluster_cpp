@@ -4,9 +4,9 @@
 #include <stdexcept>
 #include <string>
 #include <iostream>
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cosmosis/datablock/datablock_status.h"
-#include "/cosmosis/cosmosis/datablock/ndarray.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock_status.h"
+#include "cosmosis/datablock/ndarray.hh"
 
 template<typename T>
 T

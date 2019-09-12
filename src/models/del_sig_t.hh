@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_DEL_SIG_T_HH
 #define Y3_CLUSTER_DEL_SIG_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "ez.hh"
 #include "utils/primitives.hh"
 #include "utils/interp_2d.hh"

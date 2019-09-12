@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_EXAMPLE_VECTOR_INTEGRAND_H
 #define Y3_CLUSTER_EXAMPLE_VECTOR_INTEGRAND_H
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
 

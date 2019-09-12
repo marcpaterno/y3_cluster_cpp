@@ -1,8 +1,8 @@
 #ifndef Y3_CLUSTER_AVERAGE_SCI_HH
 #define Y3_CLUSTER_AVERAGE_SCI_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cosmosis/datablock/ndarray.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/ndarray.hh"
 #include "models/ez.hh"
 #include "utils/primitives.hh"
 #include "utils/interp_1d.hh"
@@ -31,8 +31,7 @@ namespace y3_cluster
     double
     operator()(double zt) const
     { 
-      double sig_1 = _sci->eval(zt);
-      return sig_1;
+      return _sci->eval(zt);
     }
   };
 }

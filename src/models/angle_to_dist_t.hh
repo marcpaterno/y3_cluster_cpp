@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/interp_1d.hh"
 #include "utils/primitives.hh"

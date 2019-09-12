@@ -16,6 +16,8 @@
 
 #include "omega_z_sdss.hh"
 
+#include "gsl/gsl_sf_legendre.h"
+
 namespace y3_cluster {
   // Coefficients of survey mask, in spherical harmonics
   template<typename OMEGA_Z>
@@ -27,7 +29,7 @@ namespace y3_cluster {
     else {
       const double oz = omega_z(z),
                    cos_theta = 1 - oz / 2 / pi(),
-                   frac = (std::legendre(l - 1, cos_theta) - std::legendre(l + 1, cos_theta))
+                   frac = (gsl_sf_legendre_Pl(l - 1, cos_theta) - gsl_sf_legendre_Pl(l + 1, cos_theta))
                           / oz;
       return std::sqrt(pi() / (2*l + 1)) * frac;
     }

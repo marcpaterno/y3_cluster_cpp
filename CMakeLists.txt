@@ -1,13 +1,16 @@
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(y3_cluster_cpp VERSION 0.2.0 LANGUAGES CXX)
 enable_testing()
 
 # These flags are used by everything in the project. Put anything that affects
 # the ABI here -- e.g., the standard level.
 add_compile_options(-W -Wall) # -Werror)
-SET ( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno  -fno-signaling-nans -fexcess-precision=fast -march=native -mtune=native" )
-#SET ( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno  -fno-signaling-nans -fexcess-precision=fast -march=native -mtune=native -fsanitize=address" )
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+SET ( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -march=native -mtune=native" )
+
+if (CMAKE_CXX_COMPILER STREQUAL "gcc")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-signaling-nans -fexcess-precision=fast")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

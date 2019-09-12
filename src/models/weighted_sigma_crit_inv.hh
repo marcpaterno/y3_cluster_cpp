@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/gsl.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/fits_loader.hh"

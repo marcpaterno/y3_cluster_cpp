@@ -1,4 +1,4 @@
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 
 #include "utils/datablock_reader.hh"
 #include "utils/integration_range.hh"

@@ -4,8 +4,8 @@
 #include "utils/interp_2d.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/read_vector.hh"
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cosmosis/datablock/ndarray.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/ndarray.hh"
 
 #include <memory>
 

@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_CPP_MOR_DES_T_HH
 #define Y3_CLUSTER_CPP_MOR_DES_T_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "utils/interp_2d.hh"
 #include "utils/mz_power_law.hh"
 #include "utils/primitives.hh"

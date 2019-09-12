@@ -1,8 +1,9 @@
 #include <cmath>
-#include <cubacpp/gsl.hh>
 #include <iostream>
 #include <memory>
 
+#include "cubacpp/gsl.hh"
+#include "gsl/gsl_sf_bessel.h"
 #include "catch2/catch.hpp"
 #include "models/dv_do_dz_t.hh"
 #include "models/ez.hh"
@@ -53,12 +54,12 @@ TEST_CASE("Check that different ways to integrate bessel functions are equivalen
 
                 const auto z_bessel_integral = qag.with_range(zstart, zend)
                                                   .integrate([&](double z) {
-                                                          return dvdodz(z) * std::sph_bessel(l, k * dcom.eval(z) * h);
+                                                          return dvdodz(z) * gsl_sf_bessel_jl(l, k * dcom.eval(z) * h);
                                                           },
                                                           1e-5, 1e-18);
                 const auto r_bessel_integral = qag.with_range(rstart, rend)
                                                   .integrate([&](double r) {
-                                                          return r * r * std::sph_bessel(l, k * r);
+                                                          return r * r * gsl_sf_bessel_jl(l, k * r);
                                                           },
                                                           1e-5, 1e-18);
 

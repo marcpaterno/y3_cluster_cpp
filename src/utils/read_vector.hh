@@ -2,8 +2,11 @@
 #define Y3_CLUSTER_CPP_READ_VECTOR_HH
 
 // Helper function to read a vector<double> from a file with the given filename.
+// This requires that CosmoSIS be set up, so that the environment variable
+// COSMOSIS_SRC_DIR is defined.
+
+#include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <stdexcept>
 #include <sstream>
 #include <string>
@@ -13,8 +16,10 @@ template <class XFORM>
 inline std::vector<double>
 read_vector(const std::string filename, XFORM xform)
 {
-    std::string fname = std::string("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/data/")
-                        + filename;
+    std::string const fname = 
+      std::string(std::getenv("COSMOSIS_SRC_DIR")) +
+      "/cosmosis-standard-library/y3_cluster_cpp/data/" +
+      filename;
     std::ifstream file(fname);
 	if (!file) {
         std::string errmsg("Failed to open file: ");

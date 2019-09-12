@@ -1,6 +1,6 @@
-#include <cubacpp/cubacpp.hh>
-#include <gsl/gsl_sf_bessel.h>
-#include <gsl/gsl_errno.h>
+#include "cubacpp/cubacpp.hh"
+#include "gsl/gsl_sf_bessel.h"
+#include "gsl/gsl_errno.h"
 
 #include "sample_variance.hh"
 

@@ -4,7 +4,7 @@
 #include "point_3d.hh"
 
 #include "gsl/gsl_interp2d.h"
-#include "/cosmosis/cosmosis/datablock/ndarray.hh"
+#include "cosmosis/datablock/ndarray.hh"
 #include <array>
 #include <cstddef>
 #include <iostream>

@@ -1,3 +1,5 @@
+include_directories($ENV{COSMOSIS_SRC_DIR} ${GSL_INCLUDE_DIRS})
+link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
 add_library(testmain SHARED main.cc)
 target_include_directories(testmain
                            PRIVATE
@@ -7,7 +9,7 @@ target_include_directories(testmain
 add_executable(make_grid_points_test make_grid_points.test.cc)
 target_link_libraries(make_grid_points_test
                       PRIVATE
-                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      cosmosis
                       testmain)
 target_include_directories(make_grid_points_test
                            PRIVATE
@@ -20,7 +22,7 @@ add_test(make_grid_points_test make_grid_points_test)
 add_executable(make_integration_volume_test make_integration_volume.test.cc)
 target_link_libraries(make_integration_volume_test
                       PRIVATE
-                      /cosmosis/cosmosis/datablock/libcosmosis.so
+                      cosmosis
                       testmain)
 target_include_directories(make_integration_volume_test
                            PRIVATE
@@ -386,6 +388,7 @@ target_include_directories(integrate_roffset
 
 add_executable(sample_variance sample_variance.cc)
 target_link_libraries(sample_variance PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models profiler)
+target_link_directories(sample_variance PRIVATE /usr/local/lib)
 target_include_directories(sample_variance
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src

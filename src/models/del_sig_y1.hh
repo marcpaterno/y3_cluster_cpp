@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_DEL_SIG_CEN_Y1_HH
 #define Y3_CLUSTER_DEL_SIG_CEN_Y1_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include <cmath>
 
 namespace y3_cluster

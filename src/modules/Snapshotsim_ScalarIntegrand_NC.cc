@@ -2,7 +2,7 @@
 #include "utils/make_grid_points.hh"
 #include "utils/module_macros.hh"
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
 

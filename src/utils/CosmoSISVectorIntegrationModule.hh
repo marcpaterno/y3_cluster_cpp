@@ -1,8 +1,8 @@
 #ifndef Y3_CLUSTER_COSMOSIS_INTEGRATION_MODULE_HH
 #define Y3_CLUSTER_COSMOSIS_INTEGRATION_MODULE_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
-#include "/cosmosis/cosmosis/datablock/entry.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/entry.hh"
 #include "cubacpp/cuhre.hh"
 #include "cubacpp/integrand_traits.hh"
 #include "cubacpp/integration_result.hh"

@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_INTEGRATION_RANGE_HH
 #define Y3_CLUSTER_INTEGRATION_RANGE_HH
 
-#include "/cosmosis/cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include <ostream>
 #include <stdexcept>
 #include <string>

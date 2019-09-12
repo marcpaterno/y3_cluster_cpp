@@ -1,16 +1,38 @@
 #ifndef Y3_CLUSTER_CPP_PRIMITIVES_HH
 #define Y3_CLUSTER_CPP_PRIMITIVES_HH
 
-#include "polynomial.hh"
+// primitives.hh contains a few commonly-used mathematical primitives.
 
 #include <cmath>
-#include <fstream>
-#include <iostream>
-// primitives.hh contains a few commonly-used mathematical primitives.
+#include <limits>   
+
 
 namespace y3_cluster {
 
-  double constexpr pi() { return 4. * std::atan(1.0); };
+namespace detail
+{
+      double constexpr sqrtNewtonRaphson(double x, double curr, double prev)
+            {
+                      return curr == prev
+                                    ? curr
+                                                : sqrtNewtonRaphson(x, 0.5 * (curr + x / curr), curr);
+                          }
+}
+
+
+// Constexpr version of the square root.
+// For a finite and non-negative value of "x", returns an approximation for the square root of "x"
+// Otherwise, returns NaN.
+// Adapted from https://stackoverflow.com/questions/8622256/in-c11-is-sqrt-defined-as-constexpr
+double constexpr sqrt(double x)
+{
+      return (x >= 0.0 && std::isfinite(x))
+                ? detail::sqrtNewtonRaphson(x, x, 0)
+                : std::numeric_limits<double>::quiet_NaN();
+}
+  // This is the double-precision hexidecimal floating point value
+  // closes to pi.
+  double constexpr pi() {return  0x1.5bf0a8b145769p+1; }
 
   // TODO: Get higher precision!
   // Source: astropy's constants and unit conversion
@@ -20,7 +42,7 @@ namespace y3_cluster {
   // Source: astropy's constants and unit conversion
   double constexpr G() { return 4.51710305e-48;}; // Mpc^3 / M_sol / s^2
 
-  double constexpr invsqrt2pi() { return 1. / std::sqrt(2. * pi()); };
+  double constexpr invsqrt2pi() { return 1. / sqrt(2. * pi()); };
 
   inline double
   gaussian(double x, double mu, double sigma)
