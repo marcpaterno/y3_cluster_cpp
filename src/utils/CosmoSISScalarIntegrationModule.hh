@@ -28,21 +28,30 @@ namespace y3_cluster {
 
   template <typename COSMOSISINTEGRAND, typename ALG = cubacpp::Cuhre>
   class CosmoSISScalarIntegrationModule {
-  public:
+   public:
     using IntegrandType = COSMOSISINTEGRAND;
     using Algorithm = ALG;
+    using volume_t = cubacpp::integration_volume_for_t<IntegrandType>;
+    using grid_point_t = typename IntegrandType::grid_point_t;
+    using integration_results_t = cubacpp::integration_result;
 
     explicit CosmoSISScalarIntegrationModule(cosmosis::DataBlock& cfg);
 
     void execute(cosmosis::DataBlock& sample);
 
-  private:
-    using volume_t = cubacpp::integration_volume_for_t<IntegrandType>;
-    using grid_point_t = typename IntegrandType::grid_point_t;
-    using integration_results_t = cubacpp::integration_result;
-
+   private:
     void integrate_one_volume(volume_t const& vol,
                               std::vector<integration_results_t>& results);
+
+    // finalize_sample() is where products can be put into the
+    // cosmosis::DataBlock representing the current sample. The object 'sample'
+    // passed to this function will be the exact same object as was passed to
+    // the most recent call to set_sample(). The object 'results' will be the
+    // results of the integration that has just been done for that sample. This
+    // is generally the item which should be put into the sample.
+    void finalize_sample(
+        cosmosis::DataBlock& sample,
+        std::vector<cubacpp::integration_result> const& results) const;
 
     IntegrandType integrand_;
     Algorithm algorithm_;
@@ -51,12 +60,12 @@ namespace y3_cluster {
     double eps_rel_;
     double eps_abs_;
   };
-} // namespace y3_cluster
+}  // namespace y3_cluster
 
 template <typename I, typename A>
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::
-  CosmoSISScalarIntegrationModule(cosmosis::DataBlock& cfg)
-try : integrand_(cfg),
+y3_cluster::CosmoSISScalarIntegrationModule<
+    I, A>::CosmoSISScalarIntegrationModule(cosmosis::DataBlock& cfg) try
+    : integrand_(cfg),
       algorithm_(),
       volumes_(IntegrandType::make_integration_volumes(cfg)),
       grid_points_(IntegrandType::make_grid_points(cfg)),
@@ -64,24 +73,19 @@ try : integrand_(cfg),
       eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")) {
   algorithm_.maxeval = cfg.view<int>(IntegrandType::module_label(), "max_eval");
   cubacores(0, 0);
-}
-catch (cosmosis::Exception const&) {
+} catch (cosmosis::Exception const&) {
   std::cerr
-    << "\nDuring construction of a CosmoSISScalarIntegrationModule, the "
-       "lookup of some parameter"
-    << "\nfailed. It may be a wrong name, or a wrong type.\n";
-}
-catch (...) {
+      << "\nDuring construction of a CosmoSISScalarIntegrationModule, the "
+         "lookup of some parameter"
+      << "\nfailed. It may be a wrong name, or a wrong type.\n";
+} catch (...) {
   std::cerr << "\nUnknown exception type thrown while constructing a "
                "CosmoSISScalarIntegrationModule.\n\n";
 }
 
 template <typename I, typename A>
-void
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::integrate_one_volume(
-  volume_t const& volume,
-  std::vector<integration_results_t>& results)
-{
+void y3_cluster::CosmoSISScalarIntegrationModule<I, A>::integrate_one_volume(
+    volume_t const& volume, std::vector<integration_results_t>& results) {
   for (auto const& grid_point : grid_points_) {
     integrand_.set_grid_point(grid_point);
     auto result = algorithm_.integrate(integrand_, eps_rel_, eps_abs_, volume);
@@ -90,10 +94,8 @@ y3_cluster::CosmoSISScalarIntegrationModule<I, A>::integrate_one_volume(
 }
 
 template <typename I, typename A>
-void
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::execute(
-  cosmosis::DataBlock& sample)
-{
+void y3_cluster::CosmoSISScalarIntegrationModule<I, A>::execute(
+    cosmosis::DataBlock& sample) {
   // Prepare the integrand for this sample.
   integrand_.set_sample(sample);
 
@@ -104,8 +106,58 @@ y3_cluster::CosmoSISScalarIntegrationModule<I, A>::execute(
     integrate_one_volume(volume, results);
   }
 
-  // Put the result into the sample.
-  integrand_.finalize_sample(sample, grid_points_, volumes_.size(), results);
+  // Put the results into the sample.
+  finalize_sample(sample, results);
+}
+
+template <typename I, typename A>
+void y3_cluster::CosmoSISScalarIntegrationModule<I, A>::finalize_sample(
+    cosmosis::DataBlock& sample,
+    std::vector<cubacpp::integration_result> const& res) const {
+      using cosmosis::ndarray;
+      using cubacpp::integration_result;
+      
+      
+  auto ngrid_points = grid_points_.size();
+  auto nvolumes = volumes_.size();
+  auto nresults = nvolumes * ngrid_points;
+
+  // Create ndarray to give a view into the 'res' vector.
+  ndarray<integration_result> results(res, {nvolumes, ngrid_points});
+
+  // Create storage buffers for ndarrays to be inserted into the sample, and
+  // then create the ndarrays.
+  std::vector<double> vals_buffer(nresults);
+  ndarray<double> vals(vals_buffer, {nvolumes, ngrid_points});
+
+  std::vector<double> errors_buffer(nresults);
+  ndarray<double> errors(errors_buffer, {nvolumes, ngrid_points});
+
+  std::vector<double> probs_buffer(nresults);
+  ndarray<double> probs(probs_buffer, {nvolumes, ngrid_points});
+
+  std::vector<int> statuses_buffer(nresults);
+  ndarray<int> statuses(statuses_buffer, {nvolumes, ngrid_points});
+  
+  std::vector<int> nregions_buffer(nresults);
+  ndarray<int> nregions(nregions_buffer, {nvolumes, ngrid_points});
+
+  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
+    for (std::size_t jgp = 0; jgp != ngrid_points; ++jgp) {
+      vals(ivol, jgp) = results(ivol, jgp).value;
+      errors(ivol, jgp) = results(ivol, jgp).error;
+      probs(ivol, jgp) = results(ivol, jgp).prob;
+      statuses(ivol, jgp) = results(ivol, jgp).status;
+      nregions(ivol, jgp) = results(ivol, jgp).nregions;
+    }
+  }
+
+  auto module_label = IntegrandType::module_label();
+  sample.put_val(module_label, "vals", vals);
+  sample.put_val(module_label, "errors", errors);
+  sample.put_val(module_label, "probs", probs);
+  sample.put_val(module_label, "status", statuses);
+  sample.put_val(module_label, "nregions", nregions);
 }
 
 #endif

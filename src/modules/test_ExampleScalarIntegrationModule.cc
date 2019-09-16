@@ -36,7 +36,7 @@ int main()
   if (rc != 0)  return 2;
 
   // Check values in 'sample' here.
-  auto vals = sample.view<cosmosis::ndarray<double>>(module_label, "integral_vals");
+  auto vals = sample.view<cosmosis::ndarray<double>>(module_label, "vals");
 
   // Delete the module.
   rc = cleanup(mod);
