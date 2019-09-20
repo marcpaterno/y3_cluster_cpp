@@ -1,6 +1,27 @@
 include_directories($ENV{COSMOSIS_SRC_DIR} ${CUBA_INCLUDE_DIR}) 
 link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
 
+add_library(example_vector_integrand SHARED ExampleVectorIntegrand.cc)
+target_link_libraries(example_vector_integrand PRIVATE cosmosis)
+target_include_directories(example_vector_integrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(example_scalar_integrand SHARED ExampleScalarIntegrand.cc)
+target_link_libraries(example_scalar_integrand PRIVATE cosmosis)
+target_include_directories(example_scalar_integrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+
+# Note
+# The following two "modules" are abnormal, in that they are declared as a
+# shared libraries rather than as modules. This is so they can be used in testing the
+# module templates themselves. This should not be done for actual modules, which should
+# be declared as modules.
 add_library(ExampleVectorIntegrationModule SHARED ExampleVectorIntegration_module.cc)
 target_link_libraries(ExampleVectorIntegrationModule
                       PRIVATE
@@ -50,21 +71,7 @@ target_include_directories(test_ExampleScalarIntegrationModule
 add_test(test_ExampleScalarIntegrationModule test_ExampleScalarIntegrationModule)
 
 
-add_library(example_vector_integrand SHARED ExampleVectorIntegrand.cc)
-target_link_libraries(example_vector_integrand PRIVATE cosmosis)
-target_include_directories(example_vector_integrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
 
-add_library(example_scalar_integrand SHARED ExampleScalarIntegrand.cc)
-target_link_libraries(example_scalar_integrand PRIVATE cosmosis)
-target_include_directories(example_scalar_integrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(ExampleVectorIntegrand_test ExampleVectorIntegrand.test.cc)
 target_link_libraries(ExampleVectorIntegrand_test
@@ -97,7 +104,7 @@ target_include_directories(ExampleScalarIntegrand_test
 add_test(ExampleScalarIntegrand_test ExampleScalarIntegrand_test)
 
 
-add_library(snapshotsim_scalarintegrand SHARED Snapshotsim_ScalarIntegrand.cc)
+add_library(snapshotsim_scalarintegrand MODULE Snapshotsim_ScalarIntegrand.cc)
 target_link_libraries(snapshotsim_scalarintegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(snapshotsim_scalarintegrand
                            PRIVATE
@@ -105,7 +112,7 @@ target_include_directories(snapshotsim_scalarintegrand
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(snapshotsim_scalarintegrand_NC SHARED Snapshotsim_ScalarIntegrand_NC.cc)
+add_library(snapshotsim_scalarintegrand_NC MODULE Snapshotsim_ScalarIntegrand_NC.cc)
 target_link_libraries(snapshotsim_scalarintegrand_NC PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(snapshotsim_scalarintegrand_NC
                            PRIVATE
@@ -114,7 +121,7 @@ target_include_directories(snapshotsim_scalarintegrand_NC
                            ${EIGEN3_INCLUDE_DIR})
 
 
-add_library(y1_analysis SHARED y1_analysis.cc)
+add_library(y1_analysis MODULE y1_analysis.cc)
 target_link_libraries(y1_analysis PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(y1_analysis
                            PRIVATE
@@ -122,7 +129,7 @@ target_include_directories(y1_analysis
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(sdss_analysis SHARED sdss_analysis.cc)
+add_library(sdss_analysis MODULE sdss_analysis.cc)
 target_link_libraries(sdss_analysis PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(sdss_analysis
                            PRIVATE
@@ -130,7 +137,7 @@ target_include_directories(sdss_analysis
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-#add_library(default_cluster_abundance SHARED default_cluster_abundance.cc)
+#add_library(default_cluster_abundance MODULE default_cluster_abundance.cc)
 #target_link_libraries(default_cluster_abundance
 #                      PRIVATE
 #                      utils
@@ -148,7 +155,7 @@ target_include_directories(sdss_analysis
 #                           ${CUBACPP_DIR}
 #                           ${EIGEN3_INCLUDE_DIR})
 
-add_library(cluster_abundance_covariance SHARED cluster_abundance_covariance.cc)
+add_library(cluster_abundance_covariance MODULE cluster_abundance_covariance.cc)
 target_link_libraries(cluster_abundance_covariance
                       PRIVATE
                       utils
@@ -164,7 +171,7 @@ target_include_directories(cluster_abundance_covariance
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR})
 
-add_library(ExampleVectorIntegration SHARED ExampleVectorIntegration_module.cc)
+add_library(ExampleVectorIntegration MODULE ExampleVectorIntegration_module.cc)
 target_link_libraries(ExampleVectorIntegration
                      PRIVATE
                      cosmosis
@@ -179,7 +186,7 @@ target_include_directories(ExampleVectorIntegration
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(sigma_miscent SHARED sigma_miscent.cc)
+add_library(sigma_miscent MODULE sigma_miscent.cc)
 target_link_libraries(sigma_miscent PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(sigma_miscent
                            PRIVATE
@@ -187,7 +194,7 @@ target_include_directories(sigma_miscent
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
  
-add_library(sigma_cent SHARED sigma_cent.cc)
+add_library(sigma_cent MODULE sigma_cent.cc)
 target_link_libraries(sigma_cent PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(sigma_cent
                            PRIVATE
@@ -195,7 +202,7 @@ target_include_directories(sigma_cent
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(buzzard_sigma_halos SHARED buzzard_sigma_halos.cc)
+add_library(buzzard_sigma_halos MODULE buzzard_sigma_halos.cc)
 target_link_libraries(buzzard_sigma_halos PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(buzzard_sigma_halos
                            PRIVATE
@@ -204,7 +211,7 @@ target_include_directories(buzzard_sigma_halos
                            ${EIGEN3_INCLUDE_DIR})
 
 
-add_library(sigma_cent_y1 SHARED sigma_cent_y1.cc)
+add_library(sigma_cent_y1 MODULE sigma_cent_y1.cc)
 target_link_libraries(sigma_cent_y1 PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(sigma_cent_y1
                            PRIVATE
@@ -213,7 +220,7 @@ target_include_directories(sigma_cent_y1
                            ${EIGEN3_INCLUDE_DIR})
 
 
-add_library(sigma_miscent_y1 SHARED sigma_miscent_y1.cc)
+add_library(sigma_miscent_y1 MODULE sigma_miscent_y1.cc)
 target_link_libraries(sigma_miscent_y1 PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(sigma_miscent_y1
                            PRIVATE
@@ -221,7 +228,7 @@ target_include_directories(sigma_miscent_y1
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(kappa_cent_y1 SHARED kappa_cent_y1.cc)
+add_library(kappa_cent_y1 MODULE kappa_cent_y1.cc)
 target_link_libraries(kappa_cent_y1 PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(kappa_cent_y1
                            PRIVATE
@@ -229,7 +236,7 @@ target_include_directories(kappa_cent_y1
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(kappa_miscent_y1 SHARED kappa_miscent_y1.cc)
+add_library(kappa_miscent_y1 MODULE kappa_miscent_y1.cc)
 target_link_libraries(kappa_miscent_y1 PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(kappa_miscent_y1
                            PRIVATE

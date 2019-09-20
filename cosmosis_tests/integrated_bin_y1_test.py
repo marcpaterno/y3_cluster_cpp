@@ -30,7 +30,8 @@ def execute(block, config):
             [14.055662163683669, 14.282850922869070, 14.470959036325867, 14.682116585781188],
             [14.027073034542163, 14.254233304065675, 14.443080091917629, 14.641826179274396]])
         print nn.shape, logM.shape, teo_nc.shape, teo_logm.shape
-        with open('/cosmosis/cosmosis-standard-library/y3_cluster_cpp/data/integrated_bin_y1_test.out', 'w') as outf:
+        outfile = os.path.expandvars("${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/integrated_bin_y1_test.out'")
+        with open(outfile, 'w') as outf:
             outf.write('llo\t lhi\t zlo\t zhi\t yntrue\t yntest \t ymtrue\t ymtest\n')
             for ii in range(len(l_low)):
                for jj in range(len(z_low)):
