@@ -388,7 +388,6 @@ target_include_directories(integrate_roffset
 
 add_executable(sample_variance sample_variance.cc)
 target_link_libraries(sample_variance PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models profiler)
-target_link_directories(sample_variance PRIVATE /usr/local/lib)
 target_include_directories(sample_variance
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src

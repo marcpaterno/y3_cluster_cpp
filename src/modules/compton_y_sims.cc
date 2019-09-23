@@ -167,30 +167,15 @@ compton_y_sims::finalize_sample(
   // each physics quantity.
   std::size_t n_radii_bins = thetas.size();
   const auto block_size = n_radii_bins + 1;
+
   if (z_low.size() != results.size())
     throw std::runtime_error("JOD - im wrong about results size");
+
   for (auto i = 0u; i < results.size(); i++) {
     auto const& result = results[i];
-    // We want the *mean* of a zbin
-    double zlen = z_high[i] - z_low[i];
 
     if (result.value.size() != block_size)
       throw std::runtime_error("JOD - im wrong about results size");
-
-    std::vector<double> values(result.value),
-                        errors(result.error);
-
-    for (auto& val : values)
-      val /= zlen;
-    for (auto& err : errors)
-      err /= zlen;
-
-    // The output compton-y is weighted by the number counts
-    // So we have to divide by the number counts
-    for (auto i = 1u; i < values.size(); i++) {
-        values[i] /= values[0];
-        errors[i] /= errors[0];
-    }
 
     NM_status.push_back(result.status);
     NM_nregions.push_back(result.nregions);
@@ -200,17 +185,20 @@ compton_y_sims::finalize_sample(
     N_errors.push_back(result.error[0]);
     N_probs.push_back(result.prob[0]);
 
-    // sorry Marc, but having to do it this way makes me think ill of C++...
-    compton_y_vals_temp.insert(compton_y_vals_temp.end(),
-                               result.value.begin() + 1,
-                               result.value.end());
-    compton_y_errors_temp.insert(compton_y_errors_temp.end(),
-                                 result.error.begin() + 1,
-                                 result.error.end());
-    compton_y_probs_temp.insert(compton_y_probs_temp.end(),
-                                result.prob.begin() + 1,
-                                result.prob.end());
+    // The output compton-y is weighted by the number counts
+    // So we have to divide by the number counts
+    for (auto ti = 1u; ti < result.value.size(); ++ti) {
+      compton_y_vals_temp.push_back(result.value[ti] / result.value[0]);
+      compton_y_errors_temp.push_back(result.error[ti] / result.value[0]);
+      compton_y_probs_temp.push_back(result.prob[ti]);
+    }
   }
+
+  std::size_t expected_size = results.size() * n_radii_bins;
+  if ((compton_y_vals_temp.size() != expected_size)
+          || (compton_y_errors_temp.size() != expected_size)
+          || (compton_y_probs_temp.size() != expected_size))
+    throw std::runtime_error("internal error: dimension mismatch for output");
 
   std::vector<std::size_t> extents{results.size(), n_radii_bins};
   cosmosis::ndarray<double> compton_y_vals(compton_y_vals_temp, extents);

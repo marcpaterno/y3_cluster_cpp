@@ -81,7 +81,6 @@ namespace y3_cluster {
         double
         operator()(double M, double z, unsigned theta_bin) const
         {
-            // TODO flesh out
             return interp_1h[theta_bin]->eval(M, z)
                  + interp_2h[theta_bin]->eval(M, z);
         }
