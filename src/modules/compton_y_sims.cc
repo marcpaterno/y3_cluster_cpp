@@ -48,8 +48,10 @@ private:
   std::optional<Y_SZ> y_sz;
   // The angles (in arcmin) at which we want to compute expected Compton-y
   // profiles
-  std::vector<double> zs;
   std::vector<double> thetas;
+  // The low and high z bins
+  // (needed for normalization)
+  std::vector<double> z_low, z_high;
 
 public:
   // Initialize my integrand object from the parameters read
@@ -96,12 +98,18 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-compton_y_sims::compton_y_sims(DataBlock& config) :
-       omega_z(),
-       dv_do_dz(),
-       hmf(),
-       y_sz(),
-       thetas(config.view<std::vector<double>>(compton_y_sims::module_label(), "thetas")){}
+compton_y_sims::compton_y_sims(DataBlock& config)
+    : omega_z()
+    , dv_do_dz()
+    , hmf()
+    , y_sz()
+    , thetas(get_datablock<std::vector<double>>(config, compton_y_sims::module_label(), "thetas"))
+    , z_low(get_datablock<std::vector<double>>(config, compton_y_sims::module_label(), "z_low"))
+    , z_high(get_datablock<std::vector<double>>(config, compton_y_sims::module_label(), "z_high"))
+{
+    if (z_low.size() != z_high.size())
+        throw std::invalid_argument("compton_y_sims: z_low and z_high are different lengths");
+}
 
 void
 compton_y_sims::set_sample(DataBlock& sample)
@@ -109,30 +117,21 @@ compton_y_sims::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  std::cerr << "About to make dv_do_dz...\n";
   dv_do_dz.emplace(sample);
-  std::cerr << "Successfully initialized dv_do_dz.\n"
-            << "Now initializing hmf...\n";
   hmf.emplace(sample);
-  std::cerr << "Successfully initialized hmf.\n"
-            << "Now initializing omega_z...\n";
   omega_z.emplace(sample);
-  std::cerr << "Successfully initialized omega_z.\n"
-            << "Now initializing y_sz...\n";
   y_sz.emplace(sample);
-  std::cerr << "Successfully initialized y_sz.\n";
 }
 
 std::vector<double>
-compton_y_sims::operator()(double M, double z) const
+compton_y_sims::operator()(double lnM, double z) const
 {
-  std::vector<double> results(thetas.size() + 1);
+  std::vector<double> results;
+  results.reserve(thetas.size() + 1);
 
   // Number counts followed by the radius bins, repeating over zo bins
   double common_term = (*dv_do_dz)(z)
-                       // Divide by M because HMF is dn/d(lnM), and we are
-                       // integrating over dM instead of d(lnM)
-                       * (*hmf)(std::log(M), z) / M
+                       * (*hmf)(lnM, z)
                        * (*omega_z)(z);
 
   // This is the N integral
@@ -140,7 +139,7 @@ compton_y_sims::operator()(double M, double z) const
 
   for (auto ti = 0u; ti < thetas.size(); ti++) {
     // TODO make this real
-    const double compton_y = (*y_sz)(M, z, ti);
+    const double compton_y = (*y_sz)(std::exp(lnM), z, ti);
     results.push_back(common_term * compton_y);
   }
 
@@ -166,37 +165,54 @@ compton_y_sims::finalize_sample(
 
   // TODO: Try to refactor this code, to abstract away the manipulations done for
   // each physics quantity.
-  std::size_t n_m_bins = results.size();
-  // TODO what should this actually be???
-  std::size_t n_z_bins = zs.size();
   std::size_t n_radii_bins = thetas.size();
   const auto block_size = n_radii_bins + 1;
-  for (auto const& result : results) {
-    for (std::size_t zi = 0; zi != n_z_bins; zi++){
-        NM_status.push_back(result.status);
-        NM_nregions.push_back(result.nregions);
-        NM_nevals.push_back(result.neval);
+  if (z_low.size() != results.size())
+    throw std::runtime_error("JOD - im wrong about results size");
+  for (auto i = 0u; i < results.size(); i++) {
+    auto const& result = results[i];
+    // We want the *mean* of a zbin
+    double zlen = z_high[i] - z_low[i];
 
-        N_vals.push_back(result.value[zi * block_size]);
-        N_errors.push_back(result.error[zi * block_size]);
-        N_probs.push_back(result.prob[zi * block_size]);
+    if (result.value.size() != block_size)
+      throw std::runtime_error("JOD - im wrong about results size");
 
-        // sorry Marc, but having to do it this way makes me think ill of C++...
-        const auto offset_start = zi * block_size + 1,
-                   offset_stop = (zi + 1) * block_size;
-        compton_y_vals_temp.insert(compton_y_vals_temp.end(),
-                                   result.value.begin() + offset_start,
-                                   result.value.begin() + offset_stop);
-        compton_y_errors_temp.insert(compton_y_errors_temp.end(),
-                                     result.error.begin() + offset_start,
-                                     result.error.begin() + offset_stop);
-        compton_y_probs_temp.insert(compton_y_probs_temp.end(),
-                                    result.prob.begin() + offset_start,
-                                    result.prob.begin() + offset_stop);
-   }
+    std::vector<double> values(result.value),
+                        errors(result.error);
+
+    for (auto& val : values)
+      val /= zlen;
+    for (auto& err : errors)
+      err /= zlen;
+
+    // The output compton-y is weighted by the number counts
+    // So we have to divide by the number counts
+    for (auto i = 1u; i < values.size(); i++) {
+        values[i] /= values[0];
+        errors[i] /= errors[0];
+    }
+
+    NM_status.push_back(result.status);
+    NM_nregions.push_back(result.nregions);
+    NM_nevals.push_back(result.neval);
+
+    N_vals.push_back(result.value[0]);
+    N_errors.push_back(result.error[0]);
+    N_probs.push_back(result.prob[0]);
+
+    // sorry Marc, but having to do it this way makes me think ill of C++...
+    compton_y_vals_temp.insert(compton_y_vals_temp.end(),
+                               result.value.begin() + 1,
+                               result.value.end());
+    compton_y_errors_temp.insert(compton_y_errors_temp.end(),
+                                 result.error.begin() + 1,
+                                 result.error.end());
+    compton_y_probs_temp.insert(compton_y_probs_temp.end(),
+                                result.prob.begin() + 1,
+                                result.prob.end());
   }
 
-  std::vector<std::size_t> extents{n_m_bins, n_z_bins, n_radii_bins};
+  std::vector<std::size_t> extents{results.size(), n_radii_bins};
   cosmosis::ndarray<double> compton_y_vals(compton_y_vals_temp, extents);
   cosmosis::ndarray<double> compton_y_errors(compton_y_errors_temp, extents);
   cosmosis::ndarray<double> compton_y_probs(compton_y_probs_temp, extents);
@@ -232,13 +248,21 @@ std::vector<compton_y_sims::volume_t>
 compton_y_sims::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    std::cerr << "About to look up integration volumes...\n";
-    auto res = y3_cluster::make_integration_volumes(cfg, module_label(), "M", "z");
-    std::cerr << "Done looking up integration volumes.\n";
-    return res;
+    const auto vols = y3_cluster::make_integration_volumes(cfg, module_label(), "M", "z");
+
+    // We want to convert Ms to ln(Ms)
+    std::vector<compton_y_sims::volume_t> corrected_vols;
+    for (auto vol : vols) {
+      auto [Mlo, zlo] = vol.transform({0.0, 0.0});
+      auto [Mhi, zhi] = vol.transform({1.0, 1.0});
+
+      compton_y_sims::volume_t corrected_vol{{std::log(Mlo), zlo},
+                                             {std::log(Mhi), zhi}};
+      corrected_vols.push_back(corrected_vol);
+    }
+    return corrected_vols;
   }
   catch (std::exception const& ex) {
-    std::cerr << "An error occurred looking up integration volumes!\n";
     std::cerr << ex.what();
     throw;
   };
