@@ -243,3 +243,11 @@ target_include_directories(kappa_miscent_y1
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
+
+add_library(compton_y_sims MODULE compton_y_sims.cc)
+target_link_libraries(compton_y_sims PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(compton_y_sims
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
