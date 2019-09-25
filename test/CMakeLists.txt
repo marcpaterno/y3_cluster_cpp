@@ -396,3 +396,11 @@ target_include_directories(sample_variance
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
+
+add_executable(pxizeta_t_test pxizeta_t.test.cc)
+target_link_libraries(pxizeta_t_test PRIVATE testmain)
+target_include_directories(pxizeta_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(pxizeta_t_test pxizeta_t_test)
