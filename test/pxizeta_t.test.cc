@@ -10,6 +10,9 @@ TEST_CASE("PXiZeta_t works")
 {
     std::ifstream infile {"../data/test_pxizeta_t.txt"};
 
+    // Test that we can open the file
+    REQUIRE(infile.good());
+
     // Initialize vectors to hold truth
     std::vector<double> xi, zeta, prob_true;
     std::string headerline;
