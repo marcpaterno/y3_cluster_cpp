@@ -52,3 +52,4 @@ ExampleIntegrand_test
 make_integration_volume_test
 make_grid_points_test
 pxizeta_t_test
+omega_z_y3xspt_test

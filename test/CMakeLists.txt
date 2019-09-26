@@ -403,3 +403,11 @@ target_include_directories(pxizeta_t_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(pxizeta_t_test pxizeta_t_test)
+
+add_executable(omega_z_y3xspt_test omega_z_y3xspt.test.cc)
+target_link_libraries(omega_z_y3xspt_test PRIVATE testmain)
+target_include_directories(omega_z_y3xspt_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(omega_z_y3xspt_test omega_z_y3xspt_test)
