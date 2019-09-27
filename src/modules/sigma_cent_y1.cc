@@ -5,7 +5,7 @@
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/lc_lt_des_t.hh"
+#include "models/int_lc_lt_des_t.hh"
 #include "models/mor_des_t.hh"
 #include "models/hmf_t.hh"
 #include "models/dv_do_dz_t.hh"
@@ -49,7 +49,7 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<LC_LT_DES_t> lc_lt;
+  std::optional<INT_LC_LT_DES_t> lc_lt;
   std::optional<MOR_DES_t> mor;
   std::optional<OMEGA_Z_DES> omega_z;
   std::optional<DV_DO_DZ_t> dv_do_dz;

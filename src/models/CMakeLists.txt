@@ -1,7 +1,7 @@
 add_library(models SHARED
             sample_variance.cc
             lc_lt_t.cc
-            lc_lt_des_t.cc)
+            int_lc_lt_des_t.cc)
 
 target_link_libraries(models
                       PRIVATE

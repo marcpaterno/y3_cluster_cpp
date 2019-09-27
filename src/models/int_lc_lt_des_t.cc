@@ -1,4 +1,4 @@
-#include "lc_lt_des_t.hh"
+#include "int_lc_lt_des_t.hh"
 using namespace y3_cluster;
 
 namespace {
@@ -122,7 +122,7 @@ namespace {
   };
 }
 
-Interp2D const LC_LT_DES_t::lambda0_interp = make_Interp2D(lambda0_arr);
-Interp2D const LC_LT_DES_t::lambda1_interp = make_Interp2D(lambda1_arr);
-Interp2D const LC_LT_DES_t::lambda2_interp = make_Interp2D(lambda2_arr);
-Interp2D const LC_LT_DES_t::lambda3_interp = make_Interp2D(lambda3_arr);
+Interp2D const INT_LC_LT_DES_t::lambda0_interp = make_Interp2D(lambda0_arr);
+Interp2D const INT_LC_LT_DES_t::lambda1_interp = make_Interp2D(lambda1_arr);
+Interp2D const INT_LC_LT_DES_t::lambda2_interp = make_Interp2D(lambda2_arr);
+Interp2D const INT_LC_LT_DES_t::lambda3_interp = make_Interp2D(lambda3_arr);

@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_LC_LT_DES_T_HH
-#define Y3_CLUSTER_LC_LT_DES_T_HH
+#ifndef Y3_CLUSTER_INT_LC_LT_DES_T_HH
+#define Y3_CLUSTER_INT_LC_LT_DES_T_HH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/interp_2d.hh"
@@ -11,15 +11,15 @@
 #include <iostream>
 
 namespace y3_cluster {
-  struct LC_LT_DES_t {
+  struct INT_LC_LT_DES_t {
 
     static Interp2D const lambda0_interp;
     static Interp2D const lambda1_interp;
     static Interp2D const lambda2_interp;
     static Interp2D const lambda3_interp;
 
-    explicit LC_LT_DES_t(const cosmosis::DataBlock&) {}
-    LC_LT_DES_t() {}
+    explicit INT_LC_LT_DES_t(const cosmosis::DataBlock&) {}
+    INT_LC_LT_DES_t() {}
 
     double
     operator()(double lc, double lt, double zt) const
