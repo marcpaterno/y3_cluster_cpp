@@ -54,3 +54,4 @@ make_grid_points_test
 pxizeta_t_test
 omega_z_y3xspt_test
 int_zo_zt_des_test
+zo_zt_des_test
