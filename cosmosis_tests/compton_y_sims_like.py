@@ -55,7 +55,9 @@ def execute(block, config):
     # The precision matrix is the inverse of the covariance matrix
     precision = np.linalg.inv(cov)
 
-    cov_mult = np.matmul(diff, np.matmul(precision, diff))
+    chisq = np.matmul(diff, np.matmul(precision, diff))
+    print('chisq:', chisq)
+
     # The normalization of a multivariate gaussian is:
     #   1 / \sqrt{ (2\pi)^k |Cov| }
     # Where k is the dimensions of the data vector
@@ -66,7 +68,7 @@ def execute(block, config):
     # normalization = np.log(2 * np.pi * np.linalg.det(cov)) * (diff.size / 2)
     ln_det = np.log(np.diag(cov)).sum()
     normalization = (np.log(2 * np.pi) + ln_det) * (diff.size / 2)
-    log_P = (- cov_mult / 2) - normalization
+    log_P = (- chisq / 2) - normalization
 
     block[names.likelihoods, 'compton_y_sims_like'] = log_P
     return 0
