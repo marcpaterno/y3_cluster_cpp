@@ -37,15 +37,24 @@ def setup(options):
     yerrs = []
     for Mlo, Mhi, zlo, zhi in zip(Mlows, Mhighs, zlows, zhighs):
         these_ys, these_yerrs = get_data(data_dir, Mlo, Mhi, zlo, zhi)
-        ys.extend(these_ys)
-        yerrs.extend(these_yerrs)
+        if options[option_section, 'ignore_last']:
+            last_n = options[option_section, 'ignore_last']
+            ys.extend(these_ys[:-last_n])
+            yerrs.extend(these_yerrs[:-last_n])
+        else:
+            ys.extend(these_ys)
+            yerrs.extend(these_yerrs)
 
     return {'y': np.array(ys),
-            'yerr': np.array(yerrs)}
+            'yerr': np.array(yerrs),
+            'ignore_last': options[option_section, 'ignore_last']}
 
 
 def execute(block, config):
-    results = block['compton_y_sims', 'compton_y_vals'].flatten()
+    results = block['compton_y_sims', 'compton_y_vals']
+    if config['ignore_last']:
+        results = results[:, :-config['ignore_last']]
+    results = results.flatten()
     diff = results - config['y']
 
     # Covariancee matrix is diagonal in this case
