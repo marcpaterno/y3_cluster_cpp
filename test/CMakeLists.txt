@@ -412,10 +412,10 @@ target_include_directories(omega_z_y3xspt_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(omega_z_y3xspt_test omega_z_y3xspt_test)
 
-add_executable(zo_zt_des_test zo_zt_des_t.test.cc)
-target_link_libraries(zo_zt_des_test PRIVATE testmain)
-target_include_directories(zo_zt_des_test
+add_executable(int_zo_zt_des_test int_zo_zt_des_t.test.cc)
+target_link_libraries(int_zo_zt_des_test PRIVATE testmain)
+target_include_directories(int_zo_zt_des_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
-add_test(zo_zt_des_test zo_zt_des_test)
+add_test(int_zo_zt_des_test int_zo_zt_des_test)
