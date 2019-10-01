@@ -427,3 +427,17 @@ target_include_directories(zo_zt_des_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(zo_zt_des_test zo_zt_des_test)
+
+add_executable(ln_mez_power_law ln_mez_power_law.test.cc)
+target_link_libraries(ln_mez_power_law PRIVATE testmain)
+target_include_directories(ln_mez_power_law
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ln_mez_power_law ln_mez_power_law)
+
+
+
+
+
+
