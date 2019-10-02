@@ -146,7 +146,6 @@ SnapshotScalarNCIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
   radius_ = grid_point[1];
   zt_ = grid_point[0];
-  std::cout << " grid points " << radius_ << ", " << zt_ <<'\n';
 }
 
 double
