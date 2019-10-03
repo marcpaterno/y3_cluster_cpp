@@ -59,7 +59,7 @@ namespace y3_cluster {
     double yrel_;
     double yabs_;
   };
-}
+} // namespace y3_cluster
 
 inline y3_cluster::Point3DLess::Point3DLess(double xrel,
                                             double xabs,

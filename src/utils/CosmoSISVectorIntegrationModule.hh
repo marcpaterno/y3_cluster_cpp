@@ -12,8 +12,8 @@
 #include <vector>
 
 namespace y3_cluster {
-  // CosmoSISVectorIntegrationModule is a class template used to create a class that
-  // is a CosmoSIS physics module, and which, for each CosmoSIS sample,
+  // CosmoSISVectorIntegrationModule is a class template used to create a class
+  // that is a CosmoSIS physics module, and which, for each CosmoSIS sample,
   // calculates the definite integral of a vector-valued function, storing the
   // result in the cosmosis::DataBlock for that sample.
   //
@@ -54,8 +54,8 @@ transform_all(IN const& in, OUT& out, F&& f)
 }
 
 template <typename I, typename A>
-y3_cluster::CosmoSISVectorIntegrationModule<I, A>::CosmoSISVectorIntegrationModule(
-  cosmosis::DataBlock& cfg)
+y3_cluster::CosmoSISVectorIntegrationModule<I, A>::
+  CosmoSISVectorIntegrationModule(cosmosis::DataBlock& cfg)
 try : integrand_(cfg),
       algorithm_(),
       volumes_(IntegrandType::make_integration_volumes(cfg)),
@@ -65,9 +65,10 @@ try : integrand_(cfg),
   cubacores(0, 0);
 }
 catch (cosmosis::Exception const&) {
-  std::cerr << "\nDuring construction of a CosmoSISVectorIntegrationModule, the "
-               "lookup of some parameter"
-            << "\nfailed. It may be a wrong name, or a wrong type.\n";
+  std::cerr
+    << "\nDuring construction of a CosmoSISVectorIntegrationModule, the "
+       "lookup of some parameter"
+    << "\nfailed. It may be a wrong name, or a wrong type.\n";
 }
 catch (...) {
   std::cerr << "\nUnknown exception type thrown while constructing a "

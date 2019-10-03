@@ -7,8 +7,8 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -16,36 +16,35 @@ template <class XFORM>
 inline std::vector<double>
 read_vector(const std::string filename, XFORM xform)
 {
-    std::string const fname = 
-      std::string(std::getenv("COSMOSIS_SRC_DIR")) +
-      "/cosmosis-standard-library/y3_cluster_cpp/data/" +
-      filename;
-    std::ifstream file(fname);
-	if (!file) {
-        std::string errmsg("Failed to open file: ");
-        errmsg += fname;
-        throw std::runtime_error(errmsg);
-    }
-    std::string line;
-    std::vector<double> res;
-    while (std::getline(file, line)) {
-        // Skip lines that start with comment character
-        if (line.find('#') == 0)
-            continue;
+  std::string const fname = std::string(std::getenv("COSMOSIS_SRC_DIR")) +
+                            "/cosmosis-standard-library/y3_cluster_cpp/data/" +
+                            filename;
+  std::ifstream file(fname);
+  if (!file) {
+    std::string errmsg("Failed to open file: ");
+    errmsg += fname;
+    throw std::runtime_error(errmsg);
+  }
+  std::string line;
+  std::vector<double> res;
+  while (std::getline(file, line)) {
+    // Skip lines that start with comment character
+    if (line.find('#') == 0)
+      continue;
 
-        // Read all the numbers on this line
-        std::istringstream linestream(line);
-        double tmp;
-        while (linestream >> tmp)
-            res.push_back(xform(tmp));
-    }
-    return res;
+    // Read all the numbers on this line
+    std::istringstream linestream(line);
+    double tmp;
+    while (linestream >> tmp)
+      res.push_back(xform(tmp));
+  }
+  return res;
 }
 
 inline std::vector<double>
 read_vector(const std::string filename)
 {
-    return read_vector(filename, [](double x) { return x; });
+  return read_vector(filename, [](double x) { return x; });
 }
 
 #endif

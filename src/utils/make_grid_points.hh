@@ -28,22 +28,21 @@ namespace y3_cluster {
 
   namespace detail {
 
-  // Given a vector of N names of configuration parameters, look up
-  // the N vectors of grid locations for each of the Nm axes, and
-  // put them into 'axes'.
-  template <std::size_t N>
-  void
-  get_grid_axes(cosmosis::DataBlock& cfg,
-                std::string const& modulelabel,
-                std::array<std::string, N> const& names,
-                std::array<std::vector<double>, N>& axes)
-  {
-    auto get_axis = [&cfg, &modulelabel](std::string const& name) {
-      return cfg.view<std::vector<double>>(modulelabel, name);
-    };
-    std::transform(names.begin(), names.end(), axes.begin(), get_axis);
-  }
-
+    // Given a vector of N names of configuration parameters, look up
+    // the N vectors of grid locations for each of the Nm axes, and
+    // put them into 'axes'.
+    template <std::size_t N>
+    void
+    get_grid_axes(cosmosis::DataBlock& cfg,
+                  std::string const& modulelabel,
+                  std::array<std::string, N> const& names,
+                  std::array<std::vector<double>, N>& axes)
+    {
+      auto get_axis = [&cfg, &modulelabel](std::string const& name) {
+        return cfg.view<std::vector<double>>(modulelabel, name);
+      };
+      std::transform(names.begin(), names.end(), axes.begin(), get_axis);
+    }
 
     // cartesian_product_aux(f, v...) means "do `f` for each element of
     // cartesian product of v..."
@@ -71,12 +70,11 @@ namespace y3_cluster {
         cartesian_product_aux(sub_accumulator, tail...);
       }
     }
-  }
+  } // namespace detail
 
-  // make_grid_splatted takes N vectors of floating point numbers, where N is any
-  // positive integer,
-  // and returns a vector of grid points, where each grid point is an array
-  // of N doubles.
+  // make_grid_splatted takes N vectors of floating point numbers, where N is
+  // any positive integer, and returns a vector of grid points, where each grid
+  // point is an array of N doubles.
   template <typename... Ts>
   std::vector<std::array<double, sizeof...(Ts)>>
   make_grid_splatted(std::vector<Ts> const&... in)
@@ -99,14 +97,16 @@ namespace y3_cluster {
   template <std::size_t... Is>
   std::vector<std::array<double, sizeof...(Is)>>
   make_grid_aux(std::array<std::vector<double>, sizeof...(Is)> const& axes,
-            std::index_sequence<Is...> /*unused*/) {
+                std::index_sequence<Is...> /*unused*/)
+  {
     return make_grid_splatted(axes[Is]...);
   }
 
   // use this one!
   template <std::size_t N>
   std::vector<std::array<double, N>>
-  make_grid(std::array<std::vector<double>, N> const& axes) {
+  make_grid(std::array<std::vector<double>, N> const& axes)
+  {
     return make_grid_aux(axes, std::make_index_sequence<N>());
   }
 
@@ -117,20 +117,21 @@ namespace y3_cluster {
 template <typename... STRINGLIKEs>
 std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
 y3_cluster::make_grid_points(cosmosis::DataBlock& cfg,
-                            std::string const& modulelabel,
-                            STRINGLIKEs... stringlikes)
+                             std::string const& modulelabel,
+                             STRINGLIKEs... stringlikes)
 {
   // Make sure that all arguments are convertible to std::string.
-  static_assert(std::conjunction_v<std::is_convertible<STRINGLIKEs, std::string>...>,
-                "\n\nCosmoSIS error!\nAll trailing arguments in "
-                "make_grid_points must be convertible to string.\n\n");
+  static_assert(
+    std::conjunction_v<std::is_convertible<STRINGLIKEs, std::string>...>,
+    "\n\nCosmoSIS error!\nAll trailing arguments in "
+    "make_grid_points must be convertible to string.\n\n");
   constexpr std::size_t n_axes = sizeof...(STRINGLIKEs);
 
-  std::array<std::string, n_axes> const axis_names{std::forward<STRINGLIKEs>(stringlikes)...};
+  std::array<std::string, n_axes> const axis_names{
+    std::forward<STRINGLIKEs>(stringlikes)...};
   std::array<std::vector<double>, n_axes> axes;
   detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
   return make_grid(axes);
 }
 
 #endif
-

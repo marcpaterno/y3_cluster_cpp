@@ -11,7 +11,6 @@
 #include "datablock_reader.hh"
 namespace y3_cluster {
   class IntegrationRange {
-
   public:
     // This constructor should be removed.
     // It produces an IntegrationRange of zero length, which can not
@@ -86,6 +85,6 @@ namespace y3_cluster {
     return IntegrationRange(a, b);
   }
 
-}
+} // namespace y3_cluster
 
 #endif

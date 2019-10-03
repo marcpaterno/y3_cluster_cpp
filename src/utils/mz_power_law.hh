@@ -24,7 +24,7 @@ namespace y3_cluster {
     double const B_;
     double const C_;
   };
-}
+} // namespace y3_cluster
 
 inline y3_cluster::mz_power_law::mz_power_law(double A,
                                               double B,

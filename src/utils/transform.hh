@@ -9,7 +9,7 @@
 
 namespace y3_cluster {
 
-// Anonymous namespace; implementation details in here.
+  // Anonymous namespace; implementation details in here.
   namespace {
 
     // Helper function for y3_cluster::transform
@@ -17,7 +17,7 @@ namespace y3_cluster {
     constexpr std::array<U, N> transform_impl(std::array<T, N> const& xs,
                                               F f,
                                               std::index_sequence<Is...>);
-  }
+  } // namespace
 
   // transform() takes an std::array and a function that maps the type T held in
   // that array to a possibly different type U, and returns an array of U,
@@ -53,19 +53,17 @@ namespace y3_cluster {
                // know maybe_unused.
       return {{f(xs[Is])...}};
     }
-  }
-
-
+  } // namespace
 
   template <typename R, typename T>
   std::vector<R>
-  transform  (std::vector<T> const &in,  std::function <R (T const &)> f)
+  transform(std::vector<T> const& in, std::function<R(T const&)> f)
   {
-    auto  ret  =  std::vector<R>  (in.size ());
-    std::transform  (begin (in),  end (in),  begin (ret),  f);
+    auto ret = std::vector<R>(in.size());
+    std::transform(begin(in), end(in), begin(ret), f);
     return ret;
   }
 
-}
+} // namespace y3_cluster
 
 #endif

@@ -50,7 +50,7 @@ namespace y3_cluster {
     auto highs = cfg.view<vec>(modulelabel, names[0] + "_high");
     if (nvolumes != highs.size()) {
       // TODO: Improve this error handling.
-      throw std::runtime_error(names[0]+" bad, bad user!");
+      throw std::runtime_error(names[0] + " bad, bad user!");
     }
 
     lowbounds.resize(nvolumes);
@@ -71,12 +71,12 @@ namespace y3_cluster {
       highs = cfg.view<vec>(modulelabel, names[iname] + "_high");
       if (nvolumes != lows.size()) {
         // TODO: Improve this error handling.
-        throw std::runtime_error(names[iname]+" bad, bad user!");
+        throw std::runtime_error(names[iname] + " bad, bad user!");
       }
 
       if (nvolumes != highs.size()) {
         abort();
-        throw std::runtime_error(names[iname]+" bad, bad user!");
+        throw std::runtime_error(names[iname] + " bad, bad user!");
       }
       for (std::size_t ivol = 0; ivol != nvolumes; ++ivol)
         fill_bounds(iname, ivol);
@@ -87,8 +87,8 @@ namespace y3_cluster {
 template <typename... Ts>
 std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
 y3_cluster::make_integration_volumes(cosmosis::DataBlock& cfg,
-                                         std::string const& modulelabel,
-                                         Ts... ts)
+                                     std::string const& modulelabel,
+                                     Ts... ts)
 {
   // Make sure that all arguments are convertible to std::string.
   static_assert(std::conjunction_v<std::is_convertible<Ts, std::string>...>,
@@ -100,8 +100,7 @@ y3_cluster::make_integration_volumes(cosmosis::DataBlock& cfg,
 
   using boundary_t = cubacpp::array<n>;
   std::vector<boundary_t> lows, highs;
-  y3_cluster::get_integration_boundaries(
-    cfg, modulelabel, names, lows, highs);
+  y3_cluster::get_integration_boundaries(cfg, modulelabel, names, lows, highs);
 
   std::vector<cubacpp::IntegrationVolume<n>> result;
   result.reserve(lows.size());
