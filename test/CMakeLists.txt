@@ -436,8 +436,10 @@ target_include_directories(ln_mez_power_law
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ln_mez_power_law ln_mez_power_law)
 
-
-
-
-
-
+add_executable(mor_y3xspt_t mor_y3xspt_t.test.cc)
+target_link_libraries(mor_y3xspt_t PRIVATE testmain utils)
+target_include_directories(mor_y3xspt_t
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(mor_y3xspt_t mor_y3xspt_t)
