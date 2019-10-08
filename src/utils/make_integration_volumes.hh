@@ -27,19 +27,19 @@ namespace y3_cluster {
                            std::string const& modulelabel,
                            Ts... names);
 
+  template <std::size_t N> using integration_boundaries = std::vector<cubacpp::array<N>>;
+
   // We have to use int N, rather than std::size_t N, because that is what the
   // class template cubacpp::array<N> expects; this in turn is determined by
   // Eigen.
   template <std::size_t N>
-  void
+  std::pair<integration_boundaries<N>, integration_boundaries<N>>
   get_integration_boundaries(cosmosis::DataBlock& cfg,
                              std::string const& modulelabel,
-                             std::array<std::string, N> const& names,
-                             std::vector<cubacpp::array<N>>& lowbounds,
-                             std::vector<cubacpp::array<N>>& highbounds)
+                             std::array<std::string, N> const& names)
   {
     if (names.empty())
-      return;
+      return {};
 
     // The first parameter gets special handling, because we use it to determine
     // how many integration volumes we shall produce.
@@ -53,8 +53,8 @@ namespace y3_cluster {
       throw std::runtime_error(names[0] + " bad, bad user!");
     }
 
-    lowbounds.resize(nvolumes);
-    highbounds.resize(nvolumes);
+    integration_boundaries<N> lowbounds(nvolumes);
+    integration_boundaries<N> highbounds(nvolumes);
     auto fill_bounds =
       [&lowbounds, &lows, &highbounds, &highs](std::size_t iname, int ivol) {
         lowbounds[ivol][iname] = lows[ivol];
@@ -81,6 +81,7 @@ namespace y3_cluster {
       for (std::size_t ivol = 0; ivol != nvolumes; ++ivol)
         fill_bounds(iname, ivol);
     }
+    return {lowbounds, highbounds};
   }
 } // namespace y3_cluster
 
@@ -98,9 +99,7 @@ y3_cluster::make_integration_volumes(cosmosis::DataBlock& cfg,
   constexpr std::size_t n = sizeof...(Ts);
   std::array<std::string, n> names{std::forward<Ts>(ts)...};
 
-  using boundary_t = cubacpp::array<n>;
-  std::vector<boundary_t> lows, highs;
-  y3_cluster::get_integration_boundaries(cfg, modulelabel, names, lows, highs);
+  auto [lows, highs] = y3_cluster::get_integration_boundaries(cfg, modulelabel, names);
 
   std::vector<cubacpp::IntegrationVolume<n>> result;
   result.reserve(lows.size());
