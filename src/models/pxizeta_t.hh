@@ -12,11 +12,11 @@ namespace y3_cluster {
         PXiZeta_t() {}
 
         double
-        operator()(double xi, double zeta) const
+        operator()(double xi, double zeta, double gamma) const
         {
             // Observational uncertainty in SZ significance P(\xi|\zeta)
             // Eq. 6 of Bleem et al. 2019 (IR version)
-            double const mean = std::sqrt(zeta*zeta + 3.0);
+            double const mean = std::sqrt(gamma*gamma*zeta*zeta + 3.0);
             return y3_cluster::gaussian(xi, mean, 1.0);
         }
     };

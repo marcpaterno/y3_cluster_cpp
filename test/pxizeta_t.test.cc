@@ -15,17 +15,18 @@ TEST_CASE("PXiZeta_t works")
     REQUIRE(infile.good());
 
     // Initialize vectors to hold truth
-    std::vector<double> xi, zeta, prob_true;
+    std::vector<double> xi, zeta, gamma, prob_true;
     std::string headerline;
 
     // Read in the truth
     std::getline(infile, headerline);
     std::getline(infile, headerline);
     while(infile) {
-        double onexi, onezeta, oneprob;
-        infile >> onexi >> onezeta >> oneprob;
+        double onexi, onezeta, onegamma, oneprob;
+        infile >> onexi >> onezeta >> onegamma >> oneprob;
         xi.push_back(onexi);
         zeta.push_back(onezeta);
+        gamma.push_back(onegamma);
         prob_true.push_back(oneprob);
     }
 
@@ -40,14 +41,15 @@ TEST_CASE("PXiZeta_t works")
     std::ofstream out {"../data/pxizeta_test.out"};
     out << std::setw(16);
     out << std::setprecision(16);
-    out << "xi\tzeta\tprobtest\n";
+    out << "xi\tzeta\tgamma\tprobtest\n";
 
     // Test the model against truth
     double constexpr epsrel = 1.0e-6;
     double constexpr epsabs = 1.0e-12;
     for(std::size_t i=0, len=prob_true.size(); i!=len; ++i) {
-        double const prob_test = pxizeta(xi[i], zeta[i]);
+        double const prob_test = pxizeta(xi[i], zeta[i], gamma[i]);
         CHECK(prob_test == Approx(prob_true[i]).epsilon(epsrel).margin(epsabs));
-        out << xi[i] << '\t' << zeta[i] << '\t' << prob_test << '\n';
+        out << xi[i] << '\t' << zeta[i] << '\t' << '\t' << gamma[i] 
+            << prob_test << '\n';
     }
 }
