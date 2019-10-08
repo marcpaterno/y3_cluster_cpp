@@ -27,7 +27,8 @@ namespace y3_cluster {
                            std::string const& modulelabel,
                            Ts... names);
 
-  template <std::size_t N> using integration_boundaries = std::vector<cubacpp::array<N>>;
+  template <std::size_t N>
+  using integration_boundaries = std::vector<cubacpp::array<N>>;
 
   // We have to use int N, rather than std::size_t N, because that is what the
   // class template cubacpp::array<N> expects; this in turn is determined by
@@ -75,7 +76,6 @@ namespace y3_cluster {
       }
 
       if (nvolumes != highs.size()) {
-        abort();
         throw std::runtime_error(names[iname] + " bad, bad user!");
       }
       for (std::size_t ivol = 0; ivol != nvolumes; ++ivol)
@@ -99,7 +99,8 @@ y3_cluster::make_integration_volumes(cosmosis::DataBlock& cfg,
   constexpr std::size_t n = sizeof...(Ts);
   std::array<std::string, n> names{std::forward<Ts>(ts)...};
 
-  auto [lows, highs] = y3_cluster::get_integration_boundaries(cfg, modulelabel, names);
+  auto [lows, highs] =
+    y3_cluster::get_integration_boundaries(cfg, modulelabel, names);
 
   std::vector<cubacpp::IntegrationVolume<n>> result;
   result.reserve(lows.size());
