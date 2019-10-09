@@ -59,7 +59,7 @@ TEST_CASE("3d grid")
   std::vector<double> ys {4.0, 5.0};
   std::vector<double> zs {6.0, 7.0, 8.0, 9.0};
 
-  grid_t grid = y3_cluster::make_grid_splatted(xs, ys, zs);
+  grid_t grid = y3_cluster::detail::make_grid_splatted(xs, ys, zs);
   CHECK(grid.size() == 3 * 2 * 4);
 
   std::vector<grid_point_t> expected{
