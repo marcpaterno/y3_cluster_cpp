@@ -6,12 +6,13 @@
 
 #include <algorithm>
 #include <array>
+#include <stdexcept>
 #include <string>
 #include <tuple> // for std::apply
 #include <vector>
 
 namespace y3_cluster {
-  // This variadic function template takes as arguments:
+  // These variadic function templates takes as arguments:
   //   1. a cosmosis::DataBlock (by reference), and
   //   2. one or more arguments that are convertible to strings.
   //
@@ -21,11 +22,26 @@ namespace y3_cluster {
   //
   // The function returns a vector of std::array<double, N>,
   // where N is the number of names provided.
+  //
+  // make_grid_points_cartesian_product expects one configuration
+  // parameter for each named axis, and forms a grid from the
+  // cartesian product of the axis values.
+  //
+  // make_grid_points_wall_of_numbers expects one configuration
+  // parameter for each named axis. All must be vectors of the
+  // same length. The resulting grid points carry those axis
+  // values.
   template <typename... Ts>
   std::vector<std::array<double, sizeof...(Ts)>>
   make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
                                      std::string const& modulelabel,
                                      Ts... stringlikes);
+
+  template <typename... Ts>
+  std::vector<std::array<double, sizeof...(Ts)>>
+  make_grid_points_wall_of_numbers(cosmosis::DataBlock& cfg,
+                                   std::string const& modulelabel,
+                                   Ts... names);
 
   namespace detail {
 
@@ -85,6 +101,28 @@ namespace y3_cluster {
     return detail::make_grid_aux(axes, std::make_index_sequence<N>());
   }
 
+  template <std::size_t N>
+  std::vector<std::array<double, N>>
+  make_grid_wall_of_numbers(std::array<std::vector<double>, N> const& axes)
+  {
+    // Make sure all vectors have the same length
+    std::size_t const n = axes[0].size();
+    for (std::size_t i = 1; i < N; ++i) {
+      if (axes[i].size() != n) {
+        throw std::invalid_argument(
+          "unequal length axes in make_grid_wall_of_numbers");
+      }
+    }
+    std::vector<std::array<double, N>> res(n);
+    for (std::size_t i = 0; i != n; ++i) {
+      std::array<double, N>& current_result = res[i];
+      for (std::size_t j = 0; j != N; ++j) {
+        current_result[j] = axes[j][i];
+      }
+    }
+    return res;
+  }
+
 } // namespace y3_cluster
 
 // This is the function users of CosmoSIS should use to create a
@@ -108,6 +146,25 @@ y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
   std::array<std::vector<double>, n_axes> axes;
   detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
   return make_grid_cartesian_product(axes);
+}
+
+template <typename... STRINGLIKEs>
+std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
+y3_cluster::make_grid_points_wall_of_numbers(cosmosis::DataBlock& cfg,
+                                             std::string const& modulelabel,
+                                             STRINGLIKEs... names)
+{
+  // Make sure all the arguments are convertible to std::string.
+  static_assert(
+    std::conjunction_v<std::is_convertible<STRINGLIKEs, std::string>...>,
+    "\n\nCosmoSIS error!\nAll trailing arguments in "
+    "make_grid_points_wall_of_numbers must be convertible to string.\n\n");
+  constexpr std::size_t n_axes = sizeof...(STRINGLIKEs);
+  std::array<std::string, n_axes> const axis_names{
+    std::forward<STRINGLIKEs>(names)...};
+  std::array<std::vector<double>, n_axes> axes;
+  detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
+  return make_grid_wall_of_numbers(axes);
 }
 
 #endif

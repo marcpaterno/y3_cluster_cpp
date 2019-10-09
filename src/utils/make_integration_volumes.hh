@@ -58,11 +58,11 @@ namespace y3_cluster {
 
     integration_boundaries<N> lowbounds(nvolumes);
     integration_boundaries<N> highbounds(nvolumes);
-    auto fill_bounds =
-      [&lowbounds, &lows, &highbounds, &highs](std::size_t iname, std::size_t ivol) {
-        lowbounds[ivol][iname] = lows[ivol];
-        highbounds[ivol][iname] = highs[ivol];
-      };
+    auto fill_bounds = [&lowbounds, &lows, &highbounds, &highs](
+                         std::size_t iname, std::size_t ivol) {
+      lowbounds[ivol][iname] = lows[ivol];
+      highbounds[ivol][iname] = highs[ivol];
+    };
 
     for (std::size_t ivol = 0; ivol != nvolumes; ++ivol)
       fill_bounds(0, ivol);
