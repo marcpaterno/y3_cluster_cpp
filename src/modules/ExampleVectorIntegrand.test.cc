@@ -1,7 +1,7 @@
-#include "cosmosis/datablock/datablock.hh"
-#include "modules/ExampleVectorIntegrand.hh"
 #include "catch2/catch.hpp"
+#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/cuhre.hh"
+#include "modules/ExampleVectorIntegrand.hh"
 
 #include <iostream>
 #include <vector>
@@ -27,18 +27,18 @@ TEST_CASE("2D example integrand")
       CHECK(fxy[i] == Approx(expected[i]).epsilon(1.0e-12));
     }
   } // evaluation
-  
+
   SECTION("integrate unit volume")
   {
-    
+
     double const epsrel = 1.0e-12;
     double const epsabs = 1.0e-12;
     cubacpp::Cuhre alg;
     using iv_t = cubacpp::IntegrationVolume<2>;
-    iv_t unitvolume {};
+    iv_t unitvolume{};
     auto res = alg.integrate(f, epsrel, epsabs, unitvolume);
     CHECK(res.converged());
-    std::vector<double> expected { 0.345833, 0.245833 };
+    std::vector<double> expected{0.345833, 0.245833};
     for (std::size_t i = 0, sz = res.value.size(); i != sz; ++i) {
       CHECK(res.value[i] == Approx(expected[i]).epsilon(1.0e-3));
     }
@@ -55,14 +55,15 @@ TEST_CASE("2D example integrand")
     cfg2.put_val(module_label, "y_low", std::vector<double>{4.0});
     cfg2.put_val(module_label, "y_high", std::vector<double>{7.0});
     using iv_t = cubacpp::IntegrationVolume<2>;
-    std::vector<iv_t> vols = ExampleVectorIntegrand::make_integration_volumes(cfg2);
+    std::vector<iv_t> vols =
+      ExampleVectorIntegrand::make_integration_volumes(cfg2);
     CHECK(vols.size() == 1);
     CHECK(vols[0].jacobian() == 15.0);
     auto res = alg.integrate(f, epsrel, epsabs, vols[0]);
     CHECK(res.converged());
-    std::vector<double> expected { 346.688, 348.187 };
+    std::vector<double> expected{346.688, 348.187};
     for (std::size_t i = 0, sz = res.value.size(); i != sz; ++i) {
-     CHECK(res.value[i] == Approx(expected[i]).epsilon(1.0e-3));
+      CHECK(res.value[i] == Approx(expected[i]).epsilon(1.0e-3));
     }
   }
 }

@@ -7,7 +7,8 @@ using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
 ExampleVectorIntegrand::ExampleVectorIntegrand(DataBlock& config)
-  : radii_(config.view<std::vector<double>>(module_label(), "radii")), sigma_8_()
+  : radii_(config.view<std::vector<double>>(module_label(), "radii"))
+  , sigma_8_()
 {}
 
 void
@@ -36,9 +37,9 @@ ExampleVectorIntegrand::operator()(double x, double y) const
 
 //
 void
-ExampleVectorIntegrand::finalize_sample(cosmosis::DataBlock& sample,
-                                  std::vector<integration_results_v> const& results)
-  const
+ExampleVectorIntegrand::finalize_sample(
+  cosmosis::DataBlock& sample,
+  std::vector<integration_results_v> const& results) const
 {
   // TODO: fix this to handle the whole vector of integration_results.
   sample.put_val(module_label(), "integral_vals", results[0].value);
@@ -46,7 +47,6 @@ ExampleVectorIntegrand::finalize_sample(cosmosis::DataBlock& sample,
   sample.put_val(module_label(), "integral_probs", results[0].prob);
   sample.put_val(module_label(), "integral_status", results[0].status);
 }
-
 
 char const*
 ExampleVectorIntegrand::module_label()
@@ -64,8 +64,6 @@ ExampleVectorIntegrand::module_label()
 std::vector<ExampleVectorIntegrand::volume_t>
 ExampleVectorIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes_wall_of_numbers(cfg,
-                                              ExampleVectorIntegrand::module_label(),
-                                              "x",
-                                              "y");
+  return y3_cluster::make_integration_volumes_wall_of_numbers(
+    cfg, ExampleVectorIntegrand::module_label(), "x", "y");
 }

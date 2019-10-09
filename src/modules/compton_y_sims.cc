@@ -1,12 +1,12 @@
-#include "utils/module_macros.hh"
 #include "utils/make_integration_volumes.hh"
+#include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/hmf_t.hh"
 #include "models/dv_do_dz_t.hh"
+#include "models/hmf_t.hh"
 #include "models/omega_z_des.hh"
 #include "models/y_sz.hh"
 
@@ -79,11 +79,10 @@ public:
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_results_v> const& results) const;
 
-  // module_label() should return the label for this module. The name this returns
-  // is the name that must be used in the 'ini file' for configuring the module
-  // made with this class.
-  // We return char const* rather than std::string to avoid some needless memory
-  // allocations.
+  // module_label() should return the label for this module. The name this
+  // returns is the name that must be used in the 'ini file' for configuring the
+  // module made with this class. We return char const* rather than std::string
+  // to avoid some needless memory allocations.
   static char const* module_label();
 
   // The following non-member (static) function creates a vector of integration
@@ -99,16 +98,23 @@ using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
 compton_y_sims::compton_y_sims(DataBlock& config)
-    : omega_z()
-    , dv_do_dz()
-    , hmf()
-    , y_sz()
-    , thetas(get_datablock<std::vector<double>>(config, compton_y_sims::module_label(), "thetas"))
-    , z_low(get_datablock<std::vector<double>>(config, compton_y_sims::module_label(), "z_low"))
-    , z_high(get_datablock<std::vector<double>>(config, compton_y_sims::module_label(), "z_high"))
+  : omega_z()
+  , dv_do_dz()
+  , hmf()
+  , y_sz()
+  , thetas(get_datablock<std::vector<double>>(config,
+                                              compton_y_sims::module_label(),
+                                              "thetas"))
+  , z_low(get_datablock<std::vector<double>>(config,
+                                             compton_y_sims::module_label(),
+                                             "z_low"))
+  , z_high(get_datablock<std::vector<double>>(config,
+                                              compton_y_sims::module_label(),
+                                              "z_high"))
 {
-    if (z_low.size() != z_high.size())
-        throw std::invalid_argument("compton_y_sims: z_low and z_high are different lengths");
+  if (z_low.size() != z_high.size())
+    throw std::invalid_argument(
+      "compton_y_sims: z_low and z_high are different lengths");
 }
 
 void
@@ -130,9 +136,7 @@ compton_y_sims::operator()(double lnM, double z) const
   results.reserve(thetas.size() + 1);
 
   // Number counts followed by the radius bins, repeating over zo bins
-  double common_term = (*dv_do_dz)(z)
-                       * (*hmf)(lnM, z)
-                       * (*omega_z)(z);
+  double common_term = (*dv_do_dz)(z) * (*hmf)(lnM, z) * (*omega_z)(z);
 
   // This is the N integral
   results.push_back(common_term);
@@ -163,8 +167,8 @@ compton_y_sims::finalize_sample(
   std::vector<double> compton_y_errors_temp;
   std::vector<double> compton_y_probs_temp;
 
-  // TODO: Try to refactor this code, to abstract away the manipulations done for
-  // each physics quantity.
+  // TODO: Try to refactor this code, to abstract away the manipulations done
+  // for each physics quantity.
   std::size_t n_radii_bins = thetas.size();
   const auto block_size = n_radii_bins + 1;
 
@@ -195,9 +199,9 @@ compton_y_sims::finalize_sample(
   }
 
   std::size_t expected_size = results.size() * n_radii_bins;
-  if ((compton_y_vals_temp.size() != expected_size)
-          || (compton_y_errors_temp.size() != expected_size)
-          || (compton_y_probs_temp.size() != expected_size))
+  if ((compton_y_vals_temp.size() != expected_size) ||
+      (compton_y_errors_temp.size() != expected_size) ||
+      (compton_y_probs_temp.size() != expected_size))
     throw std::runtime_error("internal error: dimension mismatch for output");
 
   std::vector<std::size_t> extents{results.size(), n_radii_bins};
@@ -226,17 +230,18 @@ compton_y_sims::module_label()
 }
 
 // The implementation of make_integration_volumes can be almost the same for
-// any CosmoSISVectorIntegrand-type class. Only the names and number of the parameters
-// provided need to be changed. It is critical that the names be given in the
-// order that correspond to the order of arguments in the class's function call
-// operator. While the compiler can verify the number of arguments provided is
-// correct, it can not verify that their order matches the order of arguments in
-// the function call operator.
+// any CosmoSISVectorIntegrand-type class. Only the names and number of the
+// parameters provided need to be changed. It is critical that the names be
+// given in the order that correspond to the order of arguments in the class's
+// function call operator. While the compiler can verify the number of arguments
+// provided is correct, it can not verify that their order matches the order of
+// arguments in the function call operator.
 std::vector<compton_y_sims::volume_t>
 compton_y_sims::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    const auto vols = y3_cluster::make_integration_volumes_wall_of_numbers(cfg, module_label(), "M", "z");
+    const auto vols = y3_cluster::make_integration_volumes_wall_of_numbers(
+      cfg, module_label(), "M", "z");
 
     // We want to convert Ms to ln(Ms)
     std::vector<compton_y_sims::volume_t> corrected_vols;

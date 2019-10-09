@@ -1,12 +1,12 @@
-#include "utils/module_macros.hh"
 #include "utils/make_integration_volumes.hh"
+#include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/hmf_t.hh"
 #include "models/dv_do_dz_t.hh"
+#include "models/hmf_t.hh"
 #include "models/omega_z_sdss.hh"
 #include "models/sig_sum.hh"
 
@@ -14,9 +14,9 @@
 #include <vector>
 using namespace y3_cluster;
 
-// buzzard_sigma_halos is a class that models the concept of "CosmoSISIntegrand",
-// and is thus suitable for use as the template parameter for the class template
-// CosmosisIntegrationModule.
+// buzzard_sigma_halos is a class that models the concept of
+// "CosmoSISIntegrand", and is thus suitable for use as the template parameter
+// for the class template CosmosisIntegrationModule.
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
@@ -76,11 +76,10 @@ public:
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_results_v> const& results) const;
 
-  // module_label() should return the label for this module. The name this returns
-  // is the name that must be used in the 'ini file' for configuring the module
-  // made with this class.
-  // We return char const* rather than std::string to avoid some needless memory
-  // allocations.
+  // module_label() should return the label for this module. The name this
+  // returns is the name that must be used in the 'ini file' for configuring the
+  // module made with this class. We return char const* rather than std::string
+  // to avoid some needless memory allocations.
   static char const* module_label();
 
   // The following non-member (static) function creates a vector of integration
@@ -95,12 +94,14 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-buzzard_sigma_halos::buzzard_sigma_halos(DataBlock& config) : 
-       	omega_z_sdss(),
-       	dv_do_dz(),
-       	hmf(), 
-        sigma(),
-        radii_(config.view<std::vector<double>>(buzzard_sigma_halos::module_label(), "radii")){}
+buzzard_sigma_halos::buzzard_sigma_halos(DataBlock& config)
+  : omega_z_sdss()
+  , dv_do_dz()
+  , hmf()
+  , sigma()
+  , radii_(config.view<std::vector<double>>(buzzard_sigma_halos::module_label(),
+                                            "radii"))
+{}
 
 void
 buzzard_sigma_halos::set_sample(DataBlock& sample)
@@ -119,15 +120,13 @@ buzzard_sigma_halos::operator()(double zt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  std::vector<double> results( 1+radii_.size() );
-  double Nval = (*dv_do_dz)(zt)
-	     * (*hmf)(lnM, zt)
-	     * (*omega_z_sdss)(zt);
-  // Number counts followed by the radius bins, repeating over zo bins 
-  for (std::size_t j =0; j != radii_.size(); j++){
-      results[j+1] = (*sigma)(radii_[j], lnM, zt) * Nval;
+  std::vector<double> results(1 + radii_.size());
+  double Nval = (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z_sdss)(zt);
+  // Number counts followed by the radius bins, repeating over zo bins
+  for (std::size_t j = 0; j != radii_.size(); j++) {
+    results[j + 1] = (*sigma)(radii_[j], lnM, zt) * Nval;
   }
-  results[0]= Nval;//results[i*(radii_.size()+1)+1];
+  results[0] = Nval; // results[i*(radii_.size()+1)+1];
   return results;
 }
 
@@ -140,27 +139,33 @@ buzzard_sigma_halos::finalize_sample(
   std::vector<int> NM_status;
   std::vector<int> NM_nregions;
   std::vector<int> NM_nevals;
-  std::vector<double> N_vals;  
-  std::vector<double> N_errors;  
-  std::vector<double> N_probs; 
+  std::vector<double> N_vals;
+  std::vector<double> N_errors;
+  std::vector<double> N_probs;
 
-  std::vector<double> totSigma_vals_temp;  
-  std::vector<double> totSigma_errors_temp;  
-  std::vector<double> totSigma_probs_temp;  
+  std::vector<double> totSigma_vals_temp;
+  std::vector<double> totSigma_errors_temp;
+  std::vector<double> totSigma_probs_temp;
 
   std::size_t n_radii_bins = radii_.size();
   for (auto const& result : results) {
-        NM_status.push_back(result.status);
-        NM_nregions.push_back(result.nregions);
-        NM_nevals.push_back(result.neval);
+    NM_status.push_back(result.status);
+    NM_nregions.push_back(result.nregions);
+    NM_nevals.push_back(result.neval);
 
-        N_vals.push_back(result.value[0]);
-        N_errors.push_back(result.error[0]);
-        N_probs.push_back(result.prob[0]);
+    N_vals.push_back(result.value[0]);
+    N_errors.push_back(result.error[0]);
+    N_probs.push_back(result.prob[0]);
 
-        totSigma_vals_temp.insert(totSigma_vals_temp.end(), result.value.begin()+1, result.value.begin()+(n_radii_bins+1));
-        totSigma_errors_temp.insert(totSigma_errors_temp.end(), result.error.begin()+1, result.error.begin()+(n_radii_bins+1));
-        totSigma_probs_temp.insert(totSigma_probs_temp.end(), result.prob.begin()+1, result.prob.begin()+(n_radii_bins+1));
+    totSigma_vals_temp.insert(totSigma_vals_temp.end(),
+                              result.value.begin() + 1,
+                              result.value.begin() + (n_radii_bins + 1));
+    totSigma_errors_temp.insert(totSigma_errors_temp.end(),
+                                result.error.begin() + 1,
+                                result.error.begin() + (n_radii_bins + 1));
+    totSigma_probs_temp.insert(totSigma_probs_temp.end(),
+                               result.prob.begin() + 1,
+                               result.prob.begin() + (n_radii_bins + 1));
   }
   std::vector<std::size_t> extents{results.size(), n_radii_bins};
   cosmosis::ndarray<double> totSigma_vals(totSigma_vals_temp, extents);
