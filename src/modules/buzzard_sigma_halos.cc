@@ -197,7 +197,7 @@ std::vector<buzzard_sigma_halos::volume_t>
 buzzard_sigma_halos::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    return y3_cluster::make_integration_volumes(
+    return y3_cluster::make_integration_volumes_wall_of_numbers(
       cfg, module_label(), "zt", "lnm");
   }
   catch (std::exception const& ex) {

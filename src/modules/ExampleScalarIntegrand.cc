@@ -55,7 +55,7 @@ ExampleScalarIntegrand::module_label()
 std::vector<ExampleScalarIntegrand::volume_t>
 ExampleScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes(cfg,
+  return y3_cluster::make_integration_volumes_wall_of_numbers(cfg,
                                               ExampleScalarIntegrand::module_label(),
                                               "x",
                                               "y");

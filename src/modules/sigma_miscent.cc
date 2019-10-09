@@ -238,7 +238,7 @@ std::vector<sigma_miscent::volume_t>
 sigma_miscent::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    return y3_cluster::make_integration_volumes(
+    return y3_cluster::make_integration_volumes_wall_of_numbers(
       cfg, module_label(), "lo", "lc", "lt", "zt", "lnm", "rmis", "theta");
   }
   catch (std::exception const& ex) {

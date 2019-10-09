@@ -224,7 +224,7 @@ SnapshotScalarNCIntegrand::module_label()
 std::vector<SnapshotScalarNCIntegrand::volume_t>
 SnapshotScalarNCIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes(cfg,
+  return y3_cluster::make_integration_volumes_wall_of_numbers(cfg,
                                               SnapshotScalarNCIntegrand::module_label(),
                                               "lt",
                                               "lnm");

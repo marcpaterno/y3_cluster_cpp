@@ -229,7 +229,7 @@ std::vector<sigma_cent::volume_t>
 sigma_cent::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    return y3_cluster::make_integration_volumes(
+    return y3_cluster::make_integration_volumes_wall_of_numbers(
       cfg, module_label(), "lo", "lt", "zt", "lnm");
   }
   catch (std::exception const& ex) {

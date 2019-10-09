@@ -236,7 +236,7 @@ std::vector<compton_y_sims::volume_t>
 compton_y_sims::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    const auto vols = y3_cluster::make_integration_volumes(cfg, module_label(), "M", "z");
+    const auto vols = y3_cluster::make_integration_volumes_wall_of_numbers(cfg, module_label(), "M", "z");
 
     // We want to convert Ms to ln(Ms)
     std::vector<compton_y_sims::volume_t> corrected_vols;

@@ -21,9 +21,11 @@ namespace y3_cluster {
   //
   // The function returns a vector of IntegrationVolume<N>,
   // where N is the number of names provided.
+  // This version expects the configuration to have come from the
+  // "wall of numbers" style of configuration.
   template <typename... Ts>
   std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
-  make_integration_volumes(cosmosis::DataBlock& cfg,
+  make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
                            std::string const& modulelabel,
                            Ts... names);
 
@@ -87,7 +89,7 @@ namespace y3_cluster {
 
 template <typename... Ts>
 std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
-y3_cluster::make_integration_volumes(cosmosis::DataBlock& cfg,
+y3_cluster::make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
                                      std::string const& modulelabel,
                                      Ts... ts)
 {

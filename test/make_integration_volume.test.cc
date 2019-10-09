@@ -16,7 +16,7 @@ TEST_CASE("2d volume")
     cfg.put_val(module_label, "x_high", std::vector<double>{2.0});
     cfg.put_val(module_label, "yyyy_low", std::vector<double>{4.0});
     cfg.put_val(module_label, "yyyy_high", std::vector<double>{7.0});
-    auto volumes = y3_cluster::make_integration_volumes(cfg, module_label, "x", "yyyy");
+    auto volumes = y3_cluster::make_integration_volumes_wall_of_numbers(cfg, module_label, "x", "yyyy");
     CHECK(volumes.size() == 1);
     cubacpp::IntegrationVolume<2> expected({-3.0, 4.0},{2.0, 7.0});
     CHECK(volumes[0] == expected);
@@ -29,7 +29,7 @@ TEST_CASE("2d volume")
     cfg.put_val(module_label, "x_high", std::vector<double>{1.0, 2.0});
     cfg.put_val(module_label, "y_low", std::vector<double>{0.0, 4.0});
     cfg.put_val(module_label, "y_high", std::vector<double>{1.0, 7.0});
-    auto volumes = y3_cluster::make_integration_volumes(cfg, module_label, "x", "y");
+    auto volumes = y3_cluster::make_integration_volumes_wall_of_numbers(cfg, module_label, "x", "y");
     CHECK(volumes.size() == 2);
     cubacpp::IntegrationVolume<2> expected({-3.0, 4.0},{2.0, 7.0});
     CHECK(volumes[0] == cubacpp::IntegrationVolume<2>{});

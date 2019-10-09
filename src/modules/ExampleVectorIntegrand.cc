@@ -64,7 +64,7 @@ ExampleVectorIntegrand::module_label()
 std::vector<ExampleVectorIntegrand::volume_t>
 ExampleVectorIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes(cfg,
+  return y3_cluster::make_integration_volumes_wall_of_numbers(cfg,
                                               ExampleVectorIntegrand::module_label(),
                                               "x",
                                               "y");
