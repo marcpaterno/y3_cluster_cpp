@@ -228,7 +228,7 @@ SnapshotScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 std::vector<SnapshotScalarIntegrand::grid_point_t>
 SnapshotScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points(
+  return y3_cluster::make_grid_points_cartesian_product(
     cfg, SnapshotScalarIntegrand::module_label(), "snapshot_zs", "radii");
 }
 

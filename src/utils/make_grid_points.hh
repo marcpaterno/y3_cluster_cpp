@@ -22,7 +22,7 @@ namespace y3_cluster {
   // The function returns a vector of std::array<double, N>,
   // where N is the number of names provided.
   template <typename... Ts>
-  std::vector<std::array<double, sizeof...(Ts)>> make_grid_points(
+  std::vector<std::array<double, sizeof...(Ts)>> make_grid_points_cartesian_product(
     cosmosis::DataBlock& cfg,
     std::string const& modulelabel,
     Ts... names);
@@ -88,10 +88,11 @@ namespace y3_cluster {
 } // namespace y3_cluster
 
 // This is the function users of CosmoSIS should use to create a
-// grid for the calculation of integrals.
+// grid for the calculation of integrals, using grid points based
+// on the cartesian product of the axes provided in the configuration.
 template <typename... STRINGLIKEs>
 std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
-y3_cluster::make_grid_points(cosmosis::DataBlock& cfg,
+y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
                              std::string const& modulelabel,
                              STRINGLIKEs... stringlikes)
 {

@@ -17,7 +17,7 @@ TEST_CASE("1d grid")
   {
     cosmosis::DataBlock cfg;
     cfg.put_val(module_label, "radii", std::vector<double>{3.0});
-    auto grid = y3_cluster::make_grid_points(cfg, module_label, "radii");
+    auto grid = y3_cluster::make_grid_points_cartesian_product(cfg, module_label, "radii");
     CHECK(grid.size() == 1);
     grid_t expected( {{3.0}} );
     CHECK(grid == expected);
@@ -27,7 +27,7 @@ TEST_CASE("1d grid")
   {
     cosmosis::DataBlock cfg;
     cfg.put_val(module_label, "radii", std::vector<double>{5.0, 10.0});
-    auto grid = y3_cluster::make_grid_points(cfg, module_label, "radii");
+    auto grid = y3_cluster::make_grid_points_cartesian_product(cfg, module_label, "radii");
     CHECK(grid.size() == 2);
     grid_t expected({{{5.0}}, {{10.0}}});
     CHECK(grid == expected);
@@ -44,7 +44,7 @@ TEST_CASE("2d grid")
     cosmosis::DataBlock cfg;
     cfg.put_val(module_label, "radii", std::vector<double>{3.0, 4.0});
     cfg.put_val(module_label, "zs", std::vector<double>{2.5});
-    auto grid = y3_cluster::make_grid_points(cfg, module_label, "radii", "zs");
+    auto grid = y3_cluster::make_grid_points_cartesian_product(cfg, module_label, "radii", "zs");
     CHECK(grid.size() == 2);
     grid_t expected({{{3.0, 2.5}}, {{4.0, 2.5}}});
     CHECK(grid == expected);
