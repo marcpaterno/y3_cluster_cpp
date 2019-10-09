@@ -52,7 +52,7 @@ namespace y3_cluster {
   // point is an array of N doubles.
   template <typename... Ts>
   std::vector<std::array<double, sizeof...(Ts)>>
-  make_grid_splatted(std::vector<Ts> const&... in)
+  make_grid_splatted(std::vector<Ts> const&... axes)
   {
     // Make sure all the vectors are carrying floating point numbers;
     // we convert everything to double, 'cause doing otherwise is hard.
@@ -63,7 +63,7 @@ namespace y3_cluster {
       // Construct an array from all the elements we pass in ts...
       res.push_back({ts...});
     };
-    detail::cartesian_product_aux(accumulator, in...);
+    detail::cartesian_product_aux(accumulator, axes...);
     return res;
   }
 
