@@ -17,9 +17,9 @@
 
 #include <default_models.hh>
 #include <del_sig_y1.hh>
-#include <mor_t2.hh>
 #include <interp_1d.hh>
 #include <interp_2d.hh>
+#include <mor_t2.hh>
 #include <read_vector.hh>
 #include <transform.hh>
 
@@ -32,8 +32,7 @@ using y3_cluster::mz_power_law;
 // Helper template, to automate the timing of integration.
 template <class F>
 auto
-time_integration(F f,
-                 char const* algname) -> decltype(f())
+time_integration(F f, char const* algname) -> decltype(f())
 {
   auto start = std::chrono::high_resolution_clock::now();
   auto res = f();
@@ -64,17 +63,18 @@ main(int argc, char* argv[])
 
   // ============ Scaling Functions ============
   auto log = [](double x) { return std::log(x); };
-  auto log_omega_m = [Omega_M](double x) { return std::log(x*Omega_M); };
+  auto log_omega_m = [Omega_M](double x) { return std::log(x * Omega_M); };
 
   // ============ Input Data Tables ============
   // dndlnmh.txt, m_h.txt, z.txt came from the cosmosis tinker_mf_module.so
   // d_a.txt, z_da.txt came from the cosmosis camb.so
   auto const dndlnmh = read_vector("dndlnmh.txt");
-  // m_h.txt is in units of: 
+  // m_h.txt is in units of:
   //    \Omega_M M_{solar} h^{-1}
   // So, need to divide by \Omega_M to get M_{solar} h^{-1} values.
-  // NOTE: 0.3 was the \Omega_M used to generate the tables, so different \Omega_M values would require different tables
-  // dndlnmh is in unit of (h^3 Mpc^{-3})
+  // NOTE: 0.3 was the \Omega_M used to generate the tables, so different
+  // \Omega_M values would require different tables dndlnmh is in unit of (h^3
+  // Mpc^{-3})
   auto mh = read_vector("m_h.txt", log_omega_m);
   auto const zz = read_vector("z.txt");
   // da_arr in Mpc
@@ -92,13 +92,16 @@ main(int argc, char* argv[])
   // Create each term which will comprise the gamma_t integral
   // TODO: remove magic numbers
   struct MODELS : public y3_cluster::DefaultModels {
-      using MOR = y3_cluster::MOR_t2;
-      using DEL_SIG = y3_cluster::DEL_SIG_y1;
+    using MOR = y3_cluster::MOR_t2;
+    using DEL_SIG = y3_cluster::DEL_SIG_y1;
   };
   long long maxeval = std::stoll(args[0]);
-  double sigma_intr=1.29339555e-01 ;//this is a parameter that should come from cosmosis
-  double alpha=6.91589257e-01 ;//this is a parameter that should come from cosmosis
-  MODELS::MOR mor{pow(10,1.11375214e+01), pow(10,12.4225835912), alpha, sigma_intr};
+  double sigma_intr =
+    1.29339555e-01; // this is a parameter that should come from cosmosis
+  double alpha =
+    6.91589257e-01; // this is a parameter that should come from cosmosis
+  MODELS::MOR mor{
+    pow(10, 1.11375214e+01), pow(10, 12.4225835912), alpha, sigma_intr};
   MODELS::LO_LC lo_lc{1.66, 0.26, 1.43, 1.0};
   MODELS::LC_LT lc_lt;
   MODELS::ZO_ZT zo_zt{0.005};
@@ -126,24 +129,25 @@ main(int argc, char* argv[])
   IntegrationRange lo_ir{20, 27.9};
   IntegrationRange zo_ir{0.1, 0.3};
 
-  auto gti = make_gamma_t_integrand<MODELS>(0.7,
-                                    mor,
-                                    lo_lc,
-                                    lc_lt,
-                                    zo_zt,
-                                    roffset,
-                                    t_cen,
-                                    t_mis,
-                                    a_cen,
-                                    a_mis,
-                                    bmz,
-                                    hmf,
-                                    ds,
-                                    dvdodz,
-                                    omega_z,
-                                    {lo_ir},//, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
-                                    {zo_ir},
-                                    10);
+  auto gti = make_gamma_t_integrand<MODELS>(
+    0.7,
+    mor,
+    lo_lc,
+    lc_lt,
+    zo_zt,
+    roffset,
+    t_cen,
+    t_mis,
+    a_cen,
+    a_mis,
+    bmz,
+    hmf,
+    ds,
+    dvdodz,
+    omega_z,
+    {lo_ir}, //, {27.9, 37.6}, {37.6, 50.3}, {50.3, 69.3}},
+    {zo_ir},
+    10);
 
   // ============ Actual Integrations ============
   // Integrate centered and miscentered, simultaneously over all bins,
@@ -157,8 +161,9 @@ main(int argc, char* argv[])
   time_integration([&]() { return gti.integrate_centered(c, epsrel, epsabs); },
                    "centered-cuhre");
 
-  time_integration([&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
-                   "miscentered-cuhre");
+  time_integration(
+    [&]() { return gti.integrate_miscentered(c, epsrel, epsabs); },
+    "miscentered-cuhre");
 
   ProfilerFlush();
   ProfilerStop();

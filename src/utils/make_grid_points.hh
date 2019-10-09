@@ -22,10 +22,10 @@ namespace y3_cluster {
   // The function returns a vector of std::array<double, N>,
   // where N is the number of names provided.
   template <typename... Ts>
-  std::vector<std::array<double, sizeof...(Ts)>> make_grid_points_cartesian_product(
-    cosmosis::DataBlock& cfg,
-    std::string const& modulelabel,
-    Ts... names);
+  std::vector<std::array<double, sizeof...(Ts)>>
+  make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
+                                     std::string const& modulelabel,
+                                     Ts... names);
 
   namespace detail {
 
@@ -93,8 +93,8 @@ namespace y3_cluster {
 template <typename... STRINGLIKEs>
 std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
 y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
-                             std::string const& modulelabel,
-                             STRINGLIKEs... stringlikes)
+                                               std::string const& modulelabel,
+                                               STRINGLIKEs... stringlikes)
 {
   // Make sure that all arguments are convertible to std::string.
   static_assert(

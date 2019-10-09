@@ -7,19 +7,19 @@
 
 namespace y3_cluster {
 
-    class PXiZeta_t{
-    public:
-        PXiZeta_t() {}
+  class PXiZeta_t {
+  public:
+    PXiZeta_t() {}
 
-        double
-        operator()(double xi, double zeta, double gamma) const
-        {
-            // Observational uncertainty in SZ significance P(\xi|\zeta)
-            // Eq. 6 of Bleem et al. 2019 (IR version)
-            double const mean = std::sqrt(gamma*gamma*zeta*zeta + 3.0);
-            return y3_cluster::gaussian(xi, mean, 1.0);
-        }
-    };
+    double
+    operator()(double xi, double zeta, double gamma) const
+    {
+      // Observational uncertainty in SZ significance P(\xi|\zeta)
+      // Eq. 6 of Bleem et al. 2019 (IR version)
+      double const mean = std::sqrt(gamma * gamma * zeta * zeta + 3.0);
+      return y3_cluster::gaussian(xi, mean, 1.0);
+    }
+  };
 
 }
 

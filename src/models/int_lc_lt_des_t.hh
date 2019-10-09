@@ -24,12 +24,17 @@ namespace y3_cluster {
     double
     operator()(double lc, double lt, double zt) const
     {
-       double val=0;
-       if ( (lc >=20) & (lc < 30) ) {val = lambda0_interp(lt, zt);}
-       else if ( (lc >=30) & (lc < 45)) {val = lambda1_interp(lt, zt);}
-       else if ( (lc >=45) & (lc < 60)) {val = lambda2_interp(lt, zt);}
-       else {val = lambda3_interp(lt, zt);}
-       return val;
+      double val = 0;
+      if ((lc >= 20) & (lc < 30)) {
+        val = lambda0_interp(lt, zt);
+      } else if ((lc >= 30) & (lc < 45)) {
+        val = lambda1_interp(lt, zt);
+      } else if ((lc >= 45) & (lc < 60)) {
+        val = lambda2_interp(lt, zt);
+      } else {
+        val = lambda3_interp(lt, zt);
+      }
+      return val;
     }
   };
 }

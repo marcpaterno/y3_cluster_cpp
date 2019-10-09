@@ -2,15 +2,15 @@
 #define Y3_CLUSTER_EXAMPLE_SCALAR_INTEGRAND_H
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
+#include "cubacpp/integration_volume.hh"
 
 #include <optional>
 #include <vector>
 
-// ExampleScalarIntegrand is a class that models the concept of "CosmoSISScalarIntegrand",
-// and is thus suitable for use as the template parameter for the class template
-// CosmoSISScalarIntegrationModule.
+// ExampleScalarIntegrand is a class that models the concept of
+// "CosmoSISScalarIntegrand", and is thus suitable for use as the template
+// parameter for the class template CosmoSISScalarIntegrationModule.
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
@@ -19,8 +19,8 @@
 //    2) The object as created by the only constructor does not need to be
 //    in a callable state.
 //
-//    3) After calls to both set_sample and set_grid_point have been made, the object must be in a
-//    callable state.
+//    3) After calls to both set_sample and set_grid_point have been made, the
+//    object must be in a callable state.
 //
 //    4) State that *can* be correctly set by the constructor *should* be set by
 //    the constructor. Do not needlessly repeat initialization in calls to
@@ -84,7 +84,8 @@ public:
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static std::vector<volume_t> make_integration_volumes(cosmosis::DataBlock& cfg);
+  static std::vector<volume_t> make_integration_volumes(
+    cosmosis::DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters

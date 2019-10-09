@@ -3,7 +3,7 @@
 
 namespace y3_cluster {
   namespace detail {
-    
+
     // cartesian_product(f, v...) means "do `f` for each element of
     // cartesian product of v..."
 

@@ -38,12 +38,11 @@ namespace y3_cluster {
 
       // Helper function for common pattern
       const auto erfc_scaled = [root_two_sigma](double a, double b) {
-          return std::erfc((a - b) / root_two_sigma);
+        return std::erfc((a - b) / root_two_sigma);
       };
 
       // eq. (33)
-      return (1.0 - fmsk) * (1.0 - fprj) *
-               y3_cluster::gaussian(lc, mu, sigma) +
+      return (1.0 - fmsk) * (1.0 - fprj) * y3_cluster::gaussian(lc, mu, sigma) +
              0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lt) * exptau *
                erfc_scaled(mu_tau_sig_sqr, lc) +
              0.5 * fmsk / lt *

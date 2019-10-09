@@ -2,15 +2,15 @@
 #define Y3_CLUSTER_EXAMPLE_VECTOR_INTEGRAND_H
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
+#include "cubacpp/integration_volume.hh"
 
 #include <optional>
 #include <vector>
 
-// ExampleVectorIntegrand is a class that models the concept of "CosmoSISIntegrand",
-// and is thus suitable for use as the template parameter for the class template
-// CosmosisIntegrationModule.
+// ExampleVectorIntegrand is a class that models the concept of
+// "CosmoSISIntegrand", and is thus suitable for use as the template parameter
+// for the class template CosmosisIntegrationModule.
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
@@ -63,16 +63,17 @@ public:
   std::vector<double> operator()(double x, double y) const;
 
   // finalize_sample() is where products can be put into the cosmosis::DataBlock
-  // representing the current sample. The object 'sample' passed to this function
-  // will be the exact same object as was passed to the most recent call to
-  // set_sample(). The object 'results' will be the results of the integration
-  // that has just been done for that sample. This is generally the item which
-  // should be put into the sample. This vector has one entry per integration
-  // volume specified in the configuration of the module. Each of these entries
-  // is an integration_results_v object, which contains an integration result for
-  // each value in the vectorized integrand.
-  void finalize_sample(cosmosis::DataBlock& sample,
-                       std::vector<cubacpp::integration_results_v> const& results) const;
+  // representing the current sample. The object 'sample' passed to this
+  // function will be the exact same object as was passed to the most recent
+  // call to set_sample(). The object 'results' will be the results of the
+  // integration that has just been done for that sample. This is generally the
+  // item which should be put into the sample. This vector has one entry per
+  // integration volume specified in the configuration of the module. Each of
+  // these entries is an integration_results_v object, which contains an
+  // integration result for each value in the vectorized integrand.
+  void finalize_sample(
+    cosmosis::DataBlock& sample,
+    std::vector<cubacpp::integration_results_v> const& results) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns

@@ -26,8 +26,8 @@ namespace y3_cluster {
   template <typename... Ts>
   std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
   make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
-                           std::string const& modulelabel,
-                           Ts... names);
+                                           std::string const& modulelabel,
+                                           Ts... names);
 
   template <std::size_t N>
   using integration_boundaries = std::vector<cubacpp::array<N>>;
@@ -89,9 +89,10 @@ namespace y3_cluster {
 
 template <typename... Ts>
 std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
-y3_cluster::make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
-                                     std::string const& modulelabel,
-                                     Ts... ts)
+y3_cluster::make_integration_volumes_wall_of_numbers(
+  cosmosis::DataBlock& cfg,
+  std::string const& modulelabel,
+  Ts... ts)
 {
   // Make sure that all arguments are convertible to std::string.
   static_assert(std::conjunction_v<std::is_convertible<Ts, std::string>...>,

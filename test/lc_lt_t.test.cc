@@ -2,9 +2,9 @@
 #include "models/lc_lt_t.hh"
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <string>
-#include <iomanip>
 
 using y3_cluster::LC_LT_t;
 TEST_CASE("Lc_Lt_t works")
@@ -35,7 +35,7 @@ TEST_CASE("Lc_Lt_t works")
 
   LC_LT_t lc_lt;
 
-  std::ofstream out {"../data/lc_lt_test.out"};
+  std::ofstream out{"../data/lc_lt_test.out"};
   out << std::setw(16);
   out << std::setprecision(16);
   out << "lambda_cen\tlambda_true\tprobtrue\tprobtest\n";
@@ -44,10 +44,6 @@ TEST_CASE("Lc_Lt_t works")
     double constexpr epsrel = 1.0e-6;
     double constexpr epsabs = 1.0e-12;
     CHECK(fz == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
-    out << lcs[i] << '\t'
-        << lts[i] << '\t'
-        << ys[i] << '\t'
-	<< fz << '\n';
-
+    out << lcs[i] << '\t' << lts[i] << '\t' << ys[i] << '\t' << fz << '\n';
   }
 }
