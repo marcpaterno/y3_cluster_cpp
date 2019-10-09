@@ -27,7 +27,7 @@ namespace y3_cluster {
   std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
   make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
                                            std::string const& modulelabel,
-                                           Ts... names);
+                                           Ts... ts);
 
   template <std::size_t N>
   using integration_boundaries = std::vector<cubacpp::array<N>>;
@@ -59,7 +59,7 @@ namespace y3_cluster {
     integration_boundaries<N> lowbounds(nvolumes);
     integration_boundaries<N> highbounds(nvolumes);
     auto fill_bounds =
-      [&lowbounds, &lows, &highbounds, &highs](std::size_t iname, int ivol) {
+      [&lowbounds, &lows, &highbounds, &highs](std::size_t iname, std::size_t ivol) {
         lowbounds[ivol][iname] = lows[ivol];
         highbounds[ivol][iname] = highs[ivol];
       };

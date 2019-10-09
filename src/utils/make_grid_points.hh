@@ -25,7 +25,7 @@ namespace y3_cluster {
   std::vector<std::array<double, sizeof...(Ts)>>
   make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
                                      std::string const& modulelabel,
-                                     Ts... names);
+                                     Ts... stringlikes);
 
   namespace detail {
 
@@ -80,7 +80,7 @@ namespace y3_cluster {
   // use this one!
   template <std::size_t N>
   std::vector<std::array<double, N>>
-  make_grid(std::array<std::vector<double>, N> const& axes)
+  make_grid_cartesian_product(std::array<std::vector<double>, N> const& axes)
   {
     return detail::make_grid_aux(axes, std::make_index_sequence<N>());
   }
@@ -94,20 +94,20 @@ template <typename... STRINGLIKEs>
 std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
 y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
                                                std::string const& modulelabel,
-                                               STRINGLIKEs... stringlikes)
+                                               STRINGLIKEs... names)
 {
   // Make sure that all arguments are convertible to std::string.
   static_assert(
     std::conjunction_v<std::is_convertible<STRINGLIKEs, std::string>...>,
     "\n\nCosmoSIS error!\nAll trailing arguments in "
-    "make_grid_points must be convertible to string.\n\n");
+    "make_grid_points_cartesian_product must be convertible to string.\n\n");
   constexpr std::size_t n_axes = sizeof...(STRINGLIKEs);
 
   std::array<std::string, n_axes> const axis_names{
-    std::forward<STRINGLIKEs>(stringlikes)...};
+    std::forward<STRINGLIKEs>(names)...};
   std::array<std::vector<double>, n_axes> axes;
   detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
-  return make_grid(axes);
+  return make_grid_cartesian_product(axes);
 }
 
 #endif
