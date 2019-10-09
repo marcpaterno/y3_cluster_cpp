@@ -61,7 +61,7 @@ namespace y3_cluster {
         // Construct an array from all the elements we pass in ts...
         res.push_back({ts...});
       };
-      detail::cartesian_product_aux(accumulator, axes...);
+      detail::cartesian_product(accumulator, axes...);
       return res;
     }
 

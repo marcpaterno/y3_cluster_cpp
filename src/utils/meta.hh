@@ -4,14 +4,14 @@
 namespace y3_cluster {
   namespace detail {
     
-    // cartesian_product_aux(f, v...) means "do `f` for each element of
+    // cartesian_product(f, v...) means "do `f` for each element of
     // cartesian product of v..."
 
     // Base case: execute the now-fully-bound sub-accumulator, to execute
     // the originally-bound 'f' using the bound set of arguments.
     template <typename F>
     void
-    cartesian_product_aux(F f)
+    cartesian_product(F f)
     {
       f();
     }
@@ -21,13 +21,13 @@ namespace y3_cluster {
     // over the remaining input arguments.
     template <typename F, typename H, typename... Ts>
     void
-    cartesian_product_aux(F f,
-                          std::vector<H> const& head,
-                          std::vector<Ts> const&... tail)
+    cartesian_product(F f,
+                      std::vector<H> const& head,
+                      std::vector<Ts> const&... tail)
     {
       for (H const& h : head) {
         auto sub_accumulator = [&h, &f](Ts const&... ts) { f(h, ts...); };
-        cartesian_product_aux(sub_accumulator, tail...);
+        cartesian_product(sub_accumulator, tail...);
       }
     }
   }
