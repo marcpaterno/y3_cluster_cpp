@@ -11,13 +11,14 @@
 #include <vector>
 
 namespace y3_cluster {
-  // This variadic function template takes as arguments:
-  //   1. a cosmosis::DataBlock (by reference), and
-  //   2. one or more arguments that are convertible to strings.
+  // These variadic function templates takes as arguments:
+  //   1. a cosmosis::DataBlock (by reference),
+  //   2. the name of the module being configured, and
+  //   3. one or more arguments that are convertible to strings.
   //
-  // It should be used like:
+  // Assuming your class's name is ClsName, it should be used like:
   //    DataBlock cfg;
-  //    auto vols = make_integration_volumes(cfg, "x", "y", "z");
+  //    auto vols = make_integration_volumes(cfg, ClsName::module_label(), "x", "y", "z");
   //
   // The function returns a vector of IntegrationVolume<N>,
   // where N is the number of names provided.
@@ -27,7 +28,13 @@ namespace y3_cluster {
   std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
   make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
                                            std::string const& modulelabel,
-                                           Ts... ts);
+                                           Ts... names);
+
+  template <typename... Ts>
+  std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
+  make_integration_volumes_cartesian_product(cosmosis::DataBlock& cfg,
+                                             std::string const& modulelabel,
+                                             Ts... names);
 
   template <std::size_t N>
   using integration_boundaries = std::vector<cubacpp::array<N>>;
@@ -92,18 +99,45 @@ std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
 y3_cluster::make_integration_volumes_wall_of_numbers(
   cosmosis::DataBlock& cfg,
   std::string const& modulelabel,
-  Ts... ts)
+  Ts... names)
 {
   // Make sure that all arguments are convertible to std::string.
   static_assert(std::conjunction_v<std::is_convertible<Ts, std::string>...>,
                 "\n\nCosmoSIS error!\nAll trailing arguments in "
-                "make_integration_volumes must be convertible to string.\n\n");
+                "make_integration_volumes_wall_of_numbers must be convertible to string.\n\n");
 
   constexpr std::size_t n = sizeof...(Ts);
-  std::array<std::string, n> names{std::forward<Ts>(ts)...};
+  std::array<std::string, n> stringnames{std::forward<Ts>(names)...};
 
   auto [lows, highs] =
-    y3_cluster::get_integration_boundaries(cfg, modulelabel, names);
+    y3_cluster::get_integration_boundaries(cfg, modulelabel, stringnames);
+
+  std::vector<cubacpp::IntegrationVolume<n>> result;
+  result.reserve(lows.size());
+  for (std::size_t i = 0; i != lows.size(); ++i) {
+    result.emplace_back(lows[i], highs[i]);
+  }
+
+  return result;
+}
+
+template <typename... Ts>
+std::vector<cubacpp::IntegrationVolume<sizeof...(Ts)>>
+y3_cluster::make_integration_volumes_cartesian_product(
+  cosmosis::DataBlock& cfg,
+  std::string const& modulelabel,
+  Ts... names)
+{
+  // Make sure that all arguments are convertible to std::string.
+  static_assert(std::conjunction_v<std::is_convertible<Ts, std::string>...>,
+                "\n\nCosmoSIS error!\nAll trailing arguments in "
+                "make_integration_volumes_cartesian_product must be convertible to string.\n\n");
+
+  constexpr std::size_t n = sizeof...(Ts);
+  std::array<std::string, n> stringnames{std::forward<Ts>(names)...};
+
+  auto [lows, highs] =
+    y3_cluster::get_integration_boundaries(cfg, modulelabel, stringnames);
 
   std::vector<cubacpp::IntegrationVolume<n>> result;
   result.reserve(lows.size());
