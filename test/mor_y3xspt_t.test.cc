@@ -1,7 +1,7 @@
 #include "catch2/catch.hpp"
 
 #include "models/sptxdes/mor_y3xspt_t.hh"
-#include "utils/interp_1d.hh"
+#include "utils/interp_2d.hh"
 #include "utils/read_vector.hh"
 
 #include <fstream>
@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 
-using y3_cluster::Interp1D;
+using y3_cluster::Interp2D;
 using y3_cluster::MOR_Y3xSPT_t;
 
 TEST_CASE("MOR_Y3xSPT_t works")
@@ -17,9 +17,9 @@ TEST_CASE("MOR_Y3xSPT_t works")
   // Nuisance parameters
   double const lamtrue = 92.0;
   double const zeta = 10.0;
-  double const ztrue = 0.40;
+  double const ztrue = 0.50;
   double const lnm200m = 34.5;
-  double const truth = 2.67235429418746436858e-03;
+  double const truth = 2.77600782722462044103e-03;
 
   // Model parameters
   double const Mmin = 1.35e11;
@@ -41,10 +41,12 @@ TEST_CASE("MOR_Y3xSPT_t works")
 
   // Load the mass conversion
   auto lnm200m_in = read_vector(
-    "mass_conversion/lnm200m_z0.5_child18_msunhinv_mor_y3xspt_t.txt");
+    "mass_conversion/lnm200m_child18_msunhinv_mor_y3xspt_t.txt");
+  auto z_in = read_vector(
+    "mass_conversion/z_200m_msunhinv_mor_y3xspt_t.txt");
   auto lnm500c_in = read_vector(
-    "mass_conversion/lnm500c_z0.5_child18_msunhinv_mor_y3xspt_t.txt");
-  auto mconv = std::make_shared<Interp1D const>(lnm200m_in, lnm500c_in);
+    "mass_conversion/lnm500c_child18_msunhinv_mor_y3xspt_t.txt");
+  auto mconv = std::make_shared<Interp2D const>(lnm200m_in, z_in, lnm500c_in);
 
   // Set up the MOR object
   MOR_Y3xSPT_t mor = MOR_Y3xSPT_t(Mmin,
