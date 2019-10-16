@@ -1,26 +1,26 @@
-#include "utils/make_integration_volumes.hh"
 #include "utils/make_grid_points.hh"
+#include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
+#include "cubacpp/integration_volume.hh"
 
-#include "models/sig_sum.hh"
-#include "models/mor_t2.hh"
 #include "models/hmf_t.hh"
+#include "models/mor_t2.hh"
+#include "models/sig_sum.hh"
 
+#include <iostream>
 #include <optional>
 #include <vector>
-#include <iostream>
 using namespace y3_cluster;
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// SnapshotScalarIntegrand is a class that models the concept of "CosmoSISScalarIntegrand",
-// and is thus suitable for use as the template parameter for the class template
-// CosmoSISScalarIntegrationModule.
+// SnapshotScalarIntegrand is a class that models the concept of
+// "CosmoSISScalarIntegrand", and is thus suitable for use as the template
+// parameter for the class template CosmoSISScalarIntegrationModule.
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
@@ -29,8 +29,8 @@ using cubacpp::integration_result;
 //    2) The object as created by the only constructor does not need to be
 //    in a callable state.
 //
-//    3) After calls to both set_sample and set_grid_point have been made, the object must be in a
-//    callable state.
+//    3) After calls to both set_sample and set_grid_point have been made, the
+//    object must be in a callable state.
 //
 //    4) State that *can* be correctly set by the constructor *should* be set by
 //    the constructor. Do not needlessly repeat initialization in calls to
@@ -63,7 +63,6 @@ private:
   std::optional<HMF_t> hmf;
   std::optional<SIG_SUM> sigma;
 
-
   // State set for current 'bin' to be integrated.
   double radius_;
   double zt_;
@@ -88,15 +87,16 @@ public:
   double operator()(double lt, double lnM) const;
 
   // finalize_sample() is where products can be put into the cosmosis::DataBlock
-  // representing the current sample. The object 'sample' passed to this function
-  // will be the exact same object as was passed to the most recent call to
-  // set_sample(). The object 'results' will be the results of the integration
-  // that has just been done for that sample. This is generally the item which
-  // should be put into the sample.
-  void finalize_sample(cosmosis::DataBlock& sample,
-                       std::vector<grid_point_t> const& grid_points,
-                       std::size_t nvolumes,
-                       std::vector<cubacpp::integration_result> const& results) const;
+  // representing the current sample. The object 'sample' passed to this
+  // function will be the exact same object as was passed to the most recent
+  // call to set_sample(). The object 'results' will be the results of the
+  // integration that has just been done for that sample. This is generally the
+  // item which should be put into the sample.
+  void finalize_sample(
+    cosmosis::DataBlock& sample,
+    std::vector<grid_point_t> const& grid_points,
+    std::size_t nvolumes,
+    std::vector<cubacpp::integration_result> const& results) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -109,7 +109,8 @@ public:
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static std::vector<volume_t> make_integration_volumes(cosmosis::DataBlock& cfg);
+  static std::vector<volume_t> make_integration_volumes(
+    cosmosis::DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
@@ -122,12 +123,8 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-SnapshotScalarIntegrand::SnapshotScalarIntegrand(DataBlock&)  : 
-	mor(),
-	hmf(),
-        sigma(),
-	radius_(),
-	zt_()
+SnapshotScalarIntegrand::SnapshotScalarIntegrand(DataBlock&)
+  : mor(), hmf(), sigma(), radius_(), zt_()
 {}
 
 void
@@ -153,20 +150,19 @@ SnapshotScalarIntegrand::operator()(double lt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  auto const  val = 300.0 *300.0 * 300.0 // this is the simulation cosmic volume
-	            * (*mor)(lt, lnM, zt_)
-  		    * (*hmf)(lnM, zt_)
-	            * (*sigma)(radius_, lnM, zt_);
-  return  val;
+  auto const val = 300.0 * 300.0 * 300.0 // this is the simulation cosmic volume
+                   * (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
+                   (*sigma)(radius_, lnM, zt_);
+  return val;
 }
 
 //
 void
-SnapshotScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
-                                        std::vector<grid_point_t> const& grid_points,
-                                        std::size_t nvolumes,
-                                        std::vector<integration_result> const& res)
-  const
+SnapshotScalarIntegrand::finalize_sample(
+  cosmosis::DataBlock& sample,
+  std::vector<grid_point_t> const& grid_points,
+  std::size_t nvolumes,
+  std::vector<integration_result> const& res) const
 {
   // TODO: fix this to handle the whole vector of integration_results.
   // Currently, we put just one double into the DataBlock.
@@ -176,8 +172,9 @@ SnapshotScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
   auto nresults = nvolumes * ngrid_points;
   // Create ndarray to give a view into the 'res' vector.
   ndarray<integration_result> results(res, {nvolumes, ngrid_points});
-  std::cout << ngrid_points << ' ' << nvolumes <<' ' <<res.size() <<'\n'; 
-    // Create storage buffers for ndarrays to be inserted into the sample, and then
+  std::cout << ngrid_points << ' ' << nvolumes << ' ' << res.size() << '\n';
+  // Create storage buffers for ndarrays to be inserted into the sample, and
+  // then
   // create the ndarrays.
   std::vector<double> vals_buffer(nresults);
   ndarray<double> vals(vals_buffer, {nvolumes, ngrid_points});
@@ -197,7 +194,8 @@ SnapshotScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
       errors(ivol, jgp) = results(ivol, jgp).error;
       probs(ivol, jgp) = results(ivol, jgp).prob;
       statuses(ivol, jgp) = results(ivol, jgp).status;
-      //std::cout << results(ivol, jgp).value << ' ' << grid_points[jgp][0] << grid_points[jgp][1] << '\n';
+      // std::cout << results(ivol, jgp).value << ' ' << grid_points[jgp][0] <<
+      // grid_points[jgp][1] << '\n';
     }
   }
 
@@ -205,7 +203,6 @@ SnapshotScalarIntegrand::finalize_sample(cosmosis::DataBlock& sample,
   sample.put_val(module_label(), "profile_errors", errors);
   sample.put_val(module_label(), "profile_probs", probs);
   sample.put_val(module_label(), "profile_status", statuses);
-
 }
 
 char const*
@@ -224,18 +221,15 @@ SnapshotScalarIntegrand::module_label()
 std::vector<SnapshotScalarIntegrand::volume_t>
 SnapshotScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes(cfg,
-                                              SnapshotScalarIntegrand::module_label(),
-                                              "lt",
-                                              "lnm");
+  return y3_cluster::make_integration_volumes_wall_of_numbers(
+    cfg, SnapshotScalarIntegrand::module_label(), "lt", "lnm");
 }
 
 std::vector<SnapshotScalarIntegrand::grid_point_t>
 SnapshotScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points(cfg,
-                                      SnapshotScalarIntegrand::module_label(),
-                                      "snapshot_zs", "radii");
+  return y3_cluster::make_grid_points_cartesian_product(
+    cfg, SnapshotScalarIntegrand::module_label(), "snapshot_zs", "radii");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarIntegrand);

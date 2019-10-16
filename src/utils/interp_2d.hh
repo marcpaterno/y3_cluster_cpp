@@ -3,8 +3,8 @@
 
 #include "point_3d.hh"
 
-#include "gsl/gsl_interp2d.h"
 #include "cosmosis/datablock/ndarray.hh"
+#include "gsl/gsl_interp2d.h"
 #include <array>
 #include <cstddef>
 #include <iostream>
@@ -46,16 +46,18 @@ namespace y3_cluster {
              std::vector<double> const& ys,
              std::vector<double> const& zs);
 
-    // Interpolator created from vector, vector, 2D vector, compiler assures they are of the same length; Added by Yuanyuan Zhang
+    // Interpolator created from vector, vector, 2D vector, compiler assures
+    // they are of the same length; Added by Yuanyuan Zhang
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
-             std::vector< std::vector<double> > const& zs);
+             std::vector<std::vector<double>> const& zs);
 
     // Like above - assumes ndarray is 2D and fits it appropriately
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
              cosmosis::ndarray<double> const& zs)
-        : Interp2D(xs, ys, std::vector<double>{zs.begin(), zs.end()}) {
+      : Interp2D(xs, ys, std::vector<double>{zs.begin(), zs.end()})
+    {
       if ((zs.extents()[1] != xs.size()) || (zs.extents()[0] != ys.size())) {
         std::cerr << "Interp2D -- wrong input dimensions:\n\t"
                   << "xs.size() = " << xs.size() << "\n\t"
@@ -65,7 +67,6 @@ namespace y3_cluster {
         throw std::domain_error("Interp2D -- ndarray wrong dimensions");
       }
     }
-
 
     // Interpolator created from vector of triplets: throws std::logic_error if
     // the points do not lie on a grid in (x,y) space, or if any values are NaN
@@ -104,7 +105,7 @@ namespace y3_cluster {
     // a std::domain_error if no grid can be constructed from these points.
     void make_grid_(std::vector<Point3D>& data);
   };
-}
+} // namespace y3_cluster
 
 template <std::size_t M, std::size_t N>
 inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
@@ -123,10 +124,11 @@ inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
 }
 
 // below are added by Yuanyuan Zhang July 17
-inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
-                                      std::vector<double> const& ys,
-                                      std::vector< std::vector<double> > const& zs)
-       : xs_(xs), ys_(ys), zs_(xs.size() * ys.size())
+inline y3_cluster::Interp2D::Interp2D(
+  std::vector<double> const& xs,
+  std::vector<double> const& ys,
+  std::vector<std::vector<double>> const& zs)
+  : xs_(xs), ys_(ys), zs_(xs.size() * ys.size())
 {
   if (zs.size() != xs.size())
     throw std::domain_error("Interp2D -- wrong number of rows in z values");
@@ -134,12 +136,13 @@ inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
   for (std::size_t i = 0; i < xs.size(); ++i) {
     std::vector<double> const& row = zs[i];
     if (row.size() != ys.size())
-      throw std::domain_error("Interp2D -- wrong number of columns in z values");
+      throw std::domain_error(
+        "Interp2D -- wrong number of columns in z values");
     for (std::size_t j = 0; j < ys.size(); ++j) {
       zs_[i + j * ys.size()] = row[j];
     }
   }
-  
+
   if (zs_.size() != nx() * ny())
     throw std::domain_error("Interp2D -- wrong number of z values passed");
   interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());

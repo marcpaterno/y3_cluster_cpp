@@ -2,59 +2,49 @@
 #include "catch2/catch.hpp"
 #include "test/probability_tests.hh"
 
-using y3_cluster::IntegrationRange,
-      y3_cluster::test_integrate_lo_lc;
-int main(int argc, char **argv)
+using y3_cluster::IntegrationRange, y3_cluster::test_integrate_lo_lc;
+int
+main(int argc, char** argv)
 {
-    double lo_min = 1.0;
-    double lo_max = 200.0;
-    double lc_min = 1.0;
-    double lc_max = 100.0;
-    double R_min = 0.01;
-    double R_max = 1.0;
+  double lo_min = 1.0;
+  double lo_max = 200.0;
+  double lc_min = 1.0;
+  double lc_max = 100.0;
+  double R_min = 0.01;
+  double R_max = 1.0;
 
-    int lc_width = 2;
-    int R_width = 2;
+  int lc_width = 2;
+  int R_width = 2;
 
-    int maxeval = 9999999;
-    bool help = false;
+  int maxeval = 9999999;
+  bool help = false;
 
-    using namespace Catch::clara;
-    auto args_parser = Opt(lo_min, "lo min")
-                          ["--lo-min"]
-                          ("Lower integration bound of \\lambda_o values")
-                     | Opt(lo_max, "lo max")
-                          ["--lo-max"]
-                          ("Upper integration bound of \\lambda_o values")
-                     | Opt(lc_min, "lc min")
-                          ["--lc-min"]
-                          ("Lower bound of \\lambda_c values to integrate at")
-                     | Opt(lc_max, "lc max")
-                          ["--lc-max"]
-                          ("Upper bound of \\lambda_c values to integrate at")
-                     | Opt(R_min, "R min")
-                          ["--r-min"]
-                          ("Lower bound of R values to integrate at")
-                     | Opt(R_max, "R max")
-                          ["--r-max"]
-                          ("Upper bound of R values to integrate at")
-                     | Opt(lc_width, "lc width")
-                          ["--lc-width"]
-                          ("Number of distinct \\lambda_c values to integrate at")
-                     | Opt(R_width, "R width")
-                          ["--r-width"]
-                          ("Number of distinct R values to integrate at")
-                     | Opt(maxeval, "maxeval")
-                          ["--maxeval"]
-                          ("Maximum number of evaluations for integration algorithm")
-                     | Help(help);
+  using namespace Catch::clara;
+  auto args_parser =
+    Opt(lo_min,
+        "lo min")["--lo-min"]("Lower integration bound of \\lambda_o values") |
+    Opt(lo_max,
+        "lo max")["--lo-max"]("Upper integration bound of \\lambda_o values") |
+    Opt(lc_min, "lc min")["--lc-min"](
+      "Lower bound of \\lambda_c values to integrate at") |
+    Opt(lc_max, "lc max")["--lc-max"](
+      "Upper bound of \\lambda_c values to integrate at") |
+    Opt(R_min, "R min")["--r-min"]("Lower bound of R values to integrate at") |
+    Opt(R_max, "R max")["--r-max"]("Upper bound of R values to integrate at") |
+    Opt(lc_width, "lc width")["--lc-width"](
+      "Number of distinct \\lambda_c values to integrate at") |
+    Opt(R_width,
+        "R width")["--r-width"]("Number of distinct R values to integrate at") |
+    Opt(maxeval, "maxeval")["--maxeval"](
+      "Maximum number of evaluations for integration algorithm") |
+    Help(help);
 
-    auto result = args_parser.parse(Args(argc, argv));
+  auto result = args_parser.parse(Args(argc, argv));
 
-    if (help || !result) {
-        std::cerr << args_parser;
-        return 0;
-    }
+  if (help || !result) {
+    std::cerr << args_parser;
+    return 0;
+  }
 
   IntegrationRange lo_ir{lo_min, lo_max};
   IntegrationRange lc_ir{lc_min, lc_max};
@@ -63,9 +53,15 @@ int main(int argc, char **argv)
   cubacpp::Vegas v;
   v.maxeval = maxeval;
 
-  test_integrate_lo_lc(v, lo_ir, lc_ir, R_ir,
-                       lc_width, R_width,
-                       1.0e-4, 1.0e-12,
+  test_integrate_lo_lc(v,
+                       lo_ir,
+                       lc_ir,
+                       R_ir,
+                       lc_width,
+                       R_width,
+                       1.0e-4,
+                       1.0e-12,
                        // print = true, test = false
-                       true, false);
+                       true,
+                       false);
 }

@@ -1,18 +1,18 @@
-#include "utils/module_macros.hh"
 #include "utils/make_integration_volumes.hh"
+#include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/lc_lt_t.hh"
-#include "models/mor_t2.hh"
-#include "models/hmf_t.hh"
 #include "models/dv_do_dz_t.hh"
-#include "models/omega_z_sdss.hh"
+#include "models/hmf_t.hh"
 #include "models/int_zo_zt_t.hh"
-#include "models/roffset_t.hh"
+#include "models/lc_lt_t.hh"
 #include "models/lo_lc_t.hh"
+#include "models/mor_t2.hh"
+#include "models/omega_z_sdss.hh"
+#include "models/roffset_t.hh"
 #include "models/sig_sum.hh"
 #include <optional>
 #include <vector>
@@ -75,7 +75,13 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  std::vector<double> operator()(double lo, double lc, double lt, double zt, double lnM, double rmis, double theta) const;
+  std::vector<double> operator()(double lo,
+                                 double lc,
+                                 double lt,
+                                 double zt,
+                                 double lnM,
+                                 double rmis,
+                                 double theta) const;
 
   // finalize_sample() is where products can be put into the cosmosis::DataBlock
   // representing the current sample. The object 'sample' passed to this
@@ -87,11 +93,10 @@ public:
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_results_v> const& results) const;
 
-  // module_label() should return the label for this module. The name this returns
-  // is the name that must be used in the 'ini file' for configuring the module
-  // made with this class.
-  // We return char const* rather than std::string to avoid some needless memory
-  // allocations.
+  // module_label() should return the label for this module. The name this
+  // returns is the name that must be used in the 'ini file' for configuring the
+  // module made with this class. We return char const* rather than std::string
+  // to avoid some needless memory allocations.
   static char const* module_label();
 
   // The following non-member (static) function creates a vector of integration
@@ -106,19 +111,23 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-sigma_miscent::sigma_miscent(DataBlock& config) : 
-	lc_lt(),
-       	mor(),
-       	omega_z_sdss(),
-       	dv_do_dz(),
-       	hmf(), 
-        int_zo_zt(),
-        roffset(),
-        lo_lc(),
-        sigma(),
-	zo_low_(config.view<std::vector<double>>(sigma_miscent::module_label(), "zo_low")),
-        zo_high_(config.view<std::vector<double>>(sigma_miscent::module_label(), "zo_high")), 
-        radii_(config.view<std::vector<double>>(sigma_miscent::module_label(), "radii")){}
+sigma_miscent::sigma_miscent(DataBlock& config)
+  : lc_lt()
+  , mor()
+  , omega_z_sdss()
+  , dv_do_dz()
+  , hmf()
+  , int_zo_zt()
+  , roffset()
+  , lo_lc()
+  , sigma()
+  , zo_low_(
+      config.view<std::vector<double>>(sigma_miscent::module_label(), "zo_low"))
+  , zo_high_(config.view<std::vector<double>>(sigma_miscent::module_label(),
+                                              "zo_high"))
+  , radii_(
+      config.view<std::vector<double>>(sigma_miscent::module_label(), "radii"))
+{}
 
 void
 sigma_miscent::set_sample(DataBlock& sample)
@@ -138,30 +147,33 @@ sigma_miscent::set_sample(DataBlock& sample)
 }
 
 std::vector<double>
-sigma_miscent::operator()(double lo, double lc, double lt, double zt, double lnM, double rmis, double theta) const
+sigma_miscent::operator()(double lo,
+                          double lc,
+                          double lt,
+                          double zt,
+                          double lnM,
+                          double rmis,
+                          double theta) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  std::vector<double> results((1+radii_.size()) * zo_low_.size());
+  std::vector<double> results((1 + radii_.size()) * zo_low_.size());
   double scaled_Rmis;
-  double common_term = (*roffset)(rmis)
-	             * (*lo_lc)(lo, lc, rmis)
-	             * (*lc_lt)(lc, lt, zt)
-	  	     * (*mor)(lt, lnM, zt)
-		     * (*dv_do_dz)(zt)
-		     * (*hmf)(lnM, zt)
-		     * (*omega_z_sdss)(zt)
-		     / 2.0/3.1415926535897;
-  // Number counts followed by the radius bins, repeating over zo bins 
+  double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
+                       (*lc_lt)(lc, lt, zt) * (*mor)(lt, lnM, zt) *
+                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z_sdss)(zt) /
+                       2.0 / 3.1415926535897;
+  // Number counts followed by the radius bins, repeating over zo bins
   double val;
-  for (std::size_t i =0; i != zo_low_.size(); i++){
-      val= (*int_zo_zt)(zo_low_[i], zo_high_[i], zt)
-			       * common_term;
-      for (std::size_t j =0; j != radii_.size(); j++){
-        scaled_Rmis=std::sqrt(radii_[j]*radii_[j] + rmis*rmis + 2*rmis*radii_[j] * std::cos(theta));
-        results[i*(radii_.size()+1)+j+1] = (*sigma)(scaled_Rmis, lnM, zt) * val;
-      }
-      results[i*(radii_.size()+1)]= val;//results[i*(radii_.size()+1)+1];
+  for (std::size_t i = 0; i != zo_low_.size(); i++) {
+    val = (*int_zo_zt)(zo_low_[i], zo_high_[i], zt) * common_term;
+    for (std::size_t j = 0; j != radii_.size(); j++) {
+      scaled_Rmis = std::sqrt(radii_[j] * radii_[j] + rmis * rmis +
+                              2 * rmis * radii_[j] * std::cos(theta));
+      results[i * (radii_.size() + 1) + j + 1] =
+        (*sigma)(scaled_Rmis, lnM, zt) * val;
+    }
+    results[i * (radii_.size() + 1)] = val; // results[i*(radii_.size()+1)+1];
   }
   return results;
 }
@@ -175,35 +187,44 @@ sigma_miscent::finalize_sample(
   std::vector<int> NM_status;
   std::vector<int> NM_nregions;
   std::vector<int> NM_nevals;
-  std::vector<double> N_vals;  
-  std::vector<double> N_errors;  
-  std::vector<double> N_probs; 
+  std::vector<double> N_vals;
+  std::vector<double> N_errors;
+  std::vector<double> N_probs;
 
-  std::vector<double> totSigma_vals_temp;  
-  std::vector<double> totSigma_errors_temp;  
-  std::vector<double> totSigma_probs_temp;  
+  std::vector<double> totSigma_vals_temp;
+  std::vector<double> totSigma_errors_temp;
+  std::vector<double> totSigma_probs_temp;
 
   //
-  // TODO: Try to refactor this code, to abstract away the manipulations done for
-  // each physics quantity.
+  // TODO: Try to refactor this code, to abstract away the manipulations done
+  // for each physics quantity.
   std::size_t n_zo_bins = zo_low_.size();
   std::size_t n_radii_bins = radii_.size();
   for (auto const& result : results) {
-    for (std::size_t i =0; i != zo_low_.size(); i++){
-        NM_status.push_back(result.status);
-        NM_nregions.push_back(result.nregions);
-        NM_nevals.push_back(result.neval);
+    for (std::size_t i = 0; i != zo_low_.size(); i++) {
+      NM_status.push_back(result.status);
+      NM_nregions.push_back(result.nregions);
+      NM_nevals.push_back(result.neval);
 
-        N_vals.push_back(result.value[i*(n_radii_bins+1)]);
-        N_errors.push_back(result.error[i*(n_radii_bins+1)]);
-        N_probs.push_back(result.prob[i*(n_radii_bins+1)]);
+      N_vals.push_back(result.value[i * (n_radii_bins + 1)]);
+      N_errors.push_back(result.error[i * (n_radii_bins + 1)]);
+      N_probs.push_back(result.prob[i * (n_radii_bins + 1)]);
 
-        totSigma_vals_temp.insert(totSigma_vals_temp.end(), result.value.begin()+i*(n_radii_bins+1)+1, result.value.begin()+(i+1)*(n_radii_bins+1));
-        totSigma_errors_temp.insert(totSigma_errors_temp.end(), result.error.begin()+i*(n_radii_bins+1)+1, result.error.begin()+(i+1)*(n_radii_bins+1));
-        totSigma_probs_temp.insert(totSigma_probs_temp.end(), result.prob.begin()+i*(n_radii_bins+1)+1, result.prob.begin()+(i+1)*(n_radii_bins+1));
-   }
+      totSigma_vals_temp.insert(
+        totSigma_vals_temp.end(),
+        result.value.begin() + i * (n_radii_bins + 1) + 1,
+        result.value.begin() + (i + 1) * (n_radii_bins + 1));
+      totSigma_errors_temp.insert(
+        totSigma_errors_temp.end(),
+        result.error.begin() + i * (n_radii_bins + 1) + 1,
+        result.error.begin() + (i + 1) * (n_radii_bins + 1));
+      totSigma_probs_temp.insert(
+        totSigma_probs_temp.end(),
+        result.prob.begin() + i * (n_radii_bins + 1) + 1,
+        result.prob.begin() + (i + 1) * (n_radii_bins + 1));
+    }
   }
-  std::vector<std::size_t> extents{results.size()*n_zo_bins, n_radii_bins};
+  std::vector<std::size_t> extents{results.size() * n_zo_bins, n_radii_bins};
   cosmosis::ndarray<double> totSigma_vals(totSigma_vals_temp, extents);
   cosmosis::ndarray<double> totSigma_errors(totSigma_errors_temp, extents);
   cosmosis::ndarray<double> totSigma_probs(totSigma_probs_temp, extents);
@@ -238,7 +259,7 @@ std::vector<sigma_miscent::volume_t>
 sigma_miscent::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    return y3_cluster::make_integration_volumes(
+    return y3_cluster::make_integration_volumes_wall_of_numbers(
       cfg, module_label(), "lo", "lc", "lt", "zt", "lnm", "rmis", "theta");
   }
   catch (std::exception const& ex) {

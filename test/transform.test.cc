@@ -7,7 +7,7 @@
 
 TEST_CASE("empty pod")
 {
-  std::array<int, 0> const xs {};
+  std::array<int, 0> const xs{};
   auto const ys = y3_cluster::transform(xs, [](double x) { return x; });
   CHECK(ys.size() == 0);
 }
@@ -33,7 +33,7 @@ TEST_CASE("nonempty pod")
 
 TEST_CASE("empty nonpod")
 {
-  std::array<std::string, 0> const xs {};
+  std::array<std::string, 0> const xs{};
   auto const ys =
     y3_cluster::transform(xs, [](std::string const&) { return std::string(); });
   CHECK(ys.size() == 0);
@@ -66,7 +66,7 @@ struct NDC {
 TEST_CASE("nonemtpy non-default-constructible")
 {
   static_assert(std::is_default_constructible<NDC>::value == false);
-  std::array<NDC, 3> const xs {{{-1}, {0}, {1}}};
+  std::array<NDC, 3> const xs{{{-1}, {0}, {1}}};
   auto const ys = y3_cluster::transform(xs, [](NDC x) { return x; });
   CHECK(ys[0].i == -1);
   CHECK(ys[1].i == 0);

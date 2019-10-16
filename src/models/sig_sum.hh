@@ -4,15 +4,14 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
 #include "models/ez.hh"
-#include "utils/primitives.hh"
-#include "utils/interp_2d.hh"
 #include "utils/datablock_reader.hh"
+#include "utils/interp_2d.hh"
+#include "utils/primitives.hh"
 
-#include <memory>
 #include <cmath>
+#include <memory>
 
-namespace y3_cluster
-{
+namespace y3_cluster {
   class SIG_SUM {
   private:
     std::shared_ptr<Interp2D const> _sigma1;
@@ -21,9 +20,10 @@ namespace y3_cluster
 
   public:
     SIG_SUM(std::shared_ptr<Interp2D const> sigma1,
-                std::shared_ptr<Interp2D const> sigma2,
-                std::shared_ptr<Interp2D const> bias)
-                : _sigma1(sigma1), _sigma2(sigma2), _bias(bias) {}
+            std::shared_ptr<Interp2D const> sigma2,
+            std::shared_ptr<Interp2D const> bias)
+      : _sigma1(sigma1), _sigma2(sigma2), _bias(bias)
+    {}
 
     using doubles = std::vector<double>;
 
@@ -31,27 +31,33 @@ namespace y3_cluster
       : _sigma1(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "deltasigma", "r_sigma_deltasigma"),
           get_datablock<doubles>(sample, "deltasigma", "lnM"),
-          get_datablock<cosmosis::ndarray<double>>(sample, "deltasigma", "sigma_1")))
+          get_datablock<cosmosis::ndarray<double>>(sample,
+                                                   "deltasigma",
+                                                   "sigma_1")))
       , _sigma2(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "deltasigma", "r_sigma_deltasigma"),
           get_datablock<doubles>(sample, "matter_power_lin", "z"),
-          get_datablock<cosmosis::ndarray<double>>(sample, "deltasigma", "sigma_2")))
+          get_datablock<cosmosis::ndarray<double>>(sample,
+                                                   "deltasigma",
+                                                   "sigma_2")))
       , _bias(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "matter_power_lin", "z"),
           get_datablock<doubles>(sample, "deltasigma", "lnM"),
-          get_datablock<cosmosis::ndarray<double>>(sample, "deltasigma", "bias")))
+          get_datablock<cosmosis::ndarray<double>>(sample,
+                                                   "deltasigma",
+                                                   "bias")))
     {}
 
     double
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
-    { 
-      double _sig_1 = _sigma1->eval(r,lnM);
-      double _sig_2 = _bias->eval(zt,lnM) * _sigma2->eval(r,zt);
+    {
+      double _sig_1 = _sigma1->eval(r, lnM);
+      double _sig_2 = _bias->eval(zt, lnM) * _sigma2->eval(r, zt);
       // TODO: h factor?
-      //if (del_sig_1 >= del_sig_2) {
-      //return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
-        return (_sig_1+_sig_2);
+      // if (del_sig_1 >= del_sig_2) {
+      // return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
+      return (_sig_1 + _sig_2);
       /*} else {
         return 1e12*(1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
       } */

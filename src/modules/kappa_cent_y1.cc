@@ -1,29 +1,29 @@
-#include "utils/module_macros.hh"
 #include "utils/make_integration_volumes.hh"
+#include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/int_lc_lt_des_t.hh"
-#include "models/mor_des_t.hh"
-#include "models/hmf_t.hh"
-#include "models/dv_do_dz_t.hh"
-#include "models/omega_z_des.hh"
-#include "models/int_zo_zt_des_t.hh"
-#include "models/roffset_t.hh"
-#include "models/lo_lc_t.hh"
-#include "models/sig_sum.hh"
-#include "models/average_sci_t.hh"
 #include "models/angle_to_dist_t.hh"
+#include "models/average_sci_t.hh"
+#include "models/dv_do_dz_t.hh"
+#include "models/hmf_t.hh"
+#include "models/int_lc_lt_des_t.hh"
+#include "models/int_zo_zt_des_t.hh"
+#include "models/lo_lc_t.hh"
+#include "models/mor_des_t.hh"
+#include "models/omega_z_des.hh"
+#include "models/roffset_t.hh"
+#include "models/sig_sum.hh"
 
 #include <optional>
 #include <vector>
 using namespace y3_cluster;
 
-// kappa_cent_y1 is a class that models the concept of "CosmoSISVectorIntegrand",
-// and is thus suitable for use as the template parameter for the class template
-// CosmosisIntegrationModule.
+// kappa_cent_y1 is a class that models the concept of
+// "CosmoSISVectorIntegrand", and is thus suitable for use as the template
+// parameter for the class template CosmosisIntegrationModule.
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
@@ -78,7 +78,10 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  std::vector<double> operator()(double lo, double lt, double zt, double lnM) const;
+  std::vector<double> operator()(double lo,
+                                 double lt,
+                                 double zt,
+                                 double lnM) const;
 
   // finalize_sample() is where products can be put into the cosmosis::DataBlock
   // representing the current sample. The object 'sample' passed to this
@@ -90,11 +93,10 @@ public:
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_results_v> const& results) const;
 
-  // module_label() should return the label for this module. The name this returns
-  // is the name that must be used in the 'ini file' for configuring the module
-  // made with this class.
-  // We return char const* rather than std::string to avoid some needless memory
-  // allocations.
+  // module_label() should return the label for this module. The name this
+  // returns is the name that must be used in the 'ini file' for configuring the
+  // module made with this class. We return char const* rather than std::string
+  // to avoid some needless memory allocations.
   static char const* module_label();
 
   // The following non-member (static) function creates a vector of integration
@@ -109,19 +111,23 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-kappa_cent_y1::kappa_cent_y1(DataBlock& config) : 
-	lc_lt(),
-       	mor(),
-       	omega_z(),
-       	dv_do_dz(),
-       	hmf(), 
-        int_zo_zt(),
-        sigma(),
-	sci(),
-	arc2dist(),
-	zo_low_(config.view<std::vector<double>>(kappa_cent_y1::module_label(), "zo_low")),
-        zo_high_(config.view<std::vector<double>>(kappa_cent_y1::module_label(), "zo_high")), 
-        radii_(config.view<std::vector<double>>(kappa_cent_y1::module_label(), "radii")){}
+kappa_cent_y1::kappa_cent_y1(DataBlock& config)
+  : lc_lt()
+  , mor()
+  , omega_z()
+  , dv_do_dz()
+  , hmf()
+  , int_zo_zt()
+  , sigma()
+  , sci()
+  , arc2dist()
+  , zo_low_(
+      config.view<std::vector<double>>(kappa_cent_y1::module_label(), "zo_low"))
+  , zo_high_(config.view<std::vector<double>>(kappa_cent_y1::module_label(),
+                                              "zo_high"))
+  , radii_(
+      config.view<std::vector<double>>(kappa_cent_y1::module_label(), "radii"))
+{}
 
 void
 kappa_cent_y1::set_sample(DataBlock& sample)
@@ -144,24 +150,21 @@ kappa_cent_y1::operator()(double lo, double lt, double zt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  std::vector<double> results((1+radii_.size()) * zo_low_.size());
-  double common_term = (*lc_lt)(lo, lt, zt)
-	  	     * (*mor)(lt, lnM, zt)
-		     * (*dv_do_dz)(zt)
-		     * (*hmf)(lnM, zt)
-		     * (*omega_z)(zt)
-		     / 2.0/3.1415926535897;
-  // Number counts followed by the radius bins, repeating over zo bins 
+  std::vector<double> results((1 + radii_.size()) * zo_low_.size());
+  double common_term = (*lc_lt)(lo, lt, zt) * (*mor)(lt, lnM, zt) *
+                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt) /
+                       2.0 / 3.1415926535897;
+  // Number counts followed by the radius bins, repeating over zo bins
   double val;
   double dist;
-  for (std::size_t i =0; i != zo_low_.size(); i++){
-      val= (*int_zo_zt)(zo_low_[i], zo_high_[i], zt)
-			       * common_term;
-      for (std::size_t j =0; j != radii_.size(); j++){
-	dist = (*arc2dist)(radii_[j], zt);
-        results[i*(radii_.size()+1)+j+1] = (*sci)(zt)*(*sigma)(dist, lnM, zt) * val;
-      }
-      results[i*(radii_.size()+1)]= val;//results[i*(radii_.size()+1)+1];
+  for (std::size_t i = 0; i != zo_low_.size(); i++) {
+    val = (*int_zo_zt)(zo_low_[i], zo_high_[i], zt) * common_term;
+    for (std::size_t j = 0; j != radii_.size(); j++) {
+      dist = (*arc2dist)(radii_[j], zt);
+      results[i * (radii_.size() + 1) + j + 1] =
+        (*sci)(zt) * (*sigma)(dist, lnM, zt) * val;
+    }
+    results[i * (radii_.size() + 1)] = val; // results[i*(radii_.size()+1)+1];
   }
   return results;
 }
@@ -175,35 +178,44 @@ kappa_cent_y1::finalize_sample(
   std::vector<int> NM_status;
   std::vector<int> NM_nregions;
   std::vector<int> NM_nevals;
-  std::vector<double> N_vals;  
-  std::vector<double> N_errors;  
-  std::vector<double> N_probs; 
+  std::vector<double> N_vals;
+  std::vector<double> N_errors;
+  std::vector<double> N_probs;
 
-  std::vector<double> totSigma_vals_temp;  
-  std::vector<double> totSigma_errors_temp;  
-  std::vector<double> totSigma_probs_temp;  
+  std::vector<double> totSigma_vals_temp;
+  std::vector<double> totSigma_errors_temp;
+  std::vector<double> totSigma_probs_temp;
 
   //
-  // TODO: Try to refactor this code, to abstract away the manipulations done for
-  // each physics quantity.
+  // TODO: Try to refactor this code, to abstract away the manipulations done
+  // for each physics quantity.
   std::size_t n_zo_bins = zo_low_.size();
   std::size_t n_radii_bins = radii_.size();
   for (auto const& result : results) {
-    for (std::size_t i =0; i != zo_low_.size(); i++){
-        NM_status.push_back(result.status);
-        NM_nregions.push_back(result.nregions);
-        NM_nevals.push_back(result.neval);
+    for (std::size_t i = 0; i != zo_low_.size(); i++) {
+      NM_status.push_back(result.status);
+      NM_nregions.push_back(result.nregions);
+      NM_nevals.push_back(result.neval);
 
-        N_vals.push_back(result.value[i*(n_radii_bins+1)]);
-        N_errors.push_back(result.error[i*(n_radii_bins+1)]);
-        N_probs.push_back(result.prob[i*(n_radii_bins+1)]);
+      N_vals.push_back(result.value[i * (n_radii_bins + 1)]);
+      N_errors.push_back(result.error[i * (n_radii_bins + 1)]);
+      N_probs.push_back(result.prob[i * (n_radii_bins + 1)]);
 
-        totSigma_vals_temp.insert(totSigma_vals_temp.end(), result.value.begin()+i*(n_radii_bins+1)+1, result.value.begin()+(i+1)*(n_radii_bins+1));
-        totSigma_errors_temp.insert(totSigma_errors_temp.end(), result.error.begin()+i*(n_radii_bins+1)+1, result.error.begin()+(i+1)*(n_radii_bins+1));
-        totSigma_probs_temp.insert(totSigma_probs_temp.end(), result.prob.begin()+i*(n_radii_bins+1)+1, result.prob.begin()+(i+1)*(n_radii_bins+1));
-   }
+      totSigma_vals_temp.insert(
+        totSigma_vals_temp.end(),
+        result.value.begin() + i * (n_radii_bins + 1) + 1,
+        result.value.begin() + (i + 1) * (n_radii_bins + 1));
+      totSigma_errors_temp.insert(
+        totSigma_errors_temp.end(),
+        result.error.begin() + i * (n_radii_bins + 1) + 1,
+        result.error.begin() + (i + 1) * (n_radii_bins + 1));
+      totSigma_probs_temp.insert(
+        totSigma_probs_temp.end(),
+        result.prob.begin() + i * (n_radii_bins + 1) + 1,
+        result.prob.begin() + (i + 1) * (n_radii_bins + 1));
+    }
   }
-  std::vector<std::size_t> extents{results.size()*n_zo_bins, n_radii_bins};
+  std::vector<std::size_t> extents{results.size() * n_zo_bins, n_radii_bins};
   cosmosis::ndarray<double> totSigma_vals(totSigma_vals_temp, extents);
   cosmosis::ndarray<double> totSigma_errors(totSigma_errors_temp, extents);
   cosmosis::ndarray<double> totSigma_probs(totSigma_probs_temp, extents);
@@ -228,17 +240,17 @@ kappa_cent_y1::module_label()
 }
 
 // The implementation of make_integration_volumes can be almost the same for
-// any CosmoSISVectorIntegrand-type class. Only the names and number of the parameters
-// provided need to be changed. It is critical that the names be given in the
-// order that correspond to the order of arguments in the class's function call
-// operator. While the compiler can verify the number of arguments provided is
-// correct, it can not verify that their order matches the order of arguments in
-// the function call operator.
+// any CosmoSISVectorIntegrand-type class. Only the names and number of the
+// parameters provided need to be changed. It is critical that the names be
+// given in the order that correspond to the order of arguments in the class's
+// function call operator. While the compiler can verify the number of arguments
+// provided is correct, it can not verify that their order matches the order of
+// arguments in the function call operator.
 std::vector<kappa_cent_y1::volume_t>
 kappa_cent_y1::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    return y3_cluster::make_integration_volumes(
+    return y3_cluster::make_integration_volumes_wall_of_numbers(
       cfg, module_label(), "lo", "lt", "zt", "lnm");
   }
   catch (std::exception const& ex) {

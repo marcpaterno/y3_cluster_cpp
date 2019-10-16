@@ -1,7 +1,7 @@
 #include "ExampleScalarIntegrand.hh"
-#include "utils/make_integration_volumes.hh"
-#include "utils/make_grid_points.hh"
 #include "cosmosis/datablock/ndarray.hh"
+#include "utils/make_grid_points.hh"
+#include "utils/make_integration_volumes.hh"
 
 // We write using declarations so that we don't have to type the namespace name
 // each time we use these names
@@ -36,7 +36,7 @@ ExampleScalarIntegrand::operator()(double x, double y) const
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   auto const delta = y - sigma_8_;
-  return  (x / radius_) + (delta * delta);
+  return (x / radius_) + (delta * delta);
 }
 
 char const*
@@ -55,17 +55,13 @@ ExampleScalarIntegrand::module_label()
 std::vector<ExampleScalarIntegrand::volume_t>
 ExampleScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes(cfg,
-                                              ExampleScalarIntegrand::module_label(),
-                                              "x",
-                                              "y");
+  return y3_cluster::make_integration_volumes_wall_of_numbers(
+    cfg, ExampleScalarIntegrand::module_label(), "x", "y");
 }
 
 std::vector<ExampleScalarIntegrand::grid_point_t>
 ExampleScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points(cfg,
-                                      ExampleScalarIntegrand::module_label(),
-                                      "radii");
+  return y3_cluster::make_grid_points_cartesian_product(
+    cfg, ExampleScalarIntegrand::module_label(), "radii");
 }
-

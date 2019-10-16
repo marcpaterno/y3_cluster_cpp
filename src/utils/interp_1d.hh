@@ -43,7 +43,7 @@ namespace y3_cluster {
     std::vector<double> ys_;
     gsl_interp* interp_;
   };
-}
+} // namespace y3_cluster
 
 template <std::size_t N>
 inline y3_cluster::Interp1D::Interp1D(std::array<double, N> const& xs,

@@ -17,4 +17,5 @@ target_include_directories(models
                            ${CUBA_INCLUDE_DIR}
                            $ENV{COSMOSIS_SRC_DIR}
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${EIGEN3_INCLUDE_DIR}
+                           ${GSL_INCLUDE_DIR})

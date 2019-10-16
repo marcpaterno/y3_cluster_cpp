@@ -13,13 +13,12 @@ using y3_cluster::Interp1D;
 
 TEST_CASE("dv_do_dz_t works")
 {
-  std::ifstream infile {"../data/test_dv_do_dz.txt"};
+  std::ifstream infile{"../data/test_dv_do_dz.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> zs;
   std::vector<double> ys;
-  while (infile)
-  {
+  while (infile) {
     // We aren't bothering to test that the reading worked, because we're
     // careful to make sure the data file is not mal-formed when we write the
     // test.
@@ -39,19 +38,15 @@ TEST_CASE("dv_do_dz_t works")
   auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
 
-
-  std::ofstream out {"../data/dvdodz_test.out"};
+  std::ofstream out{"../data/dvdodz_test.out"};
   out << std::setw(16);
   out << std::setprecision(16);
   out << "z\tytrue\tytest\n";
-  for (std::size_t i = 1, sz = zs.size(); i != sz; ++i)
-  {
+  for (std::size_t i = 1, sz = zs.size(); i != sz; ++i) {
     double const fz = dvdodz(zs[i]);
     double constexpr epsrel = 1.0e-3;
     double constexpr epsabs = 1.0e-12;
     CHECK(fz == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
-    out << zs[i] << '\t'
-        << ys[i] << '\t'
-        << fz << '\n';
+    out << zs[i] << '\t' << ys[i] << '\t' << fz << '\n';
   }
 }

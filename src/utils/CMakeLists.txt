@@ -7,7 +7,7 @@ target_link_libraries(utils PRIVATE ${GSL_LIBRARIES})
 message(STATUS "CUBACPP_DIR is: ${CUBACPP_DIR}")
 target_include_directories(utils PRIVATE
                            $ENV{COSMOSIS_SRC_DIR}
-                           /usr/local/include
+                           ${CUBA_INCLUDE_DIR}
                            ${GSL_INCLUDE_DIRS}
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})

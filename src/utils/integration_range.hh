@@ -11,7 +11,6 @@
 #include "datablock_reader.hh"
 namespace y3_cluster {
   class IntegrationRange {
-
   public:
     // This constructor should be removed.
     // It produces an IntegrationRange of zero length, which can not
@@ -28,7 +27,7 @@ namespace y3_cluster {
     // This constructor should be removed.
     // * it can only be used from within a module labeled "cluster_abundance".
     // * it reproduced behavior implemented in the constructor from 2 doubles.
-    IntegrationRange(cosmosis::DataBlock& sample, std::string var)
+    IntegrationRange(cosmosis::DataBlock& sample, std::string const& var)
     {
       double b;
       std::string min = var + "_min";
@@ -40,13 +39,13 @@ namespace y3_cluster {
         throw std::logic_error("zero-length IntegrationRange");
     }
 
-    double
+    [[nodiscard]] double
     jacobian() const
     {
       return _range;
     }
 
-    double
+    [[nodiscard]] double
     transform(double x) const
     {
       return _range * x + _a;
@@ -86,6 +85,6 @@ namespace y3_cluster {
     return IntegrationRange(a, b);
   }
 
-}
+} // namespace y3_cluster
 
 #endif

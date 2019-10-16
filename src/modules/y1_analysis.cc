@@ -1,16 +1,16 @@
-#include "utils/module_macros.hh"
 #include "utils/make_integration_volumes.hh"
+#include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/int_lc_lt_des_t.hh"
-#include "models/mor_des_t.hh"
-#include "models/hmf_t.hh"
 #include "models/dv_do_dz_t.hh"
-#include "models/omega_z_des.hh"
+#include "models/hmf_t.hh"
+#include "models/int_lc_lt_des_t.hh"
 #include "models/int_zo_zt_des_t.hh"
+#include "models/mor_des_t.hh"
+#include "models/omega_z_des.hh"
 #include <optional>
 #include <vector>
 using namespace y3_cluster;
@@ -68,7 +68,10 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  std::vector<double> operator()(double lo, double lt, double zt, double lnM) const;
+  std::vector<double> operator()(double lo,
+                                 double lt,
+                                 double zt,
+                                 double lnM) const;
 
   // finalize_sample() is where products can be put into the cosmosis::DataBlock
   // representing the current sample. The object 'sample' passed to this
@@ -80,11 +83,10 @@ public:
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_results_v> const& results) const;
 
-  // module_label() should return the label for this module. The name this returns
-  // is the name that must be used in the 'ini file' for configuring the module
-  // made with this class.
-  // We return char const* rather than std::string to avoid some needless memory
-  // allocations.
+  // module_label() should return the label for this module. The name this
+  // returns is the name that must be used in the 'ini file' for configuring the
+  // module made with this class. We return char const* rather than std::string
+  // to avoid some needless memory allocations.
   static char const* module_label();
 
   // The following non-member (static) function creates a vector of integration
@@ -99,15 +101,18 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_results_v;
 
-y1_analysis::y1_analysis(DataBlock& config) : 
-	lc_lt(),
-       	mor(),
-       	omega_z(),
-       	dv_do_dz(),
-       	hmf(), 
-        int_zo_zt(),
-	zo_low_(config.view<std::vector<double>>(y1_analysis::module_label(), "zo_low")),
-        zo_high_(config.view<std::vector<double>>(y1_analysis::module_label(), "zo_high")){}
+y1_analysis::y1_analysis(DataBlock& config)
+  : lc_lt()
+  , mor()
+  , omega_z()
+  , dv_do_dz()
+  , hmf()
+  , int_zo_zt()
+  , zo_low_(
+      config.view<std::vector<double>>(y1_analysis::module_label(), "zo_low"))
+  , zo_high_(
+      config.view<std::vector<double>>(y1_analysis::module_label(), "zo_high"))
+{}
 
 void
 y1_analysis::set_sample(DataBlock& sample)
@@ -129,16 +134,12 @@ y1_analysis::operator()(double lo, double lt, double zt, double lnM) const
   // to access the X object (as if we were dereferencing a pointer).
   std::vector<double> results(2 * zo_low_.size());
   double mass = std::exp(lnM);
-  double common_term = (*lc_lt)(lo, lt, zt)
-	  	     * (*mor)(lt, lnM, zt)
-		     * (*dv_do_dz)(zt)
-		     * (*hmf)(lnM, zt)
-		     * (*omega_z)(zt);
-  // Number counts first in the returned results, followed by the masses 
-  for (std::size_t i =0; i != zo_low_.size(); i++){
-  	results[i]= (*int_zo_zt)(zo_low_[i], zo_high_[i], zt)
-			* common_term;
-        results[i+zo_low_.size()] = mass * results[i];
+  double common_term = (*lc_lt)(lo, lt, zt) * (*mor)(lt, lnM, zt) *
+                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+  // Number counts first in the returned results, followed by the masses
+  for (std::size_t i = 0; i != zo_low_.size(); i++) {
+    results[i] = (*int_zo_zt)(zo_low_[i], zo_high_[i], zt) * common_term;
+    results[i + zo_low_.size()] = mass * results[i];
   }
   return results;
 }
@@ -153,30 +154,41 @@ y1_analysis::finalize_sample(
   std::vector<int> NM_nregions;
   std::vector<int> NM_nevals;
 
-  std::vector<double> N_vals_temp;  
-  std::vector<double> N_errors_temp;  
-  std::vector<double> N_probs_temp;  
-  std::vector<double> totM_vals_temp;  
-  std::vector<double> totM_errors_temp;  
-  std::vector<double> totM_probs_temp;  
+  std::vector<double> N_vals_temp;
+  std::vector<double> N_errors_temp;
+  std::vector<double> N_probs_temp;
+  std::vector<double> totM_vals_temp;
+  std::vector<double> totM_errors_temp;
+  std::vector<double> totM_probs_temp;
 
   ///// how do I know how many dimensions zo_low_ or zo_high_ or radiii have?
   //
-  // TODO: Try to refactor this code, to abstract away the manipulations done for
-  // each physics quantity.
+  // TODO: Try to refactor this code, to abstract away the manipulations done
+  // for each physics quantity.
   std::size_t n_zo_bins = zo_low_.size();
   for (auto const& result : results) {
     NM_status.push_back(result.status);
     NM_nregions.push_back(result.nregions);
     NM_nevals.push_back(result.neval);
 
-    N_vals_temp.insert(N_vals_temp.end(), result.value.begin(), result.value.begin()+n_zo_bins);
-    N_errors_temp.insert(N_errors_temp.end(), result.error.begin(), result.error.begin()+n_zo_bins);
-    N_probs_temp.insert(N_probs_temp.end(), result.prob.begin(), result.prob.begin()+n_zo_bins);
+    N_vals_temp.insert(N_vals_temp.end(),
+                       result.value.begin(),
+                       result.value.begin() + n_zo_bins);
+    N_errors_temp.insert(N_errors_temp.end(),
+                         result.error.begin(),
+                         result.error.begin() + n_zo_bins);
+    N_probs_temp.insert(
+      N_probs_temp.end(), result.prob.begin(), result.prob.begin() + n_zo_bins);
 
-    totM_vals_temp.insert(totM_vals_temp.end(), result.value.begin()+n_zo_bins, result.value.end());
-    totM_errors_temp.insert(totM_errors_temp.end(), result.error.begin()+n_zo_bins, result.error.end());
-    totM_probs_temp.insert(totM_probs_temp.end(), result.prob.begin()+n_zo_bins, result.prob.end());
+    totM_vals_temp.insert(totM_vals_temp.end(),
+                          result.value.begin() + n_zo_bins,
+                          result.value.end());
+    totM_errors_temp.insert(totM_errors_temp.end(),
+                            result.error.begin() + n_zo_bins,
+                            result.error.end());
+    totM_probs_temp.insert(totM_probs_temp.end(),
+                           result.prob.begin() + n_zo_bins,
+                           result.prob.end());
   }
   std::vector<std::size_t> extents{results.size(), n_zo_bins};
   cosmosis::ndarray<double> N_vals(N_vals_temp, extents);
@@ -215,7 +227,7 @@ std::vector<y1_analysis::volume_t>
 y1_analysis::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
-    return y3_cluster::make_integration_volumes(
+    return y3_cluster::make_integration_volumes_wall_of_numbers(
       cfg, module_label(), "lo", "lt", "zt", "lnm");
   }
   catch (std::exception const& ex) {

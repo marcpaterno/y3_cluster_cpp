@@ -110,6 +110,7 @@ target_include_directories(snapshotsim_scalarintegrand
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(snapshotsim_scalarintegrand_NC MODULE Snapshotsim_ScalarIntegrand_NC.cc)
@@ -118,6 +119,7 @@ target_include_directories(snapshotsim_scalarintegrand_NC
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 
@@ -127,6 +129,7 @@ target_include_directories(y1_analysis
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(sdss_analysis MODULE sdss_analysis.cc)
@@ -135,6 +138,7 @@ target_include_directories(sdss_analysis
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 #add_library(default_cluster_abundance MODULE default_cluster_abundance.cc)
@@ -168,6 +172,7 @@ target_include_directories(cluster_abundance_covariance
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CMAKE_SOURCE_DIR}/src
+                           ${GSL_INCLUDE_DIRS}
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR})
 
@@ -192,6 +197,7 @@ target_include_directories(sigma_miscent
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
  
 add_library(sigma_cent MODULE sigma_cent.cc)
@@ -200,6 +206,7 @@ target_include_directories(sigma_cent
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(buzzard_sigma_halos MODULE buzzard_sigma_halos.cc)
@@ -208,6 +215,7 @@ target_include_directories(buzzard_sigma_halos
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 
@@ -217,6 +225,7 @@ target_include_directories(sigma_cent_y1
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 
@@ -226,6 +235,7 @@ target_include_directories(sigma_miscent_y1
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(kappa_cent_y1 MODULE kappa_cent_y1.cc)
@@ -234,6 +244,7 @@ target_include_directories(kappa_cent_y1
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(kappa_miscent_y1 MODULE kappa_miscent_y1.cc)
@@ -242,6 +253,7 @@ target_include_directories(kappa_miscent_y1
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(compton_y_sims MODULE compton_y_sims.cc)
@@ -250,4 +262,11 @@ target_include_directories(compton_y_sims
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
+
+add_library(sptxdes_abundance_integral sptxdes/abundance/abundance_integral_module.cc)
+target_link_libraries(sptxdes_abundance_integral PRIVATE cosmosis utils models
+                      ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(sptxdes_abundance_integral PRIVATE ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})

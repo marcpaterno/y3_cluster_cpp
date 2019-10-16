@@ -2,14 +2,14 @@
 #include "models/lo_lc_t.hh"
 
 #include <fstream>
-#include <string>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <string>
 
 using y3_cluster::LO_LC_t;
 TEST_CASE("Lo_Lc_t works")
 {
-  std::ifstream infile {"../data/test_lolc_t.txt"};
+  std::ifstream infile{"../data/test_lolc_t.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> los;
@@ -17,10 +17,9 @@ TEST_CASE("Lo_Lc_t works")
   std::vector<double> Rs;
   std::vector<double> ys;
   std::string dummyline;
-  std::getline (infile, dummyline);
-  std::getline (infile, dummyline);
-  while (infile)
-  {
+  std::getline(infile, dummyline);
+  std::getline(infile, dummyline);
+  while (infile) {
     // We aren't bothering to test that the reading worked, because we're
     // careful to make sure the data file is not mal-formed when we write the
     // test.
@@ -40,19 +39,16 @@ TEST_CASE("Lo_Lc_t works")
   // No longer relevant - redefined lo_lc
   LO_LC_t lolc(1.66, 0.26, 1.43, 1.0);
 
-  std::ofstream out {"../data/lo_lc_test.out"};
+  std::ofstream out{"../data/lo_lc_test.out"};
   out << std::setw(16);
   out << std::setprecision(16);
   out << "deltal\tRmis\tprobtrue\tprobtest\n";
-  for (std::size_t i = 0, sy = ys.size(); i != sy; ++i)
-  {
+  for (std::size_t i = 0, sy = ys.size(); i != sy; ++i) {
     double const fz = lolc(los[i], lcs[i], Rs[i]);
     double constexpr epsrel = 1.0e-6;
     double constexpr epsabs = 1.0e-12;
-    CHECK((fz * lcs[i])== Approx(ys[i]).epsilon(epsrel).margin(epsabs));  
-    out << los[i]/lcs[i] << '\t'
-	<< Rs[i] << '\t'
-        << ys[i] << '\t'
+    CHECK((fz * lcs[i]) == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
+    out << los[i] / lcs[i] << '\t' << Rs[i] << '\t' << ys[i] << '\t'
         << fz * lcs[i] << '\n';
   }
 }

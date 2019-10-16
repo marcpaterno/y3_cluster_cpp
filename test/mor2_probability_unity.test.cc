@@ -1,7 +1,6 @@
 #include "test/probability_tests.hh"
 
-using y3_cluster::IntegrationRange,
-      y3_cluster::test_integrate_mor2;
+using y3_cluster::IntegrationRange, y3_cluster::test_integrate_mor2;
 TEST_CASE("MOR_t2 probability weighted correctly")
 {
   // Lc_lt calculates $P(\lambda^{cen} | \lambda^{true}, z^{true})$ - so,
