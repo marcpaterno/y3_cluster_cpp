@@ -1,6 +1,6 @@
 #include "catch2/catch.hpp"
 
-#include "models/mor_y3xspt_t.hh"
+#include "models/sptxdes/mor_y3xspt_t.hh"
 #include "utils/interp_1d.hh"
 #include "utils/read_vector.hh"
 

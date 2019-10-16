@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "models/omega_z_y3xspt.hh"
+#include "models/sptxdes/omega_z_y3xspt.hh"
 
 #include <fstream>
 #include <iomanip>

@@ -9,12 +9,12 @@
 #include "cubacpp/integration_volume.hh"
 
 #include "models/zo_zt_des_t.hh"
-#include "models/omega_z_y3xspt.hh"
+#include "models/sptxdes/omega_z_y3xspt.hh"
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
 #include "models/lc_lt_t.hh"
-#include "models/pxizeta_t.hh"
-#include "models/mor_y3xspt_t.hh"
+#include "models/sptxdes/pxizeta_t.hh"
+#include "models/sptxdes/mor_y3xspt_t.hh"
 
 #include <optional>
 #include <vector>

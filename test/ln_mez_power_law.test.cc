@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "models/ln_mez_power_law.hh"
+#include "models/sptxdes/ln_mez_power_law.hh"
 
 #include <fstream>
 #include <iomanip>

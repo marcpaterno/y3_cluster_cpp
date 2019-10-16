@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_LN_MEZ_POWER_LAW_HH
 #define Y3_CLUSTER_LN_MEZ_POWER_LAW_HH
 
-#include "ez.hh"
+#include "models/ez.hh"
 #include "utils/datablock_reader.hh"
 
 #include <cmath>

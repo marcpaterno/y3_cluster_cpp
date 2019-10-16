@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "models/pxizeta_t.hh"
+#include "models/sptxdes/pxizeta_t.hh"
 
 #include <fstream>
 #include <iomanip>
