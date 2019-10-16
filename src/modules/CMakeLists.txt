@@ -264,3 +264,9 @@ target_include_directories(compton_y_sims
                            ${CUBACPP_DIR}
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
+
+add_library(sptxdes_abundance_integral sptxdes/abundance/abundance_integral_module.cc)
+target_link_libraries(sptxdes_abundance_integral PRIVATE cosmosis utils models
+                      ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(sptxdes_abundance_integral PRIVATE ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
