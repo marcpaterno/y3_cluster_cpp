@@ -14,13 +14,10 @@ namespace y3_cluster {
     OMEGA_Z_Y3XSPT(cosmosis::DataBlock&) {}
 
     double
-    operator()(double zt) const
+    operator()(double /*zt*/) const
     {
       // These fits will need to be computed by Eli (+Lindsey)
       // For now, use constant area = 2500 deg^2
-
-      // Make a variable for zt for now to avoid unused variable warning
-      double const temp_zt = zt;
 
       // 2500 deg^2 in rad^2
       return 0.7615435494667714;

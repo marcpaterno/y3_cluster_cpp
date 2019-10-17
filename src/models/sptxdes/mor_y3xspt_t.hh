@@ -71,19 +71,19 @@ namespace y3_cluster {
     {}
 
     MOR_Y3xSPT_t(cosmosis::DataBlock& sample)
-      : Mmin_(get_datablock<double>(sample, "sptxdes_scalingrel", "Mmin"))
-      , M1_(get_datablock<double>(sample, "sptxdes_scalingrel", "M1"))
-      , alpha_(get_datablock<double>(sample, "sptxdes_scalingrel", "alpha"))
-      , epsilon_(get_datablock<double>(sample, "sptxdes_scalingrel", "epsilon"))
-      , sigintr_(get_datablock<double>(sample, "sptxdes_scalingrel", "sig0lam"))
-      , Asz_(get_datablock<double>(sample, "sptxdes_scalingrel", "Asz"))
-      , Bsz_(get_datablock<double>(sample, "sptxdes_scalingrel", "Bsz"))
-      , Csz_(get_datablock<double>(sample, "sptxdes_scalingrel", "Csz"))
-      , siglnzeta_(get_datablock<double>(sample, "sptxdes_scalingrel", "sig0zeta"))
-      , r_(get_datablock<double>(sample, "sptxdes_scalingrel", "r"))
-      , zplam_(get_datablock<double>(sample, "sptxdes_scalingrel", "zplam"))
-      , lnMpsz_(get_datablock<double>(sample, "sptxdes_scalingrel", "lnMpsz"))
-      , zpsz_(get_datablock<double>(sample, "sptxdes_scalingrel", "zpsz"))
+      : Mmin_(get_datablock<double>(sample, "abundance_integral", "Mmin"))
+      , M1_(get_datablock<double>(sample, "abundance_integral", "M1"))
+      , alpha_(get_datablock<double>(sample, "abundance_integral", "alpha"))
+      , epsilon_(get_datablock<double>(sample, "abundance_integral", "epsilon"))
+      , sigintr_(get_datablock<double>(sample, "abundance_integral", "sig0lam"))
+      , Asz_(get_datablock<double>(sample, "abundance_integral", "Asz"))
+      , Bsz_(get_datablock<double>(sample, "abundance_integral", "Bsz"))
+      , Csz_(get_datablock<double>(sample, "abundance_integral", "Csz"))
+      , siglnzeta_(get_datablock<double>(sample, "abundance_integral", "sig0zeta"))
+      , r_(get_datablock<double>(sample, "abundance_integral", "r"))
+      , zplam_(get_datablock<double>(sample, "abundance_integral", "zplam"))
+      , lnMpsz_(get_datablock<double>(sample, "abundance_integral", "lnMpsz"))
+      , zpsz_(get_datablock<double>(sample, "abundance_integral", "zpsz"))
       , omega_m_(get_datablock<double>(sample, "cosmological_parameters", "omega_m"))
       , omega_l_(get_datablock<double>(sample, "cosmological_parameters", "omega_lambda"))
       , omega_k_(get_datablock<double>(sample, "cosmological_parameters", "omega_k"))
@@ -102,7 +102,7 @@ namespace y3_cluster {
     {}
 
     double
-    operator()(double lamtrue, double zeta, double ztrue, double lnM200m)
+    operator()(double lamtrue, double zeta, double ztrue, double lnM200m) const
     {
       // Richness scaling calculations
       // Can precalc some of this in constructor...
