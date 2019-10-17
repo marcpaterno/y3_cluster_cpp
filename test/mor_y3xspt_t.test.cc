@@ -17,9 +17,10 @@ TEST_CASE("MOR_Y3xSPT_t works")
   // Nuisance parameters
   double const lamtrue = 92.0;
   double const zeta = 10.0;
+  double const gamma_field = 1.25;
   double const ztrue = 0.50;
   double const lnm200m = 34.5;
-  double const truth = 2.77600782722462044103e-03;
+  double const truth = 1.49885871127325670353e-03;
 
   // Model parameters
   double const Mmin = 1.35e11;
@@ -70,6 +71,7 @@ TEST_CASE("MOR_Y3xSPT_t works")
   // Test code against truth
   double constexpr epsrel = 1.0e-6;
   double constexpr epsabs = 1.0e-12;
-  double const testval = mor(lamtrue, zeta, ztrue, lnm200m);
+  double const testval = mor(lamtrue, zeta, ztrue, lnm200m, gamma_field);
+  std::cout << testval << '\t' << truth << std::endl;
   CHECK(testval == Approx(truth).epsilon(epsrel).margin(epsabs));
 }

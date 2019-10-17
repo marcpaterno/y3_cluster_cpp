@@ -148,8 +148,8 @@ AbundanceIntegralDesXSpt::operator()(double ztrue,
          * (*dv_dodz)(ztrue)
          * (*hmf)(lnM200m, ztrue)
          * p_lo_ltzt(lamobs_, lamtrue, ztrue)
-         * p_xi_zeta(xi_, zeta, gamma_field_)
-         * (*p_ltzeta_lnmzt)(lamtrue, zeta, ztrue, lnM200m);
+         * p_xi_zeta(xi_, zeta)
+         * (*p_ltzeta_lnmzt)(lamtrue, zeta, ztrue, lnM200m, gamma_field_);
 }
 
 // Name of the module in the datablock

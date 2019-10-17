@@ -15,7 +15,7 @@ TEST_CASE("ln_mez_power_law works")
   REQUIRE(infile.good());
 
   // Initialize vectors to hold truth
-  std::size_t const ncols = 11;
+  std::size_t const ncols = 12;
   std::vector<std::vector<double>> inputs;
   std::vector<double> col(ncols, -1.0);
   std::string headerline;
@@ -37,16 +37,17 @@ TEST_CASE("ln_mez_power_law works")
     double const A = inputs[i][0];
     double const B = inputs[i][1];
     double const C = inputs[i][2];
-    double const lnM = inputs[i][3];
-    double const lnMp = inputs[i][4];
-    double const z = inputs[i][5];
-    double const zp = inputs[i][6];
-    double const omega_m = inputs[i][7];
-    double const omega_l = inputs[i][8];
-    double const omega_k = inputs[i][9];
-    double const truth = inputs[i][10];
+    double const gamma = inputs[i][3];
+    double const lnM = inputs[i][4];
+    double const lnMp = inputs[i][5];
+    double const z = inputs[i][6];
+    double const zp = inputs[i][7];
+    double const omega_m = inputs[i][8];
+    double const omega_l = inputs[i][9];
+    double const omega_k = inputs[i][10];
+    double const truth = inputs[i][11];
     ln_mez_power_law powlaw(A, B, C, lnMp, zp, omega_m, omega_l, omega_k);
-    double const testval = powlaw(lnM, z);
+    double const testval = powlaw(lnM, z, gamma);
     std::cout << truth << '\t' << testval << '\n';
     CHECK(testval == Approx(truth).epsilon(epsrel).margin(epsabs));
   }

@@ -102,7 +102,7 @@ namespace y3_cluster {
     {}
 
     double
-    operator()(double lamtrue, double zeta, double ztrue, double lnM200m) const
+    operator()(double lamtrue, double zeta, double ztrue, double lnM200m, double gamma_field) const
     {
       // Richness scaling calculations
       // Can precalc some of this in constructor...
@@ -116,7 +116,7 @@ namespace y3_cluster {
 
       // ln zeta scaling calculations
       double const lnM500c = mass_conversion_->eval(lnM200m, ztrue);
-      double const mean_lnzeta = zetamrel_(lnM500c, ztrue);
+      double const mean_lnzeta = zetamrel_(lnM500c, ztrue, gamma_field);
       double const var_lnzeta = siglnzeta_ * siglnzeta_;
 
       // Compute repeated quantities
