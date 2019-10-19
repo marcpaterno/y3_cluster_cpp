@@ -1,10 +1,10 @@
 #ifndef Y3_CLUSTER_CPP_MAKE_INTEGRATION_VOLUME_HH
 #define Y3_CLUSTER_CPP_MAKE_INTEGRATION_VOLUME_HH
 
-#include "utils/meta.hh"
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/array.hh"
 #include "cubacpp/integration_volume.hh"
+#include "utils/meta.hh"
 
 #include <array>
 #include <string>
@@ -99,43 +99,48 @@ namespace y3_cluster {
     std::vector<std::array<double, sizeof...(Ts)>>
     make_cartesian_product_splatted(std::vector<Ts> const&... bounds)
     {
-        // Make sure the vectors are carrying floating point numbers;
-        // we convert everything to double, 'cause doing otherwise is hard.
-        static_assert(std::conjunction_v<std::is_floating_point<Ts>...>);
+      // Make sure the vectors are carrying floating point numbers;
+      // we convert everything to double, 'cause doing otherwise is hard.
+      static_assert(std::conjunction_v<std::is_floating_point<Ts>...>);
 
-        std::vector<std::array<double, sizeof...(Ts)>> res;
-        auto accumulator = [&res](Ts const&... ts) {
-            // Construct an array from all the elements we pass in ts...
-            res.push_back({ts...});
-        };
-        detail::cartesian_product(accumulator, bounds...);
-        return res;
+      std::vector<std::array<double, sizeof...(Ts)>> res;
+      auto accumulator = [&res](Ts const&... ts) {
+        // Construct an array from all the elements we pass in ts...
+        res.push_back({ts...});
+      };
+      detail::cartesian_product(accumulator, bounds...);
+      return res;
     }
 
     template <std::size_t... Is>
     std::vector<cubacpp::array<sizeof...(Is)>>
-    make_boundaries_cartesian_product_aux(std::array<std::vector<double>, sizeof...(Is)> const& boundaries,
-                                          std::index_sequence<Is...> /* unused */)
+    make_boundaries_cartesian_product_aux(
+      std::array<std::vector<double>, sizeof...(Is)> const& boundaries,
+      std::index_sequence<Is...> /* unused */)
     {
-        // The cartesian product facilities work in terms of std::array, while integration_boundary uses cubacpp::array,
-        // which in turn uses Eigen::array.
-        // We have to do the translation here.
-        std::vector<std::array<double, sizeof...(Is)>> bounds = make_cartesian_product_splatted(boundaries[Is]...);
-        std::vector<cubacpp::array<sizeof...(Is)>> result;
-        result.reserve(bounds.size());
-        for (auto const& current_bound : bounds) {
-            cubacpp::array<sizeof...(Is)> tmp;
-            for (std::size_t i = 0; i != sizeof...(Is); ++i) tmp[i] = current_bound[i];
-            result.push_back(tmp);
-        }
-        return result;
+      // The cartesian product facilities work in terms of std::array, while
+      // integration_boundary uses cubacpp::array, which in turn uses
+      // Eigen::array. We have to do the translation here.
+      std::vector<std::array<double, sizeof...(Is)>> bounds =
+        make_cartesian_product_splatted(boundaries[Is]...);
+      std::vector<cubacpp::array<sizeof...(Is)>> result;
+      result.reserve(bounds.size());
+      for (auto const& current_bound : bounds) {
+        cubacpp::array<sizeof...(Is)> tmp;
+        for (std::size_t i = 0; i != sizeof...(Is); ++i)
+          tmp[i] = current_bound[i];
+        result.push_back(tmp);
+      }
+      return result;
     }
 
     template <std::size_t N>
     std::vector<integration_boundary<N>>
-    make_boundaries_cartesian_product(std::array<std::vector<double>, N> const& boundaries)
+    make_boundaries_cartesian_product(
+      std::array<std::vector<double>, N> const& boundaries)
     {
-        return detail::make_boundaries_cartesian_product_aux(boundaries, std::make_index_sequence<N>());
+      return detail::make_boundaries_cartesian_product_aux(
+        boundaries, std::make_index_sequence<N>());
     }
 
     template <std::size_t N>
@@ -153,12 +158,14 @@ namespace y3_cluster {
       std::array<vec, N> high_boundaries;
 
       for (std::size_t i = 0; i != N; ++i) {
-          low_boundaries[i] = cfg.view<vec>(modulelabel, names[i] + "_low");
-          high_boundaries[i] = cfg.view<vec>(modulelabel, names[i] + "_high");
+        low_boundaries[i] = cfg.view<vec>(modulelabel, names[i] + "_low");
+        high_boundaries[i] = cfg.view<vec>(modulelabel, names[i] + "_high");
       }
 
-      std::vector<integration_boundary<N>> lows = detail::make_boundaries_cartesian_product(low_boundaries);
-      std::vector<integration_boundary<N>> highs = detail::make_boundaries_cartesian_product(high_boundaries);
+      std::vector<integration_boundary<N>> lows =
+        detail::make_boundaries_cartesian_product(low_boundaries);
+      std::vector<integration_boundary<N>> highs =
+        detail::make_boundaries_cartesian_product(high_boundaries);
       return {lows, highs};
     }
 
