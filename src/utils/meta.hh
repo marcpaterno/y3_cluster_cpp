@@ -1,6 +1,8 @@
 #ifndef Y3_CLUSTER_CPP_META_HH
 #define Y3_CLUSTER_CPP_META_HH
 
+#include <vector>
+
 namespace y3_cluster {
   namespace detail {
 
