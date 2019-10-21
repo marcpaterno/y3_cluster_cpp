@@ -2,9 +2,10 @@
 #define Y3_CLUSTER_CPP_MOR_DES_T_HH
 
 #include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/ndarray.hh"
 #include "ln_mez_power_law.hh"
 #include "utils/datablock_reader.hh"
-#include "utils/interp_1d.hh"
+#include "utils/interp_2d.hh"
 #include "utils/mz_power_law.hh"
 
 #include <cmath>
@@ -41,7 +42,7 @@ namespace y3_cluster {
                  double omega_m,
                  double omega_l,
                  double omega_k,
-                 std::shared_ptr<Interp1D const> mass_conversion)
+                 std::shared_ptr<Interp2D const> mass_conversion)
       : Mmin_(Mmin)
       , M1_(M1)
       , alpha_(alpha)
@@ -70,22 +71,22 @@ namespace y3_cluster {
     {}
 
     MOR_Y3xSPT_t(cosmosis::DataBlock& sample)
-      : Mmin_(get_datablock<double>(sample, "", ""))
-      , M1_(get_datablock<double>(sample, "", ""))
-      , alpha_(get_datablock<double>(sample, "", ""))
-      , epsilon_(get_datablock<double>(sample, "", ""))
-      , sigintr_(get_datablock<double>(sample, "", ""))
-      , Asz_(get_datablock<double>(sample, "", ""))
-      , Bsz_(get_datablock<double>(sample, "", ""))
-      , Csz_(get_datablock<double>(sample, "", ""))
-      , siglnzeta_(get_datablock<double>(sample, "", ""))
-      , r_(get_datablock<double>(sample, "", ""))
-      , zplam_(get_datablock<double>(sample, "", ""))
-      , lnMpsz_(get_datablock<double>(sample, "", ""))
-      , zpsz_(get_datablock<double>(sample, "", ""))
-      , omega_m_(get_datablock<double>(sample, "", ""))
-      , omega_l_(get_datablock<double>(sample, "", ""))
-      , omega_k_(get_datablock<double>(sample, "", ""))
+      : Mmin_(get_datablock<double>(sample, "abundance_integral", "Mmin"))
+      , M1_(get_datablock<double>(sample, "abundance_integral", "M1"))
+      , alpha_(get_datablock<double>(sample, "abundance_integral", "alpha"))
+      , epsilon_(get_datablock<double>(sample, "abundance_integral", "epsilon"))
+      , sigintr_(get_datablock<double>(sample, "abundance_integral", "sig0lam"))
+      , Asz_(get_datablock<double>(sample, "abundance_integral", "Asz"))
+      , Bsz_(get_datablock<double>(sample, "abundance_integral", "Bsz"))
+      , Csz_(get_datablock<double>(sample, "abundance_integral", "Csz"))
+      , siglnzeta_(get_datablock<double>(sample, "abundance_integral", "sig0zeta"))
+      , r_(get_datablock<double>(sample, "abundance_integral", "r"))
+      , zplam_(get_datablock<double>(sample, "abundance_integral", "zplam"))
+      , lnMpsz_(get_datablock<double>(sample, "abundance_integral", "lnMpsz"))
+      , zpsz_(get_datablock<double>(sample, "abundance_integral", "zpsz"))
+      , omega_m_(get_datablock<double>(sample, "cosmological_parameters", "omega_m"))
+      , omega_l_(get_datablock<double>(sample, "cosmological_parameters", "omega_lambda"))
+      , omega_k_(get_datablock<double>(sample, "cosmological_parameters", "omega_k"))
       , zetamrel_(Asz_,
                   Bsz_,
                   Csz_,
@@ -94,13 +95,14 @@ namespace y3_cluster {
                   omega_m_,
                   omega_l_,
                   omega_k_)
-      , mass_conversion_(std::make_shared<Interp1D const>(
+      , mass_conversion_(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "mass_conversion", "lnm200m"),
-          get_datablock<doubles>(sample, "mass_conversion", "lnm500c")))
+          get_datablock<doubles>(sample, "mass_conversion", "z"),
+          get_datablock<cosmosis::ndarray<double>>(sample, "mass_conversion", "lnm500c")))
     {}
 
     double
-    operator()(double lamtrue, double zeta, double ztrue, double lnM200m)
+    operator()(double lamtrue, double zeta, double ztrue, double lnM200m) const
     {
       // Richness scaling calculations
       // Can precalc some of this in constructor...
@@ -113,7 +115,7 @@ namespace y3_cluster {
         mean_lamsat + mean_lamsat * mean_lamsat * sigintr_ * sigintr_;
 
       // ln zeta scaling calculations
-      double const lnM500c = mass_conversion_->eval(lnM200m);
+      double const lnM500c = mass_conversion_->eval(lnM200m, ztrue);
       double const mean_lnzeta = zetamrel_(lnM500c, ztrue);
       double const var_lnzeta = siglnzeta_ * siglnzeta_;
 
@@ -139,7 +141,7 @@ namespace y3_cluster {
     double const zplam_, lnMpsz_, zpsz_;
     double const omega_m_, omega_l_, omega_k_;
     y3_cluster::ln_mez_power_law zetamrel_;
-    std::shared_ptr<Interp1D const> mass_conversion_;
+    std::shared_ptr<Interp2D const> mass_conversion_;
   };
 }
 
