@@ -18,12 +18,12 @@ def execute(block, config):
         Omega_M = block["cosmological_parameters", "omega_M"]-block["cosmological_parameters", "omega_nu"]
         masses = np.log10(Omega_M*block[section_name, "m_h"])
         zz = block[section_name, "z"]
-	nm = (block[section_name, "dndlnmh"])
+        nm = (block[section_name, "dndlnmh"])
 
-        dat=np.genfromtxt(os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/test/test_hmf_z0_z03.dat')
-        test_z= dat[:, 0] 
-        test_m= dat[:, 1] 
-        test_test=dat[:, 2]*(10.0**test_m)
+        dat = np.genfromtxt(os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/test/test_hmf_z0_z03.dat') )
+        test_z = dat[:, 0] 
+        test_m = dat[:, 1] 
+        test_test = dat[:, 2]*(10.0**test_m)
 
         test_interp=interp2d(masses, zz, nm, kind='quintic')
         outfile = os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/masses_test.out')
