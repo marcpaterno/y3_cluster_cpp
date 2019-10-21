@@ -4,6 +4,8 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/entry.hh"
 #include "cubacpp/cuhre.hh"
+#include "cubacpp/vegas.hh"
+#include "cubacpp/suave.hh"
 #include "cubacpp/integrand_traits.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"

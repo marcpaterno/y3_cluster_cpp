@@ -5,8 +5,9 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
+#include "cubacpp/vegas.hh"
 
-#include "models/pknl_t.hh"
+#include "models/pk_nl_t.hh"
 
 #include <optional>
 #include <vector>
@@ -63,7 +64,8 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<pk_nl> pk_nl;
-
+  double R_;
+  double z_;
 
 
 public:
@@ -121,7 +123,7 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 sigma_nl::sigma_nl(DataBlock&)  : 
-	pk_nl()
+	pk_nl(), R_(), z_()
 {}
 
 void
@@ -134,10 +136,10 @@ sigma_nl::set_sample(DataBlock& sample)
 }
 
 void
-SnapshotScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
+sigma_nl::set_grid_point(grid_point_t const& grid_point)
 {
-  zt_ = grid_point[0];
-  radius_ = grid_point[1];
+  z_ = grid_point[0];
+  R_ = grid_point[1];
 }
 
 double
@@ -145,23 +147,15 @@ sigma_nl::operator()(double k, double chi) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double r=sqrt(R*R+chi*chi);
+  double r=sqrt( R_ * R_ + chi * chi );
+  //double r= R_;
   double x= k*r;
   double w=sin(x)/x;
   auto const  val = w * k * k / (2.0 * PI * PI) 
-	            * (*pk_nl)(k, z)
+	            * (*pk_nl)(k, z_);
   return  val;
 }
 
-//
-void
-sigma_nl::finalize_sample(cosmosis::DataBlock& sample,
-                          std::vector<grid_point_t> const& grid_points, 
-                          std::size_t nvolumes,
-                          std::vector<integration_result> const& res)
-  const
-{
-}
 char const*
 sigma_nl::module_label()
 {
@@ -178,18 +172,17 @@ sigma_nl::module_label()
 std::vector<sigma_nl::volume_t>
 sigma_nl::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes(cfg,
+  return y3_cluster::make_integration_volumes_wall_of_numbers(cfg,
                                               sigma_nl::module_label(),
                                               "k",
                                               "los_chi");
 }
 
-std::vector<SnapshotScalarIntegrand::grid_point_t>
-SnapshotScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+std::vector<sigma_nl::grid_point_t>
+sigma_nl::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points(cfg,
-                                      SnapshotScalarIntegrand::module_label(),
+  return y3_cluster::make_grid_points_cartesian_product(cfg,
+                                      sigma_nl::module_label(),
                                       "radii", "redshifts");
 }
-
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(sigma_nl);
