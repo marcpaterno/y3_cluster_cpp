@@ -15,9 +15,18 @@ def setup(options):
     NCs=np.genfromtxt(NC_file)
     data_vector=assemble_vector(profiles*NCs, NCs)
 
+    #read in the profile_errfile, need to make this real
+    profile_file_err = options[section,"profile_err_file"]
+    profiles_err=np.genfromtxt(profile_file)
+
+    # read in the NCerr file, need to make this real
+    NC_file_err = options[section,"NC_err_file"]
+    NCs_err=np.genfromtxt(NC_file)
+    cov_vector=assemble_vector(profiles_err*NCs_err, NCs_err)
     #covariance_file= options[section,"covariance_file"]
     #Need to make this real
-    covmat = np.eye(len(data_vector)) 
+    covmat = np.diag(cov_vector)
+     
     return data_vector, covmat
 
 def execute(block, config):
@@ -43,7 +52,7 @@ def cleanup(config):
 
 def assemble_vector(profiles_model, NCs_model):
     averaged_profiles = profiles_model/NCs_model
-    model_vec=np.append(NCs_model[0, 0], NCs_model[1, 0])
-    model_vec=np.append(model_vec, profiles_model)
+    model_vec=np.append(NCs_model[0, 0], NCs_model[1, 0], NCs_model[2, 0], NCs_momdel[3, 0])
+    model_vec=np.append(model_vec, averaged_profiles)
 
     return model_vec
