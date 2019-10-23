@@ -150,8 +150,9 @@ SnapshotScalarNCIntegrand::operator()(double lt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  auto const val = 300.0 * 300.0 * 300.0 // this is the simulation cosmic volume
-                   * (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_);
+  auto const val = 165.0 * 165.0 * 165.0 // this is the simulation cosmic volume
+                   //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_);
+                   * (*hmf)(lnM, zt_);
   //* (*sigma)(radius_, lnM, zt_);
   return val;
 }

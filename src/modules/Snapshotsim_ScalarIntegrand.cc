@@ -8,7 +8,8 @@
 
 #include "models/hmf_t.hh"
 #include "models/mor_t2.hh"
-#include "models/sig_sum.hh"
+//#include "models/sig_sum.hh"
+#include "models/xi_sum.hh"
 
 #include <iostream>
 #include <optional>
@@ -61,7 +62,8 @@ private:
   // we would use std::optional<X> as our data member.
   std::optional<MOR_t2> mor;
   std::optional<HMF_t> hmf;
-  std::optional<SIG_SUM> sigma;
+  //std::optional<SIG_SUM> sigma;
+  std::optional<XI_SUM> sigma;
 
   // State set for current 'bin' to be integrated.
   double radius_;
@@ -150,8 +152,9 @@ SnapshotScalarIntegrand::operator()(double lt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  auto const val = 300.0 * 300.0 * 300.0 // this is the simulation cosmic volume
-                   * (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
+  auto const val = 165 * 165 * 165 // this is the simulation cosmic volume
+                   //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
+                   * (*hmf)(lnM, zt_) *
                    (*sigma)(radius_, lnM, zt_);
   return val;
 }
