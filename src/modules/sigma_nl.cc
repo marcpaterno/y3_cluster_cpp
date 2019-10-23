@@ -63,7 +63,7 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<pk_nl> pk_nl;
+  std::optional<pk_nl> pk_nl_;
   double R_;
   double z_;
 
@@ -123,7 +123,7 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 sigma_nl::sigma_nl(DataBlock&)  : 
-	pk_nl(), R_(), z_()
+	pk_nl_(), R_(), z_()
 {}
 
 void
@@ -132,7 +132,7 @@ sigma_nl::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  pk_nl.emplace(sample);
+  pk_nl_.emplace(sample);
 }
 
 void
@@ -152,7 +152,7 @@ sigma_nl::operator()(double k, double chi) const
   double x= k*r;
   double w=sin(x)/x;
   auto const  val = w * k * k / (2.0 * PI * PI) 
-	            * (*pk_nl)(k, z_);
+	            * (*pk_nl_)(k, z_);
   return  val;
 }
 
