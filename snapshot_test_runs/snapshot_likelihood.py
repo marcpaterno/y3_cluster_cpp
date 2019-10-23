@@ -52,7 +52,7 @@ def cleanup(config):
 
 def assemble_vector(profiles_model, NCs_model):
     averaged_profiles = profiles_model/NCs_model
-    model_vec=np.append(NCs_model[0, 0], NCs_model[1, 0], NCs_model[2, 0], NCs_momdel[3, 0])
+    model_vec=NCs_model[:,0]
     model_vec=np.append(model_vec, averaged_profiles)
 
     return model_vec
