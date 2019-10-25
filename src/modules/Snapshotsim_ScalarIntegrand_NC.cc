@@ -146,11 +146,12 @@ SnapshotScalarNCIntegrand::set_grid_point(grid_point_t const& grid_point)
 }
 
 double
-SnapshotScalarNCIntegrand::operator()(double lt, double lnM) const
+SnapshotScalarNCIntegrand::operator()(double /* lt */, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  auto const val = 165.0 * 165.0 * 165.0 // this is the simulation cosmic volume
+  auto constexpr simulation_cosmic_volume = 165.0 * 165.0 * 165.0;
+  auto const val = simulation_cosmic_volume 
                    //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_);
                    * (*hmf)(lnM, zt_);
   //* (*sigma)(radius_, lnM, zt_);
