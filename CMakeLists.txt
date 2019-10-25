@@ -23,7 +23,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/mod
 find_package(cuba REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(Gperftools)
 
 add_subdirectory(src)
 add_subdirectory(test)
