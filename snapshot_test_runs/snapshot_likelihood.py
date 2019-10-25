@@ -25,7 +25,7 @@ def setup(options):
     cov_vector=assemble_vector(profiles_err*NCs_err, NCs_err)
     #covariance_file= options[section,"covariance_file"]
     #Need to make this real
-    covmat = np.diag(cov_vector)
+    covmat = np.diag(cov_vector**2)
      
     return data_vector, covmat
 
@@ -41,7 +41,7 @@ def execute(block, config):
 
     delta = data_vector - model_vector
     weight = np.linalg.inv(covmat)
-    loglike = np.dot(delta, np.dot(weight, delta))
+    loglike = -0.5 * np.dot(delta, np.dot(weight, delta))
     block[section_names.likelihoods, 'SnapshotScalarLike_like'] = loglike
 
     return 0
