@@ -14,7 +14,7 @@
 //
 // Notes:
 //    1) std::optional<T> is used for data members that are not
-//    constructible from CosmoSIS configuration parameters.
+//    constructable from CosmoSIS configuration parameters.
 //
 //    2) The object as created by the only constructor does not need to be
 //    in a callable state.
@@ -31,7 +31,7 @@ class ExampleScalarIntegrand {
 public:
   // Define the data-type describing a grid point; this should be an
   // instance of std::array<double, N> with N set to the number
-  // of different paramaters being varied in the grid.
+  // of different parameters being varied in the grid.
   // The alias we define must be grid_point_t.
   using grid_point_t = std::array<double, 1>; // we only vary radius.
 

@@ -3,6 +3,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/entry.hh"
+#include "cosmosis/datablock/ndarray.hh"
 #include "cubacpp/cuhre.hh"
 #include "cubacpp/vegas.hh"
 #include "cubacpp/suave.hh"
