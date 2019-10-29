@@ -36,7 +36,7 @@ def execute(block, config):
     data_vector, covmat = config
 
     #read in the model values at this sample point. 
-    profile_blockname ='snapshotscalarintegrand' 
+    profile_blockname ='snapshotscalarmaxintegrand' 
     profiles_model = block[profile_blockname, "vals"]
     NCs_blockname ='snapshotscalarncintegrand' 
     NCs_model = block[NCs_blockname, "vals"]
