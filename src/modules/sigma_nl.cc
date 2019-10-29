@@ -185,4 +185,4 @@ sigma_nl::make_grid_points(cosmosis::DataBlock& cfg)
                                       sigma_nl::module_label(),
                                       "radii", "redshifts");
 }
-DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(sigma_nl);
+DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(sigma_nl)

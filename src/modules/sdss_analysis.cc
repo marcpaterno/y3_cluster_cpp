@@ -237,4 +237,4 @@ sdss_analysis::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(sdss_analysis);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(sdss_analysis)

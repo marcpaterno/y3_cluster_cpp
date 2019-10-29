@@ -93,6 +93,6 @@ y3_cluster::CosmoSISVectorIntegrationModule<I, A>::execute(
 
   // Put the result into the sample.
   integrand_.finalize_sample(sample, results);
-};
+}
 
 #endif
