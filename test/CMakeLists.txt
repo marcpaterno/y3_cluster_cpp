@@ -10,6 +10,7 @@ add_executable(make_grid_points_test make_grid_points.test.cc)
 target_link_libraries(make_grid_points_test
                       PRIVATE
                       cosmosis
+                      utils
                       testmain)
 target_include_directories(make_grid_points_test
                            PRIVATE
@@ -23,6 +24,7 @@ add_executable(make_integration_volume_test make_integration_volume.test.cc)
 target_link_libraries(make_integration_volume_test
                       PRIVATE
                       cosmosis
+                      utils
                       testmain)
 target_include_directories(make_integration_volume_test
                            PRIVATE

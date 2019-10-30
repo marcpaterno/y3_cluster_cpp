@@ -22,3 +22,9 @@ get_vector_double(cosmosis::DataBlock& db, const char* section, const char* name
   throw std::runtime_error(std::string("DataBlock contained no parameer in section ") + section + " named " + name + " that could be coerced to type vector<double>");
 }
 
+
+std::vector<double>
+get_vector_double(cosmosis::DataBlock& db, std::string section, std::string name)
+{
+  return get_vector_double(db, section.c_str(), name.c_str());
+}

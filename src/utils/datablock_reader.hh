@@ -11,6 +11,7 @@
 // The parameter in question may actually have been stored as a vector<double>, or double, or vector<int>, or int.
 // Both 'section' and 'name' must be non-null.
 std::vector<double> get_vector_double(cosmosis::DataBlock& db, const char* section, const char* name);
+std::vector<double> get_vector_double(cosmosis::DataBlock& db, std::string section, std::string name);
 
 // Note: This function is deprecated. Prefer to use the DataBlock member template
 //    T DataBlock::view<T>(section, name)
