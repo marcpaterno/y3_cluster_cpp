@@ -42,10 +42,8 @@ bessel_polynomial_integral_quadrature(const int n,
                                       const double range_max)
 {
   cubacpp::QNG integrator(range_min, range_max);
-  const auto res = integrator.integrate(
-    [=](double r) { return integer_pow(r, n) * gsl_sf_bessel_jl(l, k * r); },
-    1e-5,
-    1e-18);
+  auto f = [=](double r) { return integer_pow(r, n) * gsl_sf_bessel_jl(l, k * r); };
+  const auto res = integrator.integrate(f, 1e-5, 1e-18);
   if (res.status != 0)
     throw std::runtime_error("Bessel quadrature did not converge!");
   return res.value;

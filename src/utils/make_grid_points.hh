@@ -3,6 +3,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/meta.hh"
+#include "utils/datablock_reader.hh"
 
 #include <algorithm>
 #include <array>
@@ -13,12 +14,14 @@
 
 namespace y3_cluster {
   // These variadic function templates takes as arguments:
-  //   1. a cosmosis::DataBlock (by reference), and
-  //   2. one or more arguments that are convertible to strings.
+  //   1. a cosmosis::DataBlock (by reference),
+  //   2. the name of the module being configured, and
+  //   3. one or more arguments that are convertible to strings.
   //
-  // It should be used like:
+  // Assuming your class's name is ClsName, it should be used like:
   //    DataBlock cfg;
-  //    auto vols = make_grid_points(cfg, "radius", "z");
+  //    auto vols = make_grid_points(cfg, ClsName::module_label(), "radius",
+  //    "z");
   //
   // The function returns a vector of std::array<double, N>,
   // where N is the number of names provided.
@@ -56,7 +59,7 @@ namespace y3_cluster {
                   std::array<std::vector<double>, N>& axes)
     {
       auto get_axis = [&cfg, &modulelabel](std::string const& name) {
-        return cfg.view<std::vector<double>>(modulelabel, name);
+        return get_vector_double(cfg, modulelabel.c_str(), name.c_str());
       };
       std::transform(names.begin(), names.end(), axes.begin(), get_axis);
     }
@@ -91,43 +94,37 @@ namespace y3_cluster {
       return make_grid_splatted(axes[Is]...);
     }
 
+    template <std::size_t N>
+    std::vector<std::array<double, N>>
+    make_grid_cartesian_product(std::array<std::vector<double>, N> const& axes)
+    {
+      return detail::make_grid_aux(axes, std::make_index_sequence<N>());
+    }
+
+    template <std::size_t N>
+    std::vector<std::array<double, N>>
+    make_grid_wall_of_numbers(std::array<std::vector<double>, N> const& axes)
+    {
+      // Make sure all vectors have the same length
+      std::size_t const n = axes[0].size();
+      for (std::size_t i = 1; i < N; ++i) {
+        if (axes[i].size() != n) {
+          throw std::invalid_argument(
+            "unequal length axes in make_grid_wall_of_numbers");
+        }
+      }
+      std::vector<std::array<double, N>> res(n);
+      for (std::size_t i = 0; i != n; ++i) {
+        std::array<double, N>& current_result = res[i];
+        for (std::size_t j = 0; j != N; ++j) {
+          current_result[j] = axes[j][i];
+        }
+      }
+      return res;
+    }
   } // namespace detail
-
-  // use this one!
-  template <std::size_t N>
-  std::vector<std::array<double, N>>
-  make_grid_cartesian_product(std::array<std::vector<double>, N> const& axes)
-  {
-    return detail::make_grid_aux(axes, std::make_index_sequence<N>());
-  }
-
-  template <std::size_t N>
-  std::vector<std::array<double, N>>
-  make_grid_wall_of_numbers(std::array<std::vector<double>, N> const& axes)
-  {
-    // Make sure all vectors have the same length
-    std::size_t const n = axes[0].size();
-    for (std::size_t i = 1; i < N; ++i) {
-      if (axes[i].size() != n) {
-        throw std::invalid_argument(
-          "unequal length axes in make_grid_wall_of_numbers");
-      }
-    }
-    std::vector<std::array<double, N>> res(n);
-    for (std::size_t i = 0; i != n; ++i) {
-      std::array<double, N>& current_result = res[i];
-      for (std::size_t j = 0; j != N; ++j) {
-        current_result[j] = axes[j][i];
-      }
-    }
-    return res;
-  }
-
 } // namespace y3_cluster
 
-// This is the function users of CosmoSIS should use to create a
-// grid for the calculation of integrals, using grid points based
-// on the cartesian product of the axes provided in the configuration.
 template <typename... STRINGLIKEs>
 std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
 y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
@@ -145,7 +142,7 @@ y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
     std::forward<STRINGLIKEs>(names)...};
   std::array<std::vector<double>, n_axes> axes;
   detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
-  return make_grid_cartesian_product(axes);
+  return detail::make_grid_cartesian_product(axes);
 }
 
 template <typename... STRINGLIKEs>
@@ -164,7 +161,7 @@ y3_cluster::make_grid_points_wall_of_numbers(cosmosis::DataBlock& cfg,
     std::forward<STRINGLIKEs>(names)...};
   std::array<std::vector<double>, n_axes> axes;
   detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
-  return make_grid_wall_of_numbers(axes);
+  return detail::make_grid_wall_of_numbers(axes);
 }
 
 #endif

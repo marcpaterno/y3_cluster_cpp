@@ -277,4 +277,4 @@ kappa_miscent_y1::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(kappa_miscent_y1);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(kappa_miscent_y1)

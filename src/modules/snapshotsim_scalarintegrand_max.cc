@@ -8,7 +8,8 @@
 
 #include "models/hmf_t.hh"
 #include "models/mor_t2.hh"
-#include "models/sig_sum.hh"
+//#include "models/sig_sum.hh"
+#include "models/xi_max.hh"
 
 #include <iostream>
 #include <optional>
@@ -18,7 +19,7 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// SnapshotScalarNCIntegrand is a class that models the concept of
+// SnapshotScalarmaxIntegrand is a class that models the concept of
 // "CosmoSISScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
@@ -37,7 +38,7 @@ using cubacpp::integration_result;
 //    set_sample.
 //
 //
-class SnapshotScalarNCIntegrand {
+class SnapshotScalarmaxIntegrand {
 public:
   // Define the data-type describing a grid point; this should be an
   // instance of std::array<double, N> with N set to the number
@@ -61,7 +62,8 @@ private:
   // we would use std::optional<X> as our data member.
   std::optional<MOR_t2> mor;
   std::optional<HMF_t> hmf;
-  std::optional<SIG_SUM> sigma;
+  //std::optional<SIG_SUM> sigma;
+  std::optional<XI_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
   double radius_;
@@ -70,7 +72,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit SnapshotScalarNCIntegrand(cosmosis::DataBlock& config);
+  explicit SnapshotScalarmaxIntegrand(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -123,12 +125,12 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-SnapshotScalarNCIntegrand::SnapshotScalarNCIntegrand(DataBlock&)
+SnapshotScalarmaxIntegrand::SnapshotScalarmaxIntegrand(DataBlock&)
   : mor(), hmf(), sigma(), radius_(), zt_()
 {}
 
 void
-SnapshotScalarNCIntegrand::set_sample(DataBlock& sample)
+SnapshotScalarmaxIntegrand::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -139,28 +141,28 @@ SnapshotScalarNCIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-SnapshotScalarNCIntegrand::set_grid_point(grid_point_t const& grid_point)
+SnapshotScalarmaxIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
   radius_ = grid_point[1];
   zt_ = grid_point[0];
 }
 
 double
-SnapshotScalarNCIntegrand::operator()(double /* lt */, double lnM) const
+SnapshotScalarmaxIntegrand::operator()(double /* lt */, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   auto constexpr simulation_cosmic_volume = 165.0 * 165.0 * 165.0;
-  auto const val = simulation_cosmic_volume 
-                   //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_);
-                   * (*hmf)(lnM, zt_);
-  //* (*sigma)(radius_, lnM, zt_);
+  auto const val = simulation_cosmic_volume
+                   //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
+                   * (*hmf)(lnM, zt_) *
+                   (*sigma)(radius_, lnM, zt_);
   return val;
 }
 
 //
 void
-SnapshotScalarNCIntegrand::finalize_sample(
+SnapshotScalarmaxIntegrand::finalize_sample(
   cosmosis::DataBlock& sample,
   std::vector<grid_point_t> const& grid_points,
   std::size_t nvolumes,
@@ -208,9 +210,9 @@ SnapshotScalarNCIntegrand::finalize_sample(
 }
 
 char const*
-SnapshotScalarNCIntegrand::module_label()
+SnapshotScalarmaxIntegrand::module_label()
 {
-  return "SnapshotScalarNCIntegrand";
+  return "SnapshotScalarmaxIntegrand";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -220,18 +222,18 @@ SnapshotScalarNCIntegrand::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<SnapshotScalarNCIntegrand::volume_t>
-SnapshotScalarNCIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+std::vector<SnapshotScalarmaxIntegrand::volume_t>
+SnapshotScalarmaxIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, SnapshotScalarNCIntegrand::module_label(), "lt", "lnm");
+    cfg, SnapshotScalarmaxIntegrand::module_label(), "lt", "lnm");
 }
 
-std::vector<SnapshotScalarNCIntegrand::grid_point_t>
-SnapshotScalarNCIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+std::vector<SnapshotScalarmaxIntegrand::grid_point_t>
+SnapshotScalarmaxIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(
-    cfg, SnapshotScalarNCIntegrand::module_label(), "snapshot_zs", "radii");
+    cfg, SnapshotScalarmaxIntegrand::module_label(), "snapshot_zs", "radii");
 }
 
-DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarNCIntegrand)
+DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarmaxIntegrand)

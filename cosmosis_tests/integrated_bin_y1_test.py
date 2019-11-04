@@ -29,8 +29,7 @@ def execute(block, config):
         teo_logm = np.asarray([[14.066856527866555, 14.296261606649280, 14.487104492397755, 14.717555086743570],
             [14.055662163683669, 14.282850922869070, 14.470959036325867, 14.682116585781188],
             [14.027073034542163, 14.254233304065675, 14.443080091917629, 14.641826179274396]])
-        print nn.shape, logM.shape, teo_nc.shape, teo_logm.shape
-        outfile = os.path.expandvars("${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/integrated_bin_y1_test.out'")
+        outfile = os.path.expandvars("${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/integrated_bin_y1_test.out")
         with open(outfile, 'w') as outf:
             outf.write('llo\t lhi\t zlo\t zhi\t yntrue\t yntest \t ymtrue\t ymtest\n')
             for ii in range(len(l_low)):

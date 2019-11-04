@@ -261,4 +261,4 @@ compton_y_sims::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(compton_y_sims);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(compton_y_sims)

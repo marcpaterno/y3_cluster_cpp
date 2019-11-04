@@ -32,13 +32,13 @@ namespace y3_cluster {
 
   // TODO: Get higher precision!
   // Source: astropy's constants and unit conversion
-  double constexpr c() { return 9.71561189e-15; }; // Mpc/s
+  double constexpr c() { return 9.71561189e-15; } // Mpc/s
 
   // TODO: Get higher precision!
   // Source: astropy's constants and unit conversion
-  double constexpr G() { return 4.51710305e-48; }; // Mpc^3 / M_sol / s^2
+  double constexpr G() { return 4.51710305e-48; } // Mpc^3 / M_sol / s^2
 
-  double constexpr invsqrt2pi() { return 1. / sqrt(2. * pi()); };
+  double constexpr invsqrt2pi() { return 1. / sqrt(2. * pi()); }
 
   inline double
   gaussian(double x, double mu, double sigma)

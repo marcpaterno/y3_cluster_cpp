@@ -176,4 +176,4 @@ AbundanceIntegralDesXSpt::make_grid_points(cosmosis::DataBlock& cfg)
 }
 
 
-DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(AbundanceIntegralDesXSpt);
+DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(AbundanceIntegralDesXSpt)

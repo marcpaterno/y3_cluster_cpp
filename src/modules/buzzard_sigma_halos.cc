@@ -211,4 +211,4 @@ buzzard_sigma_halos::make_integration_volumes(cosmosis::DataBlock& cfg)
   };
 }
 
-DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(buzzard_sigma_halos);
+DEFINE_COSMOSIS_VECTOR_INTEGRATION_MODULE(buzzard_sigma_halos)

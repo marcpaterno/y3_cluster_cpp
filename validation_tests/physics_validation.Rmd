@@ -482,7 +482,7 @@ ggplot(lo_lc, aes(x= deltal, y = resid, color = within.frac)) +
 ```
 # Number Counts and Masses in SDSS
 
-**This test requires running sdss_anallysis.ini in cosmosis_tests first**
+**This test requires running sdss_analysis.ini in cosmosis_tests first**
 
 ```{r}
 local.frac.errormargin =  0.05
@@ -562,7 +562,7 @@ ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
 
 # Number Counts and Masses in DESY1
 
-**This test requires running y1_anallysis.ini in cosmosis_tests first**
+**This test requires running y1_analysis.ini in cosmosis_tests first**
 
 ```{r}
 local.frac.errormargin =  0.05
