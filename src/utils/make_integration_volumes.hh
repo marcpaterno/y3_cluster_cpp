@@ -5,6 +5,7 @@
 #include "cubacpp/array.hh"
 #include "cubacpp/integration_volume.hh"
 #include "utils/meta.hh"
+#include "utils/datablock_reader.hh"
 
 #include <array>
 #include <string>
@@ -59,11 +60,10 @@ namespace y3_cluster {
 
       // The first parameter gets special handling, because we use it to
       // determine how many integration volumes we shall produce.
-      using vec = std::vector<double>;
-      auto lows = cfg.view<vec>(modulelabel, names[0] + "_low");
+      auto lows = get_vector_double(cfg, modulelabel, names[0] + "_low");
       std::size_t const nvolumes = lows.size();
 
-      auto highs = cfg.view<vec>(modulelabel, names[0] + "_high");
+      auto highs = get_vector_double(cfg, modulelabel, names[0] + "_high");
       if (nvolumes != highs.size()) {
         // TODO: Improve this error handling.
         throw std::runtime_error(names[0] + " bad, bad user!");
@@ -83,8 +83,8 @@ namespace y3_cluster {
       // All other parameters are handled identically to each other. Each must
       // have the same number of integration volumes.
       for (std::size_t iname = 1; iname != N; ++iname) {
-        lows = cfg.view<vec>(modulelabel, names[iname] + "_low");
-        highs = cfg.view<vec>(modulelabel, names[iname] + "_high");
+        lows = get_vector_double(cfg, modulelabel, names[iname] + "_low");
+        highs = get_vector_double(cfg, modulelabel, names[iname] + "_high");
         if (nvolumes != lows.size() || nvolumes != highs.size()) {
           // TODO: Improve this error handling.
           throw std::runtime_error(names[iname] + " bad, bad user!");
@@ -158,8 +158,8 @@ namespace y3_cluster {
       std::array<vec, N> high_boundaries;
 
       for (std::size_t i = 0; i != N; ++i) {
-        low_boundaries[i] = cfg.view<vec>(modulelabel, names[i] + "_low");
-        high_boundaries[i] = cfg.view<vec>(modulelabel, names[i] + "_high");
+        low_boundaries[i] = get_vector_double(cfg, modulelabel, names[i] + "_low");
+        high_boundaries[i] = get_vector_double(cfg, modulelabel, names[i] + "_high");
       }
 
       std::vector<integration_boundary<N>> lows =

@@ -2,7 +2,7 @@ include_directories($ENV{COSMOSIS_SRC_DIR} ${CUBA_INCLUDE_DIR})
 link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
 
 add_library(example_vector_integrand SHARED ExampleVectorIntegrand.cc)
-target_link_libraries(example_vector_integrand PRIVATE cosmosis)
+target_link_libraries(example_vector_integrand PRIVATE cosmosis utils)
 target_include_directories(example_vector_integrand
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -10,7 +10,7 @@ target_include_directories(example_vector_integrand
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(example_scalar_integrand SHARED ExampleScalarIntegrand.cc)
-target_link_libraries(example_scalar_integrand PRIVATE cosmosis)
+target_link_libraries(example_scalar_integrand PRIVATE cosmosis utils)
 target_include_directories(example_scalar_integrand
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src

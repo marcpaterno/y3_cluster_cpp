@@ -44,7 +44,7 @@ inline double
 sf2(double x, double y)
 {
   return 3. * x * y * (x + y);
-};
+}
 double constexpr sf2res = 1.0;
 
 // Scalar-value function of two arguments.

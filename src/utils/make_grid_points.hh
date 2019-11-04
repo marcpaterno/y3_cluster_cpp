@@ -3,6 +3,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/meta.hh"
+#include "utils/datablock_reader.hh"
 
 #include <algorithm>
 #include <array>
@@ -58,7 +59,7 @@ namespace y3_cluster {
                   std::array<std::vector<double>, N>& axes)
     {
       auto get_axis = [&cfg, &modulelabel](std::string const& name) {
-        return cfg.view<std::vector<double>>(modulelabel, name);
+        return get_vector_double(cfg, modulelabel.c_str(), name.c_str());
       };
       std::transform(names.begin(), names.end(), axes.begin(), get_axis);
     }

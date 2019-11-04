@@ -236,4 +236,4 @@ SnapshotScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
     cfg, SnapshotScalarIntegrand::module_label(), "snapshot_zs", "radii");
 }
 
-DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarIntegrand);
+DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarIntegrand)

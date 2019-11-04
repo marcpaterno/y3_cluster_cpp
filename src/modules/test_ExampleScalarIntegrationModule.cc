@@ -26,6 +26,7 @@ main()
   cfg.put_val(module_label, "eps_rel", 1.0e-10);
   cfg.put_val(module_label, "eps_abs", 1.0e-12);
   cfg.put_val(module_label, "max_eval", 250 * 1000);
+  cfg.put_val(module_label, "use_cartesian_product", true);
   void* mod = setup(&cfg);
   if (!mod)
     return 1;

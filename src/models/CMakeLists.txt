@@ -1,3 +1,5 @@
+link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
+
 add_library(models SHARED
             sample_variance.cc
             lc_lt_t.cc
@@ -6,6 +8,7 @@ add_library(models SHARED
 target_link_libraries(models
                       PRIVATE
                       utils
+                      cosmosis
                       ${GSL_LIBRARIES}
                       ${CUBA_LIBRARIES})
 
