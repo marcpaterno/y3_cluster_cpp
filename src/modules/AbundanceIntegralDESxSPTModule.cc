@@ -17,6 +17,7 @@
 
 #include <optional>
 #include <vector>
+#include <cmath>
 
 using namespace y3_cluster;
 
@@ -136,13 +137,6 @@ AbundanceIntegralDesXSpt::operator()(double ztrue,
                                      double lamtrue,
                                      double zeta) const
 {
-  // std::cout << p_zo_zt(zobs_, ztrue) << '\t'
-  //   << omega_z(ztrue) << '\t'
-  //   << (*dv_dodz)(ztrue) << '\t'
-  //   << (*hmf)(lnM200m, ztrue) << '\t'
-  //   << p_lo_ltzt(lamobs_, lamtrue, ztrue) << '\t'
-  //   << p_xi_zeta(xi_, zeta, gamma_field_) << '\t'
-  //   << (*p_ltzeta_lnmzt)(lamtrue, zeta, ztrue, lnM200m) << std::endl;
   return p_zo_zt(zobs_, ztrue)
          * omega_z(ztrue)
          * (*dv_dodz)(ztrue)
