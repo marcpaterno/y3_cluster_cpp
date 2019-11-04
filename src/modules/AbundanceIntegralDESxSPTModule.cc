@@ -2,6 +2,7 @@
 #include "utils/make_grid_points.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
+#include "utils/datablock_reader.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
@@ -17,6 +18,8 @@
 
 #include <optional>
 #include <vector>
+#include <string>
+#include <cmath>
 
 using namespace y3_cluster;
 
@@ -65,7 +68,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(double ztrue, double lnM200m, double lamtrue, double zeta) const;
+  double operator()(double lamtrue, double lnM200m, double ztrue, double zeta) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -131,25 +134,18 @@ AbundanceIntegralDesXSpt::set_grid_point(grid_point_t const& grid_point)
 // Evaluate the integrand
 // Anything initilized with std::optional needs an asterisk
 double
-AbundanceIntegralDesXSpt::operator()(double ztrue,
+AbundanceIntegralDesXSpt::operator()(double lamtrue,
                                      double lnM200m,
-                                     double lamtrue,
+                                     double ztrue,
                                      double zeta) const
 {
-  // std::cout << p_zo_zt(zobs_, ztrue) << '\t'
-  //   << omega_z(ztrue) << '\t'
-  //   << (*dv_dodz)(ztrue) << '\t'
-  //   << (*hmf)(lnM200m, ztrue) << '\t'
-  //   << p_lo_ltzt(lamobs_, lamtrue, ztrue) << '\t'
-  //   << p_xi_zeta(xi_, zeta, gamma_field_) << '\t'
-  //   << (*p_ltzeta_lnmzt)(lamtrue, zeta, ztrue, lnM200m) << std::endl;
   return p_zo_zt(zobs_, ztrue)
          * omega_z(ztrue)
          * (*dv_dodz)(ztrue)
          * (*hmf)(lnM200m, ztrue)
          * p_lo_ltzt(lamobs_, lamtrue, ztrue)
-         * p_xi_zeta(xi_, zeta, gamma_field_)
-         * (*p_ltzeta_lnmzt)(lamtrue, zeta, ztrue, lnM200m);
+         * p_xi_zeta(xi_, zeta)
+         * (*p_ltzeta_lnmzt)(lamtrue, zeta, ztrue, lnM200m, gamma_field_);
 }
 
 // Name of the module in the datablock
@@ -163,11 +159,56 @@ AbundanceIntegralDesXSpt::module_label()
 std::vector<AbundanceIntegralDesXSpt::volume_t>
 AbundanceIntegralDesXSpt::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, AbundanceIntegralDesXSpt::module_label(), "ztrue",
-                                                   "lnM200m",
-                                                   "lamtrue",
-                                                   "zeta");
+
+  // Make some handy definitions
+  auto modulelabel = AbundanceIntegralDesXSpt::module_label();
+  std::vector<std::string> dimensions{"lamtrue", "lnM200m", "ztrue", "zeta"};
+  std::size_t const nvolumes = cfg.view<int>(modulelabel, "nclusters");
+  std::size_t const N = 4;
+
+  // Initialize the arrays of bounds
+  std::vector<cubacpp::array<N>> lowbounds(nvolumes);
+  std::vector<cubacpp::array<N>> highbounds(nvolumes);
+
+  // Load lamtrue bounds and set to first integration dimension
+  auto lamtrue_bounds = get_vector_double(cfg, modulelabel, "lamtrue_bounds");
+  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
+    lowbounds[ivol][0] = lamtrue_bounds[0];
+    highbounds[ivol][0] = lamtrue_bounds[1];
+  }
+
+  // Make lnM200m the second integration dimension
+  auto lnM200m_bounds = get_vector_double(cfg, modulelabel, "lnM200m_bounds");
+  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
+    lowbounds[ivol][1] = lnM200m_bounds[0];
+    highbounds[ivol][1] = lnM200m_bounds[1];
+  }
+
+  // Bounds on ztrue are zobs +- Nsigma_ztrue*sigma_z(zobs)
+  auto zobs = get_vector_double(cfg, modulelabel, "zobs");
+  double Nsigma_ztrue = cfg.view<double>(modulelabel, "Nsigma_ztrue");
+  SIGMA_PHOTOZ_DES_t sigma_model;
+  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
+    double sigma_z = sigma_model(zobs[ivol]);
+    lowbounds[ivol][2] = zobs[ivol] - Nsigma_ztrue * sigma_z;
+    highbounds[ivol][2] = zobs[ivol] + Nsigma_ztrue * sigma_z;
+  }
+
+  // Bounds on zeta are xi +- Nsigma_zeta (sigma=1)
+  auto xi = get_vector_double(cfg, modulelabel, "xi");
+  double Nsigma_zeta = cfg.view<double>(modulelabel, "Nsigma_zeta");
+  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
+    lowbounds[ivol][3] = xi[ivol] - Nsigma_zeta;
+    highbounds[ivol][3] = xi[ivol] + Nsigma_zeta;
+  }
+
+  // Convert into the expected IntegrationVolume object
+  std::vector<cubacpp::IntegrationVolume<N>> result;
+  result.reserve(lowbounds.size());
+  for (std::size_t i=0; i != lowbounds.size(); ++i) {
+    result.emplace_back(lowbounds[i], highbounds[i]);
+  }
+  return result;
 }
 
 // Set the grid points to evaluate the integral at
