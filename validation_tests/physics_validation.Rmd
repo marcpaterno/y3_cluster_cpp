@@ -162,7 +162,7 @@ For this testing, we compare results from our implementation to the  independent
 a. The comparisons are made at `r nunique(hmf$z)` unique $z$ values with `r nlevels(hmf$zbin)` different mass values.
 b. Over the range tested 
 ($`r min(hmf$mass)` < \lambda < `r max(hmf$mass)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(hmf$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -284,7 +284,7 @@ For this testing, we compare results from our implementation to the  independent
 a. The comparisons are made at `r nunique(mor_t2$lambda)` unique $\lambda$ values with `r nlevels(mor_t2$mbin)` different mass values.
 b. Over the range tested 
 ($`r min(mor_t2$lambda)` < \lambda < `r max(mor_t2$lambda)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(mor_t2$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -358,7 +358,7 @@ For this testing, we compare results from our implementation to the  independent
 a. The comparisons are made at `r nunique(lc_lt$lambda_cen)` unique $\lambda_{c}$ values with `r nlevels(lc_lt$lbin)` different $\lambda_{t}$ values.
 b. Over the range tested 
 ($`r min(lc_lt$lambda_cen)` < \lambda_{cen} < `r max(lc_lt$lambda_cen)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(lc_lt$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -432,7 +432,7 @@ For this testing, we compare results from our implementation to the  independent
 a. The comparisons are made at `r nunique(lo_lc$deltal)` unique values of $\lambda_{o}/\lambda_{c}$ with `r nlevels(lo_lc$Rbin)` different $R_{mis}$ values.
 a. Over the range tested 
 ($`r min(lo_lc$deltal)` < \lambda_{cen} < `r max(lo_lc$deltal)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(lo_lc$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -482,14 +482,14 @@ ggplot(lo_lc, aes(x= deltal, y = resid, color = within.frac)) +
 ```
 # Number Counts and Masses in SDSS
 
-**This test requires running sdss_analysis.ini in cosmosis_tests first**
+**This test requires running sdss_analysis.ini in cosmosis_tests first**.
 
 ```{r}
 local.frac.errormargin =  0.05
 local.abs.errormargin = abs.errormargin
 ```
 
-In this section, we compare the stacked number counts and mass predictions in stacked richness/mass bins for a SDSS like analysis. These values are the integrated results using components listed above. For this testing, we compare results from our implementation to the implementations from Matteo Costanzi for the SDSS cosmology analysis (Costanzi et al. 2019). The test is conducted for the following set of cosmology and scaling relation parameters specified in **cosmosis_tests/values_comp.in**
+In this section, we compare the stacked number counts and mass predictions in stacked richness/mass bins for a SDSS like analysis. These values are the integrated results using components listed above. For this testing, we compare results from our implementation to the implementations from Matteo Costanzi for the SDSS cosmology analysis (Costanzi et al. 2019). The test is conducted for the following set of cosmology and scaling relation parameters specified in **cosmosis_tests/values_comp.ini**.
 
 ```{r include = FALSE}
 inte <- read_tsv("../data/integrated_bin_test.out")
@@ -519,38 +519,41 @@ $`r max(abs(inte$residm))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(inte$fracerrm))`$. 
 
-```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.25, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
-  geom_smallpoint(aes(x =lambda , y = yntrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = lambda , y = yntest), color = testcolor, shape = testshape) +
+  geom_point(aes(x =lambda , y = yntrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = lambda , y = yntest), color = testcolor, shape = testshape) +
+  scale_x_log10() +
+  scale_y_log10() +
   xlab('Richness') +
   ylab("Number Counts")
 ```
 
 ```{r fig.cap = "Relative residual implementation or our approximation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
-  geom_smallpoint() +
-  scale_x_log10() +
+  geom_point() +
   guides(color = FALSE) +
+  scale_x_log10() +
   xlab("richness") +
   ylab("fractional residual for number counts") +
-   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
+  ylim(-5 * local.frac.errormargin, 5 * local.frac.errormargin) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
 
-```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results for average masses. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.25, fig.cap = "Absolute comparision of our implementation to the expected results for average masses. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
-  geom_smallpoint(aes(x =lambda , y = ymtrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = lambda , y = ymtest), color = testcolor, shape = testshape) +
+  geom_point(aes(x =lambda , y = ymtrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = lambda , y = ymtest), color = testcolor, shape = testshape) +
+  scale_x_log10() +
   xlab('Richness') +
   ylab("LogMass")
 ```
 
 ```{r fig.cap = "Relative residual implementation or our approximation to the expected results for average masses. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
-  geom_smallpoint() +
+  geom_point() +
   scale_x_log10() +
   guides(color = FALSE) +
   xlab("richness") +
@@ -602,8 +605,9 @@ $`r max(abs(inte$fracerrm))`$.
 
 ```{r fig.asp=0.3, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
-  geom_smallpoint(aes(x =lambda , y = yntrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = lambda , y = yntest), color = testcolor, shape = testshape) +
+  geom_point(aes(x =lambda , y = yntrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = lambda , y = yntest), color = testcolor, shape = testshape) +
+  scale_x_log10() +
   xlab('Richness') +
   ylab("Number Counts")+
   facet_wrap(zbin~.)
@@ -611,7 +615,7 @@ ggplot(inte) +
 
 ```{r fig.asp=0.3, fig.cap = "Relative residual implementation or our approximation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
-  geom_smallpoint() +
+  geom_point() +
   scale_x_log10() +
   guides(color = FALSE) +
   xlab("richness") +
@@ -625,8 +629,9 @@ ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
 
 ```{r fig.asp=0.3, fig.cap = "Absolute comparision of our implementation to the expected results for average masses. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
-  geom_smallpoint(aes(x =lambda , y = ymtrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = lambda , y = ymtest), color = testcolor, shape = testshape) +
+  geom_point(aes(x =lambda , y = ymtrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = lambda , y = ymtest), color = testcolor, shape = testshape) +
+  scale_x_log10() +
   xlab('Richness') +
   ylab("LogMass")+
   facet_wrap(zbin~.)
@@ -634,7 +639,7 @@ ggplot(inte) +
 
 ```{r fig.asp=0.3, fig.cap = "Relative residual implementation or our approximation to the expected results for average masses. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
-  geom_smallpoint() +
+  geom_point() +
   scale_x_log10() +
   guides(color = FALSE) +
   xlab("richness") +
@@ -677,7 +682,7 @@ For this testing, we compare results from our implementation to the function eva
 a.  The comparisons are made at `r nrow(xi_nfw)` unique values of $r$. 
 b. Over the range tested 
 ($`r min(xi_nfw$r)` < r < `r max(xi_nfw$r)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(xi_nfw$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -689,8 +694,8 @@ or the absolute difference to be less than
 $`r local.abs.errormargin`$.
 d. **`r testresult(xi_nfw)`**
 
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
-ggplot(xi_nfw) +
+```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
+ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0)) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
   scale_x_log10() +
@@ -723,6 +728,8 @@ local.abs.errormargin = abs.errormargin
 
 ```{r include = FALSE}
 xi_2h <- read_tsv("../deltasigma/test/xi_mm_2halo.out")
+# We limit the range of R in our plots. It would be better to do this
+# by controlling the generation of the xi_mm_2halo.out file.
 print(xi_2h)
 xi_2h <- mutate(xi_2h,
                  resid = ytrue - ytest,
@@ -740,7 +747,7 @@ For this testing, we compare results from our implementation to the function eva
 
 a. The comparisons are done at `r nrow(xi_2h)` unique values of $r$
 b. Over the range tested 
-($`r min(xi_2h$z)` < r < `r max(xi_2h$z)`$),
+($`r min(xi_2h$r)` < r < `r max(xi_2h$r)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(xi_2h$resid))`$;
@@ -753,8 +760,8 @@ or the absolute difference to be less than
 $`r local.abs.errormargin`$.
 d. **`r testresult(xi_2h)`.**
 
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
-ggplot(xi_2h) +
+```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
+ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0)) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
   scale_x_log10() +
@@ -763,8 +770,8 @@ ggplot(xi_2h) +
   ylab(expression(xi))
 ```
 
-```{r fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
-ggplot(xi_2h, aes(x = r, y = fracerr, color = within.abs)) +
+```{r fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test. Note that points for which both the predicted and expected values are zero are suppressed."}
+ggplot(filter(xi_2h, ytrue != 0), aes(x = r, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
   guides(color = FALSE) +
@@ -802,7 +809,7 @@ For this testing, we compare results from our implementation to the function eva
 a. The comparisons are done at `r nrow(sig_nfw)` unique values of $R$.
 b. Over the range tested 
 ($`r min(sig_nfw$r)` < R < `r max(sig_nfw$r)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(sig_nfw$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -845,6 +852,9 @@ local.abs.errormargin = abs.errormargin
 ```{r include = FALSE}
 sig_nfw <- read_tsv("../deltasigma/test/Sigma_mm_2halo.out")
 print(sig_nfw)
+# We cut off the range of R values at 30 Mpc. It would be better to do
+# this by controlling the generation of the Sigma_mm_2halo.out file.
+sig_nfw <- filter(sig_nfw, r <= 30)
 sig_nfw <- mutate(sig_nfw,
                  resid = ytrue - ytest,
                  fracerr = resid/ytrue,
@@ -860,7 +870,7 @@ $\Sigma_{mm}(R)$ is the cluster surface mass density profile in the cluster 2-ha
 a. The comparisons are done at `r nrow(sig_nfw)` unique values of $R$.
 b. Over the range tested 
 ($`r min(sig_nfw$r)` < R < `r max(sig_nfw$r)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(sig_nfw$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -923,7 +933,7 @@ a. The comparisons are done at `r nlevels(bias$zbin)` different $z$ values,
 and `r nunique(bias$logmass)` different $M_{200m}$ values.
 b. Over the range tested 
 ($`r min(bias$logmass)` < Log M_{200m} < `r max(bias$logmass)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(bias$resid))`$;
 the maximum magnitude of the fractional residual is
@@ -940,8 +950,9 @@ the value of $z$ is specified in the panel top label.
 
 ```{r fig.cap = "Absolute implementation of our approximation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(bias) +
-  geom_smallpoint(aes(x = logmass , y = ytrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = logmass , y = ytest), color = testcolor, shape = testshape) +
+  geom_point(aes(x = logmass , y = ytrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = logmass , y = ytest), color = testcolor, shape = testshape) +
+  scale_y_log10() +
   xlab("Log M200m") +
   ylab("Bias") +
   facet_wrap(zbin~.)
@@ -950,8 +961,9 @@ ggplot(bias) +
 
 ```{r, fig.cap = "Relative residual implementation of our approximation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(bias, aes(x = logmass, y = fracerr, color = within.abs)) +
-  geom_smallpoint() +
+  geom_point() +
   guides(color = FALSE) +
+  scale_y_log10() +
   xlab("Log M200m") +
   ylab("fractional residual") +
   geom_hline(yintercept = local.frac.errormargin, color = "blue") +
@@ -1002,15 +1014,15 @@ d. **`r testresult(miscent)`**
 
 ```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
 ggplot(miscent) +
-  geom_smallpoint(aes(x = rmis, y = probtrue), color = truecolor, shape = trueshape) +
-  geom_smallpoint(aes(x = rmis, y = probtest), color = testcolor, shape = testshape) +
+  geom_point(aes(x = rmis, y = probtrue), color = truecolor, shape = trueshape) +
+  geom_point(aes(x = rmis, y = probtest), color = testcolor, shape = testshape) +
   xlab(expression(R_mis)) +
   ylab(expression(Probability))
 ```
 
 ```{r fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(miscent, aes(x = rmis, y = fracerr, color = within.abs)) +
-  geom_smallpoint() +
+  geom_point() +
   guides(color = FALSE) +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab(expression(R_mis)) +
@@ -1050,7 +1062,7 @@ For this testing, we compare our function output to the evaluations using the as
 a. The comparisons are done at, `r nunique(sig_crit$zs)` unique $z_s$ values, with `r nlevels(sig_crit$zbin)` different $z_l$ values
 b. Over the range tested 
  ($`r min(sig_crit$zs)` < zs < `r max(sig_crit$zs)`$),
-the maximum magnitude of the absoluteresidual between the expected value
+the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(sig_crit$resid))`$;
 the maximum magnitude of the fractional residual is
