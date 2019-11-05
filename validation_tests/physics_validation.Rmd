@@ -75,6 +75,7 @@ This condition is verified automatically and the result is noted in bold in each
 # Survey Area
 
 ## SDSS Survey footprint function
+
 ```{r}
 local.frac.errormargin = frac.errormargin
 local.abs.errormargin = abs.errormargin
@@ -152,7 +153,6 @@ hmf <- mutate(hmf,
                  within.abs = (abs(resid) < local.abs.errormargin),
                  pass = within.frac | within.abs)
 ```
-
 
 $n(M_{200m}, z)$ is the halo mass function, which describes the 3D cosmic density of halos at a given mass $M_200m$ and $z$. 
 We have modified the CosmoSIS halo mass function module to consider the effect of massive neutrinos (Costanzi et al. 2013).
@@ -255,6 +255,7 @@ ggplot(dvdodz, aes(x = z, y = fracerr, color = within.abs)) +
 ```
 
 # Scaling Relations
+
 ## Mass-observable relation
 
 ```{r}
@@ -274,7 +275,6 @@ mor_t2 <- mutate(mor_t2,
                  within.abs = (abs(resid) < local.abs.errormargin),
                  pass = within.frac | within.abs)
 ```
-
 
 $P(\lambda |M_{200m})$ describes the probabilistic distribution of the cluster observable richness ($\lambda$) at a given mass $M_200m$. 
 Our calculation is implemented in the file `mor_t2.hh`.
@@ -457,7 +457,6 @@ ggplot(lo_lc) +
   facet_wrap(Rbin~.)
 ```
 
-
 ```{r fig.asp=0.7, fig.cap = "Relative residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(lo_lc, aes(x = deltal, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
@@ -480,6 +479,7 @@ ggplot(lo_lc, aes(x= deltal, y = resid, color = within.frac)) +
   xlab(expression(lambda_miscent/lambda_cent)) +
   facet_wrap(Rbin ~ .)
 ```
+
 # Number Counts and Masses in SDSS
 
 **This test requires running sdss_analysis.ini in cosmosis_tests first**.
@@ -505,6 +505,7 @@ inte <- mutate(inte,
                  within.abs = (abs(residn) < local.abs.errormargin),
                  pass = within.frac | within.abs)
 ```
+
 a. The comparisons are made at `r nunique(inte$lambda)` unique values of $\lambda$ bins.
 a. Over the **number of bins** tested and for the stacked **number counts**,
 the maximum magnitude of the absolute residual between the expected value
@@ -540,7 +541,6 @@ ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
-
 
 ```{r fig.asp=0.25, fig.cap = "Absolute comparison of our implementation to the expected results for average masses. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
@@ -589,6 +589,7 @@ inte <- mutate(inte,
                  within.abs = (abs(residn) < local.abs.errormargin),
                  pass = within.frac | within.abs)
 ```
+
 a. The comparisons are made at `r nunique(inte$lambda)` unique values of $\lambda$ bins and `r nunique(inte$zlo)` unique values of $z$ bins.
 a. Over the **number of bins** tested and for the stacked **number counts**,
 the maximum magnitude of the absolute residual between the expected value
@@ -625,7 +626,6 @@ ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")+
   facet_wrap(zbin~.)
 ```
-
 
 ```{r fig.asp=0.3, fig.cap = "Absolute comparison of our implementation to the expected results for average masses. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
@@ -675,6 +675,7 @@ xi_nfw <- mutate(xi_nfw,
                  within.abs = (abs(resid) < local.abs.errormargin),
                  pass = within.frac | within.abs)
 ```
+
 $\xi_{NFW}(r)$ is the cluster matter correlation function in the 1-halo regime, adopting an NFW model. 
 
 For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for a cluster of $M_{200m}=3.199267137797384375e+14 M_\odot/h$ and $c=5$.
