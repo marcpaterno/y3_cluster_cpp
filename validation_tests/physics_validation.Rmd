@@ -45,8 +45,8 @@ for a single function in our calculation.
 
 a. For each of these functions,
 we have evaluations from a trusted source that are assumed to be correct.
-We test *our implementation* by comparing the results to the evaluations from the trusted source
-c. Unless otherwise indicated, we require fractional differences to be less than
+We test *our implementation* by comparing the results to the evaluations from the trusted source.
+a. Unless otherwise indicated, we require fractional differences to be less than
 $`r frac.errormargin`$,
 **or** absolute differences less than
 $`r abs.errormargin`$.
@@ -55,11 +55,11 @@ smaller than the systematic uncertainty
 to which the value is known from the trusted source.
 An absolute error bound is needed for the cases in which
 the predicted value is 0 or very close to 0.
-d. In each section, we show both absolute and residual comparisons.
+a. In each section, we show both absolute and residual comparisons.
 In the absolute comparison plots,
 the *expected* (or *true*) values are shown in `r truecolor`,
 and results from our *implementation* (or *test* values) are shown in `r testcolor`. We also show the fractional (relative) and absolute residuals.
-e. In the plot of the fractional residuals,
+a. In the plot of the fractional residuals,
 the color of each point is determined by whether or not that point
 passes the absolute residual test.
 In the plot of the absolute residuals,
@@ -68,7 +68,7 @@ passes the fractional residual test.
 Thus, in each plot, a point passes the test if *either* it is blue or within
 the error bounds (indicated by horizontal lines).
 Points that fail the test will be both red and outside of the allowable error bounds (indicated by horizontal lines).
-f. For a test to pass, it is required that every calculated point pass.
+a. For a test to pass, it is required that every calculated point pass.
 This condition is verified automatically and the result is noted in bold in each section.
 
 
@@ -111,7 +111,7 @@ or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
 c. **`r testresult(omega_z)`**
 
-```{r fig.cap = "Absolute comparision of our implementation results (cyan points) to the expected values (black points) for $\\Omega_z$. Note that overplotting may obscure the expected values."}
+```{r fig.cap = "Absolute comparison of our implementation results (cyan points) to the expected values (black points) for $\\Omega_z$. Note that over-plotting may obscure the expected values."}
 ggplot(omega_z) +
   geom_smallpoint(aes(x = z, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = z, y = ytest), color = testcolor, shape = testshape) +
@@ -160,23 +160,23 @@ We have modified the CosmoSIS halo mass function module to consider the effect o
 For this testing, we compare results from our implementation to the  independent function evaluations from Matteo Costanzi in the SDSS cluster cosmology analysis (Costanzi et al. 2019)
 
 a. The comparisons are made at `r nunique(hmf$z)` unique $z$ values with `r nlevels(hmf$zbin)` different mass values.
-b. Over the range tested 
-($`r min(hmf$mass)` < \lambda < `r max(hmf$mass)`$),
+a. Over the range tested 
+($`r min(hmf$mass)` < M < `r max(hmf$mass)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(hmf$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(hmf$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. **`r testresult(hmf)`**
+a. **`r testresult(hmf)`**
 
 Each panel in the figure below corresponds to a different $z$ value, specified in the panel top label.
 
-```{r fig.asp=0.4,fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.4,fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(hmf) +
   geom_smallpoint(aes(x = mass, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = mass, y = ytest), color = testcolor, shape = testshape) +
@@ -217,7 +217,7 @@ dvdodz <- mutate(dvdodz,
                   pass = within.frac | within.abs)
 ```
 
-$\frac{dV}{d\Omega dz}$ is the comoving volume element in solid angle $d \Omega$ and redshift interval $dz$, and is a function of $z$. Our implementation is in the file `dv_do_dz_t.hh`.
+$\frac{dV}{d\Omega dz}$ is the co-moving volume element in solid angle $d \Omega$ and redshift interval $dz$, and is a function of $z$. Our implementation is in the file `dv_do_dz_t.hh`.
 
 For this testing, we compare our function output to the independent function evaluations from Matteo Costanzi in the SDSS cluster cosmology analysis (Costanzi et al. 2019), calculated with $\Omega_m =0.3$,  $\Omega_\Lambda =0.7$, $h_0=0.7$.
 
@@ -229,13 +229,13 @@ and our approximation is
 $`r max(abs(dvdodz$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(dvdodz$fracerr))`$.
-b. For this test, we require the relative residuals to be less than
+a. For this test, we require the relative residuals to be less than
 $`r local.frac.errormargin`$,
 or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
-b. **`r testresult(dvdodz)`**
+a. **`r testresult(dvdodz)`**
 
-```{r fig.cap = "Absolute comparision of our approximation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.cap = "Absolute comparison of our approximation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(dvdodz) +
   geom_smallpoint(aes(x = z, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = z, y = ytest), color = testcolor, shape = testshape) +
@@ -276,29 +276,29 @@ mor_t2 <- mutate(mor_t2,
 ```
 
 
-$P(\lambda |M_{200m})$ describes the probabilitic districution of the cluster observable, richness $\lambda$ at a given mass $M_200m$. 
+$P(\lambda |M_{200m})$ describes the probabilistic distribution of the cluster observable richness ($\lambda$) at a given mass $M_200m$. 
 Our calculation is implemented in the file `mor_t2.hh`.
 
 For this testing, we compare results from our implementation to the  independent function evaluations from Matteo Costanzi in the SDSS cluster cosmology analysis (Costanzi et al. 2019)
 
 a. The comparisons are made at `r nunique(mor_t2$lambda)` unique $\lambda$ values with `r nlevels(mor_t2$mbin)` different mass values.
-b. Over the range tested 
+a. Over the range tested 
 ($`r min(mor_t2$lambda)` < \lambda < `r max(mor_t2$lambda)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(mor_t2$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(mor_t2$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. **`r testresult(mor_t2)`**
+a. **`r testresult(mor_t2)`**
 
 Each panel in the figure below corresponds to a different $\mathrm{log} M_{200m}$ value, specified in the panel top label.
 
-```{r fig.asp=0.4,fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.4,fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(mor_t2) +
   geom_smallpoint(aes(x = lambda, y = probtrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = lambda, y = probtest), color = testcolor, shape = testshape) +
@@ -350,29 +350,29 @@ lc_lt <- mutate(lc_lt,
                  pass = within.frac | within.abs)
 ```
 
-Projections of LOS structures cause a shift and an extra scatter to the values of cluster richness $\lambda$. $P(\lambda_c |\lambda_t)$ describes the probabilitic distribution of the richness scatter (between $\lambda_c$ and $\lambda_t$) caused by projections. 
+Projections of LOS structures cause a shift and an extra scatter to the values of cluster richness $\lambda$. $P(\lambda_c |\lambda_t)$ describes the probabilistic distribution of the richness scatter (between $\lambda_c$ and $\lambda_t$) caused by projections. 
 Our calculation is implemented in the file `lc_lt_t.hh`.
 
 For this testing, we compare results from our implementation to the  independent function evaluations from Matteo Costanzi's projection analyses (Costanzi et al. 2019)
 
 a. The comparisons are made at `r nunique(lc_lt$lambda_cen)` unique $\lambda_{c}$ values with `r nlevels(lc_lt$lbin)` different $\lambda_{t}$ values.
-b. Over the range tested 
+a. Over the range tested 
 ($`r min(lc_lt$lambda_cen)` < \lambda_{cen} < `r max(lc_lt$lambda_cen)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(lc_lt$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(lc_lt$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
  $`r local.abs.errormargin`$.
-d. **`r testresult(lc_lt)`**
+a. **`r testresult(lc_lt)`**
 
 Each panel in the figure below corresponds to a $\lambda_{t}$ value,  specified in the panel top label.
 
-```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.7, fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(lc_lt) +
   geom_smallpoint(aes(x = lambda_cen, y = probtrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = lambda_cen, y = probtest), color = testcolor, shape = testshape) +
@@ -424,7 +424,7 @@ lo_lc <- mutate(lo_lc,
                  pass = within.frac | within.abs)
 ```
 
-Mis-centering cause a shift and an extra scatter to the values of cluster richness $\lambda$. $P(\lambda_o/\lambda_c | R_{mis})$ describes the probabilitic distribution of the richness shift ($\lambda_o/\lambda_c$) with a mis-centering distance $R_{mis}$ 
+Mis-centering cause a shift and an extra scatter to the values of cluster richness $\lambda$. $P(\lambda_o/\lambda_c | R_{mis})$ describes the probabilistic distribution of the richness shift ($\lambda_o/\lambda_c$) with a mis-centering distance $R_{mis}$ 
 Our calculation is implemented in the file `lo_lc_t.hh`.
 
 For this testing, we compare results from our implementation to the  independent function evaluations from Yuanyuan Zhang's mis-centering analysis (Zhang et al. 2019).
@@ -446,7 +446,7 @@ c. **`r testresult(lo_lc)`**
 
 Each panel in the figure below corresponds to a $R_{mis}$ value, specified in the panel top label.
 
-```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.7, fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(lo_lc) +
   geom_smallpoint(aes(x = deltal , y = probtrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = deltal , y = probtest), color = testcolor, shape = testshape) +
@@ -519,7 +519,7 @@ $`r max(abs(inte$residm))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(inte$fracerrm))`$. 
 
-```{r fig.asp=0.25, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.25, fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
   geom_point(aes(x =lambda , y = yntrue), color = truecolor, shape = trueshape) +
   geom_point(aes(x = lambda , y = yntest), color = testcolor, shape = testshape) +
@@ -542,7 +542,7 @@ ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
 ```
 
 
-```{r fig.asp=0.25, fig.cap = "Absolute comparision of our implementation to the expected results for average masses. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.25, fig.cap = "Absolute comparison of our implementation to the expected results for average masses. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
   geom_point(aes(x =lambda , y = ymtrue), color = truecolor, shape = trueshape) +
   geom_point(aes(x = lambda , y = ymtest), color = testcolor, shape = testshape) +
@@ -603,7 +603,7 @@ $`r max(abs(inte$residm))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(inte$fracerrm))`$. 
 
-```{r fig.asp=0.3, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.3, fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
   geom_point(aes(x =lambda , y = yntrue), color = truecolor, shape = trueshape) +
   geom_point(aes(x = lambda , y = yntest), color = testcolor, shape = testshape) +
@@ -627,7 +627,7 @@ ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
 ```
 
 
-```{r fig.asp=0.3, fig.cap = "Absolute comparision of our implementation to the expected results for average masses. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.3, fig.cap = "Absolute comparison of our implementation to the expected results for average masses. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(inte) +
   geom_point(aes(x =lambda , y = ymtrue), color = truecolor, shape = trueshape) +
   geom_point(aes(x = lambda , y = ymtest), color = testcolor, shape = testshape) +
@@ -680,21 +680,21 @@ $\xi_{NFW}(r)$ is the cluster matter correlation function in the 1-halo regime, 
 For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for a cluster of $M_{200m}=3.199267137797384375e+14 M_\odot/h$ and $c=5$.
 
 a.  The comparisons are made at `r nrow(xi_nfw)` unique values of $r$. 
-b. Over the range tested 
+a. Over the range tested 
 ($`r min(xi_nfw$r)` < r < `r max(xi_nfw$r)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(xi_nfw$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(xi_nfw$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. **`r testresult(xi_nfw)`**
+a. **`r testresult(xi_nfw)`**
 
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
+```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
 ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0)) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
@@ -716,8 +716,6 @@ ggplot(xi_nfw, aes(x = r, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
-
-
 
 ## $\xi$ 2-halo
 
@@ -746,21 +744,21 @@ $\xi_{mm}(r)$ is the matter correlation function in the cluster 2-halo regime, a
 For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for $z=0.201010$.
 
 a. The comparisons are done at `r nrow(xi_2h)` unique values of $r$
-b. Over the range tested 
+a. Over the range tested 
 ($`r min(xi_2h$r)` < r < `r max(xi_2h$r)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(xi_2h$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(xi_2h$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. **`r testresult(xi_2h)`.**
+a. **`r testresult(xi_2h)`.**
 
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
+```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
 ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0)) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
@@ -807,21 +805,21 @@ $\Sigma_{NFW}(R)$ is the cluster surface mass density profile in the 1-halo regi
 For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package, for a cluster of $M_{200m}=3.199267137797384375e+14 M_\odot/h$ and $c=5$.
 
 a. The comparisons are done at `r nrow(sig_nfw)` unique values of $R$.
-b. Over the range tested 
+a. Over the range tested 
 ($`r min(sig_nfw$r)` < R < `r max(sig_nfw$r)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(sig_nfw$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(sig_nfw$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. `r testresult(sig_nfw)`.
+a. **`r testresult(sig_nfw)`**.
 
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(sig_nfw) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
@@ -842,6 +840,7 @@ ggplot(sig_nfw, aes(x = r, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
+
 ## $\Sigma$ 2-halo
 
 ```{r}
@@ -868,21 +867,21 @@ sig_nfw <- mutate(sig_nfw,
 $\Sigma_{mm}(R)$ is the cluster surface mass density profile in the cluster 2-halo regime, adopting a non-linear matter power spectrum, and not accounting for cluster bias.
 
 a. The comparisons are done at `r nrow(sig_nfw)` unique values of $R$.
-b. Over the range tested 
+a. Over the range tested 
 ($`r min(sig_nfw$r)` < R < `r max(sig_nfw$r)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(sig_nfw$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(sig_nfw$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. `r testresult(sig_nfw)`.
+a. **`r testresult(sig_nfw)`**.
 
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(sig_nfw) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = r, y = ytest), color = testcolor, shape = testshape) +
@@ -927,28 +926,28 @@ bias <- mutate(bias,
 
 $b(M_{200m}, z)$ is the halo bias at mass $M_{200m}$ and redshift $z$.
 
-For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c pacakge.
+For this testing, we compare results from our implementation to the function evaluations from directly calling Tom McClintock's python/c package.
 
 a. The comparisons are done at `r nlevels(bias$zbin)` different $z$ values,
 and `r nunique(bias$logmass)` different $M_{200m}$ values.
-b. Over the range tested 
+a. Over the range tested 
 ($`r min(bias$logmass)` < Log M_{200m} < `r max(bias$logmass)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(bias$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(bias$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. **`r testresult(bias)`**
+a. **`r testresult(bias)`**.
 
 Each panel in the figure below corresponds to a $z$ bin;
 the value of $z$ is specified in the panel top label.
 
-```{r fig.cap = "Absolute implementation of our approximation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.cap = "Absolute implementation of our approximation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(bias) +
   geom_point(aes(x = logmass , y = ytrue), color = truecolor, shape = trueshape) +
   geom_point(aes(x = logmass , y = ytest), color = testcolor, shape = testshape) +
@@ -957,7 +956,6 @@ ggplot(bias) +
   ylab("Bias") +
   facet_wrap(zbin~.)
 ```
-
 
 ```{r, fig.cap = "Relative residual implementation of our approximation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(bias, aes(x = logmass, y = fracerr, color = within.abs)) +
@@ -974,7 +972,7 @@ ggplot(bias, aes(x = logmass, y = fracerr, color = within.abs)) +
 
 # Mass Profile corrections
 
-## Miscentering offset
+## Mis-centering offset
 
 ```{r}
 local.frac.errormargin = frac.errormargin
@@ -993,26 +991,26 @@ miscent <- mutate(miscent,
                   pass = within.frac | within.abs)
 ```
 
-$P(R_{mis})$ is the probabilit distribution of the mis-centering offset $R_{mis}$.
+$P(R_{mis})$ is the probabilistic distribution of the mis-centering offset $R_{mis}$.
 Our calculation is implemented in the file `roffset_t.hh`.
 
 For this testing, we compare our function output to the evaluations from Yuanyuan Zhang in the DES Y1 centering analysis (Zhang et al. 2019).
 
 a. The comparisons are done at `r nrow(miscent)` unique $R_{mis}$ values.
-b. Over the range tested
+a. Over the range tested
 $(`r min(miscent$rmis)` < R_{mis} < `r max(miscent$rmis)`)$,
 the maximum magnitude of the absolute residual between the expected value
 and our approximation is
 $`r max(abs(miscent$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(miscent$fracerr))`$.
-c. For this test, we require the relative residuals to be less than
+a. For this test, we require the relative residuals to be less than
 $`r local.frac.errormargin`$,
 or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
-d. **`r testresult(miscent)`**
+a. **`r testresult(miscent)`**.
 
-```{r fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(miscent) +
   geom_point(aes(x = rmis, y = probtrue), color = truecolor, shape = trueshape) +
   geom_point(aes(x = rmis, y = probtest), color = testcolor, shape = testshape) +
@@ -1030,7 +1028,6 @@ ggplot(miscent, aes(x = rmis, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
-
 
 # Lensing
 
@@ -1060,24 +1057,24 @@ $\Sigma_{crit}(z_l, z_s)$ is the inverse of the critical surface density of a le
 For this testing, we compare our function output to the evaluations using the astropy package with a flat cosmology $\Omega_m=0.3$, $\Omega_b=0.06$, $h_0=0.7$.
 
 a. The comparisons are done at, `r nunique(sig_crit$zs)` unique $z_s$ values, with `r nlevels(sig_crit$zbin)` different $z_l$ values
-b. Over the range tested 
+a. Over the range tested 
  ($`r min(sig_crit$zs)` < zs < `r max(sig_crit$zs)`$),
 the maximum magnitude of the absolute residual between the expected value
 and our calculated value is
 $`r max(abs(sig_crit$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(sig_crit$fracerr))`$.
-c. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 **or** the absolute difference to be less than
 $`r local.abs.errormargin`$.
-d. **`r testresult(sig_crit)`**
+a. **`r testresult(sig_crit)`**.
 
 Each panel in the figure below corresponds to a $\lambda_{c}$ bin;
 the value of the $\lambda_{c}$ mass is specified in the panel top label.
 
-```{r fig.asp=0.7, fig.cap = "Absolute comparision of our implementation to the expected results. Note that overplotting may obscure the expected values, if the approximated values are very close."}
+```{r fig.asp=0.7, fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(sig_crit) +
   geom_smallpoint(aes(x = zs, y = ytrue), color = truecolor, shape = trueshape) +
   geom_smallpoint(aes(x = zs , y = ytest), color = testcolor, shape = testshape) +
@@ -1086,7 +1083,7 @@ ggplot(sig_crit) +
   facet_wrap(" "+zbin~.)
 ```
 
-```{r fig.asp=0.7, fig.cap = "Absolute residual comparison of our implementaion to the expected results. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
+```{r fig.asp=0.7, fig.cap = "Absolute residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
 ggplot(sig_crit, aes(x= zs, y = resid, color = within.frac)) +
   geom_smallpoint() +
   guides(color = FALSE) +
