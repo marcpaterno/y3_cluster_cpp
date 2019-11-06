@@ -27,7 +27,7 @@ abs.errormargin = 1.0e-12
 testresult <-function(df) {
   npass <- sum(df$pass)
   npoints <- nrow(df)
-  str_interp("For this test, ${sum(df$pass)} of ${nrow(df)} points pass.")
+  str_interp("**For this test, ${sum(df$pass)} of ${nrow(df)} points pass.**")
 }
 
 geom_smallpoint <- function(...) geom_point(..., size = 0.5)
@@ -106,11 +106,11 @@ and our approximation is
 $`r max(abs(omega_z$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(omega_z$fracerr))`$.
-b. For this test, we require the relative residuals to be less than
+a. For this test, we require the relative residuals to be less than
 $`r local.frac.errormargin`$,
 or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
-c. **`r testresult(omega_z)`**
+a. `r testresult(omega_z)`
 
 ```{r fig.cap = "Absolute comparison of our implementation results (cyan points) to the expected values (black points) for $\\Omega_z$. Note that over-plotting may obscure the expected values."}
 ggplot(omega_z) +
@@ -172,7 +172,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(hmf)`**
+a. `r testresult(hmf)`
 
 Each panel in the figure below corresponds to a different $z$ value, specified in the panel top label.
 
@@ -233,7 +233,7 @@ a. For this test, we require the relative residuals to be less than
 $`r local.frac.errormargin`$,
 or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(dvdodz)`**
+a. `r testresult(dvdodz)`
 
 ```{r fig.cap = "Absolute comparison of our approximation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(dvdodz) +
@@ -294,7 +294,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(mor_t2)`**
+a. `r testresult(mor_t2)`
 
 Each panel in the figure below corresponds to a different $\mathrm{log} M_{200m}$ value, specified in the panel top label.
 
@@ -368,7 +368,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
  $`r local.abs.errormargin`$.
-a. **`r testresult(lc_lt)`**
+a. `r testresult(lc_lt)`
 
 Each panel in the figure below corresponds to a $\lambda_{t}$ value,  specified in the panel top label.
 
@@ -437,12 +437,12 @@ and our calculated value is
 $`r max(abs(lo_lc$resid))`$;
 the maximum magnitude of the fractional residual is
 $`r max(abs(lo_lc$fracerr))`$.
-b. For this test,
+a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-c. **`r testresult(lo_lc)`**
+a. `r testresult(lo_lc)`
 
 Each panel in the figure below corresponds to a $R_{mis}$ value, specified in the panel top label.
 
@@ -693,7 +693,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(xi_nfw)`**
+a. `r testresult(xi_nfw)`
 
 ```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
 ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0)) +
@@ -757,7 +757,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(xi_2h)`.**
+a. `r testresult(xi_2h)`
 
 ```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
 ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0)) +
@@ -818,7 +818,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(sig_nfw)`**.
+a. `r testresult(sig_nfw)`
 
 ```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(sig_nfw) +
@@ -880,7 +880,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(sig_nfw)`**.
+a. `r testresult(sig_nfw)`
 
 ```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(sig_nfw) +
@@ -943,7 +943,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(bias)`**.
+a. `r testresult(bias)`
 
 Each panel in the figure below corresponds to a $z$ bin;
 the value of $z$ is specified in the panel top label.
@@ -1009,7 +1009,7 @@ a. For this test, we require the relative residuals to be less than
 $`r local.frac.errormargin`$,
 or the absolute residuals to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(miscent)`**.
+a. `r testresult(miscent)`
 
 ```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close."}
 ggplot(miscent) +
@@ -1070,7 +1070,7 @@ we require the relative differences to be
 less than $`r local.frac.errormargin`$,
 **or** the absolute difference to be less than
 $`r local.abs.errormargin`$.
-a. **`r testresult(sig_crit)`**.
+a. `r testresult(sig_crit)`
 
 Each panel in the figure below corresponds to a $\lambda_{c}$ bin;
 the value of the $\lambda_{c}$ mass is specified in the panel top label.
