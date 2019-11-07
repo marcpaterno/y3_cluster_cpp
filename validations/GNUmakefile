@@ -35,14 +35,12 @@ clean:
 	cd ../test && ./omega_z_sdss_test
 
 # mfp: It appears to me that cosmosis_tests/mf_tinker_test.py requires the file
-# ../test/test_hmf_z0_z03.dat, which appears to be created by running the
-# program ../test/hmf_t_test. However, this executable is *not* being built by
-# our CMake-generated build. The file ../test/test_hmf_z0_z03.dat has been
+# ../test/test_hmf_z0_z03.dat. The file ../test/test_hmf_z0_z03.dat has been
 # checked into the git repository, so for now we only have our target depend on
 # that file.
-../data/masses_test.out: ../cosmosis_tests/mf_tinker_test.py ../cosmosis_tests/test.ini ../test/test_hmf_z0_z03.dat ../cosmosis_tests/values_comp.ini
-	@echo "About to run cosmosis to generate $<"
-	cd .. && cosmosis cosmosis_tests/test.ini > /dev/null
+../data/masses_test.out: ../cosmosis_tests/mf_tinker_test.py ../cosmosis_tests/masses_test.ini ../test/test_hmf_z0_z03.dat ../cosmosis_tests/values_comp.ini
+	@echo "About to run cosmosis to generate $@"
+	cd .. && cosmosis cosmosis_tests/masses_test.ini > /dev/null
 
 ../data/dvdodz_test.out: ../test/dv_do_dz_t_test
 	cd ../test && ./dv_do_dz_t_test
