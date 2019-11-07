@@ -30,6 +30,10 @@ clean:
 	rm -f figure/*
 	rm -rf physics_validation_files/
 	rm -f ../data/*.out
+	rm -rf ../masses_test_output
+	rm -rf ../sdss_analysis_output
+	rm -rf ../y1_analysis_output
+	rm -rf ../OUTPUT
 
 ../data/omega_z_sdss.out: ../test/omega_z_sdss_test
 	cd ../test && ./omega_z_sdss_test
