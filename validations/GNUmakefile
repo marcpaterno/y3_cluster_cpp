@@ -11,6 +11,7 @@ DATAFILES=../data/omega_z_sdss.out \
 		  ../data/Sigma_crit_test.out
 
 all: html
+data: $(DATAFILES)
 html: physics_validation.html
 pdf: physics_validation.pdf
 word: physics_validation.docx
@@ -28,6 +29,7 @@ clean:
 	rm -f *.md *.html *.pdf *.docx
 	rm -f figure/*
 	rm -rf physics_validation_files/
+	rm -f ../data/*.out
 
 ../data/omega_z_sdss.out: ../test/omega_z_sdss_test
 	cd ../test && ./omega_z_sdss_test
@@ -49,7 +51,7 @@ clean:
 	cd ../test && ./mor_t2_test
 
 ../data/lc_lt_test.out: ../test/lc_lt_t_test
-	cd ../test && ./lc_lc_t_test
+	cd ../test && ./lc_lt_t_test
 
 ../data/lo_lc_test.out: ../test/lo_lc_t_test
 	cd ../test/&& ./lo_lc_t_test
