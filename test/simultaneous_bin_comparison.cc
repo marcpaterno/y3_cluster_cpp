@@ -41,7 +41,6 @@ using y3_cluster::test_simultaneous_bins;
 int
 main()
 {
-  // All stolen from trivial_gamma_t
   // ============ Cosmological Parameters ============
   //            (to be passed by CosmoSIS)
   const double Omega_M = 0.3;

@@ -46,15 +46,6 @@ target_include_directories(integration_test
                            ${EIGEN3_INCLUDE_DIR})
 add_test(integration_test integration_test)
 
-#add_executable(trivial_gamma_t trivial_gamma_t.cc)
-#target_link_libraries(trivial_gamma_t PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} profiler utils cfitsio models)
-#target_include_directories(trivial_gamma_t
-#                           PRIVATE
-#                           ${CMAKE_SOURCE_DIR}/src
-#                           ${CUBA_INCLUDE_DIR}
-#                           ${CUBACPP_DIR}
-#                           ${EIGEN3_INCLUDE_DIR})
-
 add_executable(transform_test transform.test.cc)
 target_link_libraries(transform_test PRIVATE testmain)
 target_include_directories(transform_test
