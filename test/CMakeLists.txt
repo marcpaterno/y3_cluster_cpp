@@ -446,3 +446,8 @@ target_include_directories(mor_y3xspt_t
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(mor_y3xspt_t mor_y3xspt_t)
 
+add_executable(int_pxizeta_test int_pxizeta.test.cc)
+target_link_libraries(int_pxizeta_test PRIVATE testmain ${GSL_LIBRARIES})
+target_include_directories(int_pxizeta_test PRIVATE ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(int_pxizeta_test int_pxizeta_test)
