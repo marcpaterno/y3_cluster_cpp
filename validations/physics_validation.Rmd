@@ -133,7 +133,7 @@ ggplot(omega_z, aes(x = z, y = fracerr, color = within.abs)) +
 
 # Halo Mass Function
 
-**This test requires running test.ini in cosmosis_tests first**
+**This test requires running masses_test.ini in cosmosis_tests first**
 Need to do better than this in the future.
 
 ```{r}

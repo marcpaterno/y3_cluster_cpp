@@ -11,6 +11,7 @@ DATAFILES=../data/omega_z_sdss.out \
 		  ../data/Sigma_crit_test.out
 
 all: html
+data: $(DATAFILES)
 html: physics_validation.html
 pdf: physics_validation.pdf
 word: physics_validation.docx
@@ -28,19 +29,22 @@ clean:
 	rm -f *.md *.html *.pdf *.docx
 	rm -f figure/*
 	rm -rf physics_validation_files/
+	rm -f ../data/*.out
+	rm -rf ../masses_test_output
+	rm -rf ../sdss_analysis_output
+	rm -rf ../y1_analysis_output
+	rm -rf ../OUTPUT
 
 ../data/omega_z_sdss.out: ../test/omega_z_sdss_test
 	cd ../test && ./omega_z_sdss_test
 
 # mfp: It appears to me that cosmosis_tests/mf_tinker_test.py requires the file
-# ../test/test_hmf_z0_z03.dat, which appears to be created by running the
-# program ../test/hmf_t_test. However, this executable is *not* being built by
-# our CMake-generated build. The file ../test/test_hmf_z0_z03.dat has been
+# ../test/test_hmf_z0_z03.dat. The file ../test/test_hmf_z0_z03.dat has been
 # checked into the git repository, so for now we only have our target depend on
 # that file.
-../data/masses_test.out: ../cosmosis_tests/mf_tinker_test.py ../cosmosis_tests/test.ini ../test/test_hmf_z0_z03.dat ../cosmosis_tests/values_comp.ini
-	@echo "About to run cosmosis to generate $<"
-	cd .. && cosmosis cosmosis_tests/test.ini > /dev/null
+../data/masses_test.out: ../cosmosis_tests/mf_tinker_test.py ../cosmosis_tests/masses_test.ini ../test/test_hmf_z0_z03.dat ../cosmosis_tests/values_comp.ini
+	@echo "About to run cosmosis to generate $@"
+	cd .. && cosmosis cosmosis_tests/masses_test.ini > /dev/null
 
 ../data/dvdodz_test.out: ../test/dv_do_dz_t_test
 	cd ../test && ./dv_do_dz_t_test
@@ -49,7 +53,7 @@ clean:
 	cd ../test && ./mor_t2_test
 
 ../data/lc_lt_test.out: ../test/lc_lt_t_test
-	cd ../test && ./lc_lc_t_test
+	cd ../test && ./lc_lt_t_test
 
 ../data/lo_lc_test.out: ../test/lo_lc_t_test
 	cd ../test/&& ./lo_lc_t_test

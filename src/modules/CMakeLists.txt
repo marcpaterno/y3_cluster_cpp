@@ -169,24 +169,6 @@ target_include_directories(sdss_analysis
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
-#add_library(default_cluster_abundance MODULE default_cluster_abundance.cc)
-#target_link_libraries(default_cluster_abundance
-#                      PRIVATE
-#                      utils
-#                      profiler
-#                      cfitsio
-#                      ${CUBA_LIBRARIES}
-#                      ${GSL_LIBRARIES}
-#                      cosmosis)
-#target_include_directories(default_cluster_abundance
-#                           PRIVATE
-#                           ${CMAKE_SOURCE_DIR}
-#                           ${CMAKE_SOURCE_DIR}/externals
-#                           ${CMAKE_SOURCE_DIR}/src
-#                           ${CUBA_INCLUDE_DIR}
-#                           ${CUBACPP_DIR}
-#                           ${EIGEN3_INCLUDE_DIR})
-
 add_library(cluster_abundance_covariance MODULE cluster_abundance_covariance.cc)
 target_link_libraries(cluster_abundance_covariance
                       PRIVATE

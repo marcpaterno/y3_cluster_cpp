@@ -113,7 +113,6 @@ namespace y3_cluster {
     if (print)
       std::cout << "lc,R,lc_lt_integrated,status,error,prob\n";
 
-    // Values from trivial_gamma_t
     LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
 
     double lc, R;
@@ -157,7 +156,6 @@ namespace y3_cluster {
     if (print)
       std::cout << "roffset_integrand,status,error,prob\n";
 
-    // Values from trivial_gamma_t
     ROFFSET_t roffset(tau);
 
     const auto res = I.integrate(
@@ -200,7 +198,6 @@ namespace y3_cluster {
     if (print)
       std::cout << "lnM,M,zt,mor_integrated,status,error,prob\n";
 
-    // Values from trivial_gamma_t
     MOR_t mor{mz_power_law{9.1e-9, 0.65, 0.1}, 0.15, 0.65};
 
     double lnM, zt;
@@ -244,7 +241,6 @@ namespace y3_cluster {
     if (print)
       std::cout << "lnM,M,zt,mor2_integrated,status,error,prob\n";
 
-    // Values from trivial_gamma_t
     MOR_t2 mor2{pow(10, 1.11375214e+01), pow(10, 12.4225835912), 0.65, 0.15};
 
     for (auto i = 0u; i < lnM_width; i++) {

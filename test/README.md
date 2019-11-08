@@ -60,8 +60,6 @@ Where `<your_test>` has been replaced with a descriptive name. Now, simply fire 
 
 In addition, there are several non-test executables, intended to ease examining the behavior of specific terms of the integral. These include:
 
-*  `trivial_gamma_t`
-    * Integrates `N` and `gamma_t`, and prints statistics - including convergence, errors, and elapsed time. Takes a single argument of the maximum number of evaluations allowed for the integration routines, an integer.
 *  `integrate_(lc_lt|lo_lc|mor|roffset)`
     * Integrate, respectively, the probability distributions $P(\lc|\lt)$, $P(\lo|\lt)$, $P(\lt|M,\zt)$, and $P_{mis}(R_{mis}$, over respective ranges. This is to check whether the distributions integrate properly to 1.0, within acceptable limits.
     * Each executable emits CSV-formatted results tables of the resulting integration value, as well as the values of extra parameters used.

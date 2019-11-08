@@ -26,3 +26,6 @@ cross_output.txt
 *.so
 validation_tests/.RData
 *.dylib
+masses_test_output/
+sdss_analysis_output/
+y1_analysis_output/

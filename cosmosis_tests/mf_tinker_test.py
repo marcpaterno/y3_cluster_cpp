@@ -1,11 +1,7 @@
 import os
-from cosmosis.datablock import option_section, names
+from cosmosis.datablock import option_section
 import numpy as np
-from scipy.interpolate import interp1d, interp2d
-from scipy.interpolate import RectBivariateSpline
-import scipy.special
-import cluster_toolkit as ct
-from scipy import optimize
+from scipy.interpolate import interp2d
 section_name="mass_function"
 
 def setup(options):
@@ -25,7 +21,7 @@ def execute(block, config):
         test_m = dat[:, 1] 
         test_test = dat[:, 2]*(10.0**test_m)
 
-        test_interp=interp2d(masses, zz, nm, kind='quintic')
+        test_interp = interp2d(masses, zz, nm, kind='quintic')
         outfile = os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/masses_test.out')
         with open(outfile, 'w') as outf:
             outf.write('z\t mass\t ytrue\t ytest\n')
