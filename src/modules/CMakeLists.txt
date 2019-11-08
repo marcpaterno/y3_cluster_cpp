@@ -298,3 +298,10 @@ target_link_libraries(sptxdes_abundance_integral PRIVATE cosmosis utils models
                       ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(sptxdes_abundance_integral PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+
+add_library(selection_integral_SPTxDES MODULE SelectionIntegralDESxSPTModule.cc)
+target_link_libraries(selection_integral_SPTxDES PRIVATE cosmosis utils models
+                      ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(selection_integral_SPTxDES PRIVATE ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+
