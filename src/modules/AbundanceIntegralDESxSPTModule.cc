@@ -23,7 +23,7 @@
 
 using namespace y3_cluster;
 
-class AbundanceIntegralDesXSpt{
+class AbundanceIntegralDESxSPT{
 public:
   // 3 varied grid parameters: lo, xi, zo
   using grid_point_t = std::array<double, 4>;
@@ -54,7 +54,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit AbundanceIntegralDesXSpt(cosmosis::DataBlock& config);
+  explicit AbundanceIntegralDESxSPT(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -98,7 +98,7 @@ using cosmosis::ndarray;
 using cubacpp::integration_result;
 
 // Set up integral that does not depend on sample
-AbundanceIntegralDesXSpt::AbundanceIntegralDesXSpt(DataBlock&)
+AbundanceIntegralDESxSPT::AbundanceIntegralDESxSPT(DataBlock&)
   : p_zo_zt()
   , omega_z()
   , p_lo_ltzt()
@@ -114,7 +114,7 @@ AbundanceIntegralDesXSpt::AbundanceIntegralDesXSpt(DataBlock&)
 
 // Set up the integration using the current sample
 void
-AbundanceIntegralDesXSpt::set_sample(DataBlock& sample)
+AbundanceIntegralDESxSPT::set_sample(DataBlock& sample)
 {
   dv_dodz.emplace(sample);
   hmf.emplace(sample);
@@ -123,7 +123,7 @@ AbundanceIntegralDesXSpt::set_sample(DataBlock& sample)
 
 // Set the grid points for the current integration
 void
-AbundanceIntegralDesXSpt::set_grid_point(grid_point_t const& grid_point)
+AbundanceIntegralDESxSPT::set_grid_point(grid_point_t const& grid_point)
 {
   lamobs_ = grid_point[0];
   xi_ = grid_point[1];
@@ -134,7 +134,7 @@ AbundanceIntegralDesXSpt::set_grid_point(grid_point_t const& grid_point)
 // Evaluate the integrand
 // Anything initilized with std::optional needs an asterisk
 double
-AbundanceIntegralDesXSpt::operator()(double lamtrue,
+AbundanceIntegralDESxSPT::operator()(double lamtrue,
                                      double lnM200m,
                                      double ztrue,
                                      double zeta) const
@@ -150,18 +150,18 @@ AbundanceIntegralDesXSpt::operator()(double lamtrue,
 
 // Name of the module in the datablock
 char const*
-AbundanceIntegralDesXSpt::module_label()
+AbundanceIntegralDESxSPT::module_label()
 {
   return "abundance_integral";
 }
 
 // Set the bounds of integration
-std::vector<AbundanceIntegralDesXSpt::volume_t>
-AbundanceIntegralDesXSpt::make_integration_volumes(cosmosis::DataBlock& cfg)
+std::vector<AbundanceIntegralDESxSPT::volume_t>
+AbundanceIntegralDESxSPT::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
 
   // Make some handy definitions
-  auto modulelabel = AbundanceIntegralDesXSpt::module_label();
+  auto modulelabel = AbundanceIntegralDESxSPT::module_label();
   std::vector<std::string> dimensions{"lamtrue", "lnM200m", "ztrue", "zeta"};
   std::size_t const nvolumes = cfg.view<int>(modulelabel, "nclusters");
   std::size_t const N = 4;
@@ -212,15 +212,15 @@ AbundanceIntegralDesXSpt::make_integration_volumes(cosmosis::DataBlock& cfg)
 }
 
 // Set the grid points to evaluate the integral at
-std::vector<AbundanceIntegralDesXSpt::grid_point_t>
-AbundanceIntegralDesXSpt::make_grid_points(cosmosis::DataBlock& cfg)
+std::vector<AbundanceIntegralDESxSPT::grid_point_t>
+AbundanceIntegralDESxSPT::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, AbundanceIntegralDesXSpt::module_label(), "lamobs",
+    cfg, AbundanceIntegralDESxSPT::module_label(), "lamobs",
                                                    "xi",
                                                    "zobs",
                                                    "gamma_field");
 }
 
 
-DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(AbundanceIntegralDesXSpt)
+DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(AbundanceIntegralDESxSPT)
