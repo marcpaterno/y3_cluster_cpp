@@ -13,8 +13,7 @@
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
 #include "models/lc_lt_y1_t.hh"
-#include "models/sptxdes/int_pxizeta.hh"
-#include "models/sptxdes/mor_y3xspt_t.hh"
+#include "models/sptxdes/mor_1d.hh"
 
 #include <optional>
 #include <vector>
@@ -30,20 +29,19 @@ public:
 
 private:
   // Number of integration dimensions
-  using volume_t = cubacpp::IntegrationVolume<5>;
+  using volume_t = cubacpp::IntegrationVolume<4>;
 
   // State obtained from configuration
   INT_ZO_ZT_DES_t int_p_zo_zt;
   OMEGA_Z_Y3XSPT omega_z;
   LC_LT_Y1_t p_lo_ltzt;
-  INT_PXIZETA int_pxizeta;
 
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<DV_DO_DZ_t> dv_dodz;
   std::optional<HMF_t> hmf;
-  std::optional<MOR_Y3xSPT_t> p_ltzeta_lnmzt;
+  std::optional<MOR_1D> p_lt_lnmzt;
 
   // State set for current 'bin' to be integrated.
   double zobs_min_;
@@ -66,8 +64,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(double lamobs, double lamtrue, double lnM200m,
-                    double ztrue, double zeta) const;
+  double operator()(double lamobs, double lamtrue, double lnM200m, double ztrue) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -80,8 +77,7 @@ public:
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static std::vector<volume_t> make_integration_volumes(
-    cosmosis::DataBlock& cfg);
+  static std::vector<volume_t> make_integration_volumes(cosmosis::DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
@@ -101,10 +97,9 @@ SelectionIntegralDESxSPT::SelectionIntegralDESxSPT(DataBlock&)
   : int_p_zo_zt()
   , omega_z()
   , p_lo_ltzt()
-  , int_pxizeta()
   , dv_dodz()
   , hmf()
-  , p_ltzeta_lnmzt()
+  , p_lt_lnmzt()
   , zobs_min_()
   , zobs_max_()
 {}
@@ -115,7 +110,7 @@ SelectionIntegralDESxSPT::set_sample(DataBlock& sample)
 {
   dv_dodz.emplace(sample);
   hmf.emplace(sample);
-  p_ltzeta_lnmzt.emplace(sample);
+  p_lt_lnmzt.emplace(sample);
 }
 
 // Set the grid points for the current integration
@@ -132,17 +127,14 @@ double
 SelectionIntegralDESxSPT::operator()(double lamobs,
                                      double lamtrue,
                                      double lnM200m,
-                                     double ztrue,
-                                     double zeta) const
+                                     double ztrue) const
 {
-  double gamma_field = 1.0;
   return int_p_zo_zt(zobs_min_, zobs_max_, ztrue)
          * omega_z(ztrue)
          * (*dv_dodz)(ztrue)
          * (*hmf)(lnM200m, ztrue)
          * p_lo_ltzt(lamobs, lamtrue, ztrue)
-         * int_pxizeta(zeta)
-         * (*p_ltzeta_lnmzt)(lamtrue, zeta, ztrue, lnM200m, gamma_field);
+         * (*p_lt_lnmzt)(lamtrue, ztrue, lnM200m);
 }
 
 // Name of the module in the datablock
@@ -161,8 +153,7 @@ SelectionIntegralDESxSPT::make_integration_volumes(cosmosis::DataBlock& cfg)
       cfg, SelectionIntegralDESxSPT::module_label(), "lamobs",
                                                      "lamtrue",
                                                      "lnM200m",
-                                                     "ztrue",
-                                                     "zeta");
+                                                     "ztrue");
 }
 
 // Set the grid points to evaluate the integral at
