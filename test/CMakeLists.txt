@@ -442,3 +442,9 @@ target_link_libraries(int_pxizeta_test PRIVATE testmain ${GSL_LIBRARIES})
 target_include_directories(int_pxizeta_test PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(int_pxizeta_test int_pxizeta_test)
+
+add_executable(sptxdes_mor_1d sptxdes_mor_1d.test.cc)
+target_link_libraries(sptxdes_mor_1d PRIVATE testmain ${GSL_LIBRARIES})
+target_include_directories(sptxdes_mor_1d PRIVATE ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(sptxdes_mor_1d sptxdes_mor_1d)
