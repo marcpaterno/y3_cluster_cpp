@@ -215,7 +215,7 @@ AbundanceIntegralDESxSPT::make_integration_volumes(cosmosis::DataBlock& cfg)
 std::vector<AbundanceIntegralDESxSPT::grid_point_t>
 AbundanceIntegralDESxSPT::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_wall_of_numbers(
+  return y3_cluster::load_grid_from_file_wall_of_numbers(
     cfg, AbundanceIntegralDESxSPT::module_label(), "lamobs",
                                                    "xi",
                                                    "zobs",
