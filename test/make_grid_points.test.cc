@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <iostream>
+
 std::string const module_label("something");
 
 TEST_CASE("1d grid")
@@ -59,6 +61,20 @@ TEST_CASE("2d grid")
     cfg.put_val(module_label, "radii", std::vector<double>{3.0, 4.0, 5.0});
     cfg.put_val(module_label, "zs", std::vector<double>{1.5, 1.5, 2.5});
     grid_t grid = y3_cluster::make_grid_points_wall_of_numbers(
+      cfg, module_label, "radii", "zs");
+    CHECK(grid.size() == 3);
+    grid_t expected{{{3.0, 1.5}}, {{4.0, 1.5}}, {{5.0, 2.5}}};
+    CHECK(grid == expected);
+  }
+
+  SECTION("2x1 grid load from file")
+  {
+    cosmosis::DataBlock cfg;
+    std::string const fname =
+      std::string(std::getenv("COSMOSIS_SRC_DIR")) +
+      "/cosmosis-standard-library/y3_cluster_cpp/data/" + "test_grid_file.txt";
+    cfg.put_val(module_label, "grid_file", fname);
+    grid_t grid = y3_cluster::load_grid_from_file_wall_of_numbers(
       cfg, module_label, "radii", "zs");
     CHECK(grid.size() == 3);
     grid_t expected{{{3.0, 1.5}}, {{4.0, 1.5}}, {{5.0, 2.5}}};

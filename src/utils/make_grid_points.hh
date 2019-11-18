@@ -2,11 +2,12 @@
 #define Y3_CLUSTER_CPP_MAKE_GRID_POINTS_HH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "utils/meta.hh"
 #include "utils/datablock_reader.hh"
+#include "utils/meta.hh"
 
 #include <algorithm>
 #include <array>
+#include <fstream>
 #include <stdexcept>
 #include <string>
 #include <tuple> // for std::apply
@@ -46,6 +47,12 @@ namespace y3_cluster {
                                    std::string const& modulelabel,
                                    Ts... names);
 
+  template <typename... Ts>
+  std::vector<std::array<double, sizeof...(Ts)>>
+  load_grid_from_file_wall_of_numbers(cosmosis::DataBlock& cfg,
+                                      std::string const& modulelabel,
+                                      Ts... names);
+
   namespace detail {
 
     // Given a vector of N names of configuration parameters, look up
@@ -53,15 +60,62 @@ namespace y3_cluster {
     // put them into 'axes'.
     template <std::size_t N>
     void
-    get_grid_axes(cosmosis::DataBlock& cfg,
-                  std::string const& modulelabel,
-                  std::array<std::string, N> const& names,
-                  std::array<std::vector<double>, N>& axes)
+    get_grid_axes_from_datablock(cosmosis::DataBlock& cfg,
+                                 std::string const& modulelabel,
+                                 std::array<std::string, N> const& names,
+                                 std::array<std::vector<double>, N>& axes)
     {
       auto get_axis = [&cfg, &modulelabel](std::string const& name) {
         return get_vector_double(cfg, modulelabel.c_str(), name.c_str());
       };
       std::transform(names.begin(), names.end(), axes.begin(), get_axis);
+    }
+
+    // Given a filename in the configuration parameters, open the file,
+    // parse each row into a grid point, and put them into 'axes'
+    template <std::size_t N>
+    void
+    get_grid_axes_from_file(cosmosis::DataBlock& cfg,
+                            std::string const& modulelabel,
+                            std::array<std::vector<double>, N>& axes)
+    {
+      // Try to open the file
+      std::string const gridfilename =
+        cfg.view<std::string>(modulelabel, "grid_file");
+      std::ifstream file(gridfilename);
+      if (!file) {
+        std::string errmsg("Failed to open file: ");
+        errmsg += gridfilename;
+        throw std::runtime_error(errmsg);
+      }
+
+      // Load the file
+      std::string line;
+      std::vector<double> onerow;
+      std::vector<std::vector<double>> fullres;
+      while (std::getline(file, line)) {
+        // Skip comment lines
+        if (line.find('#') == 0)
+          continue;
+
+        // Make the line into a vector of doubles
+        std::istringstream linestream(line);
+        double tmp;
+        while (linestream >> tmp)
+          onerow.push_back(tmp);
+        fullres.push_back(onerow);
+        onerow.clear();
+      }
+
+      // Place each column into the axes object
+      std::size_t const n = fullres.size();
+      std::vector<double> col;
+      for (std::size_t i = 0; i < N; ++i) {
+        for (std::size_t j = 0; j < n; ++j)
+          col.push_back(fullres[j][i]);
+        axes[i] = col;
+        col.clear();
+      }
     }
 
     // make_grid_splatted takes N vectors of floating point numbers, where N is
@@ -141,7 +195,7 @@ y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
   std::array<std::string, n_axes> const axis_names{
     std::forward<STRINGLIKEs>(names)...};
   std::array<std::vector<double>, n_axes> axes;
-  detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
+  detail::get_grid_axes_from_datablock(cfg, modulelabel, axis_names, axes);
   return detail::make_grid_cartesian_product(axes);
 }
 
@@ -160,7 +214,29 @@ y3_cluster::make_grid_points_wall_of_numbers(cosmosis::DataBlock& cfg,
   std::array<std::string, n_axes> const axis_names{
     std::forward<STRINGLIKEs>(names)...};
   std::array<std::vector<double>, n_axes> axes;
-  detail::get_grid_axes(cfg, modulelabel, axis_names, axes);
+  detail::get_grid_axes_from_datablock(cfg, modulelabel, axis_names, axes);
+  return detail::make_grid_wall_of_numbers(axes);
+}
+
+template <typename... STRINGLIKEs>
+std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
+y3_cluster::load_grid_from_file_wall_of_numbers(cosmosis::DataBlock& cfg,
+                                                std::string const& modulelabel,
+                                                STRINGLIKEs... names)
+{
+  // Make sure all the arguments are convertible to std::string.
+  // The parameter names are not used directly but are kept for consistency
+  // and to easily tell the order of the grid points (if they match the
+  // column order in the grid_file)
+  static_assert(
+    std::conjunction_v<std::is_convertible<STRINGLIKEs, std::string>...>,
+    "\n\nCosmoSIS error!\nAll trailing arguments in "
+    "load_grid_points_wall_of_numbers must be convertible to string.\n\n");
+  constexpr std::size_t n_axes = sizeof...(STRINGLIKEs);
+  std::array<std::string, n_axes> const axis_names{
+    std::forward<STRINGLIKEs>(names)...};
+  std::array<std::vector<double>, n_axes> axes;
+  detail::get_grid_axes_from_file(cfg, modulelabel, axes);
   return detail::make_grid_wall_of_numbers(axes);
 }
 
