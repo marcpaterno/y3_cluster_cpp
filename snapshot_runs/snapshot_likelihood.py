@@ -27,31 +27,27 @@ def setup(options):
     #covariance_file= options[section,"covariance_file"]
     #Need to make this real
     covmat = np.diag(cov_vector**2)
-     
-    print(NCs, NCs_err, cov_vector, profiles_err, covmat)
 
-    return data_vector, covmat
+    profile_blockname = options[section,"profile_blockname"]
+    NCs_blockname = options[section,"NCs_blockname"]
+
+    return data_vector, covmat, profile_blockname, NCs_blockname
 
 def execute(block, config):
-    data_vector, covmat = config
+    data_vector, covmat, profile_blockname, NCs_blockname = config
 
     #read in the model values at this sample point. 
-    profile_blockname ='snapshotscalarmaxintegrand' 
     profiles_model = block[profile_blockname, "vals"]
-    NCs_blockname ='snapshotscalarncintegrand' 
     NCs_model = block[NCs_blockname, "vals"]
     model_vector = assemble_vector(profiles_model, NCs_model)
-
     delta = data_vector - model_vector
     weight = np.linalg.inv(covmat)
     loglike = -0.5 * np.dot(delta, np.dot(weight, delta))
     block[section_names.likelihoods, 'SnapshotScalarLike_like'] = loglike
 
-    print(block['cluster_mass_profile', "concentration"], block['cosmological_parameters', "omega_m"], block['cosmological_parameters', "sigma_8"], loglike)
-    '''plt.plot( model_vector );
-    plt.yscale('log')
-    plt.errorbar(range(len(model_vector)), data_vector, yerr=np.sqrt(np.diag(covmat)), fmt='r.')
-    plt.show()'''
+    #print(block['cluster_mass_profile', "concentration"], block['cosmological_parameters', "omega_m"], block['cosmological_parameters', "sigma_8"], loglike)
+    #make_plots(3, 4, 18, model_vector, data_vector, covmat)
+    #make_plots_compare(3, 4, 18, model_vector, data_vector, covmat)
     return 0
 
 def cleanup(config):
@@ -60,7 +56,54 @@ def cleanup(config):
 
 def assemble_vector(profiles_model, NCs_model):
     averaged_profiles = profiles_model/NCs_model
-    model_vec=np.array([NCs_model[:,0], NCs_model[:,19], NCs_model[:,38]])
+    model_vec=np.array([ NCs_model[:,0], NCs_model[:,18], NCs_model[:,36] ])
     model_vec=np.append(model_vec, averaged_profiles)
 
     return model_vec
+
+def make_plots(ngriddim, nvoldim, nrad, model_vector, data_vector, covmat):
+    ngriddim = int(ngriddim)
+    nvoldim = int(nvoldim)
+    nrad = int(nrad)
+    unc = np.diag( np.sqrt(covmat) )
+    fig, axs = plt.subplots(ngriddim, nvoldim+1, figsize=[12, 8])
+
+    for j in range(ngriddim):
+        for i in range(nvoldim):
+            ndim1=j*nvoldim
+            ndim2=(j+1)*nvoldim
+            axs[j, nvoldim].plot(model_vector[ndim1:ndim2])
+            axs[j, nvoldim].errorbar(range(nvoldim), data_vector[ndim1:ndim2], yerr=unc[ndim1:ndim2], fmt='ko')
+
+            dim1 = i*ngriddim*nrad + j*nrad + ngriddim*nvoldim
+            dim2 = i*ngriddim*nrad + (j+1)*nrad + ngriddim*nvoldim
+            axs[j, i].plot(range(nrad), model_vector[dim1:dim2], 'r--')
+            axs[j, i].errorbar(range(nrad), data_vector[dim1:dim2], yerr=unc[dim1:dim2], fmt='ko')
+            axs[j, i].set_yscale('log')
+    plt.show()
+
+
+def make_plots_compare(ngriddim, nvoldim, nrad, model_vector, data_vector, covmat):
+    ngriddim = int(ngriddim)
+    nvoldim = int(nvoldim)
+    nrad = int(nrad)
+    unc = np.diag( np.sqrt(covmat) )
+    fig, axs = plt.subplots(ngriddim, nvoldim+1, figsize=[12, 8])
+
+    for j in range(ngriddim):
+        for i in range(nvoldim):
+            ndim1=j*nvoldim
+            ndim2=(j+1)*nvoldim
+            axs[j, nvoldim].errorbar(range(nvoldim), data_vector[ndim1:ndim2]/model_vector[ndim1:ndim2], yerr=unc[ndim1:ndim2]/model_vector[ndim1:ndim2], fmt='ko')
+
+            dim1 = i*ngriddim*nrad + j*nrad + ngriddim*nvoldim
+            dim2 = i*ngriddim*nrad + (j+1)*nrad + ngriddim*nvoldim
+            axs[j, i].errorbar(range(nrad), data_vector[dim1:dim2]/model_vector[dim1:dim2], yerr=unc[dim1:dim2]/model_vector[dim1:dim2], fmt='ko')
+            axs[j, i].set_ylim([0.5, 2.0])
+            axs[j, nvoldim].set_ylim([0.5, 2.0])
+    plt.show()
+
+
+
+
+

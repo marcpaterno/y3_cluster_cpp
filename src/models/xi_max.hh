@@ -61,7 +61,7 @@ namespace y3_cluster {
       double res = _sig_2;
       if (_sig_1 >= _sig_2)  { res = _sig_1; }
       // return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
-      return (res +1) * 2.77536627E11*_om / 1.0E10;
+      return (res) * 2.77536627E11*_om / 1.0E10;
       /*} else {
         return 1e12*(1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
       } */
