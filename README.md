@@ -10,9 +10,9 @@ We will be installing four different `git` repositories, nested like Russian dol
 _This_ repository is the very last one to clone.
 
 Note that we have several types of installation
-* Below is the docker installation: put everything inside a docker container and use that to work
-* The [Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native_macOS_build) lets you install natively on a Mac. You do have a Mac, don't you (we don't judge).
-* Not yet documented is a native install on linux
+1. Below is the docker installation: put everything inside a docker container and use that to work
+2. The [Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native_macOS_build) lets you install natively on a Mac. You do have a Mac, don't you (we don't judge).
+3. Not yet documented is a native install on linux
 
 ### Get cosmosis-docker
 
