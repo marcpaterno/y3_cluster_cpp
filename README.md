@@ -14,10 +14,10 @@ Note that we have several types of installation
 
 1. Below is the docker installation: put everything inside a docker container 
 
-2. The link [Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native_macOS_build) lets you install natively on a Mac. (You do have a mac, don't you? But we don't judge.)
+2. The link [Mac OSx Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native_macOS_build) lets you install natively on a Mac. (You do have a mac, don't you? But we don't judge.)
 
 3. The link 
-[Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native%20linux%20build) lets you install natively on a Linux box. 
+[Linux Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native%20linux%20build) lets you install natively on a Linux box. 
 
 
 ### Get cosmosis-docker
