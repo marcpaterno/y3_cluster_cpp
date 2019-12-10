@@ -9,6 +9,17 @@ https://www.docker.com/get-started
 We will be installing four different `git` repositories, nested like Russian dolls. Stay on your toes!
 _This_ repository is the very last one to clone.
 
+
+Note that we have several types of installation
+
+1. Below is the docker installation: put everything inside a docker container 
+
+2. The link [Mac OSx Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native_macOS_build) lets you install natively on a Mac. (You do have a mac, don't you? But we don't judge.)
+
+3. The link 
+[Linux Native Install](https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/Native%20linux%20build) lets you install natively on a Linux box. 
+
+
 ### Get cosmosis-docker
 
 In whatever directory is to become your top-level installation, clone the `cosmosis-docker` repository:
