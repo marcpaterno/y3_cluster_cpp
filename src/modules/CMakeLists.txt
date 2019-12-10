@@ -349,3 +349,10 @@ target_link_libraries(SelectionIntegralDESxSPTModule PRIVATE cosmosis utils mode
 target_include_directories(SelectionIntegralDESxSPTModule PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
+add_library(ZtrueIntegralDESxSPTModule MODULE ZtrueIntegralDESxSPTModule.cc)
+target_link_libraries(ZtrueIntegralDESxSPTModule PRIVATE cosmosis utils models
+                      ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(ZtrueIntegralDESxSPTModule PRIVATE ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+
+
