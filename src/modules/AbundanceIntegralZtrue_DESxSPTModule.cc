@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 
-using namespace y3_cluster;
 using cosmosis::DataBlock;
 
 class ZtrueIntegralDESxSPT {
@@ -26,11 +25,11 @@ public:
 
 private:
   // From configuration - constructor
-  ZO_ZT_DES_t PZobsZtrue;
-  OMEGA_Z_Y3XSPT OmegaZtrue;
+  y3_cluster::ZO_ZT_DES_t PZobsZtrue;
+  y3_cluster::OMEGA_Z_Y3XSPT OmegaZtrue;
 
   // From likelihood sample - sample
-  std::optional<DV_DO_DZ_t> dv_dodzt;
+  std::optional<y3_cluster::DV_DO_DZ_t> dv_dodzt;
 
   // From cluster sample - grid
   double zobs_;
@@ -124,7 +123,7 @@ ZtrueIntegralDESxSPT::make_integration_volumes(DataBlock& cfg)
 
   // Bounds on ztrue are zobs +- Nsigma_ztrue*sigma_z(zobs)
   std::vector<double> lows, highs;
-  SIGMA_PHOTOZ_DES_t sigma_model;
+  y3_cluster::SIGMA_PHOTOZ_DES_t sigma_model;
   for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
     lows.push_back(zobs[ivol] - Nsigma * sigma_model(zobs[ivol]));
     highs.push_back(zobs[ivol] + Nsigma * sigma_model(zobs[ivol]));
