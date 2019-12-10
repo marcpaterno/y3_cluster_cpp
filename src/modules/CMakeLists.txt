@@ -17,8 +17,12 @@ target_include_directories(example_scalar_integrand
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(example_oned_integrand SHARED ExampleOneDIntegrand.cc)
+target_link_libraries(example_oned_integrand PRIVATE cosmosis utils)
+target_include_directories(example_oned_integrand PRIVATE ${CMAKE_SOURCE_DIR}/src) 
+
 # Note
-# The following two "modules" are abnormal, in that they are declared as a
+# The following three "modules" are abnormal, in that they are declared as a
 # shared libraries rather than as modules. This is so they can be used in testing the
 # module templates themselves. This should not be done for actual modules, which should
 # be declared as modules.
@@ -46,6 +50,20 @@ target_include_directories(ExampleScalarIntegrationModule
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(ExampleOneDIntegrationModule SHARED ExampleOneDIntegration_module.cc)
+target_link_libraries(ExampleOneDIntegrationModule
+                      PRIVATE
+                      cosmosis
+                      example_oned_integrand
+                      ${CUBA_LIBRARIES}
+                      ${GSL_LIBRARIES})
+target_include_directories(ExampleOneDIntegrationModule
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                           ${GSL_INCLUDE_DIR})
+
 add_executable(test_ExampleVectorIntegrationModule test_ExampleVectorIntegrationModule.cc)
 target_link_libraries(test_ExampleVectorIntegrationModule
                       PRIVATE
@@ -70,8 +88,17 @@ target_include_directories(test_ExampleScalarIntegrationModule
                            ${CMAKE_SOURCE_DIR}/src)
 add_test(test_ExampleScalarIntegrationModule test_ExampleScalarIntegrationModule)
 
-
-
+add_executable(test_ExampleOneDIntegrationModule test_ExampleOneDIntegrationModule.cc)
+target_link_libraries(test_ExampleOneDIntegrationModule
+                      PRIVATE
+                      cosmosis
+                      example_oned_integrand
+                      ExampleOneDIntegrationModule
+                      example_oned_integrand)
+target_include_directories(test_ExampleOneDIntegrationModule
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src)
+add_test(test_ExampleOneDIntegrationModule test_ExampleOneDIntegrationModule)
 
 add_executable(ExampleVectorIntegrand_test ExampleVectorIntegrand.test.cc)
 target_link_libraries(ExampleVectorIntegrand_test
@@ -103,6 +130,21 @@ target_include_directories(ExampleScalarIntegrand_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ExampleScalarIntegrand_test ExampleScalarIntegrand_test)
 
+add_executable(ExampleOneDIntegrand_test ExampleOneDIntegrand.test.cc)
+target_link_libraries(ExampleOneDIntegrand_test
+                      PRIVATE
+                      example_oned_integrand
+                      cosmosis
+                      ${CUBA_LIBRARIES}
+                      ExampleOneDIntegrationModule
+                      testmain)
+target_include_directories(ExampleOneDIntegrand_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(ExampleOneDIntegrand_test ExampleOneDIntegrand_test)
 
 add_library(snapshotsim_scalarintegrand MODULE Snapshotsim_ScalarIntegrand.cc)
 target_link_libraries(snapshotsim_scalarintegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
