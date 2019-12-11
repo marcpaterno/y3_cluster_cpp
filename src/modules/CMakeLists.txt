@@ -337,10 +337,10 @@ target_include_directories(compton_y_sims
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(AbundanceIntegralDESxSPTModule MODULE AbundanceIntegralDESxSPTModule.cc)
-target_link_libraries(AbundanceIntegralDESxSPTModule PRIVATE cosmosis utils models
+add_library(AbundanceIntegralMLamtrue_DESxSPTModule MODULE AbundanceIntegralMLamtrue_DESxSPTModule.cc)
+target_link_libraries(AbundanceIntegralMLamtrue_DESxSPTModule PRIVATE cosmosis utils models
                       ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(AbundanceIntegralDESxSPTModule PRIVATE ${CMAKE_SOURCE_DIR}/src
+target_include_directories(AbundanceIntegralMLamtrue_DESxSPTModule PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
 add_library(SelectionIntegralDESxSPTModule MODULE SelectionIntegralDESxSPTModule.cc)
