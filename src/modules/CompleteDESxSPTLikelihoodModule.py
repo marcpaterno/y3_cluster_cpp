@@ -1,5 +1,7 @@
 import numpy as np
-from cosmosis.datablock import names, option_section
+from cosmosis.datablock import names as section_names
+
+likes = section_names.likelihoods
 
 
 def setup(options):
@@ -43,7 +45,7 @@ def execute(block, config):
     # Compute the total lnlikelihood
     #########################################
     lnlike = np.sum(np.log(abundances)) - selection_term
-    block.put_double("richest_clusters_likelihood", "lnlike", lnlike)
+    block.put_double(likes, "RICH_CLS_LIKE", lnlike)
     return 0
 
 
