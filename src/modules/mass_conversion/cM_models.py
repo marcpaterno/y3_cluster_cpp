@@ -1,6 +1,6 @@
 """Classes to define different concentration-mass relations"""
-import mass_conversion.utils as utils
-import mass_conversion.conversions as conv
+import utils
+import conversions as conv
 
 
 class ConcentrationModel(object):

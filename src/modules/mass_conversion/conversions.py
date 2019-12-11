@@ -1,7 +1,7 @@
 import numpy as np
-import mass_conversion.hu_kravtsov_2002 as hu02
-import mass_conversion.utils as utils
-import mass_conversion.cM_models as models
+import hu_kravtsov_2002 as hu02
+import utils
+import cM_models as models
 
 
 
