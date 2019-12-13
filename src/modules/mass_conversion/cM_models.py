@@ -29,11 +29,11 @@ class FixedC200c(ConcentrationModel):
     def __init__(self, c200c):
         self.c200c = float(c200c)
         note = "Approximation for high mass clusters"
-        super().__init__(name='fixedc', model_mdef='200c', mask=None,
+        super(FixedC200c, self).__init__(name='fixedc', model_mdef='200c', mask=None,
                          cosmology=None, note=note)
 
     def __repr__(self):
-        parent = super().__repr__()
+        parent = super(FixedC200c, self).__repr__()
         line1 = '\nc200c = {}\n'.format(self.c200c)
         return parent+line1
 
