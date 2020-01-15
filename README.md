@@ -1,5 +1,53 @@
 This is the y3_cluster_cpp repository.
 
+The `y3_cluster_cpp` repository contains code for related DES analysis project.
+
+## Getting started on DES Y3 CosmoSIS cluster pipeline development.
+
+These are the documents to start with if you are interested in joining the efforts.
+
+* Y3 likelihood slides by Spencer Everett: https://des-docdb.fnal.gov/cgi-bin/private/ShowDocument?docid=12254
+
+* Y3 CosmoSIS implementation (15mins) Marc Paterno [https://des-docdb.fnal.gov/cgi-bin/private/RetrieveFile?docid=12212&filename=cosmosis_intro.pdf&version=2]
+
+To contribute to this project:
+
+* You may wish to subscribe to a mailing list des-cosmosis-y3@fnal.gov.
+
+* There is also a DES slack channel (#cosmo_clpipe), but please note that we communicate mainly through the mailing list. Weekly hack reminders are sent to the mailing list.
+
+* Request access to the repo by sending your bitbucket user name to Yuanyuan (ynzhang@fnal.gov) https://bitbucket.org/mpaterno/y3_cluster_cpp/ (We need to keep the repo private for a bit.)
+
+* We'd appreciate that you have went through the installation process.
+
+## Development Philosphy
+
+We welcome people's contributions to this project. We strive to build elegant, robust and optimized code for Y3 in c++. When you commit your changes, please check the following:
+
+* The code runs and passes all the tests with your modification. **Please don't commit any changes that breaks the code.**
+
+* The code runs in a reasonable time.**If your modification slows down the integrand by more than 2 second, you should talk to the team before committing (so we know to look into it for optimization)**
+
+* The code should have been tested a bit, and please consider setting up a unit test.
+
+
+## Installing the software
+
+More information, installation instructions as well as usage tutorial, please see the wiki page. 
+https://bitbucket.org/mpaterno/y3_cluster_cpp/wiki/browse/
+
+* **There is a native macOS installation available, if you're willing to use a `devel` version of CosmoSIS. See [[Native macOS build]].**
+
+* **Alternatively, you can install a docker version with instructions here https://bitbucket.org/mpaterno/y3_cluster_cpp/src/master/**
+
+The docker installation is a pre-requisite -- unfortunately this is a commercially/community offered software, so we may not be able to help as much -- However, we expect the installation to be trivial for Mac and Ubuntu. If you use other operating systems, you may consider using a Ubuntu virtual machine for installation.
+Note that docker more or less can only be installed on a machine that you have root access to (like your laptop), and the docker images can't be ran from an external hard disk.
+After installing docker, there are several repos to clone and install, please follow the instructions on the bitbucket instruction page. This takes some downloading time but should be relatively straightforward.
+
+* If you can't get the installation to work, email des-cosmosis-y3@fnal.gov.
+
+
+-------------------------------------------
 ## Getting started
 
 We devleop and test the code in the docker environment -- so the first thing would be to installthe docker software. 
