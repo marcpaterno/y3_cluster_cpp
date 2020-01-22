@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+#rm -rf cmake_install.cmake CTestTestfile.cmake Testing Makefile CMakeFiles
+rm -f Makefile test/Makefile src/Makefile src/utils/Makefile src/models/Makefile src/modules/Makefile
+rm -f CTestTestfile.cmake test/CTestTestfile.cmake src/CTestTestfile.cmake src/utils/CTestTestfile.cmake src/models/CTestTestfile.cmake src/modules/CTestTestfile.cmake
+rm -f cmake_install.cmake test/cmake_install.cmake src/cmake_install.cmake src/utils/cmake_install.cmake src/models/cmake_install.cmake src/modules/cmake_install.cmake
+rm -rf CMakeFiles test/CMakeFiles  src/CMakeFiles src/utils/CMakeFiles src/models/CMakeFiles src/modules/CMakeFiles
+rm -f CMakeCache.txt
+find . -type f -name '*.dylib' -delete
+find . -type f -name '*.so' -delete

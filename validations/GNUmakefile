@@ -1,5 +1,5 @@
 DATAFILES=../data/omega_z_sdss.out \
-          ../data/masses_test.out \
+      ../data/masses_test.out \
 		  ../data/dvdodz_test.out \
 		  ../data/mor_tt_test.out \
 		  ../data/lc_lt_test.out \
@@ -72,7 +72,7 @@ clean:
 # re-run the same CosmoSIS workflow several times to generate the same set of
 # files. Breaking up the giant one-liner defining the target and dependencies
 # seems fragile, so if you try to do so, please test the result carefully!
-../deltasigma/test/xi_nfwonly.out ../deltasigma/test/xi_mm_2halo.out ../deltasigma/test/Sigma_nfwonly.out ../deltasigma/test/Sigma_mm_2halo.out ../deltasigma/test/bias.out: ../deltasigma/test/deltasigma_test.py ../deltasigma/deltasigma_test.ini ../src/modules/deltasigma_values.ini
+../deltasigma/test/xi_nfwonly.out ../deltasigma/test/xi_mm_2halo.out ../deltasigma/test/Sigma_nfwonly.out ../deltasigma/test/Sigma_mm_2halo.out ../deltasigma/test/bias.out: ../cosmosis_tests/deltasigma_test.py ../deltasigma/deltasigma_test.ini ../src/modules/deltasigma_values.ini
 	@echo "About to run cosmosis to generate $@"
 	cd .. && cosmosis deltasigma/deltasigma_test.ini > /dev/null
 

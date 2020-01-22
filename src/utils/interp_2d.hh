@@ -34,16 +34,9 @@ namespace y3_cluster {
     // and the column-major (N.B: not the natural-for-C++ row-major) storage of
     // the z values. We require the column-major ordering
     // because that is what is used by GSL.
-    Interp2D(std::vector<double> && xs,
-             std::vector<double> && ys,
-             std::vector<double> && zs);
-
-    // As above, but take deep copies of the incoming vectors.
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
-             std::vector<double> const& zs)
-      : Interp2D {std::vector<double>(xs), std::vector<double>(ys), std::vector<double>(zs)}
-      {}
+             std::vector<double> const& zs);
 
     // Interpolator created from vector, vector, 2D vector, compiler assures they
     // are of the same length; Added by Yuanyuan Zhang

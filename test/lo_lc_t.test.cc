@@ -44,16 +44,16 @@ TEST_CASE("Lo_Lc_t works")
   // No longer relevant - redefined lo_lc
   LO_LC_t lolc(1.66, 0.26, 1.43, 1.0);
 
-  std::ofstream out{"../data/lo_lc_test.out"};
-  out << std::setw(16);
-  out << std::setprecision(16);
-  out << "deltal\tRmis\tprobtrue\tprobtest\n";
+  std::ofstream out2{"../data/lo_lc_test.out"};
+  out2 << std::setw(16);
+  out2 << std::setprecision(16);
+  out2 << "deltal\tRmis\tprobtrue\tprobtest\n";
   for (std::size_t i = 0, sy = ys.size(); i != sy; ++i) {
     double const fz = lolc(los[i], lcs[i], Rs[i]);
     double constexpr epsrel = 1.0e-6;
     double constexpr epsabs = 1.0e-12;
     CHECK((fz * lcs[i]) == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
-    out << los[i] / lcs[i] << '\t' << Rs[i] << '\t' << ys[i] << '\t'
+    out2 << los[i] / lcs[i] << '\t' << Rs[i] << '\t' << ys[i] << '\t'
         << fz * lcs[i] << '\n';
   }
 }

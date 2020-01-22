@@ -36,17 +36,6 @@ y3_cluster::Interp2D::Interp2D(std::vector<double> && xs,
   gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
 }
 
-y3_cluster::Interp2D::Interp2D(std::vector<double> && xs,
-			       std::vector<double> && ys,
-			       std::vector<double> && zs)
-  : xs_(std::move (xs)), ys_(std::move (ys)), zs_(std::move (zs))
-{
-  if (zs_.size() != nx() * ny())
-    throw std::domain_error("Interp2D -- wrong number of z values passed");
-  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
-  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
-}
-
 double
 y3_cluster::Interp2D::operator()(double x, double y) const
 {
