@@ -1,4 +1,2 @@
 *~
-lib*.a
-libcluster_abundance.so
-libcluster_abundance_covariance.so
+*.so

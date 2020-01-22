@@ -36,6 +36,11 @@ TEST_CASE("Lo_Lc_t works")
   REQUIRE(lcs.size() == Rs.size());
   REQUIRE(Rs.size() == ys.size());
 
+  std::ofstream out { "../data/test_lolc.out" };
+  out << std::setw(16);
+  out << std::setprecision(16);
+  out << "lambda_o\tlambda_c\tR_mis\tytrue\tytest\n";
+
   // No longer relevant - redefined lo_lc
   LO_LC_t lolc(1.66, 0.26, 1.43, 1.0);
 

@@ -1,7 +1,6 @@
 /* Here I use Omega_m=0.3, Omega_l=0.7 , in class EZ */
 /* We would need redshift of the cluster as an input?! */
-#include <math.h>
-#include <iostream>
+#include <cmath>
 
 class nfw_xi{
 public:

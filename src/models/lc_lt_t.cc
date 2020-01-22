@@ -168,7 +168,7 @@ namespace {
   // make_short_vec creates an std::vector<double> from an std::array,
   // using all but the last element of the std::array.
   template <size_t N>
-  std::vector<double>
+  inline  constexpr  std::vector<double>
   make_short_vec(std::array<double, N> const& a)
   {
     static_assert(N != 0, "make_short_vec requires a nonzero-length array");
@@ -178,7 +178,7 @@ namespace {
   // make_vec creates an std::vector<double> from an std::array, using all the
   // values in the std::array.
   template <size_t N>
-  std::vector<double>
+  inline  constexpr  std::vector<double>
   make_vec(std::array<double, N> const& a)
   {
     return {a.begin(), a.end()};
@@ -187,7 +187,7 @@ namespace {
   // Create an Interp2D from an x-axis, y-axis, and z "matrix", with the matrix
   // unrolled into a one-dimenstional array.
   template <size_t M, std::size_t N>
-  Interp2D
+  inline  constexpr  Interp2D
   make_Interp2D_aux(std::array<double, M> const& xs,
                     std::array<double, N> const& ys,
                     std::array<double, (N - 1) * (M - 1)> const& zs)
@@ -195,9 +195,12 @@ namespace {
     return {make_short_vec(xs), make_short_vec(ys), make_vec(zs)};
   }
 
-  auto make_Interp2D = [](auto zs) {
+  template <size_t M>
+  inline  constexpr  Interp2D
+  make_Interp2D (std::array<double, M> const &zs)
+  {
     return make_Interp2D_aux(lt_bins, zt_bins, zs);
-  };
+  }
 }
 
 Interp2D const LC_LT_t::tau_interp = make_Interp2D(tau_arr);

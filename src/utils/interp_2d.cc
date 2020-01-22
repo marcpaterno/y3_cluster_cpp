@@ -4,10 +4,45 @@
 #include <algorithm>
 #include <stdexcept>
 
-y3_cluster::Interp2D::Interp2D(std::vector<Point3D> data)
+y3_cluster::Interp2D::Interp2D(std::vector<Point3D> &&data)
   : xs_(), ys_(), zs_(), interp_(nullptr)
 {
-  make_grid_(data);
+  make_grid_(std::move (data));
+  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
+  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+}
+
+// below are added by Yuanyuan Zhang July 17
+y3_cluster::Interp2D::Interp2D(std::vector<double> && xs,
+			       std::vector<double> && ys,
+			       std::vector< std::vector<double> > const& zs)
+  : xs_(std::move (xs)), ys_(std::move (ys)), zs_(xs.size() * ys.size())
+{
+  if (zs.size() != xs.size())
+    throw std::domain_error("Interp2D -- wrong number of rows in z values");
+
+  for (std::size_t i = 0; i < xs.size(); ++i) {
+    std::vector<double> const& row = zs[i];
+    if (row.size() != ys.size())
+      throw std::domain_error("Interp2D -- wrong number of columns in z values");
+    for (std::size_t j = 0; j < ys.size(); ++j) {
+      zs_[i + j * ys.size()] = row[j];
+    }
+  }
+  
+  if (zs_.size() != nx() * ny())
+    throw std::domain_error("Interp2D -- wrong number of z values passed");
+  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
+  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+}
+
+y3_cluster::Interp2D::Interp2D(std::vector<double> && xs,
+			       std::vector<double> && ys,
+			       std::vector<double> && zs)
+  : xs_(std::move (xs)), ys_(std::move (ys)), zs_(std::move (zs))
+{
+  if (zs_.size() != nx() * ny())
+    throw std::domain_error("Interp2D -- wrong number of z values passed");
   interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
   gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
 }
@@ -18,8 +53,21 @@ y3_cluster::Interp2D::operator()(double x, double y) const
   // We do not use the accelerator features of GSL interpolation, because we
   // do not expect that the pattern of calls will be such that it will help.
   // Profile the resulting integration routine to see if this should be changed.
-  return gsl_interp2d_eval_extrap(
-    interp_, xs_.data(), ys_.data(), zs_.data(), x, y, nullptr, nullptr);
+  return gsl_interp2d_eval_extrap( interp_, xs_.data(), ys_.data(), zs_.data(), x, y, nullptr, nullptr);
+
+
+  // Skip this check for now - we will fix this later
+  /*
+  double result = 0.0;
+  int rc = gsl_interp2d_eval_e(
+    interp_, xs_.data(), ys_.data(), zs_.data(), x, y, nullptr, nullptr, &result);
+  if (rc == 0) return result;
+
+  // We only get here on an error...
+  std::cerr << "Failure in y3_cluster::Interp2D::operator()\n"
+	  	<< "x = " << x << " y = " << y << '\n';
+  throw std::domain_error("argument out of range in Interp2D");
+  */
 }
 
 y3_cluster::Interp2D::~Interp2D() noexcept
@@ -28,7 +76,7 @@ y3_cluster::Interp2D::~Interp2D() noexcept
 }
 
 void
-y3_cluster::Interp2D::make_grid_(std::vector<Point3D>& data)
+y3_cluster::Interp2D::make_grid_(std::vector<Point3D>&& data)
 {
   if (data.empty())
     throw std::domain_error("Interp2D -- no points provided");

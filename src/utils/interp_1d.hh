@@ -8,9 +8,7 @@
 
 // Interp1D is used for linear interpolation in 1 dimension.
 // It uses the GSL library to do the actual interpolation.
-// Interp1D object allow extrapolation as well as supporting
-// interpolation; no warnings or errors are given when
-// extrapolating.
+// Interp1D objects do not allow extrapolation.
 //
 namespace y3_cluster {
   class Interp1D {
@@ -22,7 +20,12 @@ namespace y3_cluster {
 
     // Interpolator created from two vectors: throws std::logic_error if the
     // vectors are not of the same length.
-    Interp1D(std::vector<double> const& xs, std::vector<double> const& ys);
+    Interp1D(std::vector<double> && xs, std::vector<double> && ys);
+
+    // As above, but deep-copy the vectors instead of just moving them. */
+    Interp1D(std::vector<double> const& xs, std::vector<double> const& ys)
+      :  Interp1D {std::vector<double> (xs), std::vector<double> (ys)}
+    {}
 
     // Destructor must clean up allocated GSL resources.
     ~Interp1D() noexcept;
@@ -31,7 +34,11 @@ namespace y3_cluster {
     // be copied.
     Interp1D(Interp1D const&) = delete;
 
+    // Ditto copy-assignment.
+    Interp1D &operator=(Interp1D const &) = delete;
+
     double operator()(double x) const;
+
     double
     eval(double x) const
     {

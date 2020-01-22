@@ -80,6 +80,15 @@ target_include_directories(mz_power_law_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(mz_power_law_test mz_power_law_test)
 
+add_executable(a_t_cen_t_test a_t_cen_t.test.cc)
+target_link_libraries(a_t_cen_t_test PRIVATE testmain)
+target_include_directories(a_t_cen_t_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals)
+add_test(a_t_cen_t_test a_t_cen_t_test)
+
 add_executable(point_3d_test point_3d.test.cc)
 target_link_libraries(point_3d_test PRIVATE testmain)
 target_include_directories(point_3d_test
