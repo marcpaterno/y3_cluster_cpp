@@ -18,7 +18,6 @@
 
 #include "CosmoSISScalarIntegrationModule.hh"
 #include "CosmoSISVectorIntegrationModule.hh"
-#include "OneDIntegrationModule.hh"
 
 // Produce the injected functions
 // TODO: Refactor this macros to remove the duplication of code.

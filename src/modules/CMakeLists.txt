@@ -7,7 +7,8 @@ target_include_directories(example_vector_integrand
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${EIGEN3_INCLUDE_DIR}
+                           ${GSL_INCLUDE_DIR})
 
 add_library(example_scalar_integrand SHARED ExampleScalarIntegrand.cc)
 target_link_libraries(example_scalar_integrand PRIVATE cosmosis utils)
@@ -36,6 +37,7 @@ target_include_directories(ExampleVectorIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(ExampleScalarIntegrationModule SHARED ExampleScalarIntegration_module.cc)

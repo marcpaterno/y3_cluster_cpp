@@ -4,6 +4,7 @@
 #include "utils/make_grid_points.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
+#include "utils/OneDIntegrationModule.hh"
 
 #include "models/dv_do_dz_t.hh"
 #include "models/sptxdes/omega_z_y3xspt.hh"
