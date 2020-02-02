@@ -369,26 +369,6 @@ target_include_directories(integrate_roffset
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 
-#add_executable(simultaneous_bin_comparison simultaneous_bin_comparison.cc)
-#target_link_libraries(simultaneous_bin_comparison PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cfitsio)
-#target_include_directories(simultaneous_bin_comparison
-#                           PRIVATE
-#                           ${CMAKE_SOURCE_DIR}/src
-#                           ${CMAKE_SOURCE_DIR}/externals
-#                           ${CUBA_INCLUDE_DIR}
-#                           ${CUBACPP_DIR}
-#                           ${EIGEN3_INCLUDE_DIR})
-
-#add_executable(sample_variance sample_variance.cc)
-#target_link_libraries(sample_variance PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models ${GPERFTOOLS_LIBRARIES})
-#target_include_directories(sample_variance
-#                           PRIVATE
-#                           ${CMAKE_SOURCE_DIR}/src
-#                           ${CMAKE_SOURCE_DIR}/externals
-#                           ${CUBA_INCLUDE_DIR}
-#                           ${CUBACPP_DIR}
-#                           ${EIGEN3_INCLUDE_DIR})
-
 add_executable(pxizeta_t_test pxizeta_t.test.cc)
 target_link_libraries(pxizeta_t_test PRIVATE testmain)
 target_include_directories(pxizeta_t_test
@@ -448,3 +428,12 @@ target_link_libraries(sptxdes_mor_1d PRIVATE testmain ${GSL_LIBRARIES})
 target_include_directories(sptxdes_mor_1d PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(sptxdes_mor_1d sptxdes_mor_1d)
+
+add_executable(multi_dimensional_integrator_test multi_dimensional_integrator.test.cc)
+target_link_libraries(multi_dimensional_integrator_test PRIVATE testmain ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(multi_dimensional_integrator_test PRIVATE ${CMAKE_SOURCE_DIR}/src
+                           ${CMAKE_SOURCE_DIR}/externals
+                           ${CUBA_INCLUDE_DIR}
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR})
+add_test(multi_dimensional_integrator_test multi_dimensional_integrator_test)

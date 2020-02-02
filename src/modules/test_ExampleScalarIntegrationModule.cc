@@ -18,6 +18,7 @@ main()
   // Create the module.
   cosmosis::DataBlock cfg;
   std::vector<double> radii{2.5, 5.0};
+  cfg.put_val(module_label, "algorithm", std::string("suave"));
   cfg.put_val(module_label, "radii", radii);
   cfg.put_val(module_label, "x_low", std::vector<double>{-3.0});
   cfg.put_val(module_label, "x_high", std::vector<double>{2.0});

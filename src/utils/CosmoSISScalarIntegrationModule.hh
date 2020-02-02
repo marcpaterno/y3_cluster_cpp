@@ -4,12 +4,9 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/entry.hh"
 #include "cosmosis/datablock/ndarray.hh"
-#include "cubacpp/cuhre.hh"
-#include "cubacpp/integrand_traits.hh"
-#include "cubacpp/integration_result.hh"
-#include "cubacpp/integration_volume.hh"
-#include "cubacpp/suave.hh"
-#include "cubacpp/vegas.hh"
+#include "cubacpp/cubacpp.hh"
+
+#include "utils/multi_dimensional_integrator.hh"
 
 #include <iostream>
 #include <stdexcept>
@@ -30,11 +27,10 @@ namespace y3_cluster {
   // Likelihood calculations based on the result of this integration must be
   // done by a separate CosmoSIS module.
 
-  template <typename COSMOSISINTEGRAND, typename ALG = cubacpp::Cuhre>
+  template <typename COSMOSISINTEGRAND>
   class CosmoSISScalarIntegrationModule {
   public:
     using IntegrandType = COSMOSISINTEGRAND;
-    using Algorithm = ALG;
     using volume_t = cubacpp::integration_volume_for_t<IntegrandType>;
     using grid_point_t = typename IntegrandType::grid_point_t;
     using integration_results_t = cubacpp::integration_result;
@@ -75,7 +71,7 @@ namespace y3_cluster {
       std::vector<integration_results_t> const& results) const;
 
     IntegrandType integrand_;
-    Algorithm algorithm_;
+    MultiDimensionalIntegrator algorithm_;
     std::vector<volume_t> volumes_;
     std::vector<grid_point_t> grid_points_;
     double eps_rel_;
@@ -84,12 +80,12 @@ namespace y3_cluster {
   };
 } // namespace y3_cluster
 
-template <typename I, typename A>
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::
+template <typename I>
+y3_cluster::CosmoSISScalarIntegrationModule<I>::
   CosmoSISScalarIntegrationModule(cosmosis::DataBlock& cfg)
 try
   : integrand_(cfg),
-    algorithm_(),
+    algorithm_(cfg.view<std::string>(IntegrandType::module_label(), "algorithm")),
     volumes_(IntegrandType::make_integration_volumes(cfg)),
     grid_points_(IntegrandType::make_grid_points(cfg)),
     eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
@@ -104,7 +100,7 @@ try
         "but the number of volumes did not equal the number of gridpoints.\n");
     }
   }
-  algorithm_.maxeval = cfg.view<int>(IntegrandType::module_label(), "max_eval");
+  algorithm_.set_maxeval(cfg.view<int>(IntegrandType::module_label(), "max_eval"));
   cubacores(0, 0);
 }
 catch (cosmosis::Exception const&) {
@@ -124,9 +120,9 @@ catch (...) {
                "CosmoSISScalarIntegrationModule.\n\n";
 }
 
-template <typename I, typename A>
+template <typename I>
 void
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::execute(
+y3_cluster::CosmoSISScalarIntegrationModule<I>::execute(
   cosmosis::DataBlock& sample)
 {
   integrand_.set_sample(sample);
@@ -136,18 +132,18 @@ y3_cluster::CosmoSISScalarIntegrationModule<I, A>::execute(
   finalize_sample(sample, results);
 }
 
-template <typename I, typename A>
+template <typename I>
 std::size_t
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::num_results() const
+y3_cluster::CosmoSISScalarIntegrationModule<I>::num_results() const
 {
   return (use_cartesian_product_of_volumes_and_gridpoints_) ?
            volumes_.size() * grid_points_.size() :
            volumes_.size();
 }
 
-template <typename I, typename A>
+template <typename I>
 std::vector<cubacpp::integration_result>
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::
+y3_cluster::CosmoSISScalarIntegrationModule<I>::
   integrate_cartesian_product_of_volumes_and_gridpoints()
 {
   std::vector<integration_results_t> results;
@@ -163,9 +159,9 @@ y3_cluster::CosmoSISScalarIntegrationModule<I, A>::
   return results;
 }
 
-template <typename COSMOSISINTEGRAND, typename ALG>
+template <typename COSMOSISINTEGRAND>
 std::vector<cubacpp::integration_result>
-y3_cluster::CosmoSISScalarIntegrationModule<COSMOSISINTEGRAND, ALG>::
+y3_cluster::CosmoSISScalarIntegrationModule<COSMOSISINTEGRAND>::
   integrate_zipped_sequence_of_volumes_and_gridpoints()
 {
   std::vector<integration_results_t> results;
@@ -178,9 +174,9 @@ y3_cluster::CosmoSISScalarIntegrationModule<COSMOSISINTEGRAND, ALG>::
   return results;
 }
 
-template <typename I, typename A>
+template <typename I>
 void
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::finalize_sample(
+y3_cluster::CosmoSISScalarIntegrationModule<I>::finalize_sample(
   cosmosis::DataBlock& sample,
   std::vector<cubacpp::integration_result> const& res) const
 {
@@ -190,9 +186,9 @@ y3_cluster::CosmoSISScalarIntegrationModule<I, A>::finalize_sample(
     finalize_sample_zipped_sequence_of_volumes_and_gridpoints(sample, res);
 }
 
-template <typename I, typename A>
+template <typename I>
 void
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::
+y3_cluster::CosmoSISScalarIntegrationModule<I>::
   finalize_sample_zipped_sequence_of_volumes_and_gridpoints(
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_result> const& res) const
@@ -237,9 +233,9 @@ y3_cluster::CosmoSISScalarIntegrationModule<I, A>::
   sample.put_val(module_label, "status", statuses);
   sample.put_val(module_label, "nregions", nregions);
 }
-template <typename I, typename A>
+template <typename I>
 void
-y3_cluster::CosmoSISScalarIntegrationModule<I, A>::
+y3_cluster::CosmoSISScalarIntegrationModule<I>::
   finalize_sample_cartesian_product_of_volumes_and_gridpoints(
     cosmosis::DataBlock& sample,
     std::vector<cubacpp::integration_result> const& res) const

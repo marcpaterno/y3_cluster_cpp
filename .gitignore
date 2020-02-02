@@ -30,3 +30,8 @@ masses_test_output/
 sdss_analysis_output/
 y1_analysis_output/
 wiki
+test/multi_dimensional_integrator_test
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
