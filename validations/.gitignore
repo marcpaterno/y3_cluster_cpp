@@ -6,3 +6,5 @@ physics_validation.md
 physics_validation.knit.md
 physics_validation.utf8.md
 physics_validation_files/
+physics_validation_cache/
+.Rproj.user/

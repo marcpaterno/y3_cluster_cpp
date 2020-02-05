@@ -14,6 +14,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
+                      cache = TRUE,
                       fig.align = "center",
                       fig.asp = 1/3)
 library(tidyverse)
@@ -654,7 +655,10 @@ ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
 
 The Cluster Mass profiles are calculated by a **separate CosmoSIS module**, which is a python wrapper to Tom McClintock's Cluster_toolkit code. The code exists in the folder `delta_sigma`.
 
-**Before your run this test, Make sure to go to the folder `deltasigma` and run `cosmosis deltasigma_test.ini` to produce the proper test files.**
+**Before your run this test, make sure to go to the folder `deltasigma` and run
+`cosmosis deltasigma_test.ini` to produce the proper test files.**
+If you are using the supplied `GNUmakefile` to build the document,
+this is done automatically.
 
 ## $\xi$ NFW
 
@@ -695,6 +699,10 @@ or the absolute difference to be less than
 $`r local.abs.errormargin`$.
 a. `r testresult(xi_nfw)`
 
+The values of $\xi$ cover a very wide range, so a logarithmic $y$-axis is needed.
+However, many points in the plot have $\xi = 0$.
+In order to allow the use of a logarithmic axis, these points are suppressed.
+
 ```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
 ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0)) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
@@ -706,14 +714,14 @@ ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0)) +
 ```
 
 ```{r fig.cap = "Relative residual implementation or our approximation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
-ggplot(xi_nfw, aes(x = r, y = fracerr, color = within.abs)) +
+ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0),
+      aes(x = r, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
   guides(color = FALSE) +
-  #ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab(expression(r)) +
   ylab("fractional residual") +
-   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
+  ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
@@ -759,6 +767,10 @@ or the absolute difference to be less than
 $`r local.abs.errormargin`$.
 a. `r testresult(xi_2h)`
 
+The values of $\xi$ cover a very wide range, so a logarithmic $y$-axis is needed.
+However, many points in the plot have $\xi = 0$.
+In order to allow the use of a logarithmic axis, these points are suppressed.
+
 ```{r fig.cap = "Absolute comparison of our implementation to the expected results. Note that over-plotting may obscure the expected values, if the approximated values are very close. Note that we suppress negative values of $\\xi$ in this plot, so that we can use a log scale."}
 ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0)) +
   geom_smallpoint(aes(x = r, y = ytrue), color = truecolor, shape = trueshape) +
@@ -770,7 +782,8 @@ ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0)) +
 ```
 
 ```{r fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test. Note that points for which both the predicted and expected values are zero are suppressed."}
-ggplot(filter(xi_2h, ytrue != 0), aes(x = r, y = fracerr, color = within.abs)) +
+ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0), 
+       aes(x = r, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
   guides(color = FALSE) +
@@ -1081,7 +1094,7 @@ ggplot(sig_crit) +
   geom_smallpoint(aes(x = zs , y = ytest), color = testcolor, shape = testshape) +
   xlab("z_s") +
   ylab("Density [Mpc^(-3)]") +
-  facet_wrap(" "+zbin~.)
+  facet_wrap(vars(zbin))
 ```
 
 ```{r fig.asp=0.7, fig.cap = "Absolute residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
@@ -1092,7 +1105,7 @@ ggplot(sig_crit, aes(x= zs, y = resid, color = within.frac)) +
   geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
   ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
   xlab("z_s") +
-  facet_wrap(zbin ~ .)
+  facet_wrap(vars(zbin))
 ```
 
 ```{r fig.asp=0.7, fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test. In this plot, the relative residual is forced to be 0 when both the true and test values are 0, as is the case when zs <= zl"}
@@ -1103,7 +1116,7 @@ ggplot(sig_crit, aes(x = zs, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")+
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab("z_s") +
-  facet_wrap(zbin ~ .)
+  facet_wrap(vars(zbin))
 ```
 
 # Session information

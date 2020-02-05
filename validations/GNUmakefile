@@ -34,6 +34,7 @@ clean:
 	rm -rf ../sdss_analysis_output
 	rm -rf ../y1_analysis_output
 	rm -rf ../OUTPUT
+	rm -rf physics_validation_cache/
 
 ../data/omega_z_sdss.out: ../test/omega_z_sdss_test
 	cd ../test && ./omega_z_sdss_test
