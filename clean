@@ -8,3 +8,4 @@ rm -rf CMakeFiles test/CMakeFiles  src/CMakeFiles src/utils/CMakeFiles src/model
 rm -f CMakeCache.txt
 find . -type f -name '*.dylib' -delete
 find . -type f -name '*.so' -delete
+

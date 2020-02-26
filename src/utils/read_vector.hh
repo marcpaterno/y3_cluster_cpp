@@ -16,8 +16,8 @@ template <class XFORM>
 inline std::vector<double>
 read_vector(const std::string filename, XFORM xform)
 {
-  std::string const fname = std::string(std::getenv("COSMOSIS_SRC_DIR")) +
-                            "/cosmosis-standard-library/y3_cluster_cpp/data/" +
+  std::string const fname = std::string(std::getenv("Y3_CLUSTER_CPP_DIR")) +
+                            "/data/" +
                             filename;
   std::ifstream file(fname);
   if (!file) {
