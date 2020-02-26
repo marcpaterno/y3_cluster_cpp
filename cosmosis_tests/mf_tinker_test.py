@@ -16,13 +16,13 @@ def execute(block, config):
         zz = block[section_name, "z"]
         nm = (block[section_name, "dndlnmh"])
 
-        dat = np.genfromtxt(os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/test/test_hmf_z0_z03.dat') )
+        dat = np.genfromtxt(os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/test/test_hmf_z0_z03.dat') )
         test_z = dat[:, 0] 
         test_m = dat[:, 1] 
         test_test = dat[:, 2]*(10.0**test_m)
 
         test_interp = interp2d(masses, zz, nm, kind='quintic')
-        outfile = os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/masses_test.out')
+        outfile = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/masses_test.out')
         with open(outfile, 'w') as outf:
             outf.write('z\t mass\t ytrue\t ytest\n')
             for ii in range(len(test_m)):

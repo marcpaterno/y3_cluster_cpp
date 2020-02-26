@@ -21,7 +21,7 @@ def execute(block, config):
         l_high = [27.9, 37.6, 50.3, 69.3, 140.0]
         teo_nc = [3698.17826207, 1780.16346057, 923.24586279, 468.39002918, 231.20028486]
         teo_logm = [14.17440261, 14.35812886, 14.52711919, 14.69816962, 14.93090648]
-        outfile = os.path.expandvars("${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/integrated_bin_test.out")
+        outfile = os.path.expandvars("${Y3_CLUSTER_CPP_DIR}/data/integrated_bin_test.out")
         with open(outfile, 'w') as outf:
             outf.write('llo\t lhi \t yntrue\t yntest \t ymtrue\t ymtest\n')
             for ii in range(len(l_low)):

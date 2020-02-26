@@ -27,7 +27,7 @@ def execute(block, config):
         test_mass=3.199267137797384375e+14
         test_z=0.2010101
 
-        basepath = "%s/cosmosis-standard-library/y3_cluster_cpp/deltasigma" % os.environ["COSMOSIS_SRC_DIR"]
+        basepath = "%s/deltasigma" % os.environ["Y3_CLUSTER_CPP_DIR"]
         dat=np.genfromtxt('%s/test/xi_nfwonly.txt' % basepath, delimiter=',')
         test_r=dat[:, 0]; test_test=dat[:, 1]
         test_interp=interp2d(Radii, M, Xi_1, kind='cubic')
