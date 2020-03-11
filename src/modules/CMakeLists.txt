@@ -214,6 +214,42 @@ target_include_directories(snapshotsim_scalarintegrand_NC
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(SigmaMiscentY1ScalarIntegrand MODULE sigma_miscent_y1_scalarintegrand.cc)
+target_link_libraries(SigmaMiscentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(SigmaMiscentY1ScalarIntegrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(SigmaCentY1ScalarIntegrand MODULE sigma_cent_y1_scalarintegrand.cc)
+target_link_libraries(SigmaCentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(SigmaCentY1ScalarIntegrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(NCMiscentY1ScalarIntegrand MODULE NC_miscent_y1_scalarintegrand.cc)
+target_link_libraries(NCMiscentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(NCMiscentY1ScalarIntegrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
+                           ${EIGEN3_INCLUDE_DIR})
+
+add_library(NCCentY1ScalarIntegrand MODULE NC_cent_y1_scalarintegrand.cc)
+target_link_libraries(NCCentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(NCCentY1ScalarIntegrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
+                           ${EIGEN3_INCLUDE_DIR})
+
 
 add_library(y1_analysis MODULE y1_analysis.cc)
 target_link_libraries(y1_analysis PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
