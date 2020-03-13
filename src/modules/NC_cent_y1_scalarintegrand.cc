@@ -48,7 +48,7 @@ public:
   // instance of std::array<double, N> with N set to the number
   // of different paramaters being varied in the grid.
   // The alias we define must be grid_point_t.
-  using grid_point_t = std::array<double, 3>; // we only vary radius.
+  using grid_point_t = std::array<double, 2>; // we only vary radius.
 
 private:
   // We define the type alias volume_t to be the right dimensionality
@@ -76,7 +76,6 @@ private:
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
-  double radius_;
 
 
 public:
@@ -137,7 +136,6 @@ NCCentY1ScalarIntegrand::NCCentY1ScalarIntegrand(DataBlock&)
   , int_zo_zt()
   , zo_low_()
   , zo_high_()
-  , radius_()
 {}
 
 void
@@ -156,7 +154,6 @@ NCCentY1ScalarIntegrand::set_sample(DataBlock& sample)
 void
 NCCentY1ScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
-  radius_ = grid_point[2];
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
@@ -199,7 +196,7 @@ std::vector<NCCentY1ScalarIntegrand::grid_point_t>
 NCCentY1ScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(
-    cfg, NCCentY1ScalarIntegrand::module_label(), "zo_low", "zo_high", "radii");
+    cfg, NCCentY1ScalarIntegrand::module_label(), "zo_low", "zo_high");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(NCCentY1ScalarIntegrand)
