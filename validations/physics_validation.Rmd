@@ -14,7 +14,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
-                      cache = TRUE,
+                      cache = FALSE,
                       fig.align = "center",
                       fig.asp = 1/3)
 library(tidyverse)
