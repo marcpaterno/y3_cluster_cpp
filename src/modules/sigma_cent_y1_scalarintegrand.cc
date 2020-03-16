@@ -173,8 +173,7 @@ SigmaCentY1ScalarIntegrand::operator()(double lo,
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double common_term = (*lc_lt)(lo, lt, zt) * (*mor)(lt, lnM, zt) *
-                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt) /
-                       2.0 / 3.1415926535897;
+                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
   auto const val = (*sigma)(radius_, lnM, zt) * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
    return val;
 }
