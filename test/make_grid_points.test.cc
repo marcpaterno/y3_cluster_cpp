@@ -71,8 +71,8 @@ TEST_CASE("2d grid")
   {
     cosmosis::DataBlock cfg;
     std::string const fname =
-      std::string(std::getenv("COSMOSIS_SRC_DIR")) +
-      "/cosmosis-standard-library/y3_cluster_cpp/data/" + "test_grid_file.txt";
+      std::string(std::getenv("Y3_CLUSTER_CPP_DIR")) +
+      "/data/" + "test_grid_file.txt";
     cfg.put_val(module_label, "grid_file", fname);
     grid_t grid = y3_cluster::load_grid_from_file_wall_of_numbers(
       cfg, module_label, "radii", "zs");

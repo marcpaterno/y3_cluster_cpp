@@ -8,7 +8,7 @@ cosmo = names.cosmological_parameters
 
 def setup(options):
 	section = option_section
-        z_file_name=os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/data/data_DESY1/test_cluster_Y1.fits'
+        z_file_name=os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/data_DESY1/test_cluster_Y1.fits'
         z_data=pyfits.open(z_file_name)[6].data
         z_array=z_data['z_mid']
         prob_array=z_data['bin1']

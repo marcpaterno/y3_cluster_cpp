@@ -15,7 +15,7 @@ if __name__ == "__main__":
   # All of the test files have been commited into the git repo. This code is kept here for record.
   # If you'd like to run it yourself, run cosmosis ../deltasigma.ini first to generate the matter power spectrum files
   # test are done at M=3.199267137797384375e+14, z=0.2010101, c=5.0, om=0.3
-  dirname = os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/deltasigma/OUTPUT/matter_power_nl')
+  dirname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/deltasigma/OUTPUT/matter_power_nl')
   k = np.loadtxt(os.path.join(dirname, "k_h.txt"))
   P = np.loadtxt(os.path.join(dirname, "p_k.txt"))
   zz = np.loadtxt(os.path.join(dirname, "z.txt"))
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
   SigmaNFW, SigmaMM, xiNFW, xiMM=sigma(R, M, c, om, k, P, Rp, xi_mm)
   
-  dirname = os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/deltasigma/test')
+  dirname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/deltasigma/test')
   ff=open(os.path.join(dirname, 'Sigma_mm_2halo.txt'), 'w')
   for ii in range(len(Rp)):
      ff.write('%f, %f \n'%(Rp[ii], SigmaMM[ii]))
@@ -54,11 +54,11 @@ if __name__ == "__main__":
   ff.close
 
   #generate bias test files using linear power spectrum
-  dirname = os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/deltasigma/OUTPUT/matter_power_lin')
+  dirname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/deltasigma/OUTPUT/matter_power_lin')
   klin = np.loadtxt(os.path.join(dirname, "k_h.txt"))
   Plin = np.loadtxt(os.path.join(dirname, "p_k.txt"))
   zz = np.loadtxt(os.path.join(dirname, "z.txt"))
-  ff=open(os.path.expandvars('${COSMOSIS_SRC_DIR}/cosmosis-standard-library/y3_cluster_cpp/deltasigma/test/bias.txt'), 'w')
+  ff=open(os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/deltasigma/test/bias.txt'), 'w')
   ff.write('## Mass(solar mass/h), redshift, bias  \n')
   M=10.0**(np.arange(12.0, 16.0, 0.2))
   ind, =np.where((zz > 0.2) & (zz < 0.202))

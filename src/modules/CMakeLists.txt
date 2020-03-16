@@ -8,7 +8,7 @@ target_include_directories(example_vector_integrand
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR}
-                           ${GSL_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
 
 add_library(example_scalar_integrand SHARED ExampleScalarIntegrand.cc)
 target_link_libraries(example_scalar_integrand PRIVATE cosmosis utils)
@@ -37,7 +37,7 @@ target_include_directories(ExampleVectorIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(ExampleScalarIntegrationModule SHARED ExampleScalarIntegration_module.cc)
@@ -50,6 +50,7 @@ target_include_directories(ExampleScalarIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(ExampleOneDIntegrationModule SHARED ExampleOneDIntegration_module.cc)
@@ -64,7 +65,7 @@ target_include_directories(ExampleOneDIntegrationModule
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
                            ${EIGEN3_INCLUDE_DIR}
-                           ${GSL_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
 
 add_executable(test_ExampleVectorIntegrationModule test_ExampleVectorIntegrationModule.cc)
 target_link_libraries(test_ExampleVectorIntegrationModule
@@ -291,14 +292,14 @@ target_link_libraries(ExampleVectorIntegration
                      PRIVATE
                      cosmosis
                      example_vector_integrand
-                     ${CUBA_LIBRARIES})                     
-
+                     ${CUBA_LIBRARIES})
 target_include_directories(ExampleVectorIntegration
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
 add_library(sigma_miscent MODULE sigma_miscent.cc)
