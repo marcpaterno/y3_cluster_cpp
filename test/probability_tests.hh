@@ -3,7 +3,7 @@
 #include "models/lc_lt_t.hh"
 #include "models/lo_lc_t.hh"
 #include "models/mor_t.hh"
-#include "models/mor_t2.hh"
+#include "models/mor_sdss_t.hh"
 #include "models/roffset_t.hh"
 #include "utils/integration_range.hh"
 
@@ -241,7 +241,7 @@ namespace y3_cluster {
     if (print)
       std::cout << "lnM,M,zt,mor2_integrated,status,error,prob\n";
 
-    MOR_t2 mor2{pow(10, 1.11375214e+01), pow(10, 12.4225835912), 0.65, 0.15};
+    MOR_sdss mor2{pow(10, 1.11375214e+01), pow(10, 12.4225835912), 0.65, 0.15};
 
     for (auto i = 0u; i < lnM_width; i++) {
       for (auto j = 0u; j < zt_width; j++) {

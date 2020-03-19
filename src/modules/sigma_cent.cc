@@ -10,7 +10,7 @@
 #include "models/int_zo_zt_t.hh"
 #include "models/lc_lt_t.hh"
 #include "models/lo_lc_t.hh"
-#include "models/mor_t2.hh"
+#include "models/mor_sdss_t.hh"
 #include "models/omega_z_sdss.hh"
 #include "models/roffset_t.hh"
 #include "models/sig_sum.hh"
@@ -50,7 +50,7 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<LC_LT_t> lc_lt;
-  std::optional<MOR_t2> mor;
+  std::optional<MOR_sdss> mor;
   std::optional<OMEGA_Z_SDSS> omega_z_sdss;
   std::optional<DV_DO_DZ_t> dv_do_dz;
   std::optional<HMF_t> hmf;

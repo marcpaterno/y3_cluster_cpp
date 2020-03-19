@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_CPP_MOR_T2_HH
-#define Y3_CLUSTER_CPP_MOR_T2_HH
+#ifndef Y3_CLUSTER_CPP_MOR_SDSS_HH
+#define Y3_CLUSTER_CPP_MOR_SDSS_HH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/datablock_reader.hh"
@@ -14,7 +14,7 @@
 
 namespace y3_cluster {
 
-  class MOR_t2 {
+  class MOR_sdss {
     // Read from l_sat_grid.dat
     static std::array<double, 42> constexpr test_lsat = {
       0.500000,   0.600000,   0.700000,   0.800000,   0.900000,   1.000000,
@@ -241,11 +241,11 @@ namespace y3_cluster {
     double _sigma_intr;
 
   public:
-    MOR_t2(double A, double B, double C, double sigma_i)
+    MOR_sdss(double A, double B, double C, double sigma_i)
       : _A(A), _B(B), _C(C), _sigma_intr(sigma_i)
     {}
 
-    explicit MOR_t2(cosmosis::DataBlock& sample)
+    explicit MOR_sdss(cosmosis::DataBlock& sample)
       : _A(get_datablock<double>(sample, "cluster_abundance", "mor_A"))
       , _B(get_datablock<double>(sample, "cluster_abundance", "mor_B"))
       , _C(get_datablock<double>(sample, "cluster_abundance", "mor_alpha"))
@@ -275,9 +275,9 @@ namespace y3_cluster {
   };
 }
 
-y3_cluster::Interp2D const y3_cluster::MOR_t2::sig_interp =
+y3_cluster::Interp2D const y3_cluster::MOR_sdss::sig_interp =
   y3_cluster::Interp2D(test_sigintr, test_lsat, sig_skewnorml_flat);
-y3_cluster::Interp2D const y3_cluster::MOR_t2::skews_interp =
+y3_cluster::Interp2D const y3_cluster::MOR_sdss::skews_interp =
   y3_cluster::Interp2D(test_sigintr, test_lsat, skews);
 
 #endif

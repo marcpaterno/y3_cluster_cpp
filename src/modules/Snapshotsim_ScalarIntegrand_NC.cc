@@ -7,7 +7,6 @@
 #include "cubacpp/integration_volume.hh"
 
 #include "models/hmf_t.hh"
-#include "models/mor_t2.hh"
 #include "models/sig_sum.hh"
 
 #include <iostream>
@@ -59,7 +58,6 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<MOR_t2> mor;
   std::optional<HMF_t> hmf;
   std::optional<SIG_SUM> sigma;
 
@@ -124,7 +122,7 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 SnapshotScalarNCIntegrand::SnapshotScalarNCIntegrand(DataBlock&)
-  : mor(), hmf(), sigma(), radius_(), zt_()
+  : hmf(), sigma(), radius_(), zt_()
 {}
 
 void
@@ -133,7 +131,6 @@ SnapshotScalarNCIntegrand::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  mor.emplace(sample);
   hmf.emplace(sample);
   sigma.emplace(sample);
 }

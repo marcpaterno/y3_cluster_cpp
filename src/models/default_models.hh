@@ -11,7 +11,7 @@
 #include "models/lc_lt_t.hh"
 #include "models/lo_lc_t.hh"
 #include "models/models.hh"
-#include "models/mor_t2.hh"
+#include "models/mor_sdss_t.hh"
 #include "models/omega_z_sdss.hh"
 #include "models/pzsource_gaussian_t.hh"
 #include "models/pzsource_t.hh"
@@ -21,7 +21,7 @@
 #include "models/t_mis_t.hh"
 
 namespace y3_cluster {
-  using DefaultModels = Models<MOR_t2,
+  using DefaultModels = Models<MOR_sdss,
                                LO_LC_t,
                                LC_LT_t,
                                INT_ZO_ZT_t,

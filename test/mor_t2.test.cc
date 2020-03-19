@@ -1,12 +1,12 @@
 #include "catch2/catch.hpp"
-#include "models/mor_t2.hh"
+#include "models/mor_sdss_t.hh"
 
 #include <fstream>
 #include <iomanip>
 
-using y3_cluster::MOR_t2;
+using y3_cluster::MOR_sdss;
 
-TEST_CASE("mor_t2 works")
+TEST_CASE("mor_sdss works")
 {
   std::ifstream infile{"../data/mor_tt_test.txt"};
   // Use REQUIRE for immediate failure if we can't open the file.
@@ -37,7 +37,7 @@ TEST_CASE("mor_t2 works")
   const double sigma_intr = 0.10;
   const double alpha = 0.65;
 
-  MOR_t2 mor_t(pow(10, 11.2), pow(10, 12.42), alpha, sigma_intr);
+  MOR_sdss mor_t(pow(10, 11.2), pow(10, 12.42), alpha, sigma_intr);
 
   std::ofstream out{"../data/mor_tt_test.out"};
   out << std::setw(16);
