@@ -52,8 +52,8 @@ namespace y3_cluster {
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     {
-      double _sig_1 = _sigma1->eval(r, lnM);
-      double _sig_2 = _bias->eval(zt, lnM) * _sigma2->eval(r, zt);
+      double _sig_1 = _sigma1->clamp(r, lnM);
+      double _sig_2 = _bias->clamp(zt, lnM) * _sigma2->clamp(r, zt);
       // TODO: h factor?
       // if (del_sig_1 >= del_sig_2) {
       // return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);

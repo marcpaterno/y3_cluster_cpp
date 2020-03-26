@@ -275,13 +275,14 @@ namespace y3_cluster {
       // Now _lambda returns the evaluation of the eq.(9) of the
       // Matteo's paper, i.e., lambda_sat_given_M. 1. is a dummy
       // value for z. We are not using z here.
-      double ltm = pow((std::exp(lnM) - _A) / (_B - _A), _C) *
+      double const ltm = pow((std::exp(lnM) - _A) / (_B - _A), _C) *
                    pow((1.0 + zt) / (1.0 + _z_pivot), _epsilon);
 
       // Computing sigma from the interpolation
       // ltm is lambda_true_given_M; _sigma_intr is sigma_intrisic
-      double _sigma = sig_interp(_sigma_intr, ltm);
-      double _skw = skews_interp(_sigma_intr, ltm);
+
+      double const _sigma = sig_interp.clamp(_sigma_intr, ltm);
+      double const _skw = skews_interp.clamp(_sigma_intr, ltm);
 
       // Eq. B1 of Matteo's paper, adding the normalization part
       double const x = lt - ltm;
