@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "models/sptxdes/omega_z_y3xspt.hh"
+#include "utils/make_ifstream.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -9,7 +10,7 @@ using y3_cluster::OMEGA_Z_Y3XSPT;
 
 TEST_CASE("omega_z_y3xspt works")
 {
-  std::ifstream infile{"../data/test_omega_z_y3xspt.txt"};
+  std::ifstream infile = y3_cluster::make_ifstream("data/test_omega_z_y3xspt.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());

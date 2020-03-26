@@ -2,6 +2,8 @@
 #include "models/hmf_t.hh"
 #include "utils/interp_2d.hh"
 #include "utils/read_vector.hh"
+#include "utils/make_ifstream.hh"
+
 #include <fstream>
 #include <iomanip>
 
@@ -10,7 +12,7 @@ using y3_cluster::Interp2D;
 
 TEST_CASE("mass function works")
 {
-  std::ifstream infile{"test_hmf_z0_z03.dat"};
+  std::ifstream infile = y3_cluster::make_ifstream("test/test_hmf_z0_z03.dat");
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> zs;

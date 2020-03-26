@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "models/mor_sdss_t.hh"
+#include "utils/make_ifstream.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -8,7 +9,7 @@ using y3_cluster::MOR_sdss;
 
 TEST_CASE("mor_sdss works")
 {
-  std::ifstream infile{"../data/mor_tt_test.txt"};
+  std::ifstream infile = y3_cluster::make_ifstream("data/mor_tt_test.txt");
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> log10m;

@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "models/sptxdes/ln_mez_power_law.hh"
+#include "utils/make_ifstream.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -9,7 +10,7 @@
 using y3_cluster::ln_mez_power_law;
 TEST_CASE("ln_mez_power_law works")
 {
-  std::ifstream infile{"../data/test_ln_mez_power_law.txt"};
+  std::ifstream infile = y3_cluster::make_ifstream("data/test_ln_mez_power_law.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());
