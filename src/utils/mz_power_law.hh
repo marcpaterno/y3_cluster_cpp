@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_MZ_POWER_LAW_HH
 
 #include <cmath>
-
+#include <iostream>
 namespace y3_cluster {
   // mz_power_law represents a commonly-used power law relationship, with the
   // form
@@ -36,6 +36,7 @@ inline double
 y3_cluster::mz_power_law::operator()(double lnM, double z) const noexcept
 {
   double const log_res = B_ * lnM + C_ * std::log1p(z) + log_A_;
+  //std::cout << log_res << " " << lnM << " " << log_A_<<"\n";
   return std::exp(log_res);
 }
 #endif
