@@ -149,42 +149,8 @@ target_include_directories(ExampleOneDIntegrand_test
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ExampleOneDIntegrand_test ExampleOneDIntegrand_test)
 
-add_library(snapshotsim_scalarintegrand MODULE Snapshotsim_ScalarIntegrand.cc)
-target_link_libraries(snapshotsim_scalarintegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(snapshotsim_scalarintegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
+#### The above are example modules
 
-
-                       add_library(snapshotsim_scalarintegrand_sigma MODULE Snapshotsim_ScalarIntegrand_Sigma.cc)
-target_link_libraries(snapshotsim_scalarintegrand_sigma PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(snapshotsim_scalarintegrand_sigma
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(snapshotsim_scalarintegrand_max MODULE snapshotsim_scalarintegrand_max.cc)
-target_link_libraries(snapshotsim_scalarintegrand_max PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(snapshotsim_scalarintegrand_max
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(snapshotsim_scalarintegrand_max_sigma MODULE snapshotsim_scalarintegrand_max_sigma.cc)
-target_link_libraries(snapshotsim_scalarintegrand_max_sigma PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(snapshotsim_scalarintegrand_max_sigma
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
 
 
 add_library(sigma_nl MODULE sigma_nl.cc)
@@ -233,131 +199,14 @@ target_include_directories(SigmaCentY1ScalarIntegrand
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(NCMiscentY1ScalarIntegrand MODULE NC_miscent_y1_scalarintegrand.cc)
-target_link_libraries(NCMiscentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(NCMiscentY1ScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(NCCentY1ScalarIntegrand MODULE NC_cent_y1_scalarintegrand.cc)
-target_link_libraries(NCCentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(NCCentY1ScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(NCRadMiscentY1ScalarIntegrand MODULE NCRad_miscent_y1_scalarintegrand.cc)
-target_link_libraries(NCRadMiscentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(NCRadMiscentY1ScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(MassMiscentY1ScalarIntegrand MODULE Mass_miscent_y1_scalarintegrand.cc)
-target_link_libraries(MassMiscentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(MassMiscentY1ScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(MassCentY1ScalarIntegrand MODULE Mass_cent_y1_scalarintegrand.cc)
-target_link_libraries(MassCentY1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(MassCentY1ScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(NCMiscentY1MortScalarIntegrand MODULE mass_mort_y1/NC_miscent_y1_mort_scalarintegrand.cc)
-target_link_libraries(NCMiscentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(NCMiscentY1MortScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(NCCentY1MortScalarIntegrand MODULE mass_mort_y1/NC_cent_y1_mort_scalarintegrand.cc)
-target_link_libraries(NCCentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(NCCentY1MortScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(NCRadMiscentY1MortScalarIntegrand MODULE mass_mort_y1/NCRad_miscent_y1_mort_scalarintegrand.cc)
-target_link_libraries(NCRadMiscentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(NCRadMiscentY1MortScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(MassMiscentY1MortScalarIntegrand MODULE mass_mort_y1/Mass_miscent_y1_mort_scalarintegrand.cc)
-target_link_libraries(MassMiscentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(MassMiscentY1MortScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(MassCentY1MortScalarIntegrand MODULE mass_mort_y1/Mass_cent_y1_mort_scalarintegrand.cc)
-target_link_libraries(MassCentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(MassCentY1MortScalarIntegrand
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-
-add_library(y1_analysis MODULE y1_analysis.cc)
-target_link_libraries(y1_analysis PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(y1_analysis
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(sdss_analysis MODULE sdss_analysis.cc)
-target_link_libraries(sdss_analysis PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(sdss_analysis
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(cluster_abundance_covariance MODULE cluster_abundance_covariance.cc)
-target_link_libraries(cluster_abundance_covariance
-                      PRIVATE
-                      utils
-                      models
-                      ${CUBA_LIBRARIES}
-                      ${GSL_LIBRARIES}
-                      cosmosis)
-target_include_directories(cluster_abundance_covariance
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}
-                           ${CMAKE_SOURCE_DIR}/externals
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${GSL_INCLUDE_DIRS}
-                           ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR})
+add_subdirectory(mass_y1)
+add_subdirectory(mass_mort_y1)
+add_subdirectory(sigma_mort_y1)
+add_subdirectory(y1_analysis)
+add_subdirectory(sdss_analysis)
+add_subdirectory(snapshotsim)
+add_subdirectory(cluster_abundance_covariance)
+add_subdirectory(DESxSPTModule)
 
 add_library(ExampleVectorIntegration MODULE ExampleVectorIntegration_module.cc)
 target_link_libraries(ExampleVectorIntegration
@@ -448,22 +297,5 @@ target_include_directories(compton_y_sims
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(AbundanceIntegralMLamtrue_DESxSPTModule MODULE AbundanceIntegralMLamtrue_DESxSPTModule.cc)
-target_link_libraries(AbundanceIntegralMLamtrue_DESxSPTModule PRIVATE cosmosis utils models
-                      ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(AbundanceIntegralMLamtrue_DESxSPTModule PRIVATE ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
-
-add_library(SelectionIntegralDESxSPTModule MODULE SelectionIntegralDESxSPTModule.cc)
-target_link_libraries(SelectionIntegralDESxSPTModule PRIVATE cosmosis utils models
-                      ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(SelectionIntegralDESxSPTModule PRIVATE ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
-
-add_library(AbundanceIntegralZtrue_DESxSPTModule MODULE AbundanceIntegralZtrue_DESxSPTModule.cc)
-target_link_libraries(AbundanceIntegralZtrue_DESxSPTModule PRIVATE cosmosis utils models
-                      ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(AbundanceIntegralZtrue_DESxSPTModule PRIVATE ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
 
