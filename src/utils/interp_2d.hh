@@ -6,6 +6,7 @@
 #include "cosmosis/datablock/ndarray.hh"
 #include "gsl/gsl_interp2d.h"
 #include <array>
+#include <assert.h>
 #include <cstddef>
 #include <iostream>
 #include <stdexcept>
@@ -17,6 +18,13 @@
 //
 namespace y3_cluster {
 
+  // This is based on std::clamp<T> from C++ 17, put here for use with
+  // models that use interpolation and need to avoid extrapolation.
+  constexpr double do_clamp( double v, double lo, double hi )
+  {
+    assert( !(hi < lo) );
+    return (v < lo) ? lo : (hi < v) ? hi : v;
+  }
   class Interp2D {
   public:
 
@@ -94,6 +102,13 @@ namespace y3_cluster {
       return this->operator()(x, y);
     };
 
+    double
+    clamp(double x, double y) const
+    {
+      return eval(do_clamp(x, min_x(), max_x()),
+                  do_clamp(y, min_y(), max_y()));
+    }
+
     // Return the number of grid points in x and y.
     std::size_t nx() const;
     std::size_t ny() const;
@@ -107,6 +122,12 @@ namespace y3_cluster {
     // Discover the (x,y) grid implicit in the supplied set of points, or throw
     // a std::domain_error if no grid can be constructed from these points.
     void make_grid_(std::vector<Point3D>&& data);
+
+    // Get the limits of x and y.
+    double min_x() const { return xs_.front(); }
+    double max_x() const { return xs_.back(); }
+    double min_y() const { return ys_.front(); }
+    double max_y() const { return ys_.back(); }
   };
 } // namespace y3_cluster
 

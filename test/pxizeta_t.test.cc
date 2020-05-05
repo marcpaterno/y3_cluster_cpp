@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "models/sptxdes/pxizeta_t.hh"
+#include "utils/make_ifstream.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -9,7 +10,7 @@
 using y3_cluster::PXiZeta_t;
 TEST_CASE("PXiZeta_t works")
 {
-  std::ifstream infile{"../data/test_pxizeta_t.txt"};
+  std::ifstream infile = y3_cluster::make_ifstream("data/test_pxizeta_t.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());

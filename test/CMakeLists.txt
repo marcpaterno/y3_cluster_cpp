@@ -106,7 +106,7 @@ target_include_directories(fpsupport_test
 add_test(fpsupport_test fpsupport_test)
 
 add_executable(omega_z_sdss_test omega_z_sdss.test.cc)
-target_link_libraries(omega_z_sdss_test PRIVATE testmain)
+target_link_libraries(omega_z_sdss_test PRIVATE testmain utils)
 target_include_directories(omega_z_sdss_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -133,7 +133,7 @@ target_include_directories(sample_variance_test
 #add_test(hmf_t_test hmf_t_test)
 
 add_executable(lo_lc_t_test lo_lc_t.test.cc)
-target_link_libraries(lo_lc_t_test PRIVATE testmain)
+target_link_libraries(lo_lc_t_test PRIVATE testmain utils)
 target_include_directories(lo_lc_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -157,7 +157,7 @@ target_include_directories(ez_test
 add_test(ez_test ez_test)
 
 add_executable(roffset_t_test roffset_t.test.cc)
-target_link_libraries(roffset_t_test PRIVATE testmain)
+target_link_libraries(roffset_t_test PRIVATE testmain utils)
 target_include_directories(roffset_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -370,7 +370,7 @@ target_include_directories(integrate_roffset
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(pxizeta_t_test pxizeta_t.test.cc)
-target_link_libraries(pxizeta_t_test PRIVATE testmain)
+target_link_libraries(pxizeta_t_test PRIVATE testmain utils)
 target_include_directories(pxizeta_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -378,7 +378,7 @@ target_include_directories(pxizeta_t_test
 add_test(pxizeta_t_test pxizeta_t_test)
 
 add_executable(omega_z_y3xspt_test omega_z_y3xspt.test.cc)
-target_link_libraries(omega_z_y3xspt_test PRIVATE testmain)
+target_link_libraries(omega_z_y3xspt_test PRIVATE testmain utils)
 target_include_directories(omega_z_y3xspt_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -386,7 +386,7 @@ target_include_directories(omega_z_y3xspt_test
 add_test(omega_z_y3xspt_test omega_z_y3xspt_test)
 
 add_executable(int_zo_zt_des_test int_zo_zt_des_t.test.cc)
-target_link_libraries(int_zo_zt_des_test PRIVATE testmain)
+target_link_libraries(int_zo_zt_des_test PRIVATE testmain utils)
 target_include_directories(int_zo_zt_des_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -394,7 +394,7 @@ target_include_directories(int_zo_zt_des_test
 add_test(int_zo_zt_des_test int_zo_zt_des_test)
 
 add_executable(zo_zt_des_test zo_zt_des_t.test.cc)
-target_link_libraries(zo_zt_des_test PRIVATE testmain)
+target_link_libraries(zo_zt_des_test PRIVATE testmain utils)
 target_include_directories(zo_zt_des_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -402,7 +402,7 @@ target_include_directories(zo_zt_des_test
 add_test(zo_zt_des_test zo_zt_des_test)
 
 add_executable(ln_mez_power_law ln_mez_power_law.test.cc)
-target_link_libraries(ln_mez_power_law PRIVATE testmain)
+target_link_libraries(ln_mez_power_law PRIVATE testmain utils)
 target_include_directories(ln_mez_power_law
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -418,13 +418,13 @@ target_include_directories(mor_y3xspt_t
 add_test(mor_y3xspt_t mor_y3xspt_t)
 
 add_executable(int_pxizeta_test int_pxizeta.test.cc)
-target_link_libraries(int_pxizeta_test PRIVATE testmain ${GSL_LIBRARIES})
+target_link_libraries(int_pxizeta_test PRIVATE testmain ${GSL_LIBRARIES} utils)
 target_include_directories(int_pxizeta_test PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(int_pxizeta_test int_pxizeta_test)
 
 add_executable(sptxdes_mor_1d sptxdes_mor_1d.test.cc)
-target_link_libraries(sptxdes_mor_1d PRIVATE testmain ${GSL_LIBRARIES})
+target_link_libraries(sptxdes_mor_1d PRIVATE testmain ${GSL_LIBRARIES} utils)
 target_include_directories(sptxdes_mor_1d PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(sptxdes_mor_1d sptxdes_mor_1d)

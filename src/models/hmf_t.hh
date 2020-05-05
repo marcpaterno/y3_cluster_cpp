@@ -52,7 +52,7 @@ namespace y3_cluster {
     double
     operator()(double lnM, double zt) const
     {
-      return _nmz->eval(lnM, zt) *
+      return _nmz->clamp(lnM, zt) *
              (_s * (lnM * 0.4342944819 - 13.8124426028) + _q);
       // 0.4342944819 is log(e)
     }

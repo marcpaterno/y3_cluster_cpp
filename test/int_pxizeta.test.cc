@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "models/sptxdes/int_pxizeta.hh"
+#include "utils/make_ifstream.hh"
 
 #include <fstream>
 #include <iostream>
@@ -9,7 +10,7 @@ using y3_cluster::INT_PXIZETA;
 
 TEST_CASE("Testing Integral over xi of P(xi|zeta)")
 {
-  std::ifstream infile{"../data/test_int_pxizeta.txt"};
+  std::ifstream infile = y3_cluster::make_ifstream("data/test_int_pxizeta.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());

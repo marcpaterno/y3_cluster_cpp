@@ -1,6 +1,7 @@
 #include "catch2/catch.hpp"
 #include "models/sigma_photoz_des.hh"
 #include "models/zo_zt_des_t.hh"
+#include "utils/make_ifstream.hh"
 
 #include <fstream>
 #include <iostream>
@@ -11,7 +12,7 @@ using y3_cluster::ZO_ZT_DES_t;
 
 TEST_CASE("P(zobs|ztrue) implementation zo_zt_des works")
 {
-  std::ifstream infile{"../data/test_zo_zt_des.txt"};
+  std::ifstream infile = y3_cluster::make_ifstream("data/test_zo_zt_des.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());

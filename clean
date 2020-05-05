@@ -8,4 +8,13 @@ rm -rf CMakeFiles test/CMakeFiles  src/CMakeFiles src/utils/CMakeFiles src/model
 rm -f CMakeCache.txt
 find . -type f -name '*.dylib' -delete
 find . -type f -name '*.so' -delete
-
+find . -type f -name '*.pyc' -delete
+rm -rf Testing/
+rm -f test/*_test
+rm -f deltasigma/test/Sigma_mm_2halo.out
+rm -f deltasigma/test/Sigma_nfwonly.out
+rm -f deltasigma/test/bias.out
+rm -f deltasigma/test/xi_mm_2halo.out
+rm -f deltasigma/test/xi_nfwonly.out
+rm -rf masses_test_output/
+rm -rf sdss_analysis_output/

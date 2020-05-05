@@ -42,9 +42,13 @@ y3_cluster::Interp2D::operator()(double x, double y) const
   // We do not use the accelerator features of GSL interpolation, because we
   // do not expect that the pattern of calls will be such that it will help.
   // Profile the resulting integration routine to see if this should be changed.
-  return gsl_interp2d_eval_extrap( interp_, xs_.data(), ys_.data(), zs_.data(), x, y, nullptr, nullptr);
-
-
+  double z = 0.0;
+  int rc = gsl_interp2d_eval_e(interp_, xs_.data(), ys_.data(), zs_.data(),
+      x, y, nullptr, nullptr, &z);
+  if (rc == 0) return z;
+  std::cerr << "gsl error code: " << rc << '\n';
+  std::cerr << "x: " << x << " y: " << y << '\n';
+  std::abort();
   // Skip this check for now - we will fix this later
   /*
   double result = 0.0;

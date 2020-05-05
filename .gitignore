@@ -35,3 +35,4 @@ test/multi_dimensional_integrator_test
 .ninja_log
 build.ninja
 rules.ninja
+*_output/

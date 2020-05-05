@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "models/sptxdes/mor_1d.hh"
+#include "utils/make_ifstream.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -9,7 +10,7 @@
 using y3_cluster::MOR_1D;
 TEST_CASE("SPTxDES MOR_1D works")
 {
-  std::ifstream infile{"../data/test_sptxdes_mor_1d.txt"};
+  std::ifstream infile = y3_cluster::make_ifstream("data/test_sptxdes_mor_1d.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());
