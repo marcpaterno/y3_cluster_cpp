@@ -151,27 +151,6 @@ add_test(ExampleOneDIntegrand_test ExampleOneDIntegrand_test)
 
 #### The above are example modules
 
-
-
-add_library(sigma_nl MODULE sigma_nl.cc)
-target_link_libraries(sigma_nl PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(sigma_nl
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-
-add_library(model_sigmahm MODULE model_sigmahm.cc)
-target_link_libraries(model_sigmahm PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(model_sigmahm
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
 add_subdirectory(mass_y1)
 add_subdirectory(mass_mort_y1)
 add_subdirectory(sigma_mort_y1)
@@ -181,6 +160,9 @@ add_subdirectory(snapshotsim)
 add_subdirectory(cluster_abundance_covariance)
 add_subdirectory(DESxSPTModule)
 add_subdirectory(sigma_kappa_y1)
+add_subdirectory(buzzard_test)
+add_subdirectory(compton_y_sims)
+add_subdirectory(model_sigmahm)
 
 add_library(ExampleVectorIntegration MODULE ExampleVectorIntegration_module.cc)
 target_link_libraries(ExampleVectorIntegration
@@ -193,25 +175,6 @@ target_include_directories(ExampleVectorIntegration
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-add_library(buzzard_sigma_halos MODULE buzzard_sigma_halos.cc)
-target_link_libraries(buzzard_sigma_halos PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(buzzard_sigma_halos
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
-                           ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-
-add_library(compton_y_sims MODULE compton_y_sims.cc)
-target_link_libraries(compton_y_sims PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(compton_y_sims
-                           PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
