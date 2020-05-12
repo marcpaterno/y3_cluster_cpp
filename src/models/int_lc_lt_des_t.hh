@@ -32,7 +32,7 @@ namespace y3_cluster {
       } else if ((lc >= 45) & (lc < 60)) {
         val = lambda2_interp(lt, zt);
       } else {
-        val = lambda3_interp(lt, zt);
+        val = lambda3_interp.clamp(lt, zt);
       }
       return val;
     }
