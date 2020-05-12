@@ -1,6 +1,6 @@
 #include "catch2/catch.hpp"
 #include "cosmosis/datablock/datablock.hh"
-#include "modules/ExampleOneDIntegrand.hh"
+#include "ExampleOneDIntegrand.hh"
 
 #include <vector>
 #include <array>

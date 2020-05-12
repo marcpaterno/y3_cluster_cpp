@@ -1,7 +1,7 @@
 #include "catch2/catch.hpp"
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/cuhre.hh"
-#include "modules/ExampleScalarIntegrand.hh"
+#include "ExampleScalarIntegrand.hh"
 
 #include <iostream>
 #include <vector>
