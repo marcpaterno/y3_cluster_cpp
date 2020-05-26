@@ -21,7 +21,23 @@ set(CMAKE_SHARED_MODULE_PREFIX "")    # We don't need the leading lib
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 find_package(CUBA REQUIRED)
+message("CUBA_LIBRARIES = ${CUBA_LIBRARIES}")
+
 find_package(GSL REQUIRED)
+# Fix sometime-broken GSL discovery.
+# Documentation says GSL_INCLUDE_DIRS (not the final 'S') should be set.
+# cmake v10.1 contains a FindGSL.cmake that says this, but under some conditions
+# does not seem to do so. However, It does set 'GSL_INCLUDE_DIR'.
+message("GSL_FOUND = ${GSL_FOUND}")
+message("GSL_INCLUDE_DIR = ${GSL_INCLUDE_DIR}")
+message("GSL_INCLUDE_DIRS = '${GSL_INCLUDE_DIRS}'")
+message("GSL_LIBRARIES = ${GSL_LIBRARIES}")
+if ("${GSL_INCLUDE_DIRS}" STREQUAL "")
+  message("GSL_INCLUDE_DIRS was not set by FindGSL.cmake")
+  set(GSL_INCLUDE_DIRS "${GSL_INCLUDE_DIR}")
+  message("We have set GSL_INCLUDE_DIRS to ${GSL_INCLUDE_DIRS}")
+endif()
+
 find_package(Eigen3 REQUIRED)
 
 add_subdirectory(src)

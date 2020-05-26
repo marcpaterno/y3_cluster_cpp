@@ -29,7 +29,7 @@ target_include_directories(snapshotsim_scalarintegrand_sigma
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(snapshotsim_scalarintegrand_max MODULE snapshotsim_scalarintegrand_max.cc)
+add_library(snapshotsim_scalarintegrand_max MODULE Snapshotsim_ScalarIntegrand_max.cc)
 target_link_libraries(snapshotsim_scalarintegrand_max PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(snapshotsim_scalarintegrand_max
                            PRIVATE
@@ -38,7 +38,7 @@ target_include_directories(snapshotsim_scalarintegrand_max
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
-add_library(snapshotsim_scalarintegrand_max_sigma MODULE snapshotsim_scalarintegrand_max_sigma.cc)
+add_library(snapshotsim_scalarintegrand_max_sigma MODULE Snapshotsim_ScalarIntegrand_max_sigma.cc)
 target_link_libraries(snapshotsim_scalarintegrand_max_sigma PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(snapshotsim_scalarintegrand_max_sigma
                            PRIVATE
