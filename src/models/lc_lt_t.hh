@@ -25,11 +25,11 @@ namespace y3_cluster {
     double
     operator()(double lc, double lt, double zt) const
     {
-      const auto tau = tau_interp(lt, zt);
-      const auto mu = mu_interp(lt, zt);
-      const auto sigma = sigma_interp(lt, zt);
-      const auto fmsk = fmsk_interp(lt, zt);
-      const auto fprj = fprj_interp(lt, zt);
+      const auto tau = tau_interp.clamp(lt, zt);
+      const auto mu = mu_interp.clamp(lt, zt);
+      const auto sigma = sigma_interp.clamp(lt, zt);
+      const auto fmsk = fmsk_interp.clamp(lt, zt);
+      const auto fprj = fprj_interp.clamp(lt, zt);
 
       const auto exptau =
         std::exp(tau * (2.0 * mu + tau * sigma * sigma - 2.0 * lc) / 2.0);
