@@ -6,7 +6,8 @@ enable_testing()
 # the ABI here -- e.g., the standard level.
 add_compile_options(-W -Wall -Wextra -Werror)
 add_compile_options(-Wnon-virtual-dtor -Wcast-align -Woverloaded-virtual -Wpedantic -Wdouble-promotion)
-SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -march=native -mtune=native" )
+#SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -march=native -mtune=native" )
+SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno")
 
 if (CMAKE_CXX_COMPILER STREQUAL "gcc")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-signaling-nans -fexcess-precision=fast")
@@ -37,8 +38,6 @@ if ("${GSL_INCLUDE_DIRS}" STREQUAL "")
   set(GSL_INCLUDE_DIRS "${GSL_INCLUDE_DIR}")
   message("We have set GSL_INCLUDE_DIRS to ${GSL_INCLUDE_DIRS}")
 endif()
-
-find_package(Eigen3 REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(test)
