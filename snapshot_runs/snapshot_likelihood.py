@@ -2,7 +2,7 @@ import numpy as np
 from cosmosis.datablock import names as section_names
 from cosmosis.datablock import option_section
 import matplotlib.pyplot as plt
-
+from scipy.interpolate import interp1d
 def setup(options):
     section = option_section
 
@@ -11,7 +11,8 @@ def setup(options):
     NCs_blockname = options[section,"NCs_blockname"]
     snapshot_zs = options[section, "snapshot_zs"]
     snapshot_lnm = options[section, "lnm_low"]
-    snapshot_radii = options[section, "radii"]
+    snapshot_radii = options[section, "measurement_radii"]
+    model_radii = options[section, "radii"]
     #read in the profile_file, need to make this real
     profile_file = options[section,"profile_file"]
     profiles=np.genfromtxt(profile_file)
@@ -35,15 +36,15 @@ def setup(options):
     covmat = np.diag(cov_vector**2)
 
 
-    return data_vector, covmat, profile_blockname, NCs_blockname, snapshot_zs, snapshot_lnm, snapshot_radii
+    return data_vector, covmat, profile_blockname, NCs_blockname, snapshot_zs, snapshot_lnm, snapshot_radii, model_radii
 
 def execute(block, config):
-    data_vector, covmat, profile_blockname, NCs_blockname, snapshot_zs, snapshot_lnm, snapshot_radii = config
+    data_vector, covmat, profile_blockname, NCs_blockname, snapshot_zs, snapshot_lnm, snapshot_radii, model_radii = config
 
     #read in the model values at this sample point. 
     profiles_model = block[profile_blockname, "vals"]
     NCs_model = block[NCs_blockname, "vals"]
-    model_vector = assemble_vector(profiles_model, NCs_model, snapshot_radii, snapshot_zs)
+    model_vector = assemble_model_vector(profiles_model, NCs_model, model_radii, snapshot_radii, snapshot_zs)
 
     delta = data_vector - model_vector
     weight = np.linalg.inv(covmat)
@@ -51,8 +52,8 @@ def execute(block, config):
     block[section_names.likelihoods, 'SnapshotScalarLike_like'] = loglike
 
     print(block['cluster_mass_profile', "concentration"], block['cosmological_parameters', "omega_m"], block['cosmological_parameters', "sigma_8"], loglike)
-    make_plots(3, 4, 18, model_vector, data_vector, covmat)
-    make_plots_compare(3, 4, 18, model_vector, data_vector, covmat)
+    #make_plots(3, 4, 18, model_vector, data_vector, covmat)
+    #make_plots_compare(3, 4, 18, model_vector, data_vector, covmat)
     return 0
 
 def cleanup(config):
@@ -69,6 +70,25 @@ def assemble_vector(profiles_model, NCs_model, radii, snapshot_zs):
     model_vec=np.append(model_vec, averaged_profiles)
 
     return model_vec
+
+def assemble_model_vector(profiles_model, NCs_model, radii, radii_data, snapshot_zs):
+    averaged_profiles = profiles_model/NCs_model
+    nradii= len(radii)
+    for ii in range(len(snapshot_zs)):
+        if ii == 0:
+           model_vec = NCs_model[:, 0]
+        else:
+           model_vec=np.append(model_vec, NCs_model[:,nradii*ii])
+
+    for ii in range(len(snapshot_zs)):
+        for jj in range(NCs_model.shape[0]):
+            #print(jj, NCs_model.shape, nradii, len(radii_data))
+            profile_vec = averaged_profiles[jj, nradii*ii:(nradii*ii+nradii)]
+            profile = interp1d(radii, profile_vec)
+            model_vec=np.append(model_vec, profile(radii_data))
+
+    return model_vec
+
 
 def make_plots(ngriddim, nvoldim, nrad, model_vector, data_vector, covmat):
     ngriddim = int(ngriddim)
