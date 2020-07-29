@@ -45,6 +45,7 @@ def execute(block, config):
     profiles_model = block[profile_blockname, "vals"]
     NCs_model = block[NCs_blockname, "vals"]
     model_vector = assemble_model_vector(profiles_model, NCs_model, model_radii, snapshot_radii, snapshot_zs)
+    #model_vector = assemble_vector(profiles_model, NCs_model,model_radii, snapshot_zs)
 
     delta = data_vector - model_vector
     weight = np.linalg.inv(covmat)
@@ -52,7 +53,7 @@ def execute(block, config):
     block[section_names.likelihoods, 'SnapshotScalarLike_like'] = loglike
 
     print(block['cluster_mass_profile', "concentration"], block['cosmological_parameters', "omega_m"], block['cosmological_parameters', "sigma_8"], loglike)
-    #make_plots(3, 4, 18, model_vector, data_vector, covmat)
+    make_plots(3, 4, 18, model_vector, data_vector, covmat)
     #make_plots_compare(3, 4, 18, model_vector, data_vector, covmat)
     return 0
 
@@ -67,7 +68,9 @@ def assemble_vector(profiles_model, NCs_model, radii, snapshot_zs):
            model_vec = NCs_model[:, 0]
         else:
            model_vec=np.append(model_vec, NCs_model[:,len(radii)*ii])
+    print(model_vec.shape)
     model_vec=np.append(model_vec, averaged_profiles)
+    print(model_vec.shape, averaged_profiles.shape, radii.shape, snapshot_zs.shape, NCs_model.shape)
 
     return model_vec
 
@@ -80,8 +83,8 @@ def assemble_model_vector(profiles_model, NCs_model, radii, radii_data, snapshot
         else:
            model_vec=np.append(model_vec, NCs_model[:,nradii*ii])
 
-    for ii in range(len(snapshot_zs)):
-        for jj in range(NCs_model.shape[0]):
+    for jj in range(NCs_model.shape[0]):
+        for ii in range(len(snapshot_zs)):
             #print(jj, NCs_model.shape, nradii, len(radii_data))
             profile_vec = averaged_profiles[jj, nradii*ii:(nradii*ii+nradii)]
             profile = interp1d(radii, profile_vec)
