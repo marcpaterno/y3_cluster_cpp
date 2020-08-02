@@ -43,7 +43,7 @@ clean:
 # ../test/test_hmf_z0_z03.dat. The file ../test/test_hmf_z0_z03.dat has been
 # checked into the git repository, so for now we only have our target depend on
 # that file.
-../data/masses_test.out: ../cosmosis_tests/mf_tinker_test.py ../cosmosis_tests/masses_test.ini ../test/test_hmf_z0_z03.dat ../cosmosis_tests/values_comp.ini
+../data/masses_test.out: ../cosmosis_tests/mf_tinker_test.py ../cosmosis_tests/masses_test.ini ../test/test_hmf_z0_z03.dat ../cosmosis_tests/values/values_comp.ini
 	@echo "About to run cosmosis to generate $@"
 	cd .. && cosmosis cosmosis_tests/masses_test.ini > /dev/null
 
@@ -59,11 +59,11 @@ clean:
 ../data/lo_lc_test.out: ../test/lo_lc_t_test
 	cd ../test/&& ./lo_lc_t_test
 
-../data/integrated_bin_test.out: ../cosmosis_tests/integrated_bin_test.py ../cosmosis_tests/sdss_analysis.ini ../cosmosis_tests/values_comp.ini
+../data/integrated_bin_test.out: ../cosmosis_tests/integrated_bin_test.py ../cosmosis_tests/sdss_analysis.ini ../cosmosis_tests/values/values_comp.ini
 	@echo "About to run cosmosis to generate $@"
 	cd .. && cosmosis cosmosis_tests/sdss_analysis.ini > /dev/null
 
-../data/integrated_bin_y1_test.out: ../cosmosis_tests/integrated_bin_y1_test.py ../cosmosis_tests/y1_analysis.ini ../cosmosis_tests/values_comp_y1.ini
+../data/integrated_bin_y1_test.out: ../cosmosis_tests/integrated_bin_y1_test.py ../cosmosis_tests/y1_analysis.ini ../cosmosis_tests/values/values_comp_y1.ini
 	@echo "About to run cosmosis to generate $@"
 	cd .. && cosmosis cosmosis_tests/y1_analysis.ini > /dev/null
 
