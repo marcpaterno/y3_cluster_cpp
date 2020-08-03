@@ -7,8 +7,7 @@
 #include "cubacpp/integration_volume.hh"
 
 #include "models/hmf_t.hh"
-//#include "models/sig_sum.hh"
-#include "models/xi_max.hh"
+#include "models/sig_max.hh"
 
 #include <iostream>
 #include <optional>
@@ -61,7 +60,7 @@ private:
   // we would use std::optional<X> as our data member.
   std::optional<HMF_t> hmf;
   //std::optional<SIG_SUM> sigma;
-  std::optional<XI_MAX> sigma;
+  std::optional<SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
   double radius_;
