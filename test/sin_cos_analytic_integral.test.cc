@@ -21,16 +21,16 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
                                                  {2, 3},
                                                  {3, 7}}};
   const int minpow = -12, maxpow = 12;
-  for (const auto [minx, maxx] : ranges) {
+  for (auto const& [minx, maxx] : ranges) {
     const auto [sin_results, cos_results] =
       sinusoid_polynomial_integrals(minpow, maxpow, minx, maxx);
     for (auto pow = minpow; pow < maxpow; pow++) {
-      const auto sin_integral =
+      auto const& sin_integral =
         qag.with_range(minx, maxx)
           .integrate([&](double x) { return integer_pow(x, pow) * sin(x); },
                      1e-5,
                      1e-18);
-      const auto cos_integral =
+      auto const& cos_integral =
         qag.with_range(minx, maxx)
           .integrate([&](double x) { return integer_pow(x, pow) * cos(x); },
                      1e-5,
@@ -39,7 +39,7 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
       REQUIRE(sin_integral.status == 0);
       REQUIRE(cos_integral.status == 0);
 
-      const auto [sin_result, cos_result] =
+      auto const& [sin_result, cos_result] =
         sinusoid_polynomial_integral(pow, minx, maxx);
 
       CHECK(sin_integral.value == Approx(sin_result).epsilon(1e-5));
@@ -61,7 +61,7 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
                                                        {0.05, 2.3},
                                                        {0.1, 0.3},
                                                        {1, 2}}};
-  for (const auto [minx, maxx] : small_ranges) {
+  for (auto const& [minx, maxx] : small_ranges) {
     for (auto pow = minpow; pow < maxpow; pow++) {
       const auto sin_integral =
         qag.with_range(minx, maxx)

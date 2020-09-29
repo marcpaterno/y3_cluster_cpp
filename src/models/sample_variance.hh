@@ -44,7 +44,7 @@ namespace y3_cluster {
                const std::vector<IntegrationRange>& zirs)
     {
       std::vector<std::vector<double>> out;
-      for (const auto zbin : zirs) {
+      for (auto const& zbin : zirs) {
         std::vector<double> this_bin;
         // Use the midpoint of the bin
         for (auto l = 0u; l < maxl; l++)

@@ -34,11 +34,11 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
   std::vector<double> ks{{0.001, 0.1, 1.0, 2.0, 5.0, 10.0}};
   const double maxl = 30;
   for (auto pow = -16; pow < 6; pow++) {
-    for (const auto [minx, maxx] : ranges) {
-      for (const auto k : ks) {
-        const auto list = bessel_polynomial_integrals(pow, maxl, k, minx, maxx);
+    for (auto const& [minx, maxx] : ranges) {
+      for (auto k : ks) {
+        auto const list = bessel_polynomial_integrals(pow, maxl, k, minx, maxx);
         for (auto l = 0u; l < maxl; l++) {
-          const auto bessel_integral =
+          auto const bessel_integral =
             qag.with_range(minx, maxx)
               .integrate(
                 [&](double x) {
@@ -49,7 +49,7 @@ TEST_CASE("Test analytic sin/cos polynomial integrals")
 
           REQUIRE(bessel_integral.status == 0);
 
-          const auto result = bessel_polynomial_integral(pow, l, k, minx, maxx);
+          auto const result = bessel_polynomial_integral(pow, l, k, minx, maxx);
 
           CHECK(bessel_integral.value ==
                 Approx(result).epsilon(1e-3).margin(1e-10));

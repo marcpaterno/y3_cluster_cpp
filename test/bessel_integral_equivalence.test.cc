@@ -15,7 +15,7 @@ TEST_CASE(
   "Check that different ways to integrate bessel functions are equivalent")
 {
   // cubacores(0, 0);
-  const double h = 0.771358152;
+  double const h = 0.771358152;
   auto const zz = read_vector("distances/z.txt");
   auto const da_arr = read_vector("distances/d_a.txt");
   auto const dm_arr = read_vector("distances/d_m.txt");
@@ -31,14 +31,14 @@ TEST_CASE(
     {{0.1, 0.3}, {0.3, 0.5}, {0.5, 0.7}, {0.7, 0.9}}};
 
   cubacpp::QAG qag(0, 0, GSL_INTEG_GAUSS61, 20);
-  for (const auto zir : zirs) {
-    const double zstart = zir.transform(0.0), zend = zir.transform(1.0),
+  for (auto const& zir : zirs) {
+    double const zstart = zir.transform(0.0), zend = zir.transform(1.0),
                  rstart = dcom.eval(zstart) * h, rend = dcom.eval(zend) * h;
 
-    const auto r_normalization =
+    auto const r_normalization =
       (1.0 / 3.0) * (rend * rend * rend - rstart * rstart * rstart);
 
-    const auto z_normalization =
+    auto const z_normalization =
       qag.with_range(zstart, zend)
         .integrate([&](double z) { return dvdodz(z); }, 1e-5, 1e-18);
     REQUIRE(z_normalization.status == 0);
@@ -47,9 +47,9 @@ TEST_CASE(
     y3_cluster::IntegrationRange ln_kir(std::log(0.0001), std::log(0.01));
     for (auto l = 0u; l < 10; l++) {
       for (auto ki = 0u; ki < 10; ki++) {
-        const double lnk = ln_kir.transform(ki / 9.0), k = std::exp(lnk);
+        double const lnk = ln_kir.transform(ki / 9.0), k = std::exp(lnk);
 
-        const auto z_bessel_integral =
+        auto const z_bessel_integral =
           qag.with_range(zstart, zend)
             .integrate(
               [&](double z) {
@@ -57,7 +57,7 @@ TEST_CASE(
               },
               1e-5,
               1e-18);
-        const auto r_bessel_integral =
+        auto const r_bessel_integral =
           qag.with_range(rstart, rend)
             .integrate(
               [&](double r) { return r * r * gsl_sf_bessel_jl(l, k * r); },
@@ -67,7 +67,7 @@ TEST_CASE(
         REQUIRE(z_bessel_integral.status == 0);
         REQUIRE(r_bessel_integral.status == 0);
 
-        const double z_value = z_bessel_integral.value / z_normalization.value,
+        double const z_value = z_bessel_integral.value / z_normalization.value,
                      r_value = r_bessel_integral.value / r_normalization;
         CHECK(z_bessel_integral.value ==
               Approx(r_bessel_integral.value).epsilon(2e-3));
