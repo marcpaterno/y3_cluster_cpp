@@ -14,6 +14,14 @@
 #include <vector>
 
 namespace y3_cluster {
+
+  // TODOD:
+  //     1. use this in all scalar integration modules.
+  //     2. then change grid_t to be a class template that includes the axis
+  //         names.
+  template <std::size_t NAXES>
+  using grid_t = std::vector<std::array<double, NAXES>>;
+
   // These variadic function templates takes as arguments:
   //   1. a cosmosis::DataBlock (by reference),
   //   2. the name of the module being configured, and
@@ -36,22 +44,22 @@ namespace y3_cluster {
   // same length. The resulting grid points carry those axis
   // values.
   template <typename... Ts>
-  std::vector<std::array<double, sizeof...(Ts)>>
-  make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
-                                     std::string const& modulelabel,
-                                     Ts... stringlikes);
+  grid_t<sizeof...(Ts)> make_grid_points_cartesian_product(
+    cosmosis::DataBlock& cfg,
+    std::string const& modulelabel,
+    Ts... stringlikes);
 
   template <typename... Ts>
-  std::vector<std::array<double, sizeof...(Ts)>>
-  make_grid_points_wall_of_numbers(cosmosis::DataBlock& cfg,
-                                   std::string const& modulelabel,
-                                   Ts... names);
+  grid_t<sizeof...(Ts)> make_grid_points_wall_of_numbers(
+    cosmosis::DataBlock& cfg,
+    std::string const& modulelabel,
+    Ts... names);
 
   template <typename... Ts>
-  std::vector<std::array<double, sizeof...(Ts)>>
-  load_grid_from_file_wall_of_numbers(cosmosis::DataBlock& cfg,
-                                      std::string const& modulelabel,
-                                      Ts... names);
+  grid_t<sizeof...(Ts)> load_grid_from_file_wall_of_numbers(
+    cosmosis::DataBlock& cfg,
+    std::string const& modulelabel,
+    Ts... names);
 
   namespace detail {
 
@@ -122,14 +130,14 @@ namespace y3_cluster {
     // any positive integer, and returns a vector of grid points, where each
     // grid point is an array of N doubles.
     template <typename... Ts>
-    std::vector<std::array<double, sizeof...(Ts)>>
+    grid_t<sizeof...(Ts)>
     make_grid_splatted(std::vector<Ts> const&... axes)
     {
       // Make sure all the vectors are carrying floating point numbers;
       // we convert everything to double, 'cause doing otherwise is hard.
       static_assert(std::conjunction_v<std::is_floating_point<Ts>...>);
 
-      std::vector<std::array<double, sizeof...(Ts)>> res;
+      grid_t<sizeof...(Ts)> res;
       auto accumulator = [&res](Ts const&... ts) {
         // Construct an array from all the elements we pass in ts...
         res.push_back({ts...});
@@ -141,7 +149,7 @@ namespace y3_cluster {
     // make_grid_aux is called with an array of arbitrary length, and an
     // index_sequence of matching length.
     template <std::size_t... Is>
-    std::vector<std::array<double, sizeof...(Is)>>
+    grid_t<sizeof...(Is)>
     make_grid_aux(std::array<std::vector<double>, sizeof...(Is)> const& axes,
                   std::index_sequence<Is...> /*unused*/)
     {
@@ -149,14 +157,14 @@ namespace y3_cluster {
     }
 
     template <std::size_t N>
-    std::vector<std::array<double, N>>
+    grid_t<N>
     make_grid_cartesian_product(std::array<std::vector<double>, N> const& axes)
     {
       return detail::make_grid_aux(axes, std::make_index_sequence<N>());
     }
 
     template <std::size_t N>
-    std::vector<std::array<double, N>>
+    grid_t<N>
     make_grid_wall_of_numbers(std::array<std::vector<double>, N> const& axes)
     {
       // Make sure all vectors have the same length
@@ -167,7 +175,7 @@ namespace y3_cluster {
             "unequal length axes in make_grid_wall_of_numbers");
         }
       }
-      std::vector<std::array<double, N>> res(n);
+      grid_t<N> res(n);
       for (std::size_t i = 0; i != n; ++i) {
         std::array<double, N>& current_result = res[i];
         for (std::size_t j = 0; j != N; ++j) {
@@ -180,7 +188,7 @@ namespace y3_cluster {
 } // namespace y3_cluster
 
 template <typename... STRINGLIKEs>
-std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
+y3_cluster::grid_t<sizeof...(STRINGLIKEs)>
 y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
                                                std::string const& modulelabel,
                                                STRINGLIKEs... names)
@@ -200,7 +208,7 @@ y3_cluster::make_grid_points_cartesian_product(cosmosis::DataBlock& cfg,
 }
 
 template <typename... STRINGLIKEs>
-std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
+y3_cluster::grid_t<sizeof...(STRINGLIKEs)>
 y3_cluster::make_grid_points_wall_of_numbers(cosmosis::DataBlock& cfg,
                                              std::string const& modulelabel,
                                              STRINGLIKEs... names)
@@ -219,7 +227,7 @@ y3_cluster::make_grid_points_wall_of_numbers(cosmosis::DataBlock& cfg,
 }
 
 template <typename... STRINGLIKEs>
-std::vector<std::array<double, sizeof...(STRINGLIKEs)>>
+y3_cluster::grid_t<sizeof...(STRINGLIKEs)>
 y3_cluster::load_grid_from_file_wall_of_numbers(cosmosis::DataBlock& cfg,
                                                 std::string const& modulelabel,
                                                 STRINGLIKEs... names)
