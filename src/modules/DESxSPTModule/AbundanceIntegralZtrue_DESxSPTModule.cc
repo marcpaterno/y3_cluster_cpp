@@ -19,9 +19,6 @@ using cosmosis::DataBlock;
 
 class ZtrueIntegralDESxSPT {
 public:
-  // The number of grid dimensions. I only use zobs but
-  // load all of the cluster observables to have a single
-  // catalog file without making the loading code complicated
   using grid_t = y3_cluster::grid_t<4>;
   using grid_point_t = grid_t::value_type;
 
@@ -60,11 +57,12 @@ public:
   // read from the configuration block for the module.
   static grid_t make_grid_points(DataBlock& cfg);
 
-  // The following non-member (static) function creates a vector of integration
+  // The following static member function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static std::vector<std::array<double, 2>> make_integration_volumes(
-    DataBlock& cfg);
+  static 
+  std::vector<std::array<double, 2>>
+  make_integration_volumes(DataBlock& cfg);
 };
 
 ZtrueIntegralDESxSPT::ZtrueIntegralDESxSPT(DataBlock&)
@@ -113,8 +111,9 @@ ZtrueIntegralDESxSPT::make_integration_volumes(DataBlock& cfg)
 {
   // Load zobs from gridfile
   auto modulelabel = module_label();
-  auto gridpts = y3_cluster::load_grid_from_file_wall_of_numbers(
+  grid_t grid = y3_cluster::load_grid_from_file_wall_of_numbers(
     cfg, modulelabel, "lamobs", "xi", "zobs", "gamma_field");
+  auto gridpts = grid.points;
   std::vector<double> zobs;
   for (std::size_t i = 0; i < gridpts.size(); ++i)
     zobs.push_back(gridpts[i][2]);

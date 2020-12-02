@@ -44,11 +44,8 @@ using cubacpp::integration_result;
 //
 class SigmaCentY1ScalarIntegrand {
 public:
-  // Define the data-type describing a grid point; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different paramaters being varied in the grid.
-  // The alias we define must be grid_point_t.
-  using grid_point_t = std::array<double, 3>; // we only vary radius.
+  using grid_t = y3_cluster::grid_t<3>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // We define the type alias volume_t to be the right dimensionality
@@ -121,7 +118,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 // We write using declarations so that we don't have to type the namespace name
@@ -198,7 +195,7 @@ SigmaCentY1ScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
     cfg, SigmaCentY1ScalarIntegrand::module_label(), "lo","lt", "zt", "lnm");
 }
 
-std::vector<SigmaCentY1ScalarIntegrand::grid_point_t>
+SigmaCentY1ScalarIntegrand::grid_t
 SigmaCentY1ScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(

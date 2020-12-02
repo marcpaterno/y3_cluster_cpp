@@ -25,7 +25,8 @@ using namespace y3_cluster;
 class SelectionIntegralDESxSPT{
 public:
   // Grid parameters
-  using grid_point_t = std::array<double, 2>;
+  using grid_t = y3_cluster::grid_t<2>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // Number of integration dimensions
@@ -82,7 +83,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 
@@ -157,7 +158,7 @@ SelectionIntegralDESxSPT::make_integration_volumes(cosmosis::DataBlock& cfg)
 }
 
 // Set the grid points to evaluate the integral at
-std::vector<SelectionIntegralDESxSPT::grid_point_t>
+SelectionIntegralDESxSPT::grid_t
 SelectionIntegralDESxSPT::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(

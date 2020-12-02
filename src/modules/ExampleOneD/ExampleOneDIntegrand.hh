@@ -34,11 +34,7 @@
 
 class ExampleOneDIntegrand {
 public:
-  // Define the data-type describing a grid point; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different parameters being varied in the grid.
-  // The alias we define must be grid_point_t to be recognized by the template
-  using grid_t = y3_cluster::grid_t<1>;  // we only vary the slope, a
+  using grid_t = y3_cluster::grid_t<1>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -99,7 +95,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 #endif

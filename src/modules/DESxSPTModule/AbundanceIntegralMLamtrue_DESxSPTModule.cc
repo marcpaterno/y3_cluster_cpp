@@ -22,7 +22,8 @@ using cosmosis::DataBlock;
 class AbundanceIntegralDESxSPT {
 public:
   // 4 varied grid parameters: lo, xi, zo, gamma_field
-  using grid_point_t = std::array<double, 4>;
+  using grid_t = y3_cluster::grid_t<4>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // Number of integration dimensions
@@ -78,7 +79,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(DataBlock& cfg);
+  static grid_t make_grid_points(DataBlock& cfg);
 };
 
 // Set up integral that does not depend on sample
@@ -166,7 +167,7 @@ AbundanceIntegralDESxSPT::make_integration_volumes(cosmosis::DataBlock& cfg)
 }
 
 // Set the grid points to evaluate the integral at
-std::vector<AbundanceIntegralDESxSPT::grid_point_t>
+AbundanceIntegralDESxSPT::grid_t
 AbundanceIntegralDESxSPT::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::load_grid_from_file_wall_of_numbers(

@@ -6,6 +6,7 @@
 #include "cosmosis/datablock/ndarray.hh"
 #include "cubacpp/cubacpp.hh"
 
+#include "utils/make_grid_points.hh"
 #include "utils/multi_dimensional_integrator.hh"
 
 #include <iostream>
@@ -33,6 +34,7 @@ namespace y3_cluster {
     using IntegrandType = COSMOSISINTEGRAND;
     using volume_t = cubacpp::integration_volume_for_t<IntegrandType>;
     using grid_point_t = typename IntegrandType::grid_point_t;
+    using my_grid_t = grid_t<std::tuple_size<grid_point_t>::value>;
     using integration_results_t = cubacpp::integration_result;
 
     explicit CosmoSISScalarIntegrationModule(cosmosis::DataBlock& cfg);
@@ -64,7 +66,17 @@ namespace y3_cluster {
 
     void finalize_sample_cartesian_product_of_volumes_and_gridpoints(
       cosmosis::DataBlock& sample,
-      std::vector<integration_results_t> const& results) const;
+      std::vector<integration_results_t> const& results,
+      my_grid_t const* pgrid) const;
+
+    void
+    finalize_sample_cartesian_product_of_volumes_and_gridpoints(
+      cosmosis::DataBlock& sample,
+      std::vector<integration_results_t> const& results) const
+    {
+      finalize_sample_cartesian_product_of_volumes_and_gridpoints(
+        sample, results, &grid_points_);
+    }
 
     void finalize_sample_zipped_sequence_of_volumes_and_gridpoints(
       cosmosis::DataBlock& sample,
@@ -73,7 +85,7 @@ namespace y3_cluster {
     IntegrandType integrand_;
     MultiDimensionalIntegrator algorithm_;
     std::vector<volume_t> volumes_;
-    std::vector<grid_point_t> grid_points_;
+    my_grid_t grid_points_;
     double eps_rel_;
     double eps_abs_;
     bool use_cartesian_product_of_volumes_and_gridpoints_;
@@ -81,17 +93,16 @@ namespace y3_cluster {
 } // namespace y3_cluster
 
 template <typename I>
-y3_cluster::CosmoSISScalarIntegrationModule<I>::
-  CosmoSISScalarIntegrationModule(cosmosis::DataBlock& cfg)
-try
-  : integrand_(cfg),
-    algorithm_(cfg.view<std::string>(IntegrandType::module_label(), "algorithm")),
-    volumes_(IntegrandType::make_integration_volumes(cfg)),
-    grid_points_(IntegrandType::make_grid_points(cfg)),
-    eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
-    eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")),
-    use_cartesian_product_of_volumes_and_gridpoints_(
-      cfg.view<bool>(IntegrandType::module_label(), "use_cartesian_product")) {
+y3_cluster::CosmoSISScalarIntegrationModule<I>::CosmoSISScalarIntegrationModule(
+  cosmosis::DataBlock& cfg)
+try : integrand_(cfg),
+  algorithm_(cfg.view<std::string>(IntegrandType::module_label(), "algorithm")),
+  volumes_(IntegrandType::make_integration_volumes(cfg)),
+  grid_points_(IntegrandType::make_grid_points(cfg)),
+  eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
+  eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")),
+  use_cartesian_product_of_volumes_and_gridpoints_(
+    cfg.view<bool>(IntegrandType::module_label(), "use_cartesian_product")) {
   if (not use_cartesian_product_of_volumes_and_gridpoints_) {
     if (volumes_.size() != grid_points_.size()) {
       throw std::runtime_error(
@@ -100,7 +111,8 @@ try
         "but the number of volumes did not equal the number of gridpoints.\n");
     }
   }
-  algorithm_.set_maxeval(cfg.view<int>(IntegrandType::module_label(), "max_eval"));
+  algorithm_.set_maxeval(
+    cfg.view<int>(IntegrandType::module_label(), "max_eval"));
   cubacores(0, 0);
 }
 catch (cosmosis::Exception const&) {
@@ -143,14 +155,14 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::num_results() const
 
 template <typename I>
 std::vector<cubacpp::integration_result>
-y3_cluster::CosmoSISScalarIntegrationModule<I>::
-  integrate_cartesian_product_of_volumes_and_gridpoints()
+y3_cluster::CosmoSISScalarIntegrationModule<
+  I>::integrate_cartesian_product_of_volumes_and_gridpoints()
 {
   std::vector<integration_results_t> results;
   results.reserve(num_results());
 
   for (auto const& volume : volumes_) {
-    for (auto const& grid_point : grid_points_) {
+    for (auto const& grid_point : grid_points_.points) {
       integrand_.set_grid_point(grid_point);
       results.push_back(
         algorithm_.integrate(integrand_, eps_rel_, eps_abs_, volume));
@@ -161,13 +173,13 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::
 
 template <typename COSMOSISINTEGRAND>
 std::vector<cubacpp::integration_result>
-y3_cluster::CosmoSISScalarIntegrationModule<COSMOSISINTEGRAND>::
-  integrate_zipped_sequence_of_volumes_and_gridpoints()
+y3_cluster::CosmoSISScalarIntegrationModule<
+  COSMOSISINTEGRAND>::integrate_zipped_sequence_of_volumes_and_gridpoints()
 {
   std::vector<integration_results_t> results;
   results.reserve(num_results());
   for (std::size_t i = 0; i != num_results(); ++i) {
-    integrand_.set_grid_point(grid_points_[i]);
+    integrand_.set_grid_point(grid_points_.points[i]);
     results.push_back(
       algorithm_.integrate(integrand_, eps_rel_, eps_abs_, volumes_[i]));
   }
@@ -180,6 +192,8 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::finalize_sample(
   cosmosis::DataBlock& sample,
   std::vector<cubacpp::integration_result> const& res) const
 {
+  std::cerr << "Finalizing sample.\n";
+  std::cerr << "Grid points are:\n";
   if (use_cartesian_product_of_volumes_and_gridpoints_)
     finalize_sample_cartesian_product_of_volumes_and_gridpoints(sample, res);
   else
@@ -238,7 +252,8 @@ void
 y3_cluster::CosmoSISScalarIntegrationModule<I>::
   finalize_sample_cartesian_product_of_volumes_and_gridpoints(
     cosmosis::DataBlock& sample,
-    std::vector<cubacpp::integration_result> const& res) const
+    std::vector<cubacpp::integration_result> const& res,
+    my_grid_t const* pgrid) const
 {
   using cosmosis::ndarray;
   using cubacpp::integration_result;
@@ -268,8 +283,24 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::
   std::vector<int> nregions_buffer(nresults);
   ndarray<int> nregions(nregions_buffer, {nvolumes, ngrid_points});
 
+  std::vector<int> vols_buffer(nresults);
+  ndarray<int> vols(vols_buffer, {nvolumes, ngrid_points});
+
+  std::vector<double> gridpoints_buffer(nresults);
+  constexpr std::size_t naxes = std::tuple_size<grid_point_t>::value;
+  ndarray<double> gridpoints(gridpoints_buffer, {ngrid_points, naxes});
+
+  if (pgrid) {
+    for (std::size_t jgp = 0; jgp != ngrid_points; ++jgp) {
+      for (std::size_t iaxis = 0; iaxis != naxes; ++iaxis) {
+        gridpoints(jgp, iaxis) = pgrid->points[jgp][iaxis];
+      }
+    }
+  }
+
   for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
     for (std::size_t jgp = 0; jgp != ngrid_points; ++jgp) {
+      vols(ivol, jgp) = ivol;
       vals(ivol, jgp) = results(ivol, jgp).value;
       errors(ivol, jgp) = results(ivol, jgp).error;
       probs(ivol, jgp) = results(ivol, jgp).prob;
@@ -284,6 +315,8 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::
   sample.put_val(module_label, "probs", probs);
   sample.put_val(module_label, "status", statuses);
   sample.put_val(module_label, "nregions", nregions);
+  sample.put_val(module_label, "ivol", vols);
+  sample.put_val(module_label, "gridpoints", gridpoints);
 }
 
 #endif

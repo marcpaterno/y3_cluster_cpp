@@ -39,10 +39,6 @@ using cubacpp::integration_result;
 //
 class ExampleScalarIntegrand {
 public:
-  // Define the data-type describing a grid point; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different parameters being varied in the grid.
-  // The alias we define must be grid_point_t.
   using grid_t = y3_cluster::grid_t<1>;
   using grid_point_t = grid_t::value_type;
 

@@ -11,9 +11,9 @@
 #include "models/int_zo_zt_des_t.hh"
 #include "models/mor_des_t.hh"
 #include "models/omega_z_des.hh"
+#include "utils/make_grid_points.hh"
 #include <optional>
 #include <vector>
-using namespace y3_cluster;
 
 // y1_analysis is a class that models the concept of "CosmoSISIntegrand",
 // and is thus suitable for use as the template parameter for the class template
@@ -45,16 +45,19 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<INT_LC_LT_DES_t> lc_lt;
-  std::optional<MOR_DES_t> mor;
-  std::optional<OMEGA_Z_DES> omega_z;
-  std::optional<DV_DO_DZ_t> dv_do_dz;
-  std::optional<HMF_t> hmf;
-  std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::MOR_DES_t> mor;
+  std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
+  std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
+  std::optional<y3_cluster::HMF_t> hmf;
+  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
   std::vector<double> zo_low_;
   std::vector<double> zo_high_;
 
 public:
+  using grid_t = y3_cluster::grid_t<1>;
+  using grid_point_t = grid_t::value_type;
+
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
   explicit y1_analysis(cosmosis::DataBlock& config);

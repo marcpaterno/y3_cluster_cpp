@@ -13,10 +13,13 @@ namespace y3_cluster {
   public:
     using IntegrandType = COSMOSISINTEGRAND;
     using volume_t = std::array<double, 2>;
+    using grid_t = typename IntegrandType::grid_t;
     using grid_point_t = typename IntegrandType::grid_point_t;
     using integration_results_t = std::tuple<int, double, double>;
 
     explicit OneDIntegrationModule(cosmosis::DataBlock& cfg);
+    // TODO: remove pointer data member, so that the compiler-generated
+    // d'tor is correct.
     ~OneDIntegrationModule();
 
     void execute(cosmosis::DataBlock& sample);
@@ -40,7 +43,7 @@ namespace y3_cluster {
 
     IntegrandType integrand_;
     std::vector<volume_t> volumes_;
-    std::vector<grid_point_t> grid_points_;
+    grid_t grid_;
     double eps_rel_;
     double eps_abs_;
     std::size_t maxeval_;
@@ -54,11 +57,11 @@ y3_cluster::OneDIntegrationModule<I>::
 try
   : integrand_(cfg),
     volumes_(IntegrandType::make_integration_volumes(cfg)),
-    grid_points_(IntegrandType::make_grid_points(cfg)),
+    grid_(IntegrandType::make_grid_points(cfg)),
     eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
     eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")),
     maxeval_(cfg.view<int>(IntegrandType::module_label(), "max_eval")) {
-      if (volumes_.size() != grid_points_.size()) {
+      if (volumes_.size() != grid_.points.size()) {
         throw std::runtime_error(
             "An integration module was configured with unequal numbers "
             "of volumes and gridpoints\n");
@@ -127,7 +130,7 @@ y3_cluster::OneDIntegrationModule<I>::integrate_full_sequence()
   F.function = &integrand_wrapper;
 
   for (std::size_t i = 0; i != num_results(); ++i) {
-    integrand_.set_grid_point(grid_points_[i]);
+    integrand_.set_grid_point(grid_.points[i]);
     F.params = &integrand_;
     status = gsl_integration_qag(&F, std::get<0>(volumes_[i]), std::get<1>(volumes_[i]),
         eps_abs_, eps_rel_, maxeval_, 6, workspace_, &result, &error);
