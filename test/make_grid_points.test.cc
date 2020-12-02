@@ -12,8 +12,7 @@ std::string const module_label("something");
 
 TEST_CASE("1d grid")
 {
-  using grid_point_t = std::array<double, 1>;
-  using grid_t = std::vector<grid_point_t>;
+  using grid_t = y3_cluster::grid_t<1>;
 
   SECTION("1x1 grid")
   {
@@ -40,9 +39,8 @@ TEST_CASE("1d grid")
 
 TEST_CASE("2d grid")
 {
-  using grid_point_t = std::array<double, 2>;
-  using grid_t = std::vector<grid_point_t>;
-
+  using grid_t = y3_cluster::grid_t<2>;
+ 
   SECTION("2x1 grid")
   {
     cosmosis::DataBlock cfg;
@@ -84,8 +82,9 @@ TEST_CASE("2d grid")
 
 TEST_CASE("3d grid")
 {
-  using grid_point_t = std::array<double, 3>;
-  using grid_t = std::vector<grid_point_t>;
+  using grid_t = y3_cluster::grid_t<3>;
+  using grid_point_t = grid_t::value_type;
+
   std::vector<double> xs{1.0, 2.0, 3.0};
   std::vector<double> ys{4.0, 5.0};
   std::vector<double> zs{6.0, 7.0, 8.0, 9.0};

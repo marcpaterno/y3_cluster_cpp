@@ -59,7 +59,7 @@ ExampleScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
     cfg, ExampleScalarIntegrand::module_label(), "x", "y");
 }
 
-std::vector<ExampleScalarIntegrand::grid_point_t>
+ExampleScalarIntegrand::grid_t
 ExampleScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(

@@ -5,6 +5,8 @@
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
+#include "utils/make_grid_points.hh"
+
 #include <optional>
 #include <vector>
 
@@ -33,7 +35,8 @@ public:
   // instance of std::array<double, N> with N set to the number
   // of different parameters being varied in the grid.
   // The alias we define must be grid_point_t.
-  using grid_point_t = std::array<double, 1>; // we only vary radius.
+  using grid_t = y3_cluster::grid_t<1>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // We define the type alias volume_t to be the right dimensionality
@@ -90,7 +93,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 #endif

@@ -1,6 +1,5 @@
 #include "ExampleOneDIntegrand.hh"
 #include "cosmosis/datablock/ndarray.hh"
-#include "utils/make_grid_points.hh"
 
 // Constructor. Anything that need only be done once should be done here.
 ExampleOneDIntegrand::ExampleOneDIntegrand(cosmosis::DataBlock& cfg)
@@ -52,7 +51,7 @@ ExampleOneDIntegrand::set_grid_point(grid_point_t const& grid_point)
 // Load the grid points from the config file. It is important that the
 // order of the strings here is the same order that is used in the
 // function set_grid_point
-std::vector<ExampleOneDIntegrand::grid_point_t>
+ExampleOneDIntegrand::grid_t
 ExampleOneDIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(

@@ -22,7 +22,8 @@ public:
   // The number of grid dimensions. I only use zobs but
   // load all of the cluster observables to have a single
   // catalog file without making the loading code complicated
-  using grid_point_t = std::array<double, 4>;
+  using grid_t = y3_cluster::grid_t<4>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // From configuration - constructor
@@ -57,7 +58,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(DataBlock& cfg);
+  static grid_t make_grid_points(DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
@@ -100,7 +101,7 @@ ZtrueIntegralDESxSPT::set_grid_point(grid_point_t const& grid_point)
   zobs_ = grid_point[2];
 }
 
-std::vector<ZtrueIntegralDESxSPT::grid_point_t>
+ZtrueIntegralDESxSPT::grid_t
 ZtrueIntegralDESxSPT::make_grid_points(DataBlock& cfg)
 {
   return y3_cluster::load_grid_from_file_wall_of_numbers(

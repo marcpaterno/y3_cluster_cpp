@@ -3,6 +3,8 @@
 
 #include "cosmosis/datablock/datablock.hh"
 
+#include "utils/make_grid_points.hh"
+
 #include <optional>
 #include <vector>
 #include <string>
@@ -36,7 +38,8 @@ public:
   // instance of std::array<double, N> with N set to the number
   // of different parameters being varied in the grid.
   // The alias we define must be grid_point_t to be recognized by the template
-  using grid_point_t = std::array<double, 1>; // we only vary the slope, a
+  using grid_t = y3_cluster::grid_t<1>;  // we only vary the slope, a
+  using grid_point_t = grid_t::value_type;
 
 private:
   // State obtained from configuration. Set in constructor
