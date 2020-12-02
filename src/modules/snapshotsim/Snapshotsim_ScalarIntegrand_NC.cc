@@ -84,18 +84,6 @@ public:
   // object.
   double operator()(double lt, double lnM) const;
 
-  // finalize_sample() is where products can be put into the cosmosis::DataBlock
-  // representing the current sample. The object 'sample' passed to this
-  // function will be the exact same object as was passed to the most recent
-  // call to set_sample(). The object 'results' will be the results of the
-  // integration that has just been done for that sample. This is generally the
-  // item which should be put into the sample.
-  void finalize_sample(
-    cosmosis::DataBlock& sample,
-    std::vector<grid_point_t> const& grid_points,
-    std::size_t nvolumes,
-    std::vector<cubacpp::integration_result> const& results) const;
-
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
   // is the name that must be used in the 'ini file' for configuring the module
@@ -153,55 +141,6 @@ SnapshotScalarNCIntegrand::operator()(double /* lt */, double lnM) const
                    * (*hmf)(lnM, zt_);
   //* (*sigma)(radius_, lnM, zt_);
   return val;
-}
-
-//
-void
-SnapshotScalarNCIntegrand::finalize_sample(
-  cosmosis::DataBlock& sample,
-  std::vector<grid_point_t> const& grid_points,
-  std::size_t nvolumes,
-  std::vector<integration_result> const& res) const
-{
-  // TODO: fix this to handle the whole vector of integration_results.
-  // Currently, we put just one double into the DataBlock.
-  // What is the sensible organization of results for all the grid points?
-  // Do we need to store data for the grid point locations?
-  auto ngrid_points = grid_points.size();
-  auto nresults = nvolumes * ngrid_points;
-  // Create ndarray to give a view into the 'res' vector.
-  ndarray<integration_result> results(res, {nvolumes, ngrid_points});
-  std::cout << ngrid_points << ' ' << nvolumes << ' ' << res.size() << '\n';
-  // Create storage buffers for ndarrays to be inserted into the sample, and
-  // then
-  // create the ndarrays.
-  std::vector<double> vals_buffer(nresults);
-  ndarray<double> vals(vals_buffer, {nvolumes, ngrid_points});
-
-  std::vector<double> errors_buffer(nresults);
-  ndarray<double> errors(errors_buffer, {nvolumes, ngrid_points});
-
-  std::vector<double> probs_buffer(nresults);
-  ndarray<double> probs(probs_buffer, {nvolumes, ngrid_points});
-
-  std::vector<int> statuses_buffer(nresults);
-  ndarray<int> statuses(statuses_buffer, {nvolumes, ngrid_points});
-
-  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
-    for (std::size_t jgp = 0; jgp != ngrid_points; ++jgp) {
-      vals(ivol, jgp) = results(ivol, jgp).value;
-      errors(ivol, jgp) = results(ivol, jgp).error;
-      probs(ivol, jgp) = results(ivol, jgp).prob;
-      statuses(ivol, jgp) = results(ivol, jgp).status;
-      // std::cout << results(ivol, jgp).value << ' ' << grid_points[jgp][0] <<
-      // grid_points[jgp][1] << '\n';
-    }
-  }
-
-  sample.put_val(module_label(), "profile_vals", vals);
-  sample.put_val(module_label(), "profile_errors", errors);
-  sample.put_val(module_label(), "profile_probs", probs);
-  sample.put_val(module_label(), "profile_status", statuses);
 }
 
 char const*

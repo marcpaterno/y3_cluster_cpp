@@ -87,17 +87,6 @@ public:
   // object.
   double operator()(double k, double chi) const;
 
-  // finalize_sample() is where products can be put into the cosmosis::DataBlock
-  // representing the current sample. The object 'sample' passed to this function
-  // will be the exact same object as was passed to the most recent call to
-  // set_sample(). The object 'results' will be the results of the integration
-  // that has just been done for that sample. This is generally the item which
-  // should be put into the sample.
-  void finalize_sample(cosmosis::DataBlock& sample,
-                       std::vector<grid_point_t> const& grid_points,
-                       std::size_t nvolumes,
-                       std::vector<cubacpp::integration_result> const& results) const;
-
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
   // is the name that must be used in the 'ini file' for configuring the module
