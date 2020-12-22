@@ -9,7 +9,7 @@ using y3_cluster::IntegrationRange, y3_cluster::OMEGA_Z_SDSS,
 
 TEST_CASE("Test the sample variance calculator")
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   const double h = 0.771358152;
   auto const zz = read_vector("z_da_test.txt");
   // da_arr in h inverse Mpc

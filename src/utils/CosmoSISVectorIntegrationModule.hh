@@ -62,7 +62,7 @@ try : integrand_(cfg),
       eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
       eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")) {
   algorithm_.maxeval = cfg.view<int>(IntegrandType::module_label(), "max_eval");
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
 }
 catch (cosmosis::Exception const&) {
   std::cerr

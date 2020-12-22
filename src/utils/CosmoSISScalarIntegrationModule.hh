@@ -113,7 +113,7 @@ try : integrand_(cfg),
   }
   algorithm_.set_maxeval(
     cfg.view<int>(IntegrandType::module_label(), "max_eval"));
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
 }
 catch (cosmosis::Exception const&) {
   std::cerr

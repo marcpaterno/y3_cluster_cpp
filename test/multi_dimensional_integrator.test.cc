@@ -9,7 +9,7 @@ using y3_cluster::MultiDimensionalIntegrator;
 
 TEST_CASE("can use all algorithms to integrate a constant function over the unit square")
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   auto flat_func = [](double, double) { return 1.0; };
 
   MultiDimensionalIntegrator algs;
@@ -25,7 +25,7 @@ TEST_CASE("can use all algorithms to integrate a constant function over the unit
 
 TEST_CASE("can use all algorithms to integrate a constant function over a specified area")
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   auto flat_func = [](double, double) { return 1.0; };
   cubacpp::IntegrationVolume<2> vol {{-1.0, -1.0}, {  1.0, 1.0}};
 
@@ -42,7 +42,7 @@ TEST_CASE("can use all algorithms to integrate a constant function over a specif
 
 TEST_CASE("can use named algorithms to integrate a constant function over the unit square")
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   auto flat_func = [](double, double) { return 1.0; };
   double const epsrel = 1.0e-6;
   double const epsabs = 1.0e-12;

@@ -99,7 +99,7 @@ fracerr(double actual, double expected)
 
 TEST_CASE("cuhre works", "[integration][cuhre]")
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   cubacpp::Cuhre alg;
   SECTION("sf2")
   {
@@ -149,7 +149,7 @@ TEST_CASE("cuhre works", "[integration][cuhre]")
 
 TEST_CASE("vegas works", "[integration][vegas]")
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   cubacpp::Vegas alg;
   SECTION("sf1")
   {
@@ -200,7 +200,7 @@ TEST_CASE("vegas works", "[integration][vegas]")
 
 TEST_CASE("suave works", "[integration][suave]")
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   cubacpp::Suave alg;
   SECTION("sf1")
   {
