@@ -7,7 +7,7 @@ namespace y3_cluster {
 
   class A_MIS_t {
   public:
-    A_MIS_t() {}
+    A_MIS_t() = default;
     explicit A_MIS_t(cosmosis::DataBlock&) {}
 
     double
