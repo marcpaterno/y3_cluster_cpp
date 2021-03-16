@@ -4,13 +4,14 @@
 #include <cassert>
 #include <stdexcept>
 
-inline
-void free_if_nonnull(void* p) {
-  if (p == nullptr) return;
-  gsl_interp* interp = static_cast<gsl_interp*>(p);
-  gsl_interp_free(interp);
+namespace {
+  inline
+  void free_if_nonnull(void* p) {
+    if (p == nullptr) return;
+    gsl_interp* interp = static_cast<gsl_interp*>(p);
+    gsl_interp_free(interp);
+  }
 }
-
 
 y3_cluster::Interp1D::Interp1D(std::vector<double>&& xs,
                                std::vector<double>&& ys)
