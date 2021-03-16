@@ -4,12 +4,9 @@
 #include "point_3d.hh"
 
 #include "cosmosis/datablock/ndarray.hh"
-#include "gsl/gsl_interp2d.h"
 #include <array>
-#include <assert.h>
+#include <cassert>
 #include <cstddef>
-#include <iostream>
-#include <stdexcept>
 #include <vector>
 
 // Interp2D is used for linear interpolation in 1 dimension.
@@ -25,14 +22,16 @@ namespace y3_cluster {
     assert( !(hi < lo) );
     return (v < lo) ? lo : (hi < v) ? hi : v;
   }
+
   class Interp2D {
+    using gsl_interp_ptr = void*;
   public:
 
-    // Interpolator created from two arrays; compiler assures they are of the
-    // same length.
     template <std::size_t M, std::size_t N>
     using matrix = std::array<std::array<double, N>, M>;
 
+    // Interpolator created from three arrays; compiler assures the z-array
+    // lengths match those of x- and y-arrays.
     template <std::size_t M, std::size_t N>
     Interp2D(std::array<double, M> const& xs,
              std::array<double, N> const& ys,
@@ -46,53 +45,31 @@ namespace y3_cluster {
              std::vector<double> const& ys,
              std::vector<double> const& zs);
 
-    // Interpolator created from vector, vector, 2D vector, compiler assures they
-    // are of the same length; Added by Yuanyuan Zhang
-    Interp2D(std::vector<double> && xs,
-             std::vector<double> && ys,
-             std::vector< std::vector<double> > const& zs);
 
-    // Interpolator created from vector, vector, 2D vector, compiler assures
-    // they are of the same length; Added by Yuanyuan Zhang
+    // Interpolator created from two vectors and one vector-of-vectors.
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
-             std::vector<std::vector<double>> const& zs);
+             std::vector< std::vector<double>> const& zs);
 
     // Like above - assumes ndarray is 2D and fits it appropriately
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
-             cosmosis::ndarray<double> const& zs)
-      : Interp2D(xs, ys, std::vector<double>{zs.begin(), zs.end()})
-    {
-      if ((zs.extents()[1] != xs.size()) || (zs.extents()[0] != ys.size())) {
-        std::cerr << "Interp2D -- wrong input dimensions:\n\t"
-                  << "xs.size() = " << xs.size() << "\n\t"
-                  << "ys.size() = " << ys.size() << "\n\t"
-                  << "zs.shape[1] = " << zs.extents()[1] << "\n\t"
-                  << "zs.shape[0] = " << zs.extents()[0] << "\n";
-        throw std::domain_error("Interp2D -- ndarray wrong dimensions");
-      }
-    }
+             cosmosis::ndarray<double> const& zs);
 
     // Interpolator created from vector of triplets: throws std::logic_error if
     // the points do not lie on a grid in (x,y) space, or if any values are NaN
     // or infinities. Any denormalized x- or y-values are flushed to zero.
-    Interp2D(std::vector<Point3D> &&data);
+    Interp2D(std::vector<Point3D> const &data);
 
-    // As above, but take a deep copy of the argument for working space.
-    Interp2D(std::vector<Point3D> const &data)
-      : Interp2D (std::vector<Point3D> (data))
-    {}
+    Interp2D(Interp2D const& other);
+    Interp2D& operator=(Interp2D const& rhs);
+    Interp2D(Interp2D&&) noexcept;
+    Interp2D& operator=(Interp2D&& rhs) noexcept;
 
     // Destructor must clean up allocated GSL resources.
     ~Interp2D() noexcept;
 
-    // Interp2D objects can not be copied because the GSL resources can not
-    // be copied.
-    Interp2D(Interp2D const&) = delete;
-
-    // Ditto for the copy-assignment.
-    Interp2D operator=(Interp2D const &)  =  delete;
+    void swap(Interp2D& other) noexcept;
 
     double operator()(double x, double y) const;
 
@@ -117,11 +94,13 @@ namespace y3_cluster {
     std::vector<double> xs_;
     std::vector<double> ys_;
     std::vector<double> zs_; // stores z-values in row-major
-    gsl_interp2d* interp_;
+    gsl_interp_ptr interp_;
+
+    void init_gsl_bits_();
 
     // Discover the (x,y) grid implicit in the supplied set of points, or throw
     // a std::domain_error if no grid can be constructed from these points.
-    void make_grid_(std::vector<Point3D>&& data);
+    void make_grid_(std::vector<Point3D> const& data);
 
     // Get the limits of x and y.
     double min_x() const { return xs_.front(); }
@@ -143,45 +122,16 @@ inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
       zs_[i + j * M] = row[j];
     }
   }
-  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
-  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+  init_gsl_bits_();
 }
 
-// below are added by Yuanyuan Zhang July 17
-inline y3_cluster::Interp2D::Interp2D(
-  std::vector<double> const& xs,
-  std::vector<double> const& ys,
-  std::vector<std::vector<double>> const& zs)
-  : xs_(xs), ys_(ys), zs_(xs.size() * ys.size())
-{
-  if (zs.size() != xs.size())
-    throw std::domain_error("Interp2D -- wrong number of rows in z values");
-
-  for (std::size_t i = 0; i < xs.size(); ++i) {
-    std::vector<double> const& row = zs[i];
-    if (row.size() != ys.size())
-      throw std::domain_error(
-        "Interp2D -- wrong number of columns in z values");
-    for (std::size_t j = 0; j < ys.size(); ++j) {
-      zs_[i + j * ys.size()] = row[j];
-    }
-  }
-
-  if (zs_.size() != nx() * ny())
-    throw std::domain_error("Interp2D -- wrong number of z values passed");
-  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
-  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
-}
-
-inline y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
-                                      std::vector<double> const& ys,
-                                      std::vector<double> const& zs)
-  : xs_(xs), ys_(ys), zs_(zs)
-{
-  if (zs_.size() != nx() * ny())
-    throw std::domain_error("Interp2D -- wrong number of z values passed");
-  interp_ = gsl_interp2d_alloc(gsl_interp2d_bilinear, nx(), ny());
-  gsl_interp2d_init(interp_, xs_.data(), ys_.data(), zs_.data(), nx(), ny());
+inline void
+y3_cluster::Interp2D::swap(Interp2D& other) noexcept {
+  using std::swap;
+  swap(xs_, other.xs_);
+  swap(ys_, other.ys_);
+  swap(zs_, other.zs_);
+  swap(interp_, other.interp_);
 }
 
 inline std::size_t
