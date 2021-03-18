@@ -1,6 +1,7 @@
 #ifndef Y3_CLUSTER_COSMOSIS_ONED_INTEGRATION_MODULE_HH
 #define Y3_CLUSTER_COSMOSIS_ONED_INTEGRATION_MODULE_HH
 
+#include <iostream>
 #include <tuple>
 #include <vector>
 
