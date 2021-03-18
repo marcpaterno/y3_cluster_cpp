@@ -15,9 +15,9 @@
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
 #include "models/sig_sum.hh"
+#include <iostream>
 #include <optional>
 #include <vector>
-#include <iostream>
 using namespace y3_cluster;
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
@@ -76,7 +76,6 @@ private:
   double zo_high_;
   double radius_;
 
-
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
@@ -94,14 +93,12 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(
-                    double lo,
+  double operator()(double lo,
                     double lc,
                     double zt,
                     double lnM,
                     double rmis,
-                    double theta
-                    ) const;
+                    double theta) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -160,7 +157,8 @@ SigmaMiscentY1MortScalarIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-SigmaMiscentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
+SigmaMiscentY1MortScalarIntegrand::set_grid_point(
+  grid_point_t const& grid_point)
 {
   radius_ = grid_point[2];
   zo_low_ = grid_point[0];
@@ -169,22 +167,22 @@ SigmaMiscentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point
 
 double
 SigmaMiscentY1MortScalarIntegrand::operator()(double lo,
-                             double lc,
-                             double zt,
-                             double lnM,
-                             double rmis,
-                             double theta) const
+                                              double lc,
+                                              double zt,
+                                              double lnM,
+                                              double rmis,
+                                              double theta) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
-                       (*mor)(lc, lnM, zt) *
-                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt) /
-                       2.0 / 3.1415926535897;
+                       (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
+                       (*omega_z)(zt) / 2.0 / 3.1415926535897;
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
-                              2 * rmis * radius_ * std::cos(theta));
-  auto const val = (*sigma)(scaled_Rmis, lnM, zt) * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
-   return val;
+                                 2 * rmis * radius_ * std::cos(theta));
+  auto const val = (*sigma)(scaled_Rmis, lnM, zt) *
+                   (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+  return val;
 }
 
 char const*
@@ -201,17 +199,29 @@ SigmaMiscentY1MortScalarIntegrand::module_label()
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
 std::vector<SigmaMiscentY1MortScalarIntegrand::volume_t>
-SigmaMiscentY1MortScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+SigmaMiscentY1MortScalarIntegrand::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, SigmaMiscentY1MortScalarIntegrand::module_label(), "lo", "lc", "zt", "lnm", "rmis", "theta");
+    cfg,
+    SigmaMiscentY1MortScalarIntegrand::module_label(),
+    "lo",
+    "lc",
+    "zt",
+    "lnm",
+    "rmis",
+    "theta");
 }
 
 SigmaMiscentY1MortScalarIntegrand::grid_t
 SigmaMiscentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(
-    cfg, SigmaMiscentY1MortScalarIntegrand::module_label(), "zo_low", "zo_high", "radii");
+    cfg,
+    SigmaMiscentY1MortScalarIntegrand::module_label(),
+    "zo_low",
+    "zo_high",
+    "radii");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SigmaMiscentY1MortScalarIntegrand)

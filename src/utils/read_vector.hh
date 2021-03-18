@@ -16,9 +16,8 @@ template <class XFORM>
 inline std::vector<double>
 read_vector(const std::string filename, XFORM xform)
 {
-  std::string const fname = std::string(std::getenv("Y3_CLUSTER_CPP_DIR")) +
-                            "/data/" +
-                            filename;
+  std::string const fname =
+    std::string(std::getenv("Y3_CLUSTER_CPP_DIR")) + "/data/" + filename;
   std::ifstream file(fname);
   if (!file) {
     std::string errmsg("Failed to open file: ");
@@ -29,14 +28,12 @@ read_vector(const std::string filename, XFORM xform)
   std::vector<double> res;
   while (std::getline(file, line)) {
     // Skip lines that start with comment character
-    if (line.find('#') == 0)
-      continue;
+    if (line.find('#') == 0) continue;
 
     // Read all the numbers on this line
     std::istringstream linestream(line);
     double tmp;
-    while (linestream >> tmp)
-      res.push_back(xform(tmp));
+    while (linestream >> tmp) res.push_back(xform(tmp));
   }
   return res;
 }

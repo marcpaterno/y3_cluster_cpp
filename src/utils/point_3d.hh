@@ -23,10 +23,8 @@ namespace y3_cluster {
   inline void
   squash_subnormals(y3_cluster::Point3D& p)
   {
-    if (not std::isnormal(p[0]))
-      p[0] = 0.0;
-    if (not std::isnormal(p[1]))
-      p[1] = 0.0;
+    if (not std::isnormal(p[0])) p[0] = 0.0;
+    if (not std::isnormal(p[1])) p[1] = 0.0;
   }
 
   // "Clean" the input points. If any NaN or infinity values are detected,

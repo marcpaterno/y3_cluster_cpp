@@ -17,16 +17,17 @@ namespace y3_cluster {
 
   // This is based on std::clamp<T> from C++ 17, put here for use with
   // models that use interpolation and need to avoid extrapolation.
-  constexpr double do_clamp( double v, double lo, double hi )
+  constexpr double
+  do_clamp(double v, double lo, double hi)
   {
-    assert( !(hi < lo) );
+    assert(!(hi < lo));
     return (v < lo) ? lo : (hi < v) ? hi : v;
   }
 
   class Interp2D {
     using gsl_interp_ptr = void*;
-  public:
 
+  public:
     template <std::size_t M, std::size_t N>
     using matrix = std::array<std::array<double, N>, M>;
 
@@ -45,11 +46,10 @@ namespace y3_cluster {
              std::vector<double> const& ys,
              std::vector<double> const& zs);
 
-
     // Interpolator created from two vectors and one vector-of-vectors.
     Interp2D(std::vector<double> const& xs,
              std::vector<double> const& ys,
-             std::vector< std::vector<double>> const& zs);
+             std::vector<std::vector<double>> const& zs);
 
     // Like above - assumes ndarray is 2D and fits it appropriately
     Interp2D(std::vector<double> const& xs,
@@ -59,7 +59,7 @@ namespace y3_cluster {
     // Interpolator created from vector of triplets: throws std::logic_error if
     // the points do not lie on a grid in (x,y) space, or if any values are NaN
     // or infinities. Any denormalized x- or y-values are flushed to zero.
-    Interp2D(std::vector<Point3D> const &data);
+    Interp2D(std::vector<Point3D> const& data);
 
     Interp2D(Interp2D const& other);
     Interp2D& operator=(Interp2D const& rhs);
@@ -82,8 +82,7 @@ namespace y3_cluster {
     double
     clamp(double x, double y) const
     {
-      return eval(do_clamp(x, min_x(), max_x()),
-                  do_clamp(y, min_y(), max_y()));
+      return eval(do_clamp(x, min_x(), max_x()), do_clamp(y, min_y(), max_y()));
     }
 
     // Return the number of grid points in x and y.
@@ -103,10 +102,26 @@ namespace y3_cluster {
     void make_grid_(std::vector<Point3D> const& data);
 
     // Get the limits of x and y.
-    double min_x() const { return xs_.front(); }
-    double max_x() const { return xs_.back(); }
-    double min_y() const { return ys_.front(); }
-    double max_y() const { return ys_.back(); }
+    double
+    min_x() const
+    {
+      return xs_.front();
+    }
+    double
+    max_x() const
+    {
+      return xs_.back();
+    }
+    double
+    min_y() const
+    {
+      return ys_.front();
+    }
+    double
+    max_y() const
+    {
+      return ys_.back();
+    }
   };
 } // namespace y3_cluster
 
@@ -118,15 +133,14 @@ inline y3_cluster::Interp2D::Interp2D(std::array<double, M> const& xs,
 {
   for (std::size_t i = 0; i != M; ++i) {
     std::array<double, N> const& row = zs[i];
-    for (std::size_t j = 0; j != N; ++j) {
-      zs_[i + j * M] = row[j];
-    }
+    for (std::size_t j = 0; j != N; ++j) { zs_[i + j * M] = row[j]; }
   }
   init_gsl_bits_();
 }
 
 inline void
-y3_cluster::Interp2D::swap(Interp2D& other) noexcept {
+y3_cluster::Interp2D::swap(Interp2D& other) noexcept
+{
   using std::swap;
   swap(xs_, other.xs_);
   swap(ys_, other.ys_);

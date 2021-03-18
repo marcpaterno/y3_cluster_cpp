@@ -11,7 +11,6 @@
 
 #include "models/hmf_t.hh"
 
-
 // We write using declarations so that we don't have to type the namespace name
 // each time we use these names
 using cosmosis::DataBlock;
@@ -100,7 +99,6 @@ public:
   // read from the configuration block for the module.
   static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
-
 
 ExampleScalarIntegrand::ExampleScalarIntegrand(DataBlock&)
   : sigma_8_(), hmf_(), radius_()

@@ -20,11 +20,8 @@ namespace y3_cluster {
     using value_type = std::array<double, NAXES>;
 
     grid_t() = default;
-    grid_t(std::vector<value_type> points,
-           std::vector<std::string> names) :
-           points(std::move(points)),
-           names(std::move(names))
-           { };
+    grid_t(std::vector<value_type> points, std::vector<std::string> names)
+      : points(std::move(points)), names(std::move(names)){};
 
     void
     push_back(value_type const& point)
@@ -37,27 +34,27 @@ namespace y3_cluster {
     {
       names = std::move(ns);
     }
-    
-    std::size_t
-    constexpr size() const { return points.size(); }
-    
-    std::size_t
-    constexpr naxes() const { return NAXES; }
+
+    std::size_t constexpr size() const { return points.size(); }
+
+    std::size_t constexpr naxes() const { return NAXES; }
 
     std::vector<value_type> points;
     std::vector<std::string> names;
   };
-  
+
   template <std::size_t NAXES>
-  bool operator==(grid_t<NAXES> const& a, grid_t<NAXES> const& b)
+  bool
+  operator==(grid_t<NAXES> const& a, grid_t<NAXES> const& b)
   {
     return (a.names == b.names) && (a.points == b.points);
   }
-  
+
   template <std::size_t NAXES>
-  bool operator!=(grid_t<NAXES> const& a, grid_t<NAXES> const& b)
+  bool
+  operator!=(grid_t<NAXES> const& a, grid_t<NAXES> const& b)
   {
-    return !(a==b);
+    return !(a == b);
   }
 
   // These variadic function templates takes as arguments:
@@ -141,14 +138,12 @@ namespace y3_cluster {
       std::vector<std::vector<double>> fullres;
       while (std::getline(file, line)) {
         // Skip comment lines
-        if (line.find('#') == 0)
-          continue;
+        if (line.find('#') == 0) continue;
 
         // Make the line into a vector of doubles
         std::istringstream linestream(line);
         double tmp;
-        while (linestream >> tmp)
-          onerow.push_back(tmp);
+        while (linestream >> tmp) onerow.push_back(tmp);
         fullres.push_back(onerow);
         onerow.clear();
       }
@@ -157,8 +152,7 @@ namespace y3_cluster {
       std::size_t const n = fullres.size();
       std::vector<double> col;
       for (std::size_t i = 0; i < N; ++i) {
-        for (std::size_t j = 0; j < n; ++j)
-          col.push_back(fullres[j][i]);
+        for (std::size_t j = 0; j < n; ++j) col.push_back(fullres[j][i]);
         axes[i] = col;
         col.clear();
       }
@@ -226,9 +220,7 @@ namespace y3_cluster {
       std::vector<std::array<double, N>> points(n);
       for (std::size_t i = 0; i != n; ++i) {
         std::array<double, N>& current_result = points[i];
-        for (std::size_t j = 0; j != N; ++j) {
-          current_result[j] = axes[j][i];
-        }
+        for (std::size_t j = 0; j != N; ++j) { current_result[j] = axes[j][i]; }
       }
       std::vector<std::string> ns(begin(names), end(names));
       return {points, ns};

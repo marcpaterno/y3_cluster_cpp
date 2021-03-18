@@ -3,8 +3,7 @@
 
 #include <fstream>
 
-namespace y3_cluster
-{
+namespace y3_cluster {
 
   // Given the path fragement from the top y3_cluster_cpp directory,
   // find and open the file. If the file is not found, a default-constructed

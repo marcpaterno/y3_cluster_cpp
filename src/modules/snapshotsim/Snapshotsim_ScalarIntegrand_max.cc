@@ -56,7 +56,7 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<HMF_t> hmf;
-  //std::optional<SIG_SUM> sigma;
+  // std::optional<SIG_SUM> sigma;
   std::optional<SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
@@ -136,8 +136,7 @@ SnapshotScalarmaxIntegrand::operator()(double /* lt */, double lnM) const
   auto constexpr simulation_cosmic_volume = 165.0 * 165.0 * 165.0;
   auto const val = simulation_cosmic_volume
                    //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
-                   * (*hmf)(lnM, zt_) *
-                   (*sigma)(radius_, lnM, zt_);
+                   * (*hmf)(lnM, zt_) * (*sigma)(radius_, lnM, zt_);
   return val;
 }
 

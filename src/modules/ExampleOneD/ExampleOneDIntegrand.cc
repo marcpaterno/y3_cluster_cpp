@@ -3,8 +3,7 @@
 
 // Constructor. Anything that need only be done once should be done here.
 ExampleOneDIntegrand::ExampleOneDIntegrand(cosmosis::DataBlock& cfg)
-  : b_(cfg.view<double>(module_label(), "b"))
-  , c_(), a_()
+  : b_(cfg.view<double>(module_label(), "b")), c_(), a_()
 {}
 
 // The name of the module to use for configuration options and to
@@ -28,7 +27,7 @@ ExampleOneDIntegrand::integration_variable()
 double
 ExampleOneDIntegrand::operator()(double x) const
 {
-  return a_*x + b_ + c_;
+  return a_ * x + b_ + c_;
 }
 
 // Update anything that depends on the MCMC sample
@@ -54,8 +53,7 @@ ExampleOneDIntegrand::set_grid_point(grid_point_t const& grid_point)
 ExampleOneDIntegrand::grid_t
 ExampleOneDIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, module_label(), "a");
+  return y3_cluster::make_grid_points_wall_of_numbers(cfg, module_label(), "a");
 }
 
 // --------------------------------------------------------------------------
@@ -74,8 +72,7 @@ ExampleOneDIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 
   std::vector<std::array<double, 2>> volumes;
   for (std::size_t i = 0; i != lows.size(); ++i)
-    volumes.push_back(std::array<double, 2> { lows[i], highs[i] });
+    volumes.push_back(std::array<double, 2>{lows[i], highs[i]});
 
   return volumes;
 }
-

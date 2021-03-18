@@ -20,8 +20,7 @@ namespace y3_cluster {
                  const cosmosis::ndarray<double>& ys)
     {
       auto extents = ys.extents();
-      if (extents.size() != 3)
-        return false;
+      if (extents.size() != 3) return false;
       return (extents[0] == thetas.size()) & (extents[1] == ms.size()) &
              (extents[2] == zs.size());
     }

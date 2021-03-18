@@ -6,8 +6,8 @@
 #include "utils/make_grid_points.hh"
 
 #include <optional>
-#include <vector>
 #include <string>
+#include <vector>
 
 // ExampleOneDIntegrand is a class that models the concept of
 // "OneDIntegration", and is thus suitable for use as the template
@@ -62,7 +62,7 @@ public:
   // integration to reference in the configuration file
   static char const* integration_variable();
 
-  // The function to be integrated. This function should take 
+  // The function to be integrated. This function should take
   //
   //
   // All arguments to this function must be of

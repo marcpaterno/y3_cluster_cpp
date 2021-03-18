@@ -52,10 +52,8 @@ namespace y3_cluster {
     constexpr double
     do_integer_pow(const double accumulator, const double n, const unsigned pow)
     {
-      if (pow == 0)
-        return accumulator;
-      if ((pow % 2) == 0)
-        return do_integer_pow(accumulator, n * n, pow / 2);
+      if (pow == 0) return accumulator;
+      if ((pow % 2) == 0) return do_integer_pow(accumulator, n * n, pow / 2);
       return do_integer_pow(accumulator * n, n, pow - 1);
     }
   } // namespace
@@ -64,10 +62,8 @@ namespace y3_cluster {
   constexpr double
   integer_pow(double n, int pow)
   {
-    if (pow == 0)
-      return 1;
-    if (pow < 0)
-      return do_integer_pow(1, 1.0 / n, 0 - pow);
+    if (pow == 0) return 1;
+    if (pow < 0) return do_integer_pow(1, 1.0 / n, 0 - pow);
     return do_integer_pow(1, n, pow);
   }
 

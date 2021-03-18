@@ -85,8 +85,7 @@ std::vector<std::vector<double>>
 y3_cluster::SampleVariance_t::compute() const
 {
   std::vector<std::vector<double>> sigma_mat(z_ranges.size());
-  for (auto& v : sigma_mat)
-    v.resize(z_ranges.size());
+  for (auto& v : sigma_mat) v.resize(z_ranges.size());
 
   // Compute matrix of sigma^{SampVar}_{ij}
   cubacpp::Cuhre integrator;

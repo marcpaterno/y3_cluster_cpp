@@ -43,10 +43,8 @@ namespace y3_cluster {
     double
     operator()(double lnM, double z, double gamma_field) const
     {
-      return std::log(gamma_field)
-             + log_A_
-             + B_ * (lnM - lnMp_)
-             + C_ * (std::log(ez_(z)) - ln_e_zp_);
+      return std::log(gamma_field) + log_A_ + B_ * (lnM - lnMp_) +
+             C_ * (std::log(ez_(z)) - ln_e_zp_);
     }
 
   private:

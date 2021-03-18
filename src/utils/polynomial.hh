@@ -24,8 +24,7 @@ namespace y3_cluster {
     operator()(const double x) const
     {
       double out = 0.0;
-      for (auto i = 0u; i < Order; i++)
-        out = coeffs[i] + x * out;
+      for (auto i = 0u; i < Order; i++) out = coeffs[i] + x * out;
       return out;
     }
   };

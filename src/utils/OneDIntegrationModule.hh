@@ -32,14 +32,12 @@ namespace y3_cluster {
     static double integrand_wrapper(double x, void* p);
 
     // Do the integral for each grid point and volume
-    std::vector<integration_results_t>
-    integrate_full_sequence();
-
+    std::vector<integration_results_t> integrate_full_sequence();
 
     // Put the results into the datablock
     void finalize_sample(
-        cosmosis::DataBlock& sample,
-        std::vector<integration_results_t> const& results) const;
+      cosmosis::DataBlock& sample,
+      std::vector<integration_results_t> const& results) const;
 
     IntegrandType integrand_;
     std::vector<volume_t> volumes_;
@@ -52,22 +50,20 @@ namespace y3_cluster {
 } // end of y3_cluster
 
 template <typename I>
-y3_cluster::OneDIntegrationModule<I>::
-  OneDIntegrationModule(cosmosis::DataBlock& cfg)
-try
-  : integrand_(cfg),
-    volumes_(IntegrandType::make_integration_volumes(cfg)),
-    grid_(IntegrandType::make_grid_points(cfg)),
-    eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
-    eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")),
-    maxeval_(cfg.view<int>(IntegrandType::module_label(), "max_eval")) {
-      if (volumes_.size() != grid_.points.size()) {
-        throw std::runtime_error(
-            "An integration module was configured with unequal numbers "
-            "of volumes and gridpoints\n");
-      }
-      workspace_ = gsl_integration_workspace_alloc(maxeval_);
-    }
+y3_cluster::OneDIntegrationModule<I>::OneDIntegrationModule(
+  cosmosis::DataBlock& cfg)
+try : integrand_(cfg), volumes_(IntegrandType::make_integration_volumes(cfg)),
+  grid_(IntegrandType::make_grid_points(cfg)),
+  eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
+  eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")),
+  maxeval_(cfg.view<int>(IntegrandType::module_label(), "max_eval")) {
+  if (volumes_.size() != grid_.points.size()) {
+    throw std::runtime_error(
+      "An integration module was configured with unequal numbers "
+      "of volumes and gridpoints\n");
+  }
+  workspace_ = gsl_integration_workspace_alloc(maxeval_);
+}
 catch (cosmosis::Exception const&) {
   std::cerr
     << "\nDuring construction of a OneDIntegrationModule, the lookup of some "
@@ -76,25 +72,23 @@ catch (cosmosis::Exception const&) {
 catch (std::exception const& e) {
   std::cerr
     << "\nDuring construction of a OneDIntegrationModule, an std::exeption "
-       "throw was encountered.\nThe error message was:\n" << e.what();
+       "throw was encountered.\nThe error message was:\n"
+    << e.what();
 }
 catch (...) {
-  std::cerr
-    << "\nUnknown exception type thrown while constructing a "
-       "OneDIntegrationModule.\n\n";
+  std::cerr << "\nUnknown exception type thrown while constructing a "
+               "OneDIntegrationModule.\n\n";
 }
 
 template <typename I>
-y3_cluster::OneDIntegrationModule<I>::
-  ~OneDIntegrationModule()
+y3_cluster::OneDIntegrationModule<I>::~OneDIntegrationModule()
 {
   gsl_integration_workspace_free(workspace_);
 }
 
 template <typename I>
 void
-y3_cluster::OneDIntegrationModule<I>::execute(
-    cosmosis::DataBlock& sample)
+y3_cluster::OneDIntegrationModule<I>::execute(cosmosis::DataBlock& sample)
 {
   integrand_.set_sample(sample);
   auto results = integrate_full_sequence();
@@ -132,19 +126,26 @@ y3_cluster::OneDIntegrationModule<I>::integrate_full_sequence()
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_.points[i]);
     F.params = &integrand_;
-    status = gsl_integration_qag(&F, std::get<0>(volumes_[i]), std::get<1>(volumes_[i]),
-        eps_abs_, eps_rel_, maxeval_, 6, workspace_, &result, &error);
-    results.push_back(integration_results_t (status, result, error));
+    status = gsl_integration_qag(&F,
+                                 std::get<0>(volumes_[i]),
+                                 std::get<1>(volumes_[i]),
+                                 eps_abs_,
+                                 eps_rel_,
+                                 maxeval_,
+                                 6,
+                                 workspace_,
+                                 &result,
+                                 &error);
+    results.push_back(integration_results_t(status, result, error));
   }
   return results;
 }
 
 template <typename I>
 void
-y3_cluster::OneDIntegrationModule<I>::
-  finalize_sample(
-    cosmosis::DataBlock& sample,
-    std::vector<integration_results_t> const& results) const
+y3_cluster::OneDIntegrationModule<I>::finalize_sample(
+  cosmosis::DataBlock& sample,
+  std::vector<integration_results_t> const& results) const
 {
   auto const nresults = num_results();
 

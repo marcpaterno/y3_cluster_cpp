@@ -1,10 +1,10 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
+#include "utils/OneDIntegrationModule.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/make_grid_points.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
-#include "utils/OneDIntegrationModule.hh"
 
 #include "models/dv_do_dz_t.hh"
 #include "models/sptxdes/omega_z_y3xspt.hh"
@@ -60,9 +60,8 @@ public:
   // The following static member function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static 
-  std::vector<std::array<double, 2>>
-  make_integration_volumes(DataBlock& cfg);
+  static std::vector<std::array<double, 2>> make_integration_volumes(
+    DataBlock& cfg);
 };
 
 ZtrueIntegralDESxSPT::ZtrueIntegralDESxSPT(DataBlock&)

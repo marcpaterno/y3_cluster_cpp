@@ -44,7 +44,6 @@ using cubacpp::integration_result;
 //
 class MassMiscentY1ScalarIntegrand {
 public:
-
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
 

@@ -21,9 +21,9 @@ namespace y3_cluster {
 
   public:
     XI_MAX(std::shared_ptr<Interp2D const> sigma1,
-            std::shared_ptr<Interp2D const> sigma2,
-            std::shared_ptr<Interp2D const> bias, 
-            double om)
+           std::shared_ptr<Interp2D const> sigma2,
+           std::shared_ptr<Interp2D const> bias,
+           double om)
       : _sigma1(sigma1), _sigma2(sigma2), _bias(bias), _om(om)
     {}
 
@@ -48,7 +48,7 @@ namespace y3_cluster {
           get_datablock<cosmosis::ndarray<double>>(sample,
                                                    "deltasigma",
                                                    "bias")))
-        , _om(get_datablock<double>(sample, "cosmological_parameters", "omega_m") )
+      , _om(get_datablock<double>(sample, "cosmological_parameters", "omega_m"))
     {}
 
     double
@@ -59,9 +59,9 @@ namespace y3_cluster {
       double _sig_2 = _bias->eval(zt, lnM) * _sigma2->eval(r, zt);
       // TODO: h factor?
       double res = _sig_2;
-      if (_sig_1 >= _sig_2)  { res = _sig_1; }
+      if (_sig_1 >= _sig_2) { res = _sig_1; }
       // return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
-      return (res) * 2.77536627E11*_om / 1.0E10;
+      return (res)*2.77536627E11 * _om / 1.0E10;
       /*} else {
         return 1e12*(1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
       } */

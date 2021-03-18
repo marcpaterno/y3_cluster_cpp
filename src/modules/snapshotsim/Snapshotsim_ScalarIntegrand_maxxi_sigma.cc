@@ -10,8 +10,8 @@
 //#include "models/sig_sum.hh"
 #include "models/xi_max.hh"
 
-#include <math.h>
 #include <iostream>
+#include <math.h>
 #include <optional>
 #include <vector>
 using namespace y3_cluster;
@@ -58,7 +58,7 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<HMF_t> hmf;
-  //std::optional<SIG_SUM> sigma;
+  // std::optional<SIG_SUM> sigma;
   std::optional<XI_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
@@ -131,16 +131,17 @@ SnapshotScalarmaxSigmaIntegrand::set_grid_point(grid_point_t const& grid_point)
 }
 
 double
-SnapshotScalarmaxSigmaIntegrand::operator()(double /* lt */, double lnM, double chi) const
+SnapshotScalarmaxSigmaIntegrand::operator()(double /* lt */,
+                                            double lnM,
+                                            double chi) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   auto constexpr simulation_cosmic_volume = 165.0 * 165.0 * 165.0;
-  double r_ = std::sqrt(radius_*radius_ + chi*chi);
+  double r_ = std::sqrt(radius_ * radius_ + chi * chi);
   auto const val = simulation_cosmic_volume
                    //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
-                   * (*hmf)(lnM, zt_) *
-                   (*sigma)(r_, lnM, zt_)/100.0;
+                   * (*hmf)(lnM, zt_) * (*sigma)(r_, lnM, zt_) / 100.0;
   return val;
 }
 
@@ -158,7 +159,8 @@ SnapshotScalarmaxSigmaIntegrand::module_label()
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
 std::vector<SnapshotScalarmaxSigmaIntegrand::volume_t>
-SnapshotScalarmaxSigmaIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+SnapshotScalarmaxSigmaIntegrand::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
     cfg, SnapshotScalarmaxSigmaIntegrand::module_label(), "lt", "lnm", "chi");
@@ -168,7 +170,10 @@ SnapshotScalarmaxSigmaIntegrand::grid_t
 SnapshotScalarmaxSigmaIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(
-    cfg, SnapshotScalarmaxSigmaIntegrand::module_label(), "snapshot_zs", "radii");
+    cfg,
+    SnapshotScalarmaxSigmaIntegrand::module_label(),
+    "snapshot_zs",
+    "radii");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SnapshotScalarmaxSigmaIntegrand)

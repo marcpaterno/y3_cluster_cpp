@@ -1,8 +1,8 @@
 #include "cosmosis/datablock/ndarray.hh"
+#include "utils/datablock_reader.hh"
 #include "utils/make_grid_points.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
-#include "utils/datablock_reader.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
@@ -12,10 +12,10 @@
 #include "models/lc_lt_y1_t.hh"
 #include "models/sptxdes/mor_y3xspt_t.hh"
 
-#include <optional>
-#include <vector>
-#include <string>
 #include <cmath>
+#include <optional>
+#include <string>
+#include <vector>
 
 using cosmosis::DataBlock;
 
@@ -114,12 +114,11 @@ AbundanceIntegralDESxSPT::set_grid_point(grid_point_t const& grid_point)
 // Evaluate the integrand
 // Anything initilized with std::optional needs an asterisk
 double
-AbundanceIntegralDESxSPT::operator()(double lamtrue,
-                                     double lnM200m) const
+AbundanceIntegralDESxSPT::operator()(double lamtrue, double lnM200m) const
 {
-  return (*hmf)(lnM200m, zobs_)
-         * PLamobs_LamtrueZtrue(lamobs_, lamtrue, zobs_)
-         * (*PLamtrueZeta_lnMZtrue)(lamtrue, zeta_, zobs_, lnM200m, gamma_field_);
+  return (*hmf)(lnM200m, zobs_) *
+         PLamobs_LamtrueZtrue(lamobs_, lamtrue, zobs_) *
+         (*PLamtrueZeta_lnMZtrue)(lamtrue, zeta_, zobs_, lnM200m, gamma_field_);
 }
 
 // Name of the module in the datablock
@@ -160,7 +159,7 @@ AbundanceIntegralDESxSPT::make_integration_volumes(cosmosis::DataBlock& cfg)
   // Convert into the expected IntegrationVolume object
   std::vector<cubacpp::IntegrationVolume<N>> result;
   result.reserve(lowbounds.size());
-  for (std::size_t i=0; i != lowbounds.size(); ++i) {
+  for (std::size_t i = 0; i != lowbounds.size(); ++i) {
     result.emplace_back(lowbounds[i], highbounds[i]);
   }
   return result;
@@ -171,11 +170,12 @@ AbundanceIntegralDESxSPT::grid_t
 AbundanceIntegralDESxSPT::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::load_grid_from_file_wall_of_numbers(
-    cfg, AbundanceIntegralDESxSPT::module_label(), "lamobs",
-                                                   "xi",
-                                                   "zobs",
-                                                   "gamma_field");
+    cfg,
+    AbundanceIntegralDESxSPT::module_label(),
+    "lamobs",
+    "xi",
+    "zobs",
+    "gamma_field");
 }
-
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(AbundanceIntegralDESxSPT)

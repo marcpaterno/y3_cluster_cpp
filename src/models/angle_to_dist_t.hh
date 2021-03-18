@@ -12,13 +12,11 @@ namespace y3_cluster {
 
   class ANGLE_TO_DIST_t {
   public:
-    ANGLE_TO_DIST_t(Interp1D da, double h0)
-      : _da(std::move(da)), _h(h0)
-    {}
+    ANGLE_TO_DIST_t(Interp1D da, double h0) : _da(std::move(da)), _h(h0) {}
 
     explicit ANGLE_TO_DIST_t(cosmosis::DataBlock& sample)
       : _da(get_datablock<std::vector<double>>(sample, "distances", "z"),
-           get_datablock<std::vector<double>>(sample, "distances", "d_a"))
+            get_datablock<std::vector<double>>(sample, "distances", "d_a"))
       , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
     {}
 

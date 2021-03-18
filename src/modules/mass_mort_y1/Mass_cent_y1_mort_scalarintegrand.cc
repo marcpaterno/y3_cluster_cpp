@@ -15,9 +15,9 @@
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
 #include "models/sig_sum.hh"
+#include <iostream>
 #include <optional>
 #include <vector>
-#include <iostream>
 using namespace y3_cluster;
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
@@ -74,7 +74,6 @@ private:
   double zo_low_;
   double zo_high_;
 
-
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
@@ -92,11 +91,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(
-                    double lo,
-                    double zt,
-                    double lnM
-                    ) const;
+  double operator()(double lo, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -156,16 +151,16 @@ MassCentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
 
 double
 MassCentY1MortScalarIntegrand::operator()(double lo,
-                             double zt,
-                             double lnM) const
+                                          double zt,
+                                          double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double mass = std::exp(lnM);
-  double common_term = (*mor)(lo, lnM, zt) *
-                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
-  auto const val = mass*(*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
-   return val;
+  double common_term =
+    (*mor)(lo, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+  auto const val = mass * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+  return val;
 }
 
 char const*
@@ -182,7 +177,8 @@ MassCentY1MortScalarIntegrand::module_label()
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
 std::vector<MassCentY1MortScalarIntegrand::volume_t>
-MassCentY1MortScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+MassCentY1MortScalarIntegrand::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
     cfg, MassCentY1MortScalarIntegrand::module_label(), "lo", "zt", "lnm");

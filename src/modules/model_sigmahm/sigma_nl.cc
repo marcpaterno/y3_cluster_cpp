@@ -1,19 +1,19 @@
-#include "utils/make_integration_volumes.hh"
 #include "utils/make_grid_points.hh"
+#include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cubacpp/integration_volume.hh"
 #include "cubacpp/integration_result.hh"
+#include "cubacpp/integration_volume.hh"
 #include "cubacpp/vegas.hh"
 
 #include "models/pk_nl_t.hh"
 
-#include <optional>
-#include <vector>
+#include <cmath>
 #include <iostream>
 #include <math.h>
-#include <cmath>
+#include <optional>
+#include <vector>
 #define PI 3.14159265
 
 using namespace y3_cluster;
@@ -32,8 +32,8 @@ using cubacpp::integration_result;
 //    2) The object as created by the only constructor does not need to be
 //    in a callable state.
 //
-//    3) After calls to both set_sample and set_grid_point have been made, the object must be in a
-//    callable state.
+//    3) After calls to both set_sample and set_grid_point have been made, the
+//    object must be in a callable state.
 //
 //    4) State that *can* be correctly set by the constructor *should* be set by
 //    the constructor. Do not needlessly repeat initialization in calls to
@@ -42,7 +42,6 @@ using cubacpp::integration_result;
 //
 class sigma_nl {
 public:
-
   using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
 
@@ -63,7 +62,6 @@ private:
   std::optional<pk_nl> pk_nl_;
   double R_;
   double z_;
-
 
 public:
   // Initialize my integrand object from the parameters read
@@ -95,7 +93,8 @@ public:
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static std::vector<volume_t> make_integration_volumes(cosmosis::DataBlock& cfg);
+  static std::vector<volume_t> make_integration_volumes(
+    cosmosis::DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
@@ -108,9 +107,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-sigma_nl::sigma_nl(DataBlock&)  : 
-	pk_nl_(), R_(), z_()
-{}
+sigma_nl::sigma_nl(DataBlock&) : pk_nl_(), R_(), z_() {}
 
 void
 sigma_nl::set_sample(DataBlock& sample)
@@ -133,13 +130,12 @@ sigma_nl::operator()(double k, double chi) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double r=sqrt( R_ * R_ + chi * chi );
-  //double r= R_;
-  double x= k*r;
-  double w=sin(x)/x;
-  auto const  val = w * k * k / (2.0 * PI * PI) 
-	            * (*pk_nl_)(k, z_);
-  return  val;
+  double r = sqrt(R_ * R_ + chi * chi);
+  // double r= R_;
+  double x = k * r;
+  double w = sin(x) / x;
+  auto const val = w * k * k / (2.0 * PI * PI) * (*pk_nl_)(k, z_);
+  return val;
 }
 
 char const*
@@ -158,17 +154,14 @@ sigma_nl::module_label()
 std::vector<sigma_nl::volume_t>
 sigma_nl::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes_wall_of_numbers(cfg,
-                                              sigma_nl::module_label(),
-                                              "k",
-                                              "los_chi");
+  return y3_cluster::make_integration_volumes_wall_of_numbers(
+    cfg, sigma_nl::module_label(), "k", "los_chi");
 }
 
 sigma_nl::grid_t
 sigma_nl::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_cartesian_product(cfg,
-                                      sigma_nl::module_label(),
-                                      "radii", "redshifts");
+  return y3_cluster::make_grid_points_cartesian_product(
+    cfg, sigma_nl::module_label(), "radii", "redshifts");
 }
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(sigma_nl)

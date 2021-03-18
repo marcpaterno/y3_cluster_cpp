@@ -79,14 +79,19 @@ namespace y3_cluster {
       , Asz_(get_datablock<double>(sample, "abundance_integral", "Asz"))
       , Bsz_(get_datablock<double>(sample, "abundance_integral", "Bsz"))
       , Csz_(get_datablock<double>(sample, "abundance_integral", "Csz"))
-      , siglnzeta_(get_datablock<double>(sample, "abundance_integral", "sig0zeta"))
+      , siglnzeta_(
+          get_datablock<double>(sample, "abundance_integral", "sig0zeta"))
       , r_(get_datablock<double>(sample, "abundance_integral", "r"))
       , zplam_(get_datablock<double>(sample, "abundance_integral", "zplam"))
       , lnMpsz_(get_datablock<double>(sample, "abundance_integral", "lnMpsz"))
       , zpsz_(get_datablock<double>(sample, "abundance_integral", "zpsz"))
-      , omega_m_(get_datablock<double>(sample, "cosmological_parameters", "omega_m"))
-      , omega_l_(get_datablock<double>(sample, "cosmological_parameters", "omega_lambda"))
-      , omega_k_(get_datablock<double>(sample, "cosmological_parameters", "omega_k"))
+      , omega_m_(
+          get_datablock<double>(sample, "cosmological_parameters", "omega_m"))
+      , omega_l_(get_datablock<double>(sample,
+                                       "cosmological_parameters",
+                                       "omega_lambda"))
+      , omega_k_(
+          get_datablock<double>(sample, "cosmological_parameters", "omega_k"))
       , zetamrel_(Asz_,
                   Bsz_,
                   Csz_,
@@ -98,11 +103,17 @@ namespace y3_cluster {
       , mass_conversion_(std::make_shared<Interp2D const>(
           get_datablock<doubles>(sample, "mass_conversion", "lnm200m"),
           get_datablock<doubles>(sample, "mass_conversion", "z"),
-          get_datablock<cosmosis::ndarray<double>>(sample, "mass_conversion", "lnm500c")))
+          get_datablock<cosmosis::ndarray<double>>(sample,
+                                                   "mass_conversion",
+                                                   "lnm500c")))
     {}
 
     double
-    operator()(double lamtrue, double zeta, double ztrue, double lnM200m, double gamma_field) const
+    operator()(double lamtrue,
+               double zeta,
+               double ztrue,
+               double lnM200m,
+               double gamma_field) const
     {
       // Richness scaling calculations
       // Can precalc some of this in constructor...

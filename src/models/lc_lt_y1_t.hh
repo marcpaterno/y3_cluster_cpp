@@ -45,9 +45,10 @@ namespace y3_cluster {
         return std::erfc((a - b) / root_two_sigma);
       };
 
-      return (1.0 - fmsk) * (1.0 - fprj) * y3_cluster::gaussian(lamcent, mu, sigma) +
-             0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lamtrue) * exptau *
-               erfc_scaled(mu_tau_sig_sqr, lamcent) +
+      return (1.0 - fmsk) * (1.0 - fprj) *
+               y3_cluster::gaussian(lamcent, mu, sigma) +
+             0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lamtrue) *
+               exptau * erfc_scaled(mu_tau_sig_sqr, lamcent) +
              0.5 * fmsk / lamtrue *
                (erfc_scaled(lamcent, mu) - erfc_scaled(lamcent + lamtrue, mu)) -
              0.5 * fmsk * fprj / lamtrue *
@@ -56,12 +57,12 @@ namespace y3_cluster {
     }
   };
 
-
-  LC_LT_Y1_t::LC_LT_Y1_t() {
+  LC_LT_Y1_t::LC_LT_Y1_t()
+  {
     // This should be read in from the data block
     std::string runname = "DESY1A_v1.4";
     std::string fileroot = "lc_lt_fits/" + runname;
-  
+
     auto lamtrue_in = read_vector(fileroot + "/lamtrue.txt");
     auto z_in = read_vector(fileroot + "/z.txt");
 
@@ -72,25 +73,17 @@ namespace y3_cluster {
     // auto fprj_in = read_vector(fileroot + "fprj.txt");
 
     LC_LT_Y1_t::tau_interp = std::make_shared<Interp2D const>(
-        lamtrue_in, z_in, read_vector(fileroot + "/tau.txt"));
+      lamtrue_in, z_in, read_vector(fileroot + "/tau.txt"));
     LC_LT_Y1_t::mu_interp = std::make_shared<Interp2D const>(
-        lamtrue_in, z_in, read_vector(fileroot + "/mu.txt"));
+      lamtrue_in, z_in, read_vector(fileroot + "/mu.txt"));
     LC_LT_Y1_t::sigma_interp = std::make_shared<Interp2D const>(
-        lamtrue_in, z_in, read_vector(fileroot + "/sigma.txt"));
+      lamtrue_in, z_in, read_vector(fileroot + "/sigma.txt"));
     LC_LT_Y1_t::fmsk_interp = std::make_shared<Interp2D const>(
-        lamtrue_in, z_in, read_vector(fileroot + "/fmsk.txt"));
+      lamtrue_in, z_in, read_vector(fileroot + "/fmsk.txt"));
     LC_LT_Y1_t::fprj_interp = std::make_shared<Interp2D const>(
-        lamtrue_in, z_in, read_vector(fileroot + "/fprj.txt"));
+      lamtrue_in, z_in, read_vector(fileroot + "/fprj.txt"));
   }
 
 }
-
-
-
-
-
-
-
-
 
 #endif

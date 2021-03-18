@@ -56,7 +56,7 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<HMF_t> hmf;
-  //std::optional<SIG_SUM> sigma;
+  // std::optional<SIG_SUM> sigma;
   std::optional<SIG_SUM> sigma;
 
   // State set for current 'bin' to be integrated.
@@ -122,7 +122,8 @@ Snapshotsim_ScalarIntegrand_Sigma::set_sample(DataBlock& sample)
 }
 
 void
-Snapshotsim_ScalarIntegrand_Sigma::set_grid_point(grid_point_t const& grid_point)
+Snapshotsim_ScalarIntegrand_Sigma::set_grid_point(
+  grid_point_t const& grid_point)
 {
   radius_ = grid_point[1];
   zt_ = grid_point[0];
@@ -136,8 +137,7 @@ Snapshotsim_ScalarIntegrand_Sigma::operator()(double /* lt */, double lnM) const
   auto constexpr simulation_cosmic_volume = 165.0 * 165.0 * 165.0;
   auto const val = simulation_cosmic_volume
                    //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
-                   * (*hmf)(lnM, zt_) *
-                   (*sigma)(radius_, lnM, zt_);
+                   * (*hmf)(lnM, zt_) * (*sigma)(radius_, lnM, zt_);
   return val;
 }
 
@@ -155,7 +155,8 @@ Snapshotsim_ScalarIntegrand_Sigma::module_label()
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
 std::vector<Snapshotsim_ScalarIntegrand_Sigma::volume_t>
-Snapshotsim_ScalarIntegrand_Sigma::make_integration_volumes(cosmosis::DataBlock& cfg)
+Snapshotsim_ScalarIntegrand_Sigma::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
     cfg, Snapshotsim_ScalarIntegrand_Sigma::module_label(), "lt", "lnm");
@@ -165,7 +166,10 @@ Snapshotsim_ScalarIntegrand_Sigma::grid_t
 Snapshotsim_ScalarIntegrand_Sigma::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(
-    cfg, Snapshotsim_ScalarIntegrand_Sigma::module_label(), "snapshot_zs", "radii");
+    cfg,
+    Snapshotsim_ScalarIntegrand_Sigma::module_label(),
+    "snapshot_zs",
+    "radii");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(Snapshotsim_ScalarIntegrand_Sigma)

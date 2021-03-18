@@ -21,8 +21,7 @@ namespace y3_cluster {
         get_datablock<double>(db, "cosmological_parameters", "omega_M");
       double omega_mu =
         get_datablock<double>(db, "cosmological_parameters", "omega_nu");
-      for (auto& x : output)
-        x = std::log(x * (omega_m - omega_mu));
+      for (auto& x : output) x = std::log(x * (omega_m - omega_mu));
       return output;
     }
 

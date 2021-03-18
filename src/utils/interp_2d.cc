@@ -7,8 +7,9 @@
 #include <stdexcept>
 
 namespace {
-  inline
-  void free_if_nonnull(void* p) {
+  inline void
+  free_if_nonnull(void* p)
+  {
     if (p == nullptr) return;
     gsl_interp2d* interp = static_cast<gsl_interp2d*>(p);
     gsl_interp2d_free(interp);
@@ -23,18 +24,18 @@ y3_cluster::Interp2D::Interp2D(std::vector<Point3D> const& data)
 }
 
 y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
-             std::vector<double> const& ys,
-             cosmosis::ndarray<double> const& zs)
-      : Interp2D(xs, ys, std::vector<double>{zs.begin(), zs.end()})
+                               std::vector<double> const& ys,
+                               cosmosis::ndarray<double> const& zs)
+  : Interp2D(xs, ys, std::vector<double>{zs.begin(), zs.end()})
 {
-      if ((zs.extents()[1] != xs.size()) || (zs.extents()[0] != ys.size())) {
-        std::cerr << "Interp2D -- wrong input dimensions:\n\t"
-                  << "xs.size() = " << xs.size() << "\n\t"
-                  << "ys.size() = " << ys.size() << "\n\t"
-                  << "zs.shape[1] = " << zs.extents()[1] << "\n\t"
-                  << "zs.shape[0] = " << zs.extents()[0] << "\n";
-        throw std::domain_error("Interp2D -- ndarray wrong dimensions");
-      }
+  if ((zs.extents()[1] != xs.size()) || (zs.extents()[0] != ys.size())) {
+    std::cerr << "Interp2D -- wrong input dimensions:\n\t"
+              << "xs.size() = " << xs.size() << "\n\t"
+              << "ys.size() = " << ys.size() << "\n\t"
+              << "zs.shape[1] = " << zs.extents()[1] << "\n\t"
+              << "zs.shape[0] = " << zs.extents()[0] << "\n";
+    throw std::domain_error("Interp2D -- ndarray wrong dimensions");
+  }
 }
 
 y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
@@ -47,10 +48,9 @@ y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
   init_gsl_bits_();
 }
 
-y3_cluster::Interp2D::Interp2D(
- std::vector<double> const& xs,
- std::vector<double> const& ys,
- std::vector<std::vector<double>> const& zs)
+y3_cluster::Interp2D::Interp2D(std::vector<double> const& xs,
+                               std::vector<double> const& ys,
+                               std::vector<std::vector<double>> const& zs)
   : xs_(xs), ys_(ys), zs_(xs.size() * ys.size())
 {
   if (zs.size() != xs.size())
@@ -71,18 +71,15 @@ y3_cluster::Interp2D::Interp2D(
   init_gsl_bits_();
 }
 
-
 y3_cluster::Interp2D::Interp2D(Interp2D const& other)
-  : xs_(other.xs_)
-  , ys_(other.ys_)
-  , zs_(other.zs_)
-  , interp_(nullptr)
+  : xs_(other.xs_), ys_(other.ys_), zs_(other.zs_), interp_(nullptr)
 {
   init_gsl_bits_();
 }
 
 y3_cluster::Interp2D&
-y3_cluster::Interp2D::operator=(Interp2D const& rhs) {
+y3_cluster::Interp2D::operator=(Interp2D const& rhs)
+{
   Interp2D tmp(rhs);
   swap(tmp);
   return *this;
@@ -98,23 +95,22 @@ y3_cluster::Interp2D::Interp2D(Interp2D&& other) noexcept
 }
 
 y3_cluster::Interp2D&
-y3_cluster::Interp2D::operator=(Interp2D&& rhs) noexcept {
-    if (this == &rhs) return *this;
-    free_if_nonnull(interp_);
-    xs_ = std::move(rhs.xs_);
-    ys_ = std::move(rhs.ys_);
-    zs_ = std::move(rhs.zs_);
-    interp_ = rhs.interp_;
-    rhs.interp_ = nullptr;
-    return *this;
+y3_cluster::Interp2D::operator=(Interp2D&& rhs) noexcept
+{
+  if (this == &rhs) return *this;
+  free_if_nonnull(interp_);
+  xs_ = std::move(rhs.xs_);
+  ys_ = std::move(rhs.ys_);
+  zs_ = std::move(rhs.zs_);
+  interp_ = rhs.interp_;
+  rhs.interp_ = nullptr;
+  return *this;
 }
 
 y3_cluster::Interp2D::~Interp2D() noexcept
 {
   free_if_nonnull(interp_);
 }
-
-
 
 double
 y3_cluster::Interp2D::operator()(double x, double y) const
@@ -124,10 +120,9 @@ y3_cluster::Interp2D::operator()(double x, double y) const
   // Profile the resulting integration routine to see if this should be changed.
   double z = 0.0;
   gsl_interp2d* temp = static_cast<gsl_interp2d*>(interp_);
-  int rc = gsl_interp2d_eval_e(temp, xs_.data(), ys_.data(), zs_.data(),
-      x, y, nullptr, nullptr, &z);
-  if (rc != 0) 
-    throw std::domain_error("argument out of range in Interp1D");
+  int rc = gsl_interp2d_eval_e(
+    temp, xs_.data(), ys_.data(), zs_.data(), x, y, nullptr, nullptr, &z);
+  if (rc != 0) throw std::domain_error("argument out of range in Interp1D");
   return z;
 }
 
@@ -142,8 +137,7 @@ y3_cluster::Interp2D::init_gsl_bits_()
 void
 y3_cluster::Interp2D::make_grid_(std::vector<Point3D> const& data)
 {
-  if (data.empty())
-    throw std::domain_error("Interp2D -- no points provided");
+  if (data.empty()) throw std::domain_error("Interp2D -- no points provided");
   // Discover the (x,y) grid implied by the points we are given -- or reject
   // them as not a grid. Points in x are equivalent if they differ by an
   // absolute value less than xfuzz, and similarly for points in y.
@@ -167,7 +161,8 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D> const& data)
     return fpsupport::is_equivalent((*pa)[1], b[1], reltol, abstol);
   };
 
-  auto const column_1_end = std::find_if_not(clean_data.begin(), clean_data.end(), equal);
+  auto const column_1_end =
+    std::find_if_not(clean_data.begin(), clean_data.end(), equal);
   if (column_1_end == clean_data.end())
     throw std::domain_error("Interp2D -- Only one column");
 
@@ -209,6 +204,5 @@ y3_cluster::Interp2D::make_grid_(std::vector<Point3D> const& data)
   // Capture the z-matrix. Since the points are sorted, the order of the points
   // is the correct order for the zs_ vector.
   zs_.reserve(candidate_nrows * candidate_ncolumns);
-  for (auto const& p : clean_data)
-    zs_.push_back(p[2]);
+  for (auto const& p : clean_data) zs_.push_back(p[2]);
 }

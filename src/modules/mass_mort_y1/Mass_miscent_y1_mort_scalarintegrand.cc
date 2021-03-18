@@ -15,9 +15,9 @@
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
 #include "models/sig_sum.hh"
+#include <iostream>
 #include <optional>
 #include <vector>
-#include <iostream>
 using namespace y3_cluster;
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
@@ -75,7 +75,6 @@ private:
   double zo_high_;
   double rmis_;
 
-
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
@@ -93,11 +92,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(
-                    double lo,
-                    double lc,
-                    double zt,
-                    double lnM) const;
+  double operator()(double lo, double lc, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -163,17 +158,16 @@ MassMiscentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
 
 double
 MassMiscentY1MortScalarIntegrand::operator()(double lo,
-                             double lc,
-                             double zt,
-                             double lnM) const
+                                             double lc,
+                                             double zt,
+                                             double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double mass = std::exp(lnM);
-  double common_term = (*lo_lc)(lo, lc, rmis_) *
-                       (*mor)(lc, lnM, zt) *
+  double common_term = (*lo_lc)(lo, lc, rmis_) * (*mor)(lc, lnM, zt) *
                        (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
-  auto const val = mass*(*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+  auto const val = mass * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
 
@@ -191,17 +185,27 @@ MassMiscentY1MortScalarIntegrand::module_label()
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
 std::vector<MassMiscentY1MortScalarIntegrand::volume_t>
-MassMiscentY1MortScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+MassMiscentY1MortScalarIntegrand::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, MassMiscentY1MortScalarIntegrand::module_label(), "lo", "lc", "zt", "lnm");
+    cfg,
+    MassMiscentY1MortScalarIntegrand::module_label(),
+    "lo",
+    "lc",
+    "zt",
+    "lnm");
 }
 
 MassMiscentY1MortScalarIntegrand::grid_t
 MassMiscentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(
-    cfg, MassMiscentY1MortScalarIntegrand::module_label(), "zo_low", "zo_high", "rmis_array");
+    cfg,
+    MassMiscentY1MortScalarIntegrand::module_label(),
+    "zo_low",
+    "zo_high",
+    "rmis_array");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(MassMiscentY1MortScalarIntegrand)

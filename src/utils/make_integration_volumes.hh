@@ -4,8 +4,8 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/array.hh"
 #include "cubacpp/integration_volume.hh"
-#include "utils/meta.hh"
 #include "utils/datablock_reader.hh"
+#include "utils/meta.hh"
 
 #include <array>
 #include <string>
@@ -55,8 +55,7 @@ namespace y3_cluster {
       std::string const& modulelabel,
       std::array<std::string, N> const& names)
     {
-      if (names.empty())
-        return {};
+      if (names.empty()) return {};
 
       // The first parameter gets special handling, because we use it to
       // determine how many integration volumes we shall produce.
@@ -77,8 +76,7 @@ namespace y3_cluster {
         highbounds[ivol][iname] = highs[ivol];
       };
 
-      for (std::size_t ivol = 0; ivol != nvolumes; ++ivol)
-        fill_bounds(0, ivol);
+      for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) fill_bounds(0, ivol);
 
       // All other parameters are handled identically to each other. Each must
       // have the same number of integration volumes.
@@ -150,16 +148,17 @@ namespace y3_cluster {
       std::string const& modulelabel,
       std::array<std::string, N> const& names)
     {
-      if (names.empty())
-        return {};
+      if (names.empty()) return {};
 
       using vec = std::vector<double>;
       std::array<vec, N> low_boundaries;
       std::array<vec, N> high_boundaries;
 
       for (std::size_t i = 0; i != N; ++i) {
-        low_boundaries[i] = get_vector_double(cfg, modulelabel, names[i] + "_low");
-        high_boundaries[i] = get_vector_double(cfg, modulelabel, names[i] + "_high");
+        low_boundaries[i] =
+          get_vector_double(cfg, modulelabel, names[i] + "_low");
+        high_boundaries[i] =
+          get_vector_double(cfg, modulelabel, names[i] + "_high");
       }
 
       std::vector<integration_boundary<N>> lows =

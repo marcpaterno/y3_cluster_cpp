@@ -19,8 +19,7 @@ namespace y3_cluster {
                      long nrows,
                      int* status)
     {
-      if (nrows < 0)
-        return {false, {}};
+      if (nrows < 0) return {false, {}};
 
       std::string colname = colname_;
       int colno = 0;
@@ -38,8 +37,7 @@ namespace y3_cluster {
                     NULL,       // anynul
                     status);
 
-      if (*status)
-        return {false, {}};
+      if (*status) return {false, {}};
       return {true, output};
     }
   } // namespace
@@ -78,16 +76,14 @@ namespace y3_cluster {
             load_fits_column(file, colname.c_str(), nrows, &status);
           success = success && success2;
 
-          if (!success)
-            break;
+          if (!success) break;
 
           // Record this PZSOURCE distribution
           pzs.push_back(bin);
         }
 
         // If it worked - then great!
-        if (success)
-          return {zs, pzs};
+        if (success) return {zs, pzs};
       }
     }
 

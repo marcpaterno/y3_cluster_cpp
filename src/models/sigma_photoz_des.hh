@@ -27,12 +27,8 @@ namespace y3_cluster {
       double z_for_fit = zt;
 
       // We do not extrapolate outside of the data range
-      if (z_for_fit < 0.15) {
-        z_for_fit = 0.15;
-      }
-      if (z_for_fit > 0.7) {
-        z_for_fit = 0.7;
-      }
+      if (z_for_fit < 0.15) { z_for_fit = 0.15; }
+      if (z_for_fit > 0.7) { z_for_fit = 0.7; }
 
       // Compute the fit at pivot (z-.4)
       z_for_fit = z_for_fit - 0.4;
