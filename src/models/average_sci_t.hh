@@ -3,6 +3,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/interp_1d.hh"
+#include "utils/make_interp_1d.hh"
 
 namespace y3_cluster {
   class AVERAGE_SCI_t {
@@ -15,8 +16,7 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit AVERAGE_SCI_t(cosmosis::DataBlock& config)
-      : _sci(config.view<doubles>("average_sigma_crit_inv", "zlense"),
-             config.view<doubles>("average_sigma_crit_inv", "sci_average"))
+      : _sci(make_Interp1D(config, "average_sigma_crit_inv", "zlense", "sci_average"))
     {}
 
     double

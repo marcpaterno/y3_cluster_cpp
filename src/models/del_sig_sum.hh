@@ -1,12 +1,13 @@
 #ifndef Y3_CLUSTER_DEL_SIG_TOM_HH
 #define Y3_CLUSTER_DEL_SIG_TOM_HH
 
-#include "cosmosis/datablock/datablock.hh"
-#include "cosmosis/datablock/ndarray.hh"
 #include "ez.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/interp_2d.hh"
 #include "utils/primitives.hh"
+
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/ndarray.hh"
 
 #include <cmath>
 
@@ -27,9 +28,7 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit DEL_SIG_TOM(cosmosis::DataBlock& config)
-      : _dsigma1(config.view<doubles>("deltasigma", "r_sigma_deltasigma"),
-                 config.view<doubles>("deltasigma", "lnM"),
-                 config.view<cosmosis::ndarray<double>>("deltasigma", "deltasigma_1"))
+      : _dsigma1(make_Interp2D(config, "deltasigma", "r_sigma_deltasigma", "lnM")),
       , _dsigma2(config.view<doubles>("deltasigma", "r_sigma_deltasigma"),
                  config.view<doubles>("matter_power_lin", "z"),
                  config.view<cosmosis::ndarray<double>>("deltasigma", "deltasigma_2"))

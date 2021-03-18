@@ -6,6 +6,7 @@
 #include "ez.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/interp_2d.hh"
+#include "utils/make_interp_2d.hh"
 #include "utils/primitives.hh"
 
 #include <cmath>
@@ -28,15 +29,9 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit DEL_SIG_TOM(cosmosis::DataBlock& sample)
-      : _dsigma1(sample.view<doubles>("deltasigma", "r_sigma_deltasigma"),
-                 sample.view<doubles>("deltasigma", "lnM"),
-                 sample.view<cosmosis::ndarray<double>>("deltasigma","deltasigma_1"))
-      , _dsigma2(sample.view<doubles>("deltasigma", "r_sigma_deltasigma"),
-                 sample.view<doubles>("deltasigma", "z"),
-                 sample.view<cosmosis::ndarray<double>>("deltasigma", "deltasigma_2"))
-      , _bias(sample.view<doubles>("deltasigma", "z"),
-              sample.view<doubles>("deltasigma", "lnM"),
-              sample.view<cosmosis::ndarray<double>>("deltasigma", "bias"))
+      : _dsigma1(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma", "lnM", "deltasigma_1"))
+      , _dsigma2(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma", "z", "deltasigma_2"))
+      , _bias(make_Interp2D(sample, "deltasigma", "z", "lnM", "bias"))
     {}
 
     double
