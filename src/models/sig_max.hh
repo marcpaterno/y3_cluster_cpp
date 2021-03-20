@@ -28,12 +28,8 @@ namespace y3_cluster {
 
     explicit SIG_MAX(cosmosis::DataBlock& sample)
       : _sigma1(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma", "lnM", "sigma_1"))
-      , _sigma2(sample.view<doubles>("deltasigma", "r_sigma_deltasigma"),
-                sample.view<doubles>("matter_power_lin", "z"),
-                sample.view<cosmosis::ndarray<double>>("deltasigma","sigma_2"))
-      , _bias(sample.view<doubles>("matter_power_lin", "z"),
-              sample.view<doubles>("deltasigma", "lnM"),
-              sample.view<cosmosis::ndarray<double>>("deltasigma", "bias"))
+      , _sigma2(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma","matter_power_lin", "z","deltasigma","sigma_2"))
+      , _bias(make_Interp2D(sample, "matter_power_lin", "z", "deltasigma", "lnM", "deltasigma", "bias"))
     {}
 
     double
