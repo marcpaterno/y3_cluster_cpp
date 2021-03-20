@@ -36,7 +36,7 @@ TEST_CASE("dv_do_dz_t works")
   // da_arr in h inverse Mpc
   auto const da_arr = read_vector("d_a_test.txt");
   REQUIRE(zz.size() == da_arr.size());
-  auto da_f = std::make_shared<Interp1D const>(zz, da_arr);
+  Interp1D const da_f(zz, da_arr);
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
 
   std::ofstream out{"../data/dvdodz_test.out"};

@@ -18,7 +18,7 @@ TEST_CASE(
   auto const zz = read_vector("distances/z.txt");
   auto const da_arr = read_vector("distances/d_a.txt");
   auto const dm_arr = read_vector("distances/d_m.txt");
-  auto da_f = std::make_shared<y3_cluster::Interp1D const>(zz, da_arr);
+  y3_cluster::Interp1D const da_f(zz, da_arr);
 
   // Same cosmological parameters as used in the data above
   y3_cluster::EZ ez{0.1875, 0.81248, 0};
