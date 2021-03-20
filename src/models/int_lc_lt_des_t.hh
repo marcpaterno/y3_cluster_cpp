@@ -3,7 +3,6 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/interp_2d.hh"
-#include "utils/primitives.hh"
 
 #include <algorithm>
 #include <cmath>
