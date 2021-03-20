@@ -4,8 +4,8 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
 #include "models/ez.hh"
-#include "utils/datablock_reader.hh"
 #include "utils/interp_2d.hh"
+#include "utils/make_interp_2d.hh"
 #include "utils/primitives.hh"
 
 #include <cmath>
@@ -14,46 +14,35 @@
 namespace y3_cluster {
   class SIG_SUM {
   private:
-    std::shared_ptr<Interp2D const> _sigma1;
-    std::shared_ptr<Interp2D const> _sigma2;
-    std::shared_ptr<Interp2D const> _bias;
+    Interp2D _sigma1;
+    Interp2D _sigma2;
+    Interp2D _bias;
 
   public:
-    SIG_SUM(std::shared_ptr<Interp2D const> sigma1,
-            std::shared_ptr<Interp2D const> sigma2,
-            std::shared_ptr<Interp2D const> bias)
+    SIG_SUM(Interp2D const& sigma1,
+            Interp2D const& sigma2,
+            Interp2D const& bias)
       : _sigma1(sigma1), _sigma2(sigma2), _bias(bias)
     {}
 
     using doubles = std::vector<double>;
 
     explicit SIG_SUM(cosmosis::DataBlock& sample)
-      : _sigma1(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "deltasigma", "r_sigma_deltasigma"),
-          get_datablock<doubles>(sample, "deltasigma", "lnM"),
-          get_datablock<cosmosis::ndarray<double>>(sample,
-                                                   "deltasigma",
-                                                   "sigma_1")))
-      , _sigma2(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "deltasigma", "r_sigma_deltasigma"),
-          get_datablock<doubles>(sample, "matter_power_lin", "z"),
-          get_datablock<cosmosis::ndarray<double>>(sample,
-                                                   "deltasigma",
-                                                   "sigma_2")))
-      , _bias(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "matter_power_lin", "z"),
-          get_datablock<doubles>(sample, "deltasigma", "lnM"),
-          get_datablock<cosmosis::ndarray<double>>(sample,
-                                                   "deltasigma",
-                                                   "bias")))
+      : _sigma1(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma", "lnM", "sigma_1"))
+      , _sigma2(sample.view<doubles>("deltasigma", "r_sigma_deltasigma"),
+                sample.view<doubles>("matter_power_lin", "z"),
+                sample.view<cosmosis::ndarray<double>>("deltasigma","sigma_2"))
+      , _bias(sample.view<doubles>("matter_power_lin", "z"),
+              sample.view<doubles>("deltasigma", "lnM"),
+              sample.view<cosmosis::ndarray<double>>("deltasigma", "bias"))
     {}
 
     double
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     {
-      double _sig_1 = _sigma1->clamp(r, lnM);
-      double _sig_2 = _bias->clamp(zt, lnM) * _sigma2->clamp(r, zt);
+      double _sig_1 = _sigma1.clamp(r, lnM);
+      double _sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
       // TODO: h factor?
       // if (del_sig_1 >= del_sig_2) {
       // return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
