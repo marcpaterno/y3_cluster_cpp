@@ -9,7 +9,6 @@
 
 namespace y3_cluster {
   struct OMEGA_Z_DES {
-  public:
     OMEGA_Z_DES() {}
     OMEGA_Z_DES(cosmosis::DataBlock&) {}
 
@@ -26,14 +25,11 @@ namespace y3_cluster {
                                                         3.84958753e-1}};
       static const y3_cluster::polynomial<6> SDSS_fit3{
         {0, 0, -1.88101967, 4.8071839, -4.11424324, 1.18196785}};
+
       // Returns effective survey area in rad^2
-      if (zt < 0.504) {
-        return SDSS_fit(zt);
-      } else if (zt < 0.7) {
-        return SDSS_fit2(zt - 0.6);
-      } else {
-        return SDSS_fit3(zt);
-      }
+      if (zt < 0.504) return SDSS_fit(zt);
+      if (zt < 0.7) return SDSS_fit2(zt - 0.6);
+      return SDSS_fit3(zt);
     }
   };
 }
