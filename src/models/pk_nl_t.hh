@@ -18,7 +18,7 @@ public:
   operator()(double k, double z) const
   {
 
-    return _pkz(k, z);
+    return _pkz.clamp(k, z);
   }
 
 private:
