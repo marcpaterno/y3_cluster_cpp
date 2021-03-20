@@ -2,7 +2,6 @@
 #define Y3_CLUSTER_CPP_MOR_DES_T_HH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "utils/datablock_reader.hh"
 #include "utils/interp_2d.hh"
 #include "utils/mz_power_law.hh"
 #include "utils/primitives.hh"
@@ -256,15 +255,12 @@ namespace y3_cluster {
     {}
 
     explicit MOR_DES_t(cosmosis::DataBlock& sample)
-      : _A(get_datablock<double>(sample, "cluster_abundance", "mor_A"))
-      , _B(get_datablock<double>(sample, "cluster_abundance", "mor_B"))
-      , _C(get_datablock<double>(sample, "cluster_abundance", "mor_alpha"))
-      , _sigma_intr(
-          get_datablock<double>(sample, "cluster_abundance", "mor_sigma"))
-      , _epsilon(
-          get_datablock<double>(sample, "cluster_abundance", "mor_epsilon"))
-      , _z_pivot(
-          get_datablock<double>(sample, "cluster_abundance", "z_mor_pivot"))
+      : _A(sample.view<double>("cluster_abundance", "mor_A"))
+      , _B(sample.view<double>("cluster_abundance", "mor_B"))
+      , _C(sample.view<double>("cluster_abundance", "mor_alpha"))
+      , _sigma_intr(sample.view<double>("cluster_abundance", "mor_sigma"))
+      , _epsilon(sample.view<double>("cluster_abundance", "mor_epsilon"))
+      , _z_pivot(sample.view<double>("cluster_abundance", "z_mor_pivot"))
     {}
 
     double
