@@ -36,8 +36,7 @@ struct ParamSpaceExplorer {
   bool
   next()
   {
-    if (++iterations >= max_iterations)
-      return false;
+    if (++iterations >= max_iterations) return false;
 
     std::size_t i{NParams - 1};
 

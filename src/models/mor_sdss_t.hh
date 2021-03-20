@@ -270,10 +270,10 @@ namespace y3_cluster {
     }
   };
 }
-inline
-y3_cluster::Interp2D const y3_cluster::MOR_sdss::sig_interp(test_sigintr, test_lsat, sig_skewnorml_flat);
+inline y3_cluster::Interp2D const
+  y3_cluster::MOR_sdss::sig_interp(test_sigintr, test_lsat, sig_skewnorml_flat);
 
-inline
-y3_cluster::Interp2D const y3_cluster::MOR_sdss::skews_interp(test_sigintr, test_lsat, skews);
+inline y3_cluster::Interp2D const
+  y3_cluster::MOR_sdss::skews_interp(test_sigintr, test_lsat, skews);
 
 #endif

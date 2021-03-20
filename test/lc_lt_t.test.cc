@@ -10,7 +10,8 @@
 using y3_cluster::LC_LT_t;
 TEST_CASE("Lc_Lt_t works")
 {
-  std::ifstream infile = y3_cluster::make_ifstream("data/test_lc_lt_t_SDSS.txt");
+  std::ifstream infile =
+    y3_cluster::make_ifstream("data/test_lc_lt_t_SDSS.txt");
   // Use REQUIRE for immediate failure if we can't open the file.
   REQUIRE(infile.good());
   std::vector<double> zs;

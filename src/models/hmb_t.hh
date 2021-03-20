@@ -3,7 +3,6 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
-#include "cosmosis/datablock/datablock.hh"
 #include "utils/interp_2d.hh"
 #include "utils/make_interp_2d.hh"
 #include "utils/read_vector.hh"
@@ -23,7 +22,11 @@ namespace y3_cluster {
     {}
 
     explicit HMB_t(cosmosis::DataBlock& sample)
-      : _tinker_bias(make_Interp2D(sample, "tinker_bias_function", "ln_mass_h","z", "bias"))
+      : _tinker_bias(make_Interp2D(sample,
+                                   "tinker_bias_function",
+                                   "ln_mass_h",
+                                   "z",
+                                   "bias"))
     {}
 
     double

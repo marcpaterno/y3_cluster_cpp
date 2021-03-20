@@ -5,8 +5,8 @@
 #include "utils/datablock_reader.hh"
 #include "utils/integration_range.hh"
 #include "utils/interp_1d.hh"
-#include "utils/make_interp_1d.hh"
 #include "utils/interp_2d.hh"
+#include "utils/make_interp_1d.hh"
 #include "utils/make_interp_2d.hh"
 #include "utils/primitives.hh"
 #include "utils/read_vector.hh"
@@ -86,8 +86,7 @@ namespace y3_cluster {
       , matter_power_lin(read_vector("matter_power_lin/k_h.txt"),
                          read_vector("matter_power_lin/z.txt"),
                          read_vector("matter_power_lin/p_k.txt"))
-      , dcom(read_vector("distances/z.txt"),
-             read_vector("distances/d_m.txt"))
+      , dcom(read_vector("distances/z.txt"), read_vector("distances/d_m.txt"))
       , maxl(90)
       , ks(compute_ks(omega_z, maxl, ir))
       , hubble(h)
@@ -99,7 +98,11 @@ namespace y3_cluster {
                               const OMEGA_Z& omega_z,
                               const std::vector<IntegrationRange>& z_ranges)
       : z_ranges(z_ranges)
-      , matter_power_lin(make_Interp2D(sample,"matter_power_lin_cdm_baryon","k_h","z","p_k"))
+      , matter_power_lin(make_Interp2D(sample,
+                                       "matter_power_lin_cdm_baryon",
+                                       "k_h",
+                                       "z",
+                                       "p_k"))
       , dcom(make_Interp1D(sample, "distances", "z", "d_m"))
       , maxl(sample.view<int>("cluster_abundance", "smp_var_maxl"))
       , ks(compute_ks(omega_z, maxl, z_ranges))

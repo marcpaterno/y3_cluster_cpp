@@ -27,9 +27,25 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit SIG_MAX(cosmosis::DataBlock& sample)
-      : _sigma1(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma", "lnM", "sigma_1"))
-      , _sigma2(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma","matter_power_lin", "z","deltasigma","sigma_2"))
-      , _bias(make_Interp2D(sample, "matter_power_lin", "z", "deltasigma", "lnM", "deltasigma", "bias"))
+      : _sigma1(make_Interp2D(sample,
+                              "deltasigma",
+                              "r_sigma_deltasigma",
+                              "lnM",
+                              "sigma_1"))
+      , _sigma2(make_Interp2D(sample,
+                              "deltasigma",
+                              "r_sigma_deltasigma",
+                              "matter_power_lin",
+                              "z",
+                              "deltasigma",
+                              "sigma_2"))
+      , _bias(make_Interp2D(sample,
+                            "matter_power_lin",
+                            "z",
+                            "deltasigma",
+                            "lnM",
+                            "deltasigma",
+                            "bias"))
     {}
 
     double

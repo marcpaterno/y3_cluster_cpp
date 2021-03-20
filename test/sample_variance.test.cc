@@ -22,6 +22,5 @@ TEST_CASE("Test the sample variance calculator")
 
   auto matrix = sv.compute();
   REQUIRE(matrix.size() == 3);
-  for (const auto& row : matrix)
-    REQUIRE(row.size() == 3);
+  for (const auto& row : matrix) REQUIRE(row.size() == 3);
 }

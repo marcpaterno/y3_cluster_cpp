@@ -16,7 +16,7 @@ TEST_CASE("make_grid_points_cartesian_product")
 
   y3_cluster::grid_t mygrid = y3_cluster::make_grid_points_cartesian_product(
     cfg, module_label, "zs", "radii");
-  
+
   CHECK(mygrid.names[0] == "zs");
   CHECK(mygrid.names[1] == "radii");
   CHECK(mygrid.points[0] == std::array<double, 2>{2.5, 3.0});

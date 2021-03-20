@@ -11,7 +11,8 @@ public:
   explicit pk_nl(y3_cluster::Interp2D const& pkz) : _pkz(pkz) {}
 
   explicit pk_nl(cosmosis::DataBlock& sample)
-    : _pkz(y3_cluster::make_Interp2D(sample, "matter_power_nl", "k_h", "z", "p_k"))
+    : _pkz(
+        y3_cluster::make_Interp2D(sample, "matter_power_nl", "k_h", "z", "p_k"))
   {}
 
   double

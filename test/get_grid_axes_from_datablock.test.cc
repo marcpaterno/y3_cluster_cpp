@@ -14,7 +14,7 @@ TEST_CASE("get_grid_axes_from_datalbock")
   cfg.put_val(module_label, "radii", std::vector<double>{3.0, 4.0});
   cfg.put_val(module_label, "zs", std::vector<double>{2.5});
 
-  std::array<std::string, 2> names {"radii", "zs"};
+  std::array<std::string, 2> names{"radii", "zs"};
   std::array<std::vector<double>, 2> axes;
   y3_cluster::detail::get_grid_axes_from_datablock(
     cfg, module_label, names, axes);

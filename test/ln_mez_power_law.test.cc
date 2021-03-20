@@ -10,7 +10,8 @@
 using y3_cluster::ln_mez_power_law;
 TEST_CASE("ln_mez_power_law works")
 {
-  std::ifstream infile = y3_cluster::make_ifstream("data/test_ln_mez_power_law.txt");
+  std::ifstream infile =
+    y3_cluster::make_ifstream("data/test_ln_mez_power_law.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());
@@ -25,9 +26,7 @@ TEST_CASE("ln_mez_power_law works")
   std::getline(infile, headerline);
   std::getline(infile, headerline);
   while (infile) {
-    for (std::size_t i = 0; i != ncols; ++i) {
-      infile >> col[i];
-    }
+    for (std::size_t i = 0; i != ncols; ++i) { infile >> col[i]; }
     inputs.push_back(col);
   }
 

@@ -128,8 +128,7 @@ main()
             << "Time elapsed: " << diff.count() << "s\n"
             << "\\sigma_{ij}^2 =\n";
   for (const auto& row : matrix) {
-    for (const auto sigma : row)
-      std::cout << sigma << ' ';
+    for (const auto sigma : row) std::cout << sigma << ' ';
     std::cout << '\n';
   }
 

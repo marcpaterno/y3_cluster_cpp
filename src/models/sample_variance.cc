@@ -115,9 +115,8 @@ y3_cluster::SampleVariance_t::compute() const
             // TODO Matteo computes the sum-over-bessels ahead of
             // time on a grid in ln(k) and interpolates over it -
             // we should do the same
-            const auto matter_power =
-                         std::sqrt(matter_power_lin(k, zi_mid) *
-                                   matter_power_lin(k, zj_mid)),
+            const auto matter_power = std::sqrt(matter_power_lin(k, zi_mid) *
+                                                matter_power_lin(k, zj_mid)),
                        sum = compute_sum_over_bessels(k, i, j);
 
             // k^3 due to integration over log

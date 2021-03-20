@@ -16,10 +16,9 @@ TEST_CASE("make_grid_splatted")
 
   y3_cluster::grid_t<2> mygrid =
     y3_cluster::detail::make_grid_splatted(names, radii, zs);
-  
+
   CHECK(mygrid.names == names);
-  for (std::size_t i = 0; i != mygrid.names.size(); ++i)
-  {
+  for (std::size_t i = 0; i != mygrid.names.size(); ++i) {
     CHECK(mygrid.points[i][0] == radii[i]); // radius is first coordinate
     CHECK(mygrid.points[i][1] == zs[0]);    // z is second coordinate
   }

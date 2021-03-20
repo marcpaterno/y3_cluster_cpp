@@ -32,17 +32,15 @@ namespace y3_cluster {
       double const coeff = r_s * delta_c * rho_crit / 1E12;
 
       if (r_ratio < 1.0) {
-        return  2.0 * coeff / (r_ratio * r_ratio - 1) *
-              (1 - 2.0 / std::sqrt(1 - r_ratio * r_ratio) *
-                     std::atanh(std::sqrt((1. - r_ratio) / (1. + r_ratio))));
+        return 2.0 * coeff / (r_ratio * r_ratio - 1) *
+               (1 - 2.0 / std::sqrt(1 - r_ratio * r_ratio) *
+                      std::atanh(std::sqrt((1. - r_ratio) / (1. + r_ratio))));
       }
-      if (r_ratio == 1.0) {
-        return  2.0 * coeff / 3.0;
-      }
+      if (r_ratio == 1.0) { return 2.0 * coeff / 3.0; }
 
       return 2.0 * coeff / (r_ratio * r_ratio - 1) *
-              (1 - 2.0 / std::sqrt(r_ratio * r_ratio - 1) *
-                     std::atan(std::sqrt((r_ratio - 1) / (1. + r_ratio))));
+             (1 - 2.0 / std::sqrt(r_ratio * r_ratio - 1) *
+                    std::atan(std::sqrt((r_ratio - 1) / (1. + r_ratio))));
     }
 
   private:

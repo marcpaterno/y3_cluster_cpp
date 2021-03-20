@@ -32,13 +32,19 @@ namespace y3_cluster {
     explicit XI_MAX(cosmosis::DataBlock& sample)
       : _sigma1(make_Interp2D(sample, "deltasigma", "r_xi", "lnM", "xi_1"))
       , _sigma2(make_Interp2D(sample,
-                              "deltasigma", "r_xi",
-                              "matter_power_lin", "z",
-                              "deltasigma","xi_2"))
+                              "deltasigma",
+                              "r_xi",
+                              "matter_power_lin",
+                              "z",
+                              "deltasigma",
+                              "xi_2"))
       , _bias(make_Interp2D(sample,
-                            "matter_power_lin", "z",
-                            "deltasigma", "lnM",
-                            "deltasigma","bias"))
+                            "matter_power_lin",
+                            "z",
+                            "deltasigma",
+                            "lnM",
+                            "deltasigma",
+                            "bias"))
       , _om(sample.view<double>("cosmological_parameters", "omega_m"))
     {}
 

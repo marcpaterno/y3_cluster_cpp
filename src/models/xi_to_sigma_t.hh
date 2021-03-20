@@ -40,7 +40,7 @@ namespace y3_cluster {
         [=](double chi) {
           double const r = std::hypot(R, chi);
           if (r > 150.) return 0.0;
-          return  _xi(r, zt);
+          return _xi(r, zt);
         },
         5e-3,
         1e-9);

@@ -1,7 +1,6 @@
 #ifndef Y3_CLUSTER_SIG_CRIT_INV
 #define Y3_CLUSTER_SIG_CRIT_INV
 
-
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/interp_1d.hh"
 #include "utils/make_interp_1d.hh"

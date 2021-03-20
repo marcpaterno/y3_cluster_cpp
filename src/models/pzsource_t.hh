@@ -11,16 +11,14 @@
 namespace y3_cluster {
   class PZSOURCE_t {
   public:
-
     // TODO take in pzsource distributions
-    explicit PZSOURCE_t(
-      std::vector<y3_cluster::Interp1D> const& pzsources,
-      std::vector<double> const&  zoffsets)
+    explicit PZSOURCE_t(std::vector<y3_cluster::Interp1D> const& pzsources,
+                        std::vector<double> const& zoffsets)
       : pzsources(pzsources), zoffsets(zoffsets)
     {}
 
-    explicit PZSOURCE_t(
-      cosmosis::DataBlock& sample, std::vector<y3_cluster::Interp1D> pzsources)
+    explicit PZSOURCE_t(cosmosis::DataBlock& sample,
+                        std::vector<y3_cluster::Interp1D> pzsources)
       : pzsources(pzsources)
       , zoffsets{sample.view<double>("cluster_abundance", "pzsource_offset_1"),
                  sample.view<double>("cluster_abundance", "pzsource_offset_2"),

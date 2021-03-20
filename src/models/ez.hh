@@ -1,8 +1,8 @@
 #ifndef Y3_CLUSTER_CPP_EZ_HH
 #define Y3_CLUSTER_CPP_EZ_HH
 
-#include "ez_sq.hh"
 #include "cosmosis/datablock/datablock.hh"
+#include "ez_sq.hh"
 
 #include <cmath>
 
@@ -15,7 +15,7 @@ namespace y3_cluster {
 
     explicit EZ(cosmosis::DataBlock& sample)
       : EZ(sample.view<double>("cosmological_parameters", "omega_m"),
-           sample.view<double>("cosmological_parameters","omega_lambda"),
+           sample.view<double>("cosmological_parameters", "omega_lambda"),
            sample.view<double>("cosmological_parameters", "omega_k"))
     {}
 

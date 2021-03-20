@@ -28,9 +28,21 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit DEL_SIG_t(cosmosis::DataBlock& sample)
-      : _dsigma1(make_Interp2D(sample, "cluster_abundance", "del_sig_params_x1", "del_sig_params_y1", "del_sig_params_z1"))
-      , _dsigma2(make_Interp2D(sample, "cluster_abundance", "del_sig_params_x2", "del_sig_params_y2", "del_sig_params_z2"))
-      , _bias(make_Interp2D(sample, "cluster_abundance", "del_sig_params_x3", "del_sig_params_y3", "del_sig_params_z3"))
+      : _dsigma1(make_Interp2D(sample,
+                               "cluster_abundance",
+                               "del_sig_params_x1",
+                               "del_sig_params_y1",
+                               "del_sig_params_z1"))
+      , _dsigma2(make_Interp2D(sample,
+                               "cluster_abundance",
+                               "del_sig_params_x2",
+                               "del_sig_params_y2",
+                               "del_sig_params_z2"))
+      , _bias(make_Interp2D(sample,
+                            "cluster_abundance",
+                            "del_sig_params_x3",
+                            "del_sig_params_y3",
+                            "del_sig_params_z3"))
     {}
 
     double

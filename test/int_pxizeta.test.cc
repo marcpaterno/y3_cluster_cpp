@@ -22,7 +22,7 @@ TEST_CASE("Testing Integral over xi of P(xi|zeta)")
   // Read in the truth
   std::getline(infile, headerline);
   std::getline(infile, headerline);
-  while(infile) {
+  while (infile) {
     double onezeta, onetruth;
     infile >> onezeta >> onetruth;
     zeta.push_back(onezeta);
@@ -40,6 +40,7 @@ TEST_CASE("Testing Integral over xi of P(xi|zeta)")
   double constexpr epsabs = 1.0e-12;
   for (std::size_t i = 0, len = zeta.size(); i != len; ++i) {
     double const test_integral = int_pxizeta(zeta[i]);
-    CHECK(test_integral == Approx(truth_integral[i]).epsilon(epsrel).margin(epsabs));
+    CHECK(test_integral ==
+          Approx(truth_integral[i]).epsilon(epsrel).margin(epsabs));
   }
 }

@@ -16,9 +16,7 @@ TEST_CASE("Interp1D exact at knots", "[interpolation][1d]")
   std::vector<double> const ys = y3_cluster::transform<double, double>(
     xs, [](double x) { return 2 * x * (3 - x) * std::cos(x); });
   Interp1D f{xs, ys};
-  for (std::size_t i = 0; i != xs.size(); ++i) {
-    CHECK(ys[i] == f(xs[i]));
-  }
+  for (std::size_t i = 0; i != xs.size(); ++i) { CHECK(ys[i] == f(xs[i])); }
 }
 
 TEST_CASE("Interp1D on quadratic")
@@ -62,7 +60,5 @@ TEST_CASE("Validate")
                          sqrt(3.9)};
   std::ofstream out{"../data/interp_1d.out"};
   out << "x\tytrue\tytest\n";
-  for (auto x : xtest) {
-    out << x << '\t' << fcn(x) << '\t' << f(x) << '\n';
-  }
+  for (auto x : xtest) { out << x << '\t' << fcn(x) << '\t' << f(x) << '\n'; }
 }

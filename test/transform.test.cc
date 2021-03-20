@@ -44,9 +44,7 @@ make_upper(std::string const& s)
 {
   std::string result(s);
   std::locale dflt;
-  for (auto& ch : result) {
-    ch = std::toupper(ch, dflt);
-  }
+  for (auto& ch : result) { ch = std::toupper(ch, dflt); }
   return result;
 }
 

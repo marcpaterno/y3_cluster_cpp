@@ -1,7 +1,6 @@
 #ifndef Y3_CLUSTER_WEIGHTED_SIG_CRIT_INV
 #define Y3_CLUSTER_WEIGHTED_SIG_CRIT_INV
 
-
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/gsl.hh"
 #include "sigma_crit_inverse_t.hh"
@@ -91,9 +90,9 @@ namespace y3_cluster {
                                      std::vector<std::vector<double>> pzsources)
       // TODO - the number of source bins should be flexible
       : weighted_sigma_crit_inv(
-          {sample.view<double>("cluster_abundance","pzsource_offset_1"),
-           sample.view<double>("cluster_abundance","pzsource_offset_2"),
-           sample.view<double>("cluster_abundance","pzsource_offset_3"),
+          {sample.view<double>("cluster_abundance", "pzsource_offset_1"),
+           sample.view<double>("cluster_abundance", "pzsource_offset_2"),
+           sample.view<double>("cluster_abundance", "pzsource_offset_3"),
            sample.view<double>("cluster_abundance", "pzsource_offset_4")},
           sample.view<std::vector<double>>("distances", "z"),
           sample.view<std::vector<double>>("distances", "d_a"),

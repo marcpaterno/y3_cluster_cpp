@@ -16,8 +16,10 @@ namespace y3_cluster {
     _adjust_to_log(cosmosis::DataBlock& db, const std::vector<double>& masses)
     {
       std::vector<double> output = masses;
-      double const omega_m = db.view<double>("cosmological_parameters", "omega_M");
-      double const omega_mu = db.view<double>("cosmological_parameters", "omega_nu");
+      double const omega_m =
+        db.view<double>("cosmological_parameters", "omega_M");
+      double const omega_mu =
+        db.view<double>("cosmological_parameters", "omega_nu");
       for (auto& x : output) x = std::log(x * (omega_m - omega_mu));
       return output;
     }
@@ -26,16 +28,15 @@ namespace y3_cluster {
 
   class HMF_t {
   public:
-    HMF_t(Interp2D const& nmz, double s, double q)
-      : _nmz(nmz), _s(s), _q(q)
-    {}
+    HMF_t(Interp2D const& nmz, double s, double q) : _nmz(nmz), _s(s), _q(q) {}
 
     using doubles = std::vector<double>;
 
     explicit HMF_t(cosmosis::DataBlock& sample)
-      : _nmz(_adjust_to_log(sample, sample.view<doubles>("mass_function", "m_h"))
-            ,sample.view<doubles>("mass_function", "z")
-            ,sample.view<cosmosis::ndarray<double>>("mass_function", "dndlnmh"))
+      : _nmz(
+          _adjust_to_log(sample, sample.view<doubles>("mass_function", "m_h")),
+          sample.view<doubles>("mass_function", "z"),
+          sample.view<cosmosis::ndarray<double>>("mass_function", "dndlnmh"))
       , _s(sample.view<double>("cluster_abundance", "hmf_s"))
       , _q(sample.view<double>("cluster_abundance", "hmf_q"))
     {}

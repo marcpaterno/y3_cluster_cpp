@@ -29,8 +29,16 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit DEL_SIG_TOM(cosmosis::DataBlock& sample)
-      : _dsigma1(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma", "lnM", "deltasigma_1"))
-      , _dsigma2(make_Interp2D(sample, "deltasigma", "r_sigma_deltasigma", "z", "deltasigma_2"))
+      : _dsigma1(make_Interp2D(sample,
+                               "deltasigma",
+                               "r_sigma_deltasigma",
+                               "lnM",
+                               "deltasigma_1"))
+      , _dsigma2(make_Interp2D(sample,
+                               "deltasigma",
+                               "r_sigma_deltasigma",
+                               "z",
+                               "deltasigma_2"))
       , _bias(make_Interp2D(sample, "deltasigma", "z", "lnM", "bias"))
     {}
 

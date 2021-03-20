@@ -57,8 +57,6 @@ TEST_CASE("2d volume")
     expected.push_back(IntegrationVolume<2>({0.0, 10.0}, {2.0, 20.0}));
     expected.push_back(IntegrationVolume<2>({1.0, 0.0}, {3.0, 10.0}));
     expected.push_back(IntegrationVolume<2>({1.0, 10.0}, {3.0, 20.0}));
-    for (std::size_t i = 0; i != 6; ++i) {
-      CHECK(volumes[i] == expected[i]);
-    }
+    for (std::size_t i = 0; i != 6; ++i) { CHECK(volumes[i] == expected[i]); }
   }
 }

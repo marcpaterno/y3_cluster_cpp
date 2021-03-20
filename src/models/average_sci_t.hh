@@ -16,7 +16,10 @@ namespace y3_cluster {
     using doubles = std::vector<double>;
 
     explicit AVERAGE_SCI_t(cosmosis::DataBlock& config)
-      : _sci(make_Interp1D(config, "average_sigma_crit_inv", "zlense", "sci_average"))
+      : _sci(make_Interp1D(config,
+                           "average_sigma_crit_inv",
+                           "zlense",
+                           "sci_average"))
     {}
 
     double
