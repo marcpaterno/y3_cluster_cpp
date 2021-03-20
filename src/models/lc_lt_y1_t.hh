@@ -1,6 +1,13 @@
 #ifndef Y3_CLUSTER_LC_LT_Y1_T_HH
 #define Y3_CLUSTER_LC_LT_Y1_T_HH
 
+// TODO: This class reads and parses text files every time its default
+// constructor is run. In order to avoid reading the same file several
+// times during a single construction, the data members are first
+// default-constructed and then modified. Since Interp2D has no default
+// constructor, this must be changed before we can remove the use of
+// std::shared_ptr (or some other pointer type) from this class.
+
 #include "cosmosis/datablock/datablock.hh"
 #include "utils/interp_2d.hh"
 #include "utils/primitives.hh"
