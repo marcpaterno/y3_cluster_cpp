@@ -2,24 +2,21 @@
 #define Y3_CLUSTER_SIG_T_HH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "utils/datablock_reader.hh"
-#include "utils/interp_1d.hh"
 #include "utils/interp_2d.hh"
+#include "utils/make_interp_2d.hh"
+
 #include <cmath>
 #include <cubacpp/cubacpp.hh>
 #include <iostream>
-#include <math.h>
-#include <memory>
 
 namespace y3_cluster {
   class SIG_y3 {
   private:
-    std::shared_ptr<Interp2D const> _xi;
-    std::shared_ptr<Interp2D const> _bias;
+    Interp2D _xi;
     double _om;
 
   public:
-    SIG_y3(std::shared_ptr<Interp2D const> xi, double om) : _xi(xi), _om(om) {}
+    SIG_y3(Interp2D const& xi, double om) : _xi(xi), _om(om) {}
 
     using doubles = std::vector<double>;
 
@@ -27,8 +24,8 @@ namespace y3_cluster {
                     doubles dim_R,
                     doubles xi_v,
                     cosmosis::DataBlock& sample)
-      : _xi(std::make_shared<Interp2D const>(dim_R, dim0, xi_v))
-      , _om(get_datablock<double>(sample, "cosmological_parameters", "omega_m"))
+      : _xi(dim_R, dim0, xi_v)
+      , _om(sample.view<double>("cosmological_parameters", "omega_m"))
     {}
 
     double
@@ -41,13 +38,9 @@ namespace y3_cluster {
       cubacpp::QAG integrator(0, 150, GSL_INTEG_GAUSS61, 50000000);
       const auto res = integrator.integrate(
         [=](double chi) {
-          double r = sqrt(R * R + chi * chi);
-          double xiv;
-          if (r > 150.0)
-            xiv = 0;
-          else
-            xiv = _xi->eval(r, zt);
-          return xiv;
+          double const r = std::hypot(R, chi);
+          if (r > 150.) return 0.0;
+          return  _xi(r, zt);
         },
         5e-3,
         1e-9);
