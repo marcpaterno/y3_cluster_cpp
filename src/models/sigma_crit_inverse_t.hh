@@ -12,9 +12,7 @@ namespace y3_cluster {
 
   class sigma_crit_inv {
   public:
-    sigma_crit_inv(Interp1D const& da)
-      : _da(da)
-    {}
+    sigma_crit_inv(Interp1D const& da) : _da(da) {}
 
     explicit sigma_crit_inv(cosmosis::DataBlock& sample)
       : sigma_crit_inv(make_Interp1D(sample, "distances", "z", "d_a"))

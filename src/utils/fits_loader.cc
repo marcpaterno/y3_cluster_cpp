@@ -21,7 +21,8 @@ namespace y3_cluster {
       int colno = 0;
       // the fits library is *not* careful with const-correctness, so we have to
       // cast away the constness here.
-      fits_get_colnum(file, CASEINSEN, const_cast<char*>(colname), &colno, status);
+      fits_get_colnum(
+        file, CASEINSEN, const_cast<char*>(colname), &colno, status);
 
       std::vector<double> output(nrows);
       fits_read_col(file,
