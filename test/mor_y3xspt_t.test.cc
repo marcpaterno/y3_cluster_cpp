@@ -46,7 +46,7 @@ TEST_CASE("MOR_Y3xSPT_t works")
   auto z_in = read_vector("mass_conversion/z_200m_msunhinv_mor_y3xspt_t.txt");
   auto lnm500c_in =
     read_vector("mass_conversion/lnm500c_child18_msunhinv_mor_y3xspt_t.txt");
-  auto mconv = std::make_shared<Interp2D const>(lnm200m_in, z_in, lnm500c_in);
+  Interp2D const mconv(lnm200m_in, z_in, lnm500c_in);
 
   // Set up the MOR object
   MOR_Y3xSPT_t mor = MOR_Y3xSPT_t(Mmin,
