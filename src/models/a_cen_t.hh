@@ -7,7 +7,7 @@ namespace y3_cluster {
 
   class A_CEN_t {
   public:
-    A_CEN_t() {}
+    A_CEN_t() = default;
     explicit A_CEN_t(cosmosis::DataBlock&) {}
 
     double

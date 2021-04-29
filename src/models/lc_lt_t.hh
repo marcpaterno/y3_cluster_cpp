@@ -7,8 +7,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <fstream>
-#include <iostream>
 
 namespace y3_cluster {
   struct LC_LT_t {

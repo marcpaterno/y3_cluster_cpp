@@ -1,10 +1,10 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
+#include "utils/OneDIntegrationModule.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/make_grid_points.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
-#include "utils/OneDIntegrationModule.hh"
 
 #include "models/dv_do_dz_t.hh"
 #include "models/sptxdes/omega_z_y3xspt.hh"
@@ -19,10 +19,8 @@ using cosmosis::DataBlock;
 
 class ZtrueIntegralDESxSPT {
 public:
-  // The number of grid dimensions. I only use zobs but
-  // load all of the cluster observables to have a single
-  // catalog file without making the loading code complicated
-  using grid_point_t = std::array<double, 4>;
+  using grid_t = y3_cluster::grid_t<4>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // From configuration - constructor
@@ -57,9 +55,9 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(DataBlock& cfg);
+  static grid_t make_grid_points(DataBlock& cfg);
 
-  // The following non-member (static) function creates a vector of integration
+  // The following static member function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
   static std::vector<std::array<double, 2>> make_integration_volumes(
@@ -100,7 +98,7 @@ ZtrueIntegralDESxSPT::set_grid_point(grid_point_t const& grid_point)
   zobs_ = grid_point[2];
 }
 
-std::vector<ZtrueIntegralDESxSPT::grid_point_t>
+ZtrueIntegralDESxSPT::grid_t
 ZtrueIntegralDESxSPT::make_grid_points(DataBlock& cfg)
 {
   return y3_cluster::load_grid_from_file_wall_of_numbers(
@@ -112,8 +110,9 @@ ZtrueIntegralDESxSPT::make_integration_volumes(DataBlock& cfg)
 {
   // Load zobs from gridfile
   auto modulelabel = module_label();
-  auto gridpts = y3_cluster::load_grid_from_file_wall_of_numbers(
+  grid_t grid = y3_cluster::load_grid_from_file_wall_of_numbers(
     cfg, modulelabel, "lamobs", "xi", "zobs", "gamma_field");
+  auto gridpts = grid.points;
   std::vector<double> zobs;
   for (std::size_t i = 0; i < gridpts.size(); ++i)
     zobs.push_back(gridpts[i][2]);

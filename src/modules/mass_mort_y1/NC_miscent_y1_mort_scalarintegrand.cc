@@ -15,9 +15,9 @@
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
 #include "models/sig_sum.hh"
+#include <iostream>
 #include <optional>
 #include <vector>
-#include <iostream>
 using namespace y3_cluster;
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
@@ -44,11 +44,8 @@ using cubacpp::integration_result;
 //
 class NCMiscentY1MortScalarIntegrand {
 public:
-  // Define the data-type describing a grid point; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different paramaters being varied in the grid.
-  // The alias we define must be grid_point_t.
-  using grid_point_t = std::array<double, 2>; // we only vary radius.
+  using grid_t = y3_cluster::grid_t<2>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // We define the type alias volume_t to be the right dimensionality
@@ -77,7 +74,6 @@ private:
   double zo_low_;
   double zo_high_;
 
-
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
@@ -95,8 +91,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(
-                    double lo,
+  double operator()(double lo,
                     double lc,
                     double zt,
                     double lnM,
@@ -119,7 +114,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 // We write using declarations so that we don't have to type the namespace name
@@ -164,16 +159,16 @@ NCMiscentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
 
 double
 NCMiscentY1MortScalarIntegrand::operator()(double lo,
-                             double lc,
-                             double zt,
-                             double lnM,
-                             double rmis) const
+                                           double lc,
+                                           double zt,
+                                           double lnM,
+                                           double rmis) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
-                       (*mor)(lc, lnM, zt) *
-                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+                       (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
+                       (*omega_z)(zt);
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
@@ -192,13 +187,20 @@ NCMiscentY1MortScalarIntegrand::module_label()
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
 std::vector<NCMiscentY1MortScalarIntegrand::volume_t>
-NCMiscentY1MortScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+NCMiscentY1MortScalarIntegrand::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, NCMiscentY1MortScalarIntegrand::module_label(), "lo", "lc", "zt", "lnm", "rmis");
+    cfg,
+    NCMiscentY1MortScalarIntegrand::module_label(),
+    "lo",
+    "lc",
+    "zt",
+    "lnm",
+    "rmis");
 }
 
-std::vector<NCMiscentY1MortScalarIntegrand::grid_point_t>
+NCMiscentY1MortScalarIntegrand::grid_t
 NCMiscentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(

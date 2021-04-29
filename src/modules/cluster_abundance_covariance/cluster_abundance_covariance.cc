@@ -95,8 +95,7 @@ y3_cluster::ClusterCovarianceModule::execute(cosmosis::DataBlock& sample)
 
   // Print results
   for (auto const& row : sigma_sq) {
-    for (auto const& item : row)
-      std::cerr << item << " ";
+    for (auto const& item : row) std::cerr << item << " ";
     std::cerr << '\n';
   }
 

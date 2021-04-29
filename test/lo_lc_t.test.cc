@@ -37,7 +37,7 @@ TEST_CASE("Lo_Lc_t works")
   REQUIRE(lcs.size() == Rs.size());
   REQUIRE(Rs.size() == ys.size());
 
-  std::ofstream out { "../data/test_lolc.out" };
+  std::ofstream out{"../data/test_lolc.out"};
   out << std::setw(16);
   out << std::setprecision(16);
   out << "lambda_o\tlambda_c\tR_mis\tytrue\tytest\n";
@@ -55,6 +55,6 @@ TEST_CASE("Lo_Lc_t works")
     double constexpr epsabs = 1.0e-12;
     CHECK((fz * lcs[i]) == Approx(ys[i]).epsilon(epsrel).margin(epsabs));
     out2 << los[i] / lcs[i] << '\t' << Rs[i] << '\t' << ys[i] << '\t'
-        << fz * lcs[i] << '\n';
+         << fz * lcs[i] << '\n';
   }
 }

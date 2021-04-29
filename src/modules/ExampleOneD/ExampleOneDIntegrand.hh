@@ -3,9 +3,11 @@
 
 #include "cosmosis/datablock/datablock.hh"
 
+#include "utils/make_grid_points.hh"
+
 #include <optional>
-#include <vector>
 #include <string>
+#include <vector>
 
 // ExampleOneDIntegrand is a class that models the concept of
 // "OneDIntegration", and is thus suitable for use as the template
@@ -32,11 +34,8 @@
 
 class ExampleOneDIntegrand {
 public:
-  // Define the data-type describing a grid point; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different parameters being varied in the grid.
-  // The alias we define must be grid_point_t to be recognized by the template
-  using grid_point_t = std::array<double, 1>; // we only vary the slope, a
+  using grid_t = y3_cluster::grid_t<1>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // State obtained from configuration. Set in constructor
@@ -63,7 +62,7 @@ public:
   // integration to reference in the configuration file
   static char const* integration_variable();
 
-  // The function to be integrated. This function should take 
+  // The function to be integrated. This function should take
   //
   //
   // All arguments to this function must be of
@@ -96,7 +95,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 #endif

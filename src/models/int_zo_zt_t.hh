@@ -1,7 +1,7 @@
 #ifndef Y3_CLUSTER_INT_ZO_ZT_HH
 #define Y3_CLUSTER_INT_ZO_ZT_HH
 
-#include "utils/datablock_reader.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include <cmath>
 
 namespace y3_cluster {
@@ -11,8 +11,7 @@ namespace y3_cluster {
     explicit INT_ZO_ZT_t(double sigma) : _sigma(sigma) {}
 
     explicit INT_ZO_ZT_t(cosmosis::DataBlock& sample)
-      : _sigma(
-          get_datablock<double>(sample, "cluster_abundance", "zo_zt_sigma"))
+      : _sigma(sample.view<double>("cluster_abundance", "zo_zt_sigma"))
     {}
 
     double
@@ -25,11 +24,9 @@ namespace y3_cluster {
       //    \int P(zo|zt) d(zo), zo in [zomin, zomax]
       //     == (erf((zomax - zt) / base) - erf((zomin - zt) / base)) / 2
       using std::erf;
-      double _sigma2;
-      _sigma2 = 0.02129638 - 0.25085154 * zt + 1.11756659 * zt * zt -
-                1.22925508 * zt * zt * zt;
-      //_sigma2 = 0.02009036-0.24311016*zt+1.0778892*zt*zt-1.20483017*zt*zt*zt;
-      double base = std::sqrt(2) * _sigma2;
+      double const sigma2 = 0.02129638 - 0.25085154 * zt +
+                            1.11756659 * zt * zt - 1.22925508 * zt * zt * zt;
+      double const base = std::sqrt(2.0) * sigma2;
       return (erf((zomax - zt) / base) - erf((zomin - zt) / base)) / 2.0;
     }
 

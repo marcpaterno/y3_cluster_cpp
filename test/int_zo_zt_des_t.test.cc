@@ -12,7 +12,8 @@ using y3_cluster::SIGMA_PHOTOZ_DES_t;
 
 TEST_CASE("int_zo_zt_des and sigma_photoz_des objects works")
 {
-  std::ifstream infile = y3_cluster::make_ifstream("data/test_int_zo_zt_des.txt");
+  std::ifstream infile =
+    y3_cluster::make_ifstream("data/test_int_zo_zt_des.txt");
 
   // Test that we can open the file
   REQUIRE(infile.good());

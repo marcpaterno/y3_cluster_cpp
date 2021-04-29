@@ -1,15 +1,15 @@
+#include "ExampleOneDIntegrand.hh"
 #include "catch2/catch.hpp"
 #include "cosmosis/datablock/datablock.hh"
-#include "ExampleOneDIntegrand.hh"
 
-#include <vector>
 #include <array>
+#include <vector>
 
 // Declare the funcs that the module exports
 extern "C" {
-  void* setup(cosmosis::DataBlock*);
-  DATABLOCK_STATUS execute(cosmosis::DataBlock*, void*);
-  int cleanup(void*);
+void* setup(cosmosis::DataBlock*);
+DATABLOCK_STATUS execute(cosmosis::DataBlock*, void*);
+int cleanup(void*);
 }
 
 TEST_CASE("1D example integrand")
@@ -56,7 +56,7 @@ TEST_CASE("1D example integrand")
     auto status = sample.view<std::vector<double>>(module_label, "status");
     auto vals = sample.view<std::vector<double>>(module_label, "vals");
     auto errors = sample.view<std::vector<double>>(module_label, "errors");
-    std::vector<double> truth {19.75, 6.0};
+    std::vector<double> truth{19.75, 6.0};
     for (std::size_t i = 0; i != vals.size(); ++i) {
       CHECK(status[i] == 0);
       CHECK(vals[i] == Approx(truth[i]).epsilon(1.0e-12));

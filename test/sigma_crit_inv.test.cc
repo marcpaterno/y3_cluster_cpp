@@ -36,7 +36,7 @@ TEST_CASE("Compare sigma_crit_inv against astropy", "[sigma_crit_inverse]")
                astropy_sci = read_vector(path + "sigma_crit_inverse_c" +
                                          std::to_string(cosmo) + ".txt");
 
-    shared_ptr<Interp1D const> da = make_shared<Interp1D const>(z, d_a);
+    Interp1D const da(z, d_a);
     sigma_crit_inv sci{da};
 
     auto k = 0u;

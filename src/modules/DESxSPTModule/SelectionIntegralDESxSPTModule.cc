@@ -1,31 +1,32 @@
 #include "cosmosis/datablock/ndarray.hh"
+#include "utils/datablock_reader.hh"
 #include "utils/make_grid_points.hh"
 #include "utils/make_integration_volumes.hh"
 #include "utils/module_macros.hh"
-#include "utils/datablock_reader.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
-#include "models/int_zo_zt_des_t.hh"
-#include "models/sptxdes/omega_z_y3xspt.hh"
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
+#include "models/int_zo_zt_des_t.hh"
 #include "models/lc_lt_y1_t.hh"
 #include "models/sptxdes/mor_1d.hh"
+#include "models/sptxdes/omega_z_y3xspt.hh"
 
-#include <optional>
-#include <vector>
-#include <string>
 #include <cmath>
+#include <optional>
+#include <string>
+#include <vector>
 
 using namespace y3_cluster;
 
-class SelectionIntegralDESxSPT{
+class SelectionIntegralDESxSPT {
 public:
   // Grid parameters
-  using grid_point_t = std::array<double, 2>;
+  using grid_t = y3_cluster::grid_t<2>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // Number of integration dimensions
@@ -64,7 +65,10 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(double lamobs, double lamtrue, double lnM200m, double ztrue) const;
+  double operator()(double lamobs,
+                    double lamtrue,
+                    double lnM200m,
+                    double ztrue) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -77,14 +81,14 @@ public:
   // The following non-member (static) function creates a vector of integration
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
-  static std::vector<volume_t> make_integration_volumes(cosmosis::DataBlock& cfg);
+  static std::vector<volume_t> make_integration_volumes(
+    cosmosis::DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
-
 
 // We write using declarations so that we don't have to type the namespace name
 // each time we use these names
@@ -129,12 +133,10 @@ SelectionIntegralDESxSPT::operator()(double lamobs,
                                      double lnM200m,
                                      double ztrue) const
 {
-  return int_p_zo_zt(zobs_min_, zobs_max_, ztrue)
-         * omega_z(ztrue)
-         * (*dv_dodz)(ztrue)
-         * (*hmf)(lnM200m, ztrue)
-         * p_lo_ltzt(lamobs, lamtrue, ztrue)
-         * (*p_lt_lnmzt)(lamtrue, ztrue, lnM200m);
+  return int_p_zo_zt(zobs_min_, zobs_max_, ztrue) * omega_z(ztrue) *
+         (*dv_dodz)(ztrue) * (*hmf)(lnM200m, ztrue) *
+         p_lo_ltzt(lamobs, lamtrue, ztrue) *
+         (*p_lt_lnmzt)(lamtrue, ztrue, lnM200m);
 }
 
 // Name of the module in the datablock
@@ -144,26 +146,25 @@ SelectionIntegralDESxSPT::module_label()
   return "selection_integral";
 }
 
-
 // Set the bounds of integration
 std::vector<SelectionIntegralDESxSPT::volume_t>
 SelectionIntegralDESxSPT::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
-      cfg, SelectionIntegralDESxSPT::module_label(), "lamobs",
-                                                     "lamtrue",
-                                                     "lnM200m",
-                                                     "ztrue");
+    cfg,
+    SelectionIntegralDESxSPT::module_label(),
+    "lamobs",
+    "lamtrue",
+    "lnM200m",
+    "ztrue");
 }
 
 // Set the grid points to evaluate the integral at
-std::vector<SelectionIntegralDESxSPT::grid_point_t>
+SelectionIntegralDESxSPT::grid_t
 SelectionIntegralDESxSPT::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, SelectionIntegralDESxSPT::module_label(), "zobs_min",
-                                                   "zobs_max");
+    cfg, SelectionIntegralDESxSPT::module_label(), "zobs_min", "zobs_max");
 }
-
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SelectionIntegralDESxSPT)

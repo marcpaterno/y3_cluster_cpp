@@ -56,7 +56,7 @@ write_bessel_sums(const y3_cluster::SampleVariance_t& sv)
 int
 main()
 {
-  cubacores(0, 0);
+  cubacpp::turn_off_cuba_forking();
   const double h = 0.771358152;
   auto const zz = read_vector("z_da_test.txt");
   // da_arr in h inverse Mpc
@@ -128,8 +128,7 @@ main()
             << "Time elapsed: " << diff.count() << "s\n"
             << "\\sigma_{ij}^2 =\n";
   for (const auto& row : matrix) {
-    for (const auto sigma : row)
-      std::cout << sigma << ' ';
+    for (const auto sigma : row) std::cout << sigma << ' ';
     std::cout << '\n';
   }
 

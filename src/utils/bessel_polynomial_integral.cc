@@ -14,8 +14,7 @@ static double
 product_l_n_k(int l, int n, int max)
 {
   double output = 1;
-  for (auto k = 0; k < max; k++)
-    output *= l + n - 2 * k - 1;
+  for (auto k = 0; k < max; k++) output *= l + n - 2 * k - 1;
   return output;
 }
 
@@ -29,8 +28,7 @@ bessels_array(const unsigned l, const double x)
   // Contrary to GSL docs, Steed's method seems to be faster. Maybe our maxl is
   // too small to see the benefit of the recursive relations.
   auto retval = gsl_sf_bessel_jl_steed_array(l, x, &output[0]);
-  if (retval != GSL_SUCCESS)
-    throw std::runtime_error("GSL error!");
+  if (retval != GSL_SUCCESS) throw std::runtime_error("GSL error!");
   return output;
 }
 
@@ -42,7 +40,9 @@ bessel_polynomial_integral_quadrature(const int n,
                                       const double range_max)
 {
   cubacpp::QNG integrator(range_min, range_max);
-  auto f = [=](double r) { return integer_pow(r, n) * gsl_sf_bessel_jl(l, k * r); };
+  auto f = [=](double r) {
+    return integer_pow(r, n) * gsl_sf_bessel_jl(l, k * r);
+  };
   const auto res = integrator.integrate(f, 1e-5, 1e-18);
   if (res.status != 0)
     throw std::runtime_error("Bessel quadrature did not converge!");

@@ -15,10 +15,10 @@ y3_cluster::SampleVariance_t::compute_sum_over_bessels(double k,
                                                        unsigned i,
                                                        unsigned j) const
 {
-  const double ri_min = dcom->eval(z_ranges[i].transform(0)) * hubble,
-               ri_max = dcom->eval(z_ranges[i].transform(1)) * hubble,
-               rj_min = dcom->eval(z_ranges[j].transform(0)) * hubble,
-               rj_max = dcom->eval(z_ranges[j].transform(1)) * hubble,
+  const double ri_min = dcom(z_ranges[i].transform(0)) * hubble,
+               ri_max = dcom(z_ranges[i].transform(1)) * hubble,
+               rj_min = dcom(z_ranges[j].transform(0)) * hubble,
+               rj_max = dcom(z_ranges[j].transform(1)) * hubble,
                i_normalization =
                  (ri_max * ri_max * ri_max - ri_min * ri_min * ri_min) / 3.0,
                j_normalization =
@@ -44,10 +44,10 @@ y3_cluster::SampleVariance_t::manual_compute_sum_over_bessels(double k,
                                                               unsigned i,
                                                               unsigned j) const
 {
-  const double ri_min = dcom->eval(z_ranges[i].transform(0)) * hubble,
-               ri_max = dcom->eval(z_ranges[i].transform(1)) * hubble,
-               rj_min = dcom->eval(z_ranges[j].transform(0)) * hubble,
-               rj_max = dcom->eval(z_ranges[j].transform(1)) * hubble,
+  const double ri_min = dcom(z_ranges[i].transform(0)) * hubble,
+               ri_max = dcom(z_ranges[i].transform(1)) * hubble,
+               rj_min = dcom(z_ranges[j].transform(0)) * hubble,
+               rj_max = dcom(z_ranges[j].transform(1)) * hubble,
                i_normalization =
                  (ri_max * ri_max * ri_max - ri_min * ri_min * ri_min) / 3.0,
                j_normalization =
@@ -85,8 +85,7 @@ std::vector<std::vector<double>>
 y3_cluster::SampleVariance_t::compute() const
 {
   std::vector<std::vector<double>> sigma_mat(z_ranges.size());
-  for (auto& v : sigma_mat)
-    v.resize(z_ranges.size());
+  for (auto& v : sigma_mat) v.resize(z_ranges.size());
 
   // Compute matrix of sigma^{SampVar}_{ij}
   cubacpp::Cuhre integrator;
@@ -116,9 +115,8 @@ y3_cluster::SampleVariance_t::compute() const
             // TODO Matteo computes the sum-over-bessels ahead of
             // time on a grid in ln(k) and interpolates over it -
             // we should do the same
-            const auto matter_power =
-                         std::sqrt(matter_power_lin->eval(k, zi_mid) *
-                                   matter_power_lin->eval(k, zj_mid)),
+            const auto matter_power = std::sqrt(matter_power_lin(k, zi_mid) *
+                                                matter_power_lin(k, zj_mid)),
                        sum = compute_sum_over_bessels(k, i, j);
 
             // k^3 due to integration over log

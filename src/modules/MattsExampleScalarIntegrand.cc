@@ -11,14 +11,11 @@
 
 #include "models/hmf_t.hh"
 
-
 // We write using declarations so that we don't have to type the namespace name
 // each time we use these names
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
-
-
 
 // ExampleScalarIntegrand is a class that models the concept of
 // "CosmoSISScalarIntegrand", and is thus suitable for use as the template
@@ -41,11 +38,8 @@ using cubacpp::integration_result;
 //
 class ExampleScalarIntegrand {
 public:
-  // Define the data-type describing a grid point; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different parameters being varied in the grid.
-  // The alias we define must be grid_point_t.
-  using grid_point_t = std::array<double, 1>; // we only vary radius.
+  using grid_t = y3_cluster::grid_t<1>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // We define the type alias volume_t to be the right dimensionality
@@ -103,9 +97,8 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
-
 
 ExampleScalarIntegrand::ExampleScalarIntegrand(DataBlock&)
   : sigma_8_(), hmf_(), radius_()
@@ -157,7 +150,7 @@ ExampleScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
     cfg, ExampleScalarIntegrand::module_label(), "x", "y");
 }
 
-std::vector<ExampleScalarIntegrand::grid_point_t>
+ExampleScalarIntegrant::grid_t
 ExampleScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(

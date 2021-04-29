@@ -1,11 +1,11 @@
 #ifndef Y3_CLUSTER_CPP_MOR_T_HH
 #define Y3_CLUSTER_CPP_MOR_T_HH
 
-#include "utils/datablock_reader.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "utils/mz_power_law.hh"
 #include "utils/primitives.hh"
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 namespace y3_cluster {
 
@@ -16,13 +16,11 @@ namespace y3_cluster {
     {}
 
     explicit MOR_t(cosmosis::DataBlock& sample)
-      : _lambda(mz_power_law(
-          get_datablock<double>(sample, "cluster_abundance", "mor_A"),
-          get_datablock<double>(sample, "cluster_abundance", "mor_B"),
-          get_datablock<double>(sample, "cluster_abundance", "mor_epsilon")))
-      , _sigma_intr(
-          get_datablock<double>(sample, "cluster_abundance", "mor_sigma"))
-      , _alpha(get_datablock<double>(sample, "cluster_abundance", "mor_alpha"))
+      : _lambda(sample.view<double>("cluster_abundance", "mor_A"),
+                sample.view<double>("cluster_abundance", "mor_B"),
+                sample.view<double>("cluster_abundance", "mor_epsilon"))
+      , _sigma_intr(sample.view<double>("cluster_abundance", "mor_sigma"))
+      , _alpha(sample.view<double>("cluster_abundance", "mor_alpha"))
     {}
 
     double
@@ -35,7 +33,7 @@ namespace y3_cluster {
       double const x = lt - ltm;
       double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
       double const erfterm = std::erfc(erfarg);
-      //std::cout<<ltm<<"  "<< lnM <<"\n";
+      // std::cout<<ltm<<"  "<< lnM <<"\n";
       return y3_cluster::gaussian(x, 0.0, _sigma) * erfterm;
     }
 

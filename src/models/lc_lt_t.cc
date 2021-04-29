@@ -197,7 +197,7 @@ namespace {
 
   template <size_t M>
   inline Interp2D
-  make_Interp2D (std::array<double, M> const &zs)
+  make_Interp2D(std::array<double, M> const& zs)
   {
     return make_Interp2D_aux(lt_bins, zt_bins, zs);
   }

@@ -28,16 +28,13 @@ namespace y3_cluster {
     {}
 
     explicit MOR_EXP_t(cosmosis::DataBlock& sample)
-      : _A(get_datablock<double>(sample, "cluster_abundance", "mor_A"))
-      , _B(get_datablock<double>(sample, "cluster_abundance", "mor_B"))
-      , _C(get_datablock<double>(sample, "cluster_abundance", "mor_alpha"))
-      , _sigma_intr(
-          get_datablock<double>(sample, "cluster_abundance", "mor_sigma"))
-      , _epsilon(
-          get_datablock<double>(sample, "cluster_abundance", "mor_epsilon"))
-      , _z_pivot(
-          get_datablock<double>(sample, "cluster_abundance", "z_mor_pivot"))
-      , _skew(get_datablock<double>(sample, "cluster_abundance", "mor_skew"))
+      : _A(sample.view<double>("cluster_abundance", "mor_A"))
+      , _B(sample.view<double>("cluster_abundance", "mor_B"))
+      , _C(sample.view<double>("cluster_abundance", "mor_alpha"))
+      , _sigma_intr(sample.view<double>("cluster_abundance", "mor_sigma"))
+      , _epsilon(sample.view<double>("cluster_abundance", "mor_epsilon"))
+      , _z_pivot(sample.view<double>("cluster_abundance", "z_mor_pivot"))
+      , _skew(sample.view<double>("cluster_abundance", "mor_skew"))
     {}
 
     double

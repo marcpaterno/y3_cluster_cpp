@@ -38,11 +38,8 @@ using cubacpp::integration_result;
 //
 class SnapshotScalarmaxIntegrand {
 public:
-  // Define the data-type describing a grid point; this should be an
-  // instance of std::array<double, N> with N set to the number
-  // of different paramaters being varied in the grid.
-  // The alias we define must be grid_point_t.
-  using grid_point_t = std::array<double, 2>; // we only vary radius.
+  using grid_t = y3_cluster::grid_t<2>;
+  using grid_point_t = grid_t::value_type;
 
 private:
   // We define the type alias volume_t to be the right dimensionality
@@ -59,7 +56,7 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<HMF_t> hmf;
-  //std::optional<SIG_SUM> sigma;
+  // std::optional<SIG_SUM> sigma;
   std::optional<SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
@@ -85,18 +82,6 @@ public:
   // object.
   double operator()(double lt, double lnM) const;
 
-  // finalize_sample() is where products can be put into the cosmosis::DataBlock
-  // representing the current sample. The object 'sample' passed to this
-  // function will be the exact same object as was passed to the most recent
-  // call to set_sample(). The object 'results' will be the results of the
-  // integration that has just been done for that sample. This is generally the
-  // item which should be put into the sample.
-  void finalize_sample(
-    cosmosis::DataBlock& sample,
-    std::vector<grid_point_t> const& grid_points,
-    std::size_t nvolumes,
-    std::vector<cubacpp::integration_result> const& results) const;
-
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
   // is the name that must be used in the 'ini file' for configuring the module
@@ -114,7 +99,7 @@ public:
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
   // read from the configuration block for the module.
-  static std::vector<grid_point_t> make_grid_points(cosmosis::DataBlock& cfg);
+  static grid_t make_grid_points(cosmosis::DataBlock& cfg);
 };
 
 // We write using declarations so that we don't have to type the namespace name
@@ -151,58 +136,8 @@ SnapshotScalarmaxIntegrand::operator()(double /* lt */, double lnM) const
   auto constexpr simulation_cosmic_volume = 165.0 * 165.0 * 165.0;
   auto const val = simulation_cosmic_volume
                    //* (*mor)(lt, lnM, zt_) * (*hmf)(lnM, zt_) *
-                   * (*hmf)(lnM, zt_) *
-                   (*sigma)(radius_, lnM, zt_);
+                   * (*hmf)(lnM, zt_) * (*sigma)(radius_, lnM, zt_);
   return val;
-}
-
-//
-void
-SnapshotScalarmaxIntegrand::finalize_sample(
-  cosmosis::DataBlock& sample,
-  std::vector<grid_point_t> const& grid_points,
-  std::size_t nvolumes,
-  std::vector<integration_result> const& res) const
-{
-  // TODO: fix this to handle the whole vector of integration_results.
-  // Currently, we put just one double into the DataBlock.
-  // What is the sensible organization of results for all the grid points?
-  // Do we need to store data for the grid point locations?
-  auto ngrid_points = grid_points.size();
-  auto nresults = nvolumes * ngrid_points;
-  // Create ndarray to give a view into the 'res' vector.
-  ndarray<integration_result> results(res, {nvolumes, ngrid_points});
-  std::cout << ngrid_points << ' ' << nvolumes << ' ' << res.size() << '\n';
-  // Create storage buffers for ndarrays to be inserted into the sample, and
-  // then
-  // create the ndarrays.
-  std::vector<double> vals_buffer(nresults);
-  ndarray<double> vals(vals_buffer, {nvolumes, ngrid_points});
-
-  std::vector<double> errors_buffer(nresults);
-  ndarray<double> errors(errors_buffer, {nvolumes, ngrid_points});
-
-  std::vector<double> probs_buffer(nresults);
-  ndarray<double> probs(probs_buffer, {nvolumes, ngrid_points});
-
-  std::vector<int> statuses_buffer(nresults);
-  ndarray<int> statuses(statuses_buffer, {nvolumes, ngrid_points});
-
-  for (std::size_t ivol = 0; ivol != nvolumes; ++ivol) {
-    for (std::size_t jgp = 0; jgp != ngrid_points; ++jgp) {
-      vals(ivol, jgp) = results(ivol, jgp).value;
-      errors(ivol, jgp) = results(ivol, jgp).error;
-      probs(ivol, jgp) = results(ivol, jgp).prob;
-      statuses(ivol, jgp) = results(ivol, jgp).status;
-      // std::cout << results(ivol, jgp).value << ' ' << grid_points[jgp][0] <<
-      // grid_points[jgp][1] << '\n';
-    }
-  }
-
-  sample.put_val(module_label(), "profile_vals", vals);
-  sample.put_val(module_label(), "profile_errors", errors);
-  sample.put_val(module_label(), "profile_probs", probs);
-  sample.put_val(module_label(), "profile_status", statuses);
 }
 
 char const*
@@ -225,7 +160,7 @@ SnapshotScalarmaxIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
     cfg, SnapshotScalarmaxIntegrand::module_label(), "lt", "lnm");
 }
 
-std::vector<SnapshotScalarmaxIntegrand::grid_point_t>
+SnapshotScalarmaxIntegrand::grid_t
 SnapshotScalarmaxIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(

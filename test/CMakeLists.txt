@@ -6,6 +6,65 @@ target_include_directories(testmain
                            ${CMAKE_SOURCE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 
+add_executable(get_grid_axes_from_datablock_test get_grid_axes_from_datablock.test.cc)
+target_link_libraries(get_grid_axes_from_datablock_test
+                      PRIVATE
+                      cosmosis
+                      utils
+                      testmain)
+target_include_directories(get_grid_axes_from_datablock_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                       ${CMAKE_SOURCE_DIR}/externals)
+add_test(get_grid_axes_from_datablock_test get_grid_axes_from_datablock_test)
+
+add_executable(make_grid_splatted_test make_grid_splatted.test.cc)
+target_link_libraries(make_grid_splatted_test
+                      PRIVATE
+                      cosmosis
+                      utils
+                      testmain)
+target_include_directories(make_grid_splatted_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                       ${CMAKE_SOURCE_DIR}/externals)
+add_test(make_grid_splatted_test make_grid_splatted_test)
+
+
+
+add_executable(make_grid_cartesian_product_test make_grid_cartesian_product.test.cc)
+target_link_libraries(make_grid_cartesian_product_test
+                      PRIVATE
+                      cosmosis
+                      utils
+                      testmain)
+target_include_directories(make_grid_cartesian_product_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                       ${CMAKE_SOURCE_DIR}/externals)
+add_test(make_grid_cartesian_product_test make_grid_cartesian_product_test)
+
+
+add_executable(make_grid_points_cartesian_product_test make_grid_points_cartesian_product.test.cc)
+target_link_libraries(make_grid_points_cartesian_product_test
+                      PRIVATE
+                      cosmosis
+                      utils
+                      testmain)
+target_include_directories(make_grid_points_cartesian_product_test
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${EIGEN3_INCLUDE_DIR}
+                       ${CMAKE_SOURCE_DIR}/externals)
+add_test(make_grid_points_cartesian_product_test make_grid_points_cartesian_product_test)
+
 add_executable(make_grid_points_test make_grid_points.test.cc)
 target_link_libraries(make_grid_points_test
                       PRIVATE

@@ -1,10 +1,6 @@
 #ifndef Y3_CLUSTER_WEIGHTED_SIG_CRIT_INV
 #define Y3_CLUSTER_WEIGHTED_SIG_CRIT_INV
 
-#include <exception>
-#include <memory>
-#include <vector>
-
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/gsl.hh"
 #include "sigma_crit_inverse_t.hh"
@@ -12,6 +8,9 @@
 #include "utils/fits_loader.hh"
 #include "utils/interp_1d.hh"
 #include "utils/primitives.hh"
+
+#include <stdexcept>
+#include <vector>
 
 /* Computes, for each lensing source distribution P_i(\zs), the integral
  *
@@ -27,18 +26,18 @@
  */
 namespace y3_cluster {
   namespace {
-    std::vector<std::shared_ptr<Interp1D const>>
-    compute_weighted_sigma_crits(std::vector<double> distance_zs,
-                                 std::vector<double> da,
-                                 std::vector<double> src_zs,
-                                 std::vector<std::vector<double>> pzsrcs)
+    std::vector<Interp1D>
+    compute_weighted_sigma_crits(std::vector<double> const& distance_zs,
+                                 std::vector<double> const& da,
+                                 std::vector<double> const& src_zs,
+                                 std::vector<std::vector<double>> const& pzsrcs)
     {
       // Distance metric interpolator
-      sigma_crit_inv sci(std::make_shared<Interp1D const>(distance_zs, da));
+      sigma_crit_inv sci(Interp1D(distance_zs, da));
       // Integrator - adaptive quadrature should be good
       cubacpp::QAG igrtr(0.0, 1.0, GSL_INTEG_GAUSS61, 1000);
 
-      std::vector<std::shared_ptr<Interp1D const>> out;
+      std::vector<Interp1D> out;
       for (auto srci = 0u; srci < pzsrcs.size(); srci++) {
         const Interp1D pzsrc(src_zs, pzsrcs[srci]);
 
@@ -62,8 +61,7 @@ namespace y3_cluster {
           wgted_sig_crits.push_back(wgted_sci.value);
         }
 
-        out.push_back(
-          std::make_shared<Interp1D const>(src_zs, wgted_sig_crits));
+        out.emplace_back(src_zs, wgted_sig_crits);
       }
 
       return out;
@@ -72,7 +70,7 @@ namespace y3_cluster {
 
   class weighted_sigma_crit_inv {
     std::vector<double> zoffsets;
-    std::vector<std::shared_ptr<Interp1D const>> pzsrcs;
+    std::vector<Interp1D> pzsrcs;
 
   public:
     weighted_sigma_crit_inv(std::vector<double> offsets,
@@ -92,20 +90,12 @@ namespace y3_cluster {
                                      std::vector<std::vector<double>> pzsources)
       // TODO - the number of source bins should be flexible
       : weighted_sigma_crit_inv(
-          {get_datablock<double>(sample,
-                                 "cluster_abundance",
-                                 "pzsource_offset_1"),
-           get_datablock<double>(sample,
-                                 "cluster_abundance",
-                                 "pzsource_offset_2"),
-           get_datablock<double>(sample,
-                                 "cluster_abundance",
-                                 "pzsource_offset_3"),
-           get_datablock<double>(sample,
-                                 "cluster_abundance",
-                                 "pzsource_offset_4")},
-          get_datablock<std::vector<double>>(sample, "distances", "z"),
-          get_datablock<std::vector<double>>(sample, "distances", "d_a"),
+          {sample.view<double>("cluster_abundance", "pzsource_offset_1"),
+           sample.view<double>("cluster_abundance", "pzsource_offset_2"),
+           sample.view<double>("cluster_abundance", "pzsource_offset_3"),
+           sample.view<double>("cluster_abundance", "pzsource_offset_4")},
+          sample.view<std::vector<double>>("distances", "z"),
+          sample.view<std::vector<double>>("distances", "d_a"),
           src_zs,
           pzsources)
     {}

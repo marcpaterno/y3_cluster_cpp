@@ -1,10 +1,8 @@
 #ifndef Y3_CLUSTER_PZSOURCE_GAUSSIAN_HH
 #define Y3_CLUSTER_PZSOURCE_GAUSSIAN_HH
 
-#include "utils/datablock_reader.hh"
+#include "cosmosis/datablock/datablock.hh"
 #include "utils/primitives.hh"
-
-#include <cmath>
 
 namespace y3_cluster {
   class PZSOURCE_GAUSSIAN_t {
@@ -14,12 +12,9 @@ namespace y3_cluster {
       : _zbin(zbin), _sigma(sigma)
     {}
 
-    template <typename T>
-    explicit PZSOURCE_GAUSSIAN_t(cosmosis::DataBlock& sample, T)
-      : _zbin(
-          get_datablock<double>(sample, "cluster_abundance", "pzsource_zbin"))
-      , _sigma(
-          get_datablock<double>(sample, "cluster_abundance", "pzsource_sigma"))
+    explicit PZSOURCE_GAUSSIAN_t(cosmosis::DataBlock& sample)
+      : _zbin(sample.view<double>("cluster_abundance", "pzsource_zbin"))
+      , _sigma(sample.view<double>("cluster_abundance", "pzsource_sigma"))
     {}
 
     double

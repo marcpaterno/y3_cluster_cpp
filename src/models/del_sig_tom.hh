@@ -6,6 +6,7 @@
 #include "ez.hh"
 #include "utils/datablock_reader.hh"
 #include "utils/interp_2d.hh"
+#include "utils/make_interp_2d.hh"
 #include "utils/primitives.hh"
 
 #include <cmath>
@@ -14,45 +15,38 @@
 namespace y3_cluster {
   class DEL_SIG_TOM {
   private:
-    std::shared_ptr<Interp2D const> _dsigma1;
-    std::shared_ptr<Interp2D const> _dsigma2;
-    std::shared_ptr<Interp2D const> _bias;
+    Interp2D _dsigma1;
+    Interp2D _dsigma2;
+    Interp2D _bias;
 
   public:
-    DEL_SIG_TOM(std::shared_ptr<Interp2D const> dsigma1,
-                std::shared_ptr<Interp2D const> dsigma2,
-                std::shared_ptr<Interp2D const> bias)
+    DEL_SIG_TOM(Interp2D const& dsigma1,
+                Interp2D const& dsigma2,
+                Interp2D const& bias)
       : _dsigma1(dsigma1), _dsigma2(dsigma2), _bias(bias)
     {}
 
     using doubles = std::vector<double>;
 
     explicit DEL_SIG_TOM(cosmosis::DataBlock& sample)
-      : _dsigma1(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "deltasigma", "r_sigma_deltasigma"),
-          get_datablock<doubles>(sample, "deltasigma", "lnM"),
-          get_datablock<cosmosis::ndarray<double>>(sample,
-                                                   "deltasigma",
-                                                   "deltasigma_1")))
-      , _dsigma2(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "deltasigma", "r_sigma_deltasigma"),
-          get_datablock<doubles>(sample, "deltasigma", "z"),
-          get_datablock<cosmosis::ndarray<double>>(sample,
-                                                   "deltasigma",
-                                                   "deltasigma_2")))
-      , _bias(std::make_shared<Interp2D const>(
-          get_datablock<doubles>(sample, "deltasigma", "z"),
-          get_datablock<doubles>(sample, "deltasigma", "lnM"),
-          get_datablock<cosmosis::ndarray<double>>(sample,
-                                                   "deltasigma",
-                                                   "bias")))
+      : _dsigma1(make_Interp2D(sample,
+                               "deltasigma",
+                               "r_sigma_deltasigma",
+                               "lnM",
+                               "deltasigma_1"))
+      , _dsigma2(make_Interp2D(sample,
+                               "deltasigma",
+                               "r_sigma_deltasigma",
+                               "z",
+                               "deltasigma_2"))
+      , _bias(make_Interp2D(sample, "deltasigma", "z", "lnM", "bias"))
     {}
 
     double
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     {
-      double del_sig_1 = _dsigma1->eval(r, lnM);
+      double del_sig_1 = _dsigma1(r, lnM);
       // double del_sig_2 = _bias->eval(zt,lnM) * _dsigma2->eval(r,zt);
       // NB: The 1e12 factor is to convert from the M_{sol} / kpc^2 of the input
       // to the M_{sol} / Mpc^2 we need

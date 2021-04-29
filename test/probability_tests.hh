@@ -2,8 +2,8 @@
 #include "cubacpp/cubacpp.hh"
 #include "models/lc_lt_t.hh"
 #include "models/lo_lc_t.hh"
-#include "models/mor_t.hh"
 #include "models/mor_sdss_t.hh"
+#include "models/mor_t.hh"
 #include "models/roffset_t.hh"
 #include "utils/integration_range.hh"
 
@@ -59,8 +59,7 @@ namespace y3_cluster {
                        bool print = false,
                        bool test = true)
   {
-    if (print)
-      std::cout << "lt,zt,lc_lt_integrated,status,error,prob\n";
+    if (print) std::cout << "lt,zt,lc_lt_integrated,status,error,prob\n";
 
     LC_LT_t lc_lt;
     double lt, zt;
@@ -110,8 +109,7 @@ namespace y3_cluster {
                        bool print = false,
                        bool test = true)
   {
-    if (print)
-      std::cout << "lc,R,lc_lt_integrated,status,error,prob\n";
+    if (print) std::cout << "lc,R,lc_lt_integrated,status,error,prob\n";
 
     LO_LC_t lo_lc{1.66, 0.26, 1.43, 1.0};
 
@@ -153,8 +151,7 @@ namespace y3_cluster {
                          bool print = false,
                          bool test = true)
   {
-    if (print)
-      std::cout << "roffset_integrand,status,error,prob\n";
+    if (print) std::cout << "roffset_integrand,status,error,prob\n";
 
     ROFFSET_t roffset(tau);
 
@@ -195,8 +192,7 @@ namespace y3_cluster {
                      bool print = false,
                      bool test = true)
   {
-    if (print)
-      std::cout << "lnM,M,zt,mor_integrated,status,error,prob\n";
+    if (print) std::cout << "lnM,M,zt,mor_integrated,status,error,prob\n";
 
     MOR_t mor{mz_power_law{9.1e-9, 0.65, 0.1}, 0.15, 0.65};
 
@@ -238,8 +234,7 @@ namespace y3_cluster {
                       bool test = true)
 
   {
-    if (print)
-      std::cout << "lnM,M,zt,mor2_integrated,status,error,prob\n";
+    if (print) std::cout << "lnM,M,zt,mor2_integrated,status,error,prob\n";
 
     MOR_sdss mor2{pow(10, 1.11375214e+01), pow(10, 12.4225835912), 0.65, 0.15};
 

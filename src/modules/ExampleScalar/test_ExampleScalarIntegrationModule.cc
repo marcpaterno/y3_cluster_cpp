@@ -29,22 +29,19 @@ main()
   cfg.put_val(module_label, "max_eval", 250 * 1000);
   cfg.put_val(module_label, "use_cartesian_product", true);
   void* mod = setup(&cfg);
-  if (!mod)
-    return 1;
+  if (!mod) return 1;
 
   // Execute the module once.
   cosmosis::DataBlock sample;
   std::string const cosmo("cosmological_parameters");
   sample.put_val(cosmo, "sigma_8", 0.75);
   int rc = execute(&sample, mod);
-  if (rc != 0)
-    return 2;
+  if (rc != 0) return 2;
 
   // Check values in 'sample' here.
   auto vals = sample.view<cosmosis::ndarray<double>>(module_label, "vals");
 
   // Delete the module.
   rc = cleanup(mod);
-  if (rc != 0)
-    return 4;
+  if (rc != 0) return 4;
 }

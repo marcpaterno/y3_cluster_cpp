@@ -45,20 +45,17 @@ TEST_CASE("clamp interface works")
   }
   Interp2D f{xs, ys, zs};
 
-  SECTION("interpolation works")
-  {
-    CHECK(f(2.5, 4.5) == 56.75);
-  }
+  SECTION("interpolation works") { CHECK(f(2.5, 4.5) == 56.75); }
   SECTION("extrapolation gets clamped")
   {
     CHECK(f.clamp(0, 4.5) == f(1, 4.5)); // to the left
     CHECK(f.clamp(4, 4.5) == f(3, 4.5)); // to the right
     CHECK(f.clamp(2, 3) == f(2, 4));     // below
     CHECK(f.clamp(2, 5.5) == f(2, 5));   // above
-    CHECK(f.clamp(0, 0) == f(1., 4.)); // below left
-    CHECK(f.clamp(4, 3) == f(3, 4)); // below right
-    CHECK(f.clamp(0, 6) == f(1, 5)); // above left
-    CHECK(f.clamp(4, 6) == f(3, 5)); // above right
+    CHECK(f.clamp(0, 0) == f(1., 4.));   // below left
+    CHECK(f.clamp(4, 3) == f(3, 4));     // below right
+    CHECK(f.clamp(0, 6) == f(1, 5));     // above left
+    CHECK(f.clamp(4, 6) == f(3, 5));     // above right
   }
 }
 
@@ -216,8 +213,7 @@ TEST_CASE("detect defective grids")
     for (std::size_t i = 0; i != xs.size(); ++i) {
       double const x = xs[i];
       for (std::size_t j = 0; j != ys.size(); ++j) {
-        if (i == 1 && j == 1)
-          continue; // skip one point
+        if (i == 1 && j == 1) continue; // skip one point
         double const y = ys[j];
         Point3D const newguy{x, y, fcn(x, y)};
         points.push_back(newguy);

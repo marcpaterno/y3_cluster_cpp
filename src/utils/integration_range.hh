@@ -20,8 +20,7 @@ namespace y3_cluster {
     // Create an IntegrationRange that goes from 'a' to 'b'.
     IntegrationRange(double a, double b) : _a(a), _range(b - a)
     {
-      if (_range == 0.0)
-        throw std::logic_error("zero-length IntegrationRange");
+      if (_range == 0.0) throw std::logic_error("zero-length IntegrationRange");
     }
 
     // This constructor should be removed.
@@ -35,8 +34,7 @@ namespace y3_cluster {
       _a = get_datablock<double>(sample, "cluster_abundance", min.c_str());
       b = get_datablock<double>(sample, "cluster_abundance", max.c_str());
       _range = b - _a;
-      if (_range == 0.0)
-        throw std::logic_error("zero-length IntegrationRange");
+      if (_range == 0.0) throw std::logic_error("zero-length IntegrationRange");
     }
 
     [[nodiscard]] double
