@@ -47,6 +47,7 @@ def execute(block, config):
         delta = data - theory
         weight = np.linalg.inv(covmat)
         loglike1 = -0.5 * np.dot(delta, np.dot(weight, delta))
+        print("theory vector M and NC:"theory_M, theory_nc)
   
         '''
         delta2 = mass_data - theory_M
@@ -55,11 +56,10 @@ def execute(block, config):
         '''
 
         block[section_names.likelihoods, 'Y1AnalysisLike_like'] = loglike1
-        ''' 
-        plt.plot(richnesses, nc_data, 'ko')
-        plt.plot(richnesses, theory_nc, 'ro')
-        plt.show()
-        '''
+        #plt.plot(richnesses, nc_data, 'ko')
+        #plt.plot(richnesses, theory_nc, 'ro')
+        #plt.show()
+
         return 0
 
 
