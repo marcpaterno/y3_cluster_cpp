@@ -55,7 +55,8 @@ def execute(block, config):
         redshifts=ncdata[:, 0]
         nc_data=ncdata[:, 4]
         M_data=Mdata[:, 4]
-        #M_data=M_data+corr
+        #test this part
+        M_data=M_data+corr
 
         data=np.append(nc_data, M_data)
         theory=np.append(theory_nc, theory_M)
