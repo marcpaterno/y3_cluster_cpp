@@ -38,7 +38,8 @@ target_link_libraries(test_ExampleScalarIntegrationModule
                       cosmosis
                       example_scalar_integrand
                       ExampleScalarIntegrationModule
-                      example_scalar_integrand)
+                      example_scalar_integrand
+                      ${CUBA_LIBRARIES})
 target_include_directories(test_ExampleScalarIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src)

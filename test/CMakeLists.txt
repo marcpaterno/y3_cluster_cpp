@@ -114,7 +114,7 @@ target_include_directories(transform_test
 add_test(transform_test transform_test)
 
 add_executable(interp_1d_test interp_1d.test.cc)
-target_link_libraries(interp_1d_test PRIVATE testmain ${GSL_LIBRARIES} utils)
+target_link_libraries(interp_1d_test PRIVATE testmain ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(interp_1d_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -123,7 +123,7 @@ target_include_directories(interp_1d_test
 add_test(interp_1d_test interp_1d_test)
 
 add_executable(interp_2d_test interp_2d.test.cc)
-target_link_libraries(interp_2d_test PRIVATE testmain ${GSL_LIBRARIES} utils)
+target_link_libraries(interp_2d_test PRIVATE testmain ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(interp_2d_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -165,7 +165,7 @@ target_include_directories(fpsupport_test
 add_test(fpsupport_test fpsupport_test)
 
 add_executable(omega_z_sdss_test omega_z_sdss.test.cc)
-target_link_libraries(omega_z_sdss_test PRIVATE testmain utils)
+target_link_libraries(omega_z_sdss_test PRIVATE testmain utils cosmosis)
 target_include_directories(omega_z_sdss_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -173,7 +173,7 @@ target_include_directories(omega_z_sdss_test
 add_test(omega_z_sdss_test omega_z_sdss_test)
 
 add_executable(sample_variance_test sample_variance.test.cc)
-target_link_libraries(sample_variance_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models)
+target_link_libraries(sample_variance_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
 target_include_directories(sample_variance_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -192,7 +192,7 @@ target_include_directories(sample_variance_test
 #add_test(hmf_t_test hmf_t_test)
 
 add_executable(lo_lc_t_test lo_lc_t.test.cc)
-target_link_libraries(lo_lc_t_test PRIVATE testmain utils)
+target_link_libraries(lo_lc_t_test PRIVATE testmain utils cosmosis)
 target_include_directories(lo_lc_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -216,7 +216,7 @@ target_include_directories(ez_test
 add_test(ez_test ez_test)
 
 add_executable(roffset_t_test roffset_t.test.cc)
-target_link_libraries(roffset_t_test PRIVATE testmain utils)
+target_link_libraries(roffset_t_test PRIVATE testmain utils cosmosis)
 target_include_directories(roffset_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -224,7 +224,7 @@ target_include_directories(roffset_t_test
 add_test(roffset_t_test roffset_t_test)
 
 add_executable(lc_lt_t_test lc_lt_t.test.cc)
-target_link_libraries(lc_lt_t_test PRIVATE testmain ${GSL_LIBRARIES} utils models)
+target_link_libraries(lc_lt_t_test PRIVATE testmain ${GSL_LIBRARIES} utils models cosmosis ${CUBA_LIBRARIES})
 target_include_directories(lc_lt_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -232,7 +232,7 @@ target_include_directories(lc_lt_t_test
 add_test(lc_lt_t_test lc_lt_t_test)
 
 add_executable(lc_lt_probability_test lc_lt_probability_unity.test.cc)
-target_link_libraries(lc_lt_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models)
+target_link_libraries(lc_lt_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
 target_include_directories(lc_lt_probability_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -244,7 +244,7 @@ target_include_directories(lc_lt_probability_test
 add_test(lc_lt_probability_test lc_lt_probability_test)
 
 add_executable(dv_do_dz_t_test dv_do_dz_t.test.cc)
-target_link_libraries(dv_do_dz_t_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(dv_do_dz_t_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(dv_do_dz_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -253,7 +253,7 @@ target_include_directories(dv_do_dz_t_test
 add_test(dv_do_dz_t_test dv_do_dz_t_test)
 
 add_executable(polynomial_test polynomial.test.cc)
-target_link_libraries(polynomial_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(polynomial_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(polynomial_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -270,7 +270,7 @@ target_include_directories(integer_pow_test
 add_test(integer_pow_test integer_pow_test)
 
 add_executable(lo_lc_probability_unity_test lo_lc_probability_unity.test.cc)
-target_link_libraries(lo_lc_probability_unity_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(lo_lc_probability_unity_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(lo_lc_probability_unity_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -282,7 +282,7 @@ target_include_directories(lo_lc_probability_unity_test
 add_test(lo_lc_probability_unity_test lo_lc_probability_unity_test)
 
 add_executable(mor_t2_test mor_t2.test.cc)
-target_link_libraries(mor_t2_test PRIVATE testmain ${GSL_LIBRARIES} utils)
+target_link_libraries(mor_t2_test PRIVATE testmain ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(mor_t2_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -290,7 +290,7 @@ target_include_directories(mor_t2_test
 add_test(mor_t2_test mor_t2_test)
 
 add_executable(mor_probability_unity_test mor_probability_unity.test.cc)
-target_link_libraries(mor_probability_unity_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(mor_probability_unity_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(mor_probability_unity_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -302,7 +302,7 @@ target_include_directories(mor_probability_unity_test
 add_test(mor_probability_unity_test mor_probability_unity_test)
 
 add_executable(mor2_probability_test mor2_probability_unity.test.cc)
-target_link_libraries(mor2_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(mor2_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(mor2_probability_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -314,7 +314,7 @@ target_include_directories(mor2_probability_test
 add_test(mor2_probability_test mor2_probability_test)
 
 add_executable(roffset_probability_test roffset_probability_unity.test.cc)
-target_link_libraries(roffset_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(roffset_probability_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(roffset_probability_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -326,7 +326,7 @@ target_include_directories(roffset_probability_test
 add_test(roffset_probability_test roffset_probability_test)
 
 add_executable(integrate_delta_sigma integrate_delta_sigma.cc)
-target_link_libraries(integrate_delta_sigma PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models)
+target_link_libraries(integrate_delta_sigma PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
 target_include_directories(integrate_delta_sigma
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -337,7 +337,7 @@ target_include_directories(integrate_delta_sigma
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(sigma_crit_inv_test sigma_crit_inv.test.cc)
-target_link_libraries(sigma_crit_inv_test PRIVATE testmain utils)
+target_link_libraries(sigma_crit_inv_test PRIVATE testmain utils cosmosis)
 target_include_directories(sigma_crit_inv_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -345,7 +345,7 @@ target_include_directories(sigma_crit_inv_test
 add_test(sigma_crit_inv_test sigma_crit_inv_test)
 
 add_executable(sin_cos_analytic_integral_test sin_cos_analytic_integral.test.cc)
-target_link_libraries(sin_cos_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models)
+target_link_libraries(sin_cos_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
 target_include_directories(sin_cos_analytic_integral_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -355,7 +355,7 @@ target_include_directories(sin_cos_analytic_integral_test
 add_test(sin_cos_analytic_integral_test sin_cos_analytic_integral_test)
 
 add_executable(bessel_analytic_integral_test bessel_analytic_integral.test.cc)
-target_link_libraries(bessel_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models)
+target_link_libraries(bessel_analytic_integral_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
 target_include_directories(bessel_analytic_integral_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -365,7 +365,7 @@ target_include_directories(bessel_analytic_integral_test
 add_test(bessel_analytic_integral_test bessel_analytic_integral_test)
 
 add_executable(bessel_integral_equivalence_test bessel_integral_equivalence.test.cc)
-target_link_libraries(bessel_integral_equivalence_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models)
+target_link_libraries(bessel_integral_equivalence_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
 target_include_directories(bessel_integral_equivalence_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -375,7 +375,7 @@ target_include_directories(bessel_integral_equivalence_test
 add_test(bessel_integral_equivalence_test bessel_integral_equivalence_test)
 
 #add_executable(simultaneous_bin_comparison_test simultaneous_bin_comparison.test.cc)
-#target_link_libraries(simultaneous_bin_comparison_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cfitsio)
+#target_link_libraries(simultaneous_bin_comparison_test PRIVATE testmain ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cfitsio cosmosis)
 #target_include_directories(simultaneous_bin_comparison_test
 #                           PRIVATE
 #                           ${CMAKE_SOURCE_DIR}/src
@@ -385,7 +385,7 @@ add_test(bessel_integral_equivalence_test bessel_integral_equivalence_test)
 #                           ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_lc_lt integrate_lc_lt.cc)
-target_link_libraries(integrate_lc_lt PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models)
+target_link_libraries(integrate_lc_lt PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
 target_include_directories(integrate_lc_lt
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -396,7 +396,7 @@ target_include_directories(integrate_lc_lt
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_lo_lc integrate_lo_lc.cc)
-target_link_libraries(integrate_lo_lc PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(integrate_lo_lc PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(integrate_lo_lc
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -407,7 +407,7 @@ target_include_directories(integrate_lo_lc
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_mor integrate_mor.cc)
-target_link_libraries(integrate_mor PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(integrate_mor PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(integrate_mor
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -418,7 +418,7 @@ target_include_directories(integrate_mor
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(integrate_roffset integrate_roffset.cc)
-target_link_libraries(integrate_roffset PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils)
+target_link_libraries(integrate_roffset PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(integrate_roffset
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}
@@ -429,7 +429,7 @@ target_include_directories(integrate_roffset
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(pxizeta_t_test pxizeta_t.test.cc)
-target_link_libraries(pxizeta_t_test PRIVATE testmain utils)
+target_link_libraries(pxizeta_t_test PRIVATE testmain utils cosmosis)
 target_include_directories(pxizeta_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -437,7 +437,7 @@ target_include_directories(pxizeta_t_test
 add_test(pxizeta_t_test pxizeta_t_test)
 
 add_executable(omega_z_y3xspt_test omega_z_y3xspt.test.cc)
-target_link_libraries(omega_z_y3xspt_test PRIVATE testmain utils)
+target_link_libraries(omega_z_y3xspt_test PRIVATE testmain utils cosmosis)
 target_include_directories(omega_z_y3xspt_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -445,7 +445,7 @@ target_include_directories(omega_z_y3xspt_test
 add_test(omega_z_y3xspt_test omega_z_y3xspt_test)
 
 add_executable(int_zo_zt_des_test int_zo_zt_des_t.test.cc)
-target_link_libraries(int_zo_zt_des_test PRIVATE testmain utils)
+target_link_libraries(int_zo_zt_des_test PRIVATE testmain utils cosmosis)
 target_include_directories(int_zo_zt_des_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -453,7 +453,7 @@ target_include_directories(int_zo_zt_des_test
 add_test(int_zo_zt_des_test int_zo_zt_des_test)
 
 add_executable(zo_zt_des_test zo_zt_des_t.test.cc)
-target_link_libraries(zo_zt_des_test PRIVATE testmain utils)
+target_link_libraries(zo_zt_des_test PRIVATE testmain utils cosmosis)
 target_include_directories(zo_zt_des_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -461,7 +461,7 @@ target_include_directories(zo_zt_des_test
 add_test(zo_zt_des_test zo_zt_des_test)
 
 add_executable(ln_mez_power_law ln_mez_power_law.test.cc)
-target_link_libraries(ln_mez_power_law PRIVATE testmain utils)
+target_link_libraries(ln_mez_power_law PRIVATE testmain utils cosmosis)
 target_include_directories(ln_mez_power_law
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -469,7 +469,7 @@ target_include_directories(ln_mez_power_law
 add_test(ln_mez_power_law ln_mez_power_law)
 
 add_executable(mor_y3xspt_t mor_y3xspt_t.test.cc)
-target_link_libraries(mor_y3xspt_t PRIVATE testmain utils ${GSL_LIBRARIES})
+target_link_libraries(mor_y3xspt_t PRIVATE testmain utils ${GSL_LIBRARIES} cosmosis)
 target_include_directories(mor_y3xspt_t
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -477,13 +477,13 @@ target_include_directories(mor_y3xspt_t
 add_test(mor_y3xspt_t mor_y3xspt_t)
 
 add_executable(int_pxizeta_test int_pxizeta.test.cc)
-target_link_libraries(int_pxizeta_test PRIVATE testmain ${GSL_LIBRARIES} utils)
+target_link_libraries(int_pxizeta_test PRIVATE testmain ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(int_pxizeta_test PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(int_pxizeta_test int_pxizeta_test)
 
 add_executable(sptxdes_mor_1d sptxdes_mor_1d.test.cc)
-target_link_libraries(sptxdes_mor_1d PRIVATE testmain ${GSL_LIBRARIES} utils)
+target_link_libraries(sptxdes_mor_1d PRIVATE testmain ${GSL_LIBRARIES} utils cosmosis)
 target_include_directories(sptxdes_mor_1d PRIVATE ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(sptxdes_mor_1d sptxdes_mor_1d)

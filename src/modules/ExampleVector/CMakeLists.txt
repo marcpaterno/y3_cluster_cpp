@@ -35,7 +35,8 @@ target_link_libraries(test_ExampleVectorIntegrationModule
                       cosmosis
                       example_vector_integrand
                       ExampleVectorIntegrationModule
-                      example_vector_integrand)
+                      example_vector_integrand
+                      ${CUBA_LIBRARIES})
 target_include_directories(test_ExampleVectorIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src)
