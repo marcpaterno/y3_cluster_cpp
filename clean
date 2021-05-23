@@ -6,6 +6,7 @@ rm -f CTestTestfile.cmake test/CTestTestfile.cmake src/CTestTestfile.cmake src/u
 rm -f cmake_install.cmake test/cmake_install.cmake src/cmake_install.cmake src/utils/cmake_install.cmake src/models/cmake_install.cmake src/modules/cmake_install.cmake
 rm -rf CMakeFiles test/CMakeFiles  src/CMakeFiles src/utils/CMakeFiles src/models/CMakeFiles src/modules/CMakeFiles
 rm -f CMakeCache.txt
+rm -f build.ninja .ninja_deps .ninja_log
 find . -type f -name '*.dylib' -delete
 find . -type f -name '*.so' -delete
 find . -type f -name '*.pyc' -delete
