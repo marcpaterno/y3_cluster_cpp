@@ -29,6 +29,15 @@ target_include_directories(NCRadMiscentY1MortScalarIntegrand
                            ${GSL_INCLUDE_DIRS}
                            ${EIGEN3_INCLUDE_DIR})
 
+add_library(MassRadMiscentY1MortScalarIntegrand MODULE MassRad_miscent_y1_mort_scalarintegrand.cc)
+target_link_libraries(MassRadMiscentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+target_include_directories(MassRadMiscentY1MortScalarIntegrand
+                           PRIVATE
+                           ${CMAKE_SOURCE_DIR}/src
+                           ${CUBACPP_DIR}
+                           ${GSL_INCLUDE_DIRS}
+                           ${EIGEN3_INCLUDE_DIR})
+
 add_library(MassMiscentY1MortScalarIntegrand MODULE Mass_miscent_y1_mort_scalarintegrand.cc)
 target_link_libraries(MassMiscentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(MassMiscentY1MortScalarIntegrand

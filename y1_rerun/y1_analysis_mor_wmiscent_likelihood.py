@@ -7,7 +7,6 @@ from scipy.interpolate import RectBivariateSpline
 import scipy.special
 import cluster_toolkit as ct
 from scipy import optimize
-section_name="y1_analysis"
 import matplotlib.pyplot as plt
 
 
@@ -31,11 +30,19 @@ def execute(block, config):
 
         covmat, ncdata, Mdata, Om_corr, lnAS_corr = config
 
-        nn = (block[section_name, "n_vals"])
-        logM = np.log10(block[section_name, "totm_vals"]/nn)
+        nncent = block["NCCentY1MortScalarIntegrand", "vals"]
+        Mcent = block["MassCentY1MortScalarIntegrand", "vals"]
+        nnMiscent = block["NCMiscentY1MortScalarIntegrand", "vals"]
+        MMiscent = block["MassMiscentY1MortScalarIntegrand", "vals"]
+
+        print(nncent, nnMiscent)
         Omega_m = (block["cosmological_parameters", "omega_m"])
         loge10As = (block["cosmological_parameters", "log1e10As"])
-
+        fcen = (block["cluster_abundance", "fcen"])
+        nn = nncent*fcen+nnMiscent*(1.0-fcen)
+        MM = Mcent*fcen+MMiscent*(1.0-fcen)
+        logM = np.log10(MM/nn)
+        
         l_low = [20.0, 30.0, 45.0, 60.0]
         l_high = [30.0, 45.0, 60.0, 190.0]
         z_low = [0.2, 0.35, 0.5]
@@ -46,7 +53,7 @@ def execute(block, config):
         corr=np.array([])
         for jj in range(len(z_low)):
             for ii in range(len(l_low)):
-                theory_nc=np.append(theory_nc, nn[ii, jj]/(l_high[ii]-l_low[ii]))
+                theory_nc=np.append(theory_nc, nn[ii, jj])#/(l_high[ii]-l_low[ii]))
                 theory_M=np.append(theory_M, logM[ii, jj])
                 roww=jj*4+ii
                 corr_jjii=Om_corr[roww]*(Omega_m-0.3)+lnAS_corr[roww]*(loge10As-2.98239371)
@@ -70,7 +77,6 @@ def execute(block, config):
         weight2 = np.linalg.inv(covmat2)
         loglike2 = -0.5 * np.dot(delta2, np.dot(weight2, delta2))
         '''
-
 
         block[section_names.likelihoods, 'Y1AnalysisLike_like'] = loglike1
         #plt.plot(richnesses, nc_data, 'ko')

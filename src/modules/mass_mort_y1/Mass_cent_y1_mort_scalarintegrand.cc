@@ -187,7 +187,7 @@ MassCentY1MortScalarIntegrand::make_integration_volumes(
 MassCentY1MortScalarIntegrand::grid_t
 MassCentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_cartesian_product(
+  return y3_cluster::make_grid_points_wall_of_numbers(
     cfg, MassCentY1MortScalarIntegrand::module_label(), "zo_low", "zo_high");
 }
 

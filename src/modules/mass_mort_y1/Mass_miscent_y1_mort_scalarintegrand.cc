@@ -44,7 +44,7 @@ using cubacpp::integration_result;
 //
 class MassMiscentY1MortScalarIntegrand {
 public:
-  using grid_t = y3_cluster::grid_t<3>;
+  using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -52,7 +52,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = cubacpp::IntegrationVolume<4>;
+  using volume_t = cubacpp::IntegrationVolume<5>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -73,7 +73,6 @@ private:
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
-  double rmis_;
 
 public:
   // Initialize my integrand object from the parameters read
@@ -92,7 +91,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(double lo, double lc, double zt, double lnM) const;
+  double operator()(double lo, double lc, double zt, double lnM, double rmis) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -130,7 +129,6 @@ MassMiscentY1MortScalarIntegrand::MassMiscentY1MortScalarIntegrand(DataBlock&)
   , lo_lc()
   , zo_low_()
   , zo_high_()
-  , rmis_()
 {}
 
 void
@@ -153,19 +151,19 @@ MassMiscentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
-  rmis_ = grid_point[2];
 }
 
 double
 MassMiscentY1MortScalarIntegrand::operator()(double lo,
                                              double lc,
                                              double zt,
-                                             double lnM) const
+                                             double lnM, 
+                                             double rmis) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double mass = std::exp(lnM);
-  double common_term = (*lo_lc)(lo, lc, rmis_) * (*mor)(lc, lnM, zt) *
+  double common_term = (*lo_lc)(lo, lc, rmis) * (*roffset)(rmis) * (*mor)(lc, lnM, zt) *
                        (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
   auto const val = mass * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
@@ -194,18 +192,18 @@ MassMiscentY1MortScalarIntegrand::make_integration_volumes(
     "lo",
     "lc",
     "zt",
-    "lnm");
+    "lnm", 
+    "rmis");
 }
 
 MassMiscentY1MortScalarIntegrand::grid_t
 MassMiscentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_cartesian_product(
+  return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
     MassMiscentY1MortScalarIntegrand::module_label(),
     "zo_low",
-    "zo_high",
-    "rmis_array");
+    "zo_high");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(MassMiscentY1MortScalarIntegrand)
