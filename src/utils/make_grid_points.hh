@@ -17,6 +17,9 @@ namespace y3_cluster {
 
   template <std::size_t NAXES>
   struct grid_t {
+    // value_type for a grid_t defines what a point on the grid is.
+    // It is the array-based representation of an n-dimensional point,
+    // where the number of dimensions in the space is NAXES.
     using value_type = std::array<double, NAXES>;
 
     grid_t() = default;
@@ -35,8 +38,12 @@ namespace y3_cluster {
       names = std::move(ns);
     }
 
-    std::size_t constexpr size() const { return points.size(); }
+    // The number of points in the grid is *not* a compile-time constant; it
+    // is determined at runtime.
+    std::size_t size() const { return points.size(); }
 
+    // The number of axes (and so the dimensionality of the space) is a
+    // compile-time constant.
     std::size_t constexpr naxes() const { return NAXES; }
 
     std::vector<value_type> points;
