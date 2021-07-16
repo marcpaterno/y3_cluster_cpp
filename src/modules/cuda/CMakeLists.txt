@@ -1,0 +1,4 @@
+
+add_library(SigmaMiscentY1MortCUDAScalarIntegrand MODULE sigma_miscent_y1_mor_scalarintegrand.cu)
+target_link_libraries(SigmaMiscentY1MortCUDAScalarIntegrand PRIVATE cosmosis utils)
+target_include_directories(SigmaMiscentY1MortCUDAScalarIntegrand PRIVATE ${CMAKE_SOURCE_DIR}/src)
