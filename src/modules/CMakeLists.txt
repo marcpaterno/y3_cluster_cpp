@@ -17,7 +17,5 @@ add_subdirectory(model_sigmahm)
 add_subdirectory(ExampleVector)
 add_subdirectory(ExampleScalar)
 add_subdirectory(ExampleOneD)
-
-
-
+add_subdirectory(cuda)
 
