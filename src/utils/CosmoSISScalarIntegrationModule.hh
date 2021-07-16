@@ -286,8 +286,8 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::
   std::vector<int> vols_buffer(nresults);
   ndarray<int> vols(vols_buffer, {nvolumes, ngrid_points});
 
-  std::vector<double> gridpoints_buffer(nresults);
   constexpr std::size_t naxes = std::tuple_size<grid_point_t>::value;
+  std::vector<double> gridpoints_buffer(ngrid_points, naxes);
   ndarray<double> gridpoints(gridpoints_buffer, {ngrid_points, naxes});
 
   if (pgrid) {
