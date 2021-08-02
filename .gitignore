@@ -39,3 +39,4 @@ rules.ninja
 .Rproj.user
 .vscode
 .Rhistory
+*.gz

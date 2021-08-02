@@ -12,11 +12,11 @@ namespace quad {
 
 }
 
-class lo_lc_t {
+class LO_LC_t {
 public:
-  lo_lc_t() = default;
+  LO_LC_t() = default;
 
-  lo_lc_t(double alpha, double a, double b, double R_lambda)
+  LO_LC_t(double alpha, double a, double b, double R_lambda)
     : _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda)
   {}
 

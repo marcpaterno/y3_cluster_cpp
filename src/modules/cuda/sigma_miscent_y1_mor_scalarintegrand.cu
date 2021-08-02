@@ -1,10 +1,12 @@
 #include "utils/make_grid_points.hh"
+#include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/cuda_module_macros.cuh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
 #include "cudaPagani/quad/util/Volume.cuh"
 
+#include "utils/make_interp_1d.cuh"
 #include "models/dv_do_dz_t.cuh"
 #include "models/lo_lc_t.cuh"
 #include "models/roffset_t.cuh"
@@ -24,7 +26,7 @@ using cubacpp::integration_result;
 //
 // CAUTION: This is *very* preliminary. Don't hurt yourself.
 //
-class SigmaMiscentY1ScalarIntegrand {
+class SigmaMiscentY1CUDAIntegrand {
 public:
   using grid_t = y3_cluster::grid_t<1>;
   using grid_point_t = grid_t::value_type;
@@ -34,7 +36,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 3>;
+  using volume_t = quad::Volume<double, 4>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -43,8 +45,8 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<DV_DO_DZ_t> dv_do_dz;
   std::optional<LO_LC_t> lo_lc;
+  std::optional<DV_DO_DZ_t> dv_do_dz;
   std::optional<ROFFSET_t> roffset;
 
   // State set for current 'bin' to be integrated.
@@ -53,7 +55,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit SigmaMiscentY1ScalarIntegrand(cosmosis::DataBlock& config);
+  explicit SigmaMiscentY1CUDAIntegrand(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -70,11 +72,8 @@ public:
   __device__
   double operator()(double lo,
                     double lc,
-                    double lt,
-                    double zt,
-                    double lnM,
                     double rmis,
-                    double theta) const;
+                    double zt) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -101,7 +100,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-SigmaMiscentY1ScalarIntegrand::SigmaMiscentY1ScalarIntegrand(DataBlock&)
+SigmaMiscentY1CUDAIntegrand::SigmaMiscentY1CUDAIntegrand(DataBlock&)
   : dv_do_dz()
   , roffset()
   , lo_lc()
@@ -109,24 +108,24 @@ SigmaMiscentY1ScalarIntegrand::SigmaMiscentY1ScalarIntegrand(DataBlock&)
 {}
 
 void
-SigmaMiscentY1ScalarIntegrand::set_sample(DataBlock& sample)
+SigmaMiscentY1CUDAIntegrand::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
   dv_do_dz.emplace(sample);
-  roffset.emplace(sample);
-  lo_lc.emplace(sample);
+  //roffset.emplace(sample);
+  //lo_lc.emplace(sample);
 }
 
 void
-SigmaMiscentY1ScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
+SigmaMiscentY1CUDAIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
   radius_ = grid_point[0];
 }
 
 __device__ double
-SigmaMiscentY1ScalarIntegrand::operator()(double lo,
+SigmaMiscentY1CUDAIntegrand::operator()(double lo,
                                           double lc,
                                           double rmis,
                                           double zt) const
@@ -134,49 +133,37 @@ SigmaMiscentY1ScalarIntegrand::operator()(double lo,
   double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
                        (*dv_do_dz)(zt) / 2.0 / 3.1415926535897;
   double scaled_Rmis = sqrt(radius_ * radius_ + rmis * rmis +
-                                 2 * rmis * radius_;
+                                 2 * rmis * radius_);
   auto const val = scaled_Rmis * common_term;
   return val;
 }
 
 char const*
-SigmaMiscentY1ScalarIntegrand::module_label()
+SigmaMiscentY1CUDAIntegrand::module_label()
 {
-  return "SigmaMiscentY1ScalarIntegrand";
+  return "SigmaMiscentY1CUDAIntegrand";
 }
 
-// The implementation of make_integration_volumes can be almost the same for
-// any CosmoSISIntegrand-type class. Only the names and number of the parameters
-// provided need to be changed. It is critical that the names be given in the
-// order that correspond to the order of arguments in the class's function call
-// operator. While the compiler can verify the number of arguments provided is
-// correct, it can not verify that their order matches the order of arguments in
-// the function call operator.
-std::vector<SigmaMiscentY1ScalarIntegrand::volume_t>
-SigmaMiscentY1ScalarIntegrand::make_integration_volumes(
+std::vector<SigmaMiscentY1CUDAIntegrand::volume_t>
+SigmaMiscentY1CUDAIntegrand::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes_wall_of_numbers(
+  return make_cuda_integration_volumes_wall_of_numbers(
     cfg,
-    SigmaMiscentY1ScalarIntegrand::module_label(),
+    SigmaMiscentY1CUDAIntegrand::module_label(),
     "lo",
     "lc",
-    "lt",
-    "zt",
-    "lnm",
     "rmis",
-    "theta");
+    "zt");
 }
 
-SigmaMiscentY1ScalarIntegrand::grid_t
-SigmaMiscentY1ScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+SigmaMiscentY1CUDAIntegrand::grid_t
+SigmaMiscentY1CUDAIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_cartesian_product(
     cfg,
-    SigmaMiscentY1ScalarIntegrand::module_label(),
-    "zo_low",
-    "zo_high",
+    SigmaMiscentY1CUDAIntegrand::module_label(),
     "radii");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(SigmaMiscentY1ScalarIntegrand)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(SigmaMiscentY1CUDAIntegrand)

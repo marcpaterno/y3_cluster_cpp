@@ -3,11 +3,11 @@
 
 #include "models/ez_sq.cuh"
 
-class ez {
+class EZ {
 public:
-  ez() = default;
+  EZ() = default;
 
-  ez(double omega_m, double omega_l, double omega_k)
+  EZ(double omega_m, double omega_l, double omega_k)
     : _ezsq(omega_m, omega_l, omega_k)
   {}
 
@@ -19,7 +19,7 @@ public:
   }
 
 private:
-  ez_sq _ezsq;
+  EZ_sq _ezsq;
 };
 
 #endif

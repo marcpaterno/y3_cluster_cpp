@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 project(y3_cluster_cpp VERSION 0.2.0 LANGUAGES CXX CUDA)
 enable_testing()
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
 # These flags are used by everything in the project. Put anything that affects
 # the ABI here -- e.g., the standard level.
 #add_compile_options(-W -Wall -Wextra -Werror)
@@ -13,9 +19,6 @@ if (CMAKE_CXX_COMPILER STREQUAL "gcc")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-signaling-nans -fexcess-precision=fast")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
 endif()
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_SHARED_MODULE_SUFFIX ".so") # We want this on all operating systems
 set(CMAKE_SHARED_MODULE_PREFIX "")    # We don't need the leading lib
