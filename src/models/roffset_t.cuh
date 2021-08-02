@@ -1,11 +1,11 @@
 #ifndef ROFFSET_T_CUH
 #define ROFFSET_T_CUH
 
-class roffset_t {
+class ROFFSET_t {
 public:
-  roffset_t() = default;
+  ROFFSET_t() = default;
 
-  explicit roffset_t(double tau) : _tau(tau) {}
+  explicit ROFFSET_t(double tau) : _tau(tau) {}
 
   __device__ double
   operator()(double x) const

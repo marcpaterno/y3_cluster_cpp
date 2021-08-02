@@ -1,11 +1,11 @@
 #ifndef EZ_SQ_CUH
 #define EZ_SQ_CUH
 
-class ez_sq {
+class EZ_sq {
 public:
-  ez_sq() = default;
+  EZ_sq() = default;
 
-  ez_sq(double omega_m, double omega_l, double omega_k)
+  EZ_sq(double omega_m, double omega_l, double omega_k)
     : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
   {}
 
@@ -25,4 +25,4 @@ private:
   double _omega_k = 0.0;
 };
 
-endif
+#endif

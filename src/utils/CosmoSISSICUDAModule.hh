@@ -5,9 +5,14 @@
 #include "cosmosis/datablock/entry.hh"
 #include "cosmosis/datablock/ndarray.hh"
 
+#include "cubacpp/arity.hh"
+#include "cubacpp/integration_result.hh"
+
 #include "utils/make_grid_points.hh"
+#include "utils/make_cuda_integration_volumes.cuh"
 
 #include "cudaPagani/quad/util/Volume.cuh"
+#include "cudaPagani/quad/GPUquad/Pagani.cuh"
 
 #include <iostream>
 #include <stdexcept>
@@ -32,7 +37,7 @@ namespace y3_cluster {
   class CosmoSISSICUDAModule {
   public:
     using IntegrandType = IGRAND;
-    constexpr int ndim = cubacpp::arity<IntegrandType>();
+    static constexpr int ndim = cubacpp::arity<IntegrandType>();
     using volume_t = quad::Volume<double, ndim>;
     using grid_point_t = typename IntegrandType::grid_point_t;
     using my_grid_t = grid_t<std::tuple_size<grid_point_t>::value>;
@@ -84,7 +89,7 @@ namespace y3_cluster {
       std::vector<integration_results_t> const& results) const;
 
     IntegrandType integrand_;
-    quad::Cuhre<double, ndim>  algorithm_;
+    quad::Pagani<double, ndim>  algorithm_;
     std::vector<volume_t> volumes_;
     my_grid_t grid_points_;
     double eps_rel_;
@@ -98,7 +103,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::CosmoSISSICUDAModule(
   cosmosis::DataBlock& cfg)
 try : integrand_(cfg),
     // The c'tor for algorithm_ will get adjusted at some later date...
-  algorithm_(0, nullptr, 0, 0, 1),
+  algorithm_(),
   volumes_(IntegrandType::make_integration_volumes(cfg)),
   grid_points_(IntegrandType::make_grid_points(cfg)),
   eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
@@ -160,11 +165,18 @@ y3_cluster::CosmoSISSICUDAModule<
   std::vector<integration_results_t> results;
   results.reserve(num_results());
 
-  for (auto const& volume : volumes_) {
+  for (auto& volume : volumes_) {
     for (auto const& grid_point : grid_points_.points) {
       integrand_.set_grid_point(grid_point);
-      results.push_back(
-        algorithm_.integrate(integrand_, eps_rel_, eps_abs_, volume));
+      cuhreResult res = 
+        algorithm_.integrate(integrand_, eps_rel_, eps_abs_, &volume);
+      results.push_back(cubacpp::integration_result(
+            res.estimate,
+            res.errorest,
+            0.0,    // probability not returned by PAGANI
+            static_cast<long long>(res.neval),
+            static_cast<int>(res.nregions),
+            static_cast<int>(res.status)));
     }
   }
   return results;
@@ -179,8 +191,15 @@ y3_cluster::CosmoSISSICUDAModule<
   results.reserve(num_results());
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_points_.points[i]);
-    results.push_back(
-      algorithm_.integrate(integrand_, eps_rel_, eps_abs_, volumes_[i]));
+    cuhreResult res = 
+      algorithm_.integrate(integrand_, eps_rel_, eps_abs_, &volumes_[i]);
+     results.push_back(cubacpp::integration_result(
+           res.estimate,
+           res.errorest,
+           0.0, // probability not returned by PAGANI
+           static_cast<long long>(res.neval),
+           static_cast<int>(res.nregions),
+           static_cast<int>(res.status)));
   }
   return results;
 }
