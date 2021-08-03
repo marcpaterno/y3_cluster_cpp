@@ -7,10 +7,17 @@
 #include "cudaPagani/quad/util/Volume.cuh"
 
 #include "utils/make_interp_1d.cuh"
-#include "models/dv_do_dz_t.cuh"
-#include "models/lo_lc_t.cuh"
-#include "models/roffset_t.cuh"
 
+#include "models/dv_do_dz_t.cuh"
+#include "models/hmf_t.cuh"
+#include "models/int_lc_lt_des_t.cuh"
+#include "models/int_zo_zt_des_t.cuh"
+#include "models/lo_lc_t.cuh"
+#include "models/mor_t.cuh"
+#include "models/omega_z_des.cuh"
+#include "models/roffset_t.cuh"
+#include "models/sig_sum.cuh"
+#
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -28,7 +35,7 @@ using cubacpp::integration_result;
 //
 class SigmaMiscentY1CUDAIntegrand {
 public:
-  using grid_t = y3_cluster::grid_t<1>;
+  using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -36,7 +43,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 4>;
+  using volume_t = quad::Volume<double, 6>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -45,11 +52,19 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<LO_LC_t> lo_lc;
+  std::optional<INT_LC_LT_DES_t> lc_lt;
+  std::optional<MOR_t> mor;
+  std::optional<OMEGA_Z_DES> omega_z;
   std::optional<DV_DO_DZ_t> dv_do_dz;
+  std::optional<HMF_t> hmf;
+  std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<ROFFSET_t> roffset;
+  std::optional<LO_LC_t> lo_lc;
+  std::optional<SIG_SUM> sigma;
 
   // State set for current 'bin' to be integrated.
+  double zo_low_;
+  double zo_high_;
   double radius_;
 
 public:
@@ -72,8 +87,10 @@ public:
   __device__
   double operator()(double lo,
                     double lc,
+                    double zt,
+                    double lnM,
                     double rmis,
-                    double zt) const;
+                    double theta) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -101,9 +118,17 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 SigmaMiscentY1CUDAIntegrand::SigmaMiscentY1CUDAIntegrand(DataBlock&)
-  : dv_do_dz()
+  : lc_lt()
+  , mor()
+  , omega_z()
+  , dv_do_dz()
+  , hmf()
+  , int_zo_zt()
   , roffset()
   , lo_lc()
+  , sigma()
+  , zo_low_()
+  , zo_high_()
   , radius_()
 {}
 
@@ -113,28 +138,40 @@ SigmaMiscentY1CUDAIntegrand::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
+  lc_lt.emplace(sample);
+  mor.emplace(sample);
   dv_do_dz.emplace(sample);
-  //roffset.emplace(sample);
-  //lo_lc.emplace(sample);
+  hmf.emplace(sample);
+  omega_z.emplace(sample);
+  roffset.emplace(sample);
+  lo_lc.emplace(sample);
+  sigma.emplace(sample);
 }
 
 void
 SigmaMiscentY1CUDAIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
-  radius_ = grid_point[0];
+  radius_ = grid_point[2];
+  zo_low_ = grid_point[0];
+  zo_high_ = grid_point[1];
 }
 
 __device__ double
 SigmaMiscentY1CUDAIntegrand::operator()(double lo,
                                           double lc,
+                                          double zt,
+                                          double lnM,
                                           double rmis,
-                                          double zt) const
+                                          double theta) const
 {
-  double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
-                       (*dv_do_dz)(zt) / 2.0 / 3.1415926535897;
-  double scaled_Rmis = sqrt(radius_ * radius_ + rmis * rmis +
-                                 2 * rmis * radius_);
-  auto const val = scaled_Rmis * common_term;
+   double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
+                       (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
+                       (*omega_z)(zt) / 2.0 / 3.1415926535897;
+  double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
+                                 2 * rmis * radius_ * std::cos(theta));
+  auto const val = (*sigma)(scaled_Rmis, lnM, zt) *
+                   (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+  if (isnan(val)) printf("operator(): generated a nan\n");
   return val;
 }
 
@@ -151,10 +188,12 @@ SigmaMiscentY1CUDAIntegrand::make_integration_volumes(
   return make_cuda_integration_volumes_wall_of_numbers(
     cfg,
     SigmaMiscentY1CUDAIntegrand::module_label(),
-    "lo",
+   "lo",
     "lc",
+    "zt",
+    "lnm",
     "rmis",
-    "zt");
+    "theta");
 }
 
 SigmaMiscentY1CUDAIntegrand::grid_t
@@ -163,6 +202,8 @@ SigmaMiscentY1CUDAIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
   return y3_cluster::make_grid_points_cartesian_product(
     cfg,
     SigmaMiscentY1CUDAIntegrand::module_label(),
+    "zo_low",
+    "zo_high",
     "radii");
 }
 
