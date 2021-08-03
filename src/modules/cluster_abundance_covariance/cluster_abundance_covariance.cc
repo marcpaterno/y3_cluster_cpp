@@ -5,6 +5,8 @@
 #include "utils/datablock_reader.hh"
 #include "utils/integration_range.hh"
 
+#include <iostream>
+
 using namespace y3_cluster;
 
 namespace y3_cluster {
