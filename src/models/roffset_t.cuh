@@ -9,7 +9,7 @@ public:
 
   ROFFSET_t(cosmosis::DataBlock& sample)
     : _tau(sample.view<double>("cluster_abundance", "roffset_tau"))
-  { }
+  {}
 
   explicit ROFFSET_t(double tau) : _tau(tau) {}
 
@@ -23,6 +23,5 @@ public:
 private:
   double _tau = 0.0;
 };
-
 
 #endif

@@ -14,8 +14,7 @@ public:
   {
     // NOTE: this is valid only for \Lambda CDM cosmology, not wCDM
     double const zplus1 = 1.0 + z;
-    return (_omega_m * zplus1 * zplus1 * zplus1 +
-            _omega_k * zplus1 * zplus1 +
+    return (_omega_m * zplus1 * zplus1 * zplus1 + _omega_k * zplus1 * zplus1 +
             _omega_l);
   }
 

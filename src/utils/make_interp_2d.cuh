@@ -7,37 +7,36 @@
 
 #include <vector>
 
+using doubles = std::vector<double>;
 
-  using doubles = std::vector<double>;
+inline quad::Interp2D
+make_Interp2D(cosmosis::DataBlock& cfg,
+              char const* section,
+              char const* x_axis_name,
+              char const* y_axis_name,
+              char const* z_array_name)
+{
+  return {cfg.view<doubles>(section, x_axis_name),
+          cfg.view<doubles>(section, y_axis_name),
+          [](auto const& nda) {
+            return std::vector<double>(nda.begin(), nda.end());
+          }(cfg.view<cosmosis::ndarray<double>>(section, z_array_name))};
+}
 
-  inline quad::Interp2D
-  make_Interp2D(cosmosis::DataBlock& cfg,
-                char const* section,
-                char const* x_axis_name,
-                char const* y_axis_name,
-                char const* z_array_name)
-  {
-    return {cfg.view<doubles>(section, x_axis_name),
-            cfg.view<doubles>(section, y_axis_name),
-            [](auto const& nda) {
-              return std::vector<double>(nda.begin(), nda.end());
-            }(cfg.view<cosmosis::ndarray<double>>(section, z_array_name))};
-  }
-
-  inline quad::Interp2D
-  make_Interp2D(cosmosis::DataBlock& cfg,
-                char const* s1,
-                char const* x_axis_name,
-                char const* s2,
-                char const* y_axis_name,
-                char const* s3,
-                char const* z_array_name)
-  {
-    return {cfg.view<doubles>(s1, x_axis_name),
-            cfg.view<doubles>(s2, y_axis_name),
-            [](auto const& nda) {
-              return std::vector<double>(nda.begin(), nda.end());
-            }(cfg.view<cosmosis::ndarray<double>>(s3, z_array_name))};
-  }
+inline quad::Interp2D
+make_Interp2D(cosmosis::DataBlock& cfg,
+              char const* s1,
+              char const* x_axis_name,
+              char const* s2,
+              char const* y_axis_name,
+              char const* s3,
+              char const* z_array_name)
+{
+  return {cfg.view<doubles>(s1, x_axis_name),
+          cfg.view<doubles>(s2, y_axis_name),
+          [](auto const& nda) {
+            return std::vector<double>(nda.begin(), nda.end());
+          }(cfg.view<cosmosis::ndarray<double>>(s3, z_array_name))};
+}
 
 #endif
