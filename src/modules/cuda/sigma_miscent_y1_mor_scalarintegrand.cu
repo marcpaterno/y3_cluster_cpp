@@ -1,6 +1,6 @@
-#include "utils/make_grid_points.hh"
-#include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/cuda_module_macros.cuh"
+#include "utils/make_cuda_integration_volumes.cuh"
+#include "utils/make_grid_points.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
@@ -84,13 +84,12 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __device__
-  double operator()(double lo,
-                    double lc,
-                    double zt,
-                    double lnM,
-                    double rmis,
-                    double theta) const;
+  __device__ double operator()(double lo,
+                               double lc,
+                               double zt,
+                               double lnM,
+                               double rmis,
+                               double theta) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -156,22 +155,75 @@ SigmaMiscentY1CUDAIntegrand::set_grid_point(grid_point_t const& grid_point)
   zo_high_ = grid_point[1];
 }
 
+__device__  bool isbad(const char* name, double x) {
+  if (isnan(x)) {
+    printf("%s is nan\n", name);
+    return true;
+  }
+  if (x == 0.0) {
+    printf("%s is zero\n", name);
+    return true;
+  }
+  if (abs(x) == std::numeric_limits<double>::infinity()) {
+    printf("%s is infinite\n", name);
+    return true;
+  }
+  return false;
+}
+
+
 __device__ double
 SigmaMiscentY1CUDAIntegrand::operator()(double lo,
-                                          double lc,
-                                          double zt,
-                                          double lnM,
-                                          double rmis,
-                                          double theta) const
+                                        double lc,
+                                        double zt,
+                                        double lnM,
+                                        double rmis,
+                                        double theta) const
 {
-   double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
-                       (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       (*omega_z)(zt) / 2.0 / 3.1415926535897;
+  double const roffset_ = (*roffset)(rmis);
+  if (isbad("roffset_", roffset_)) {
+    printf("roffset bad: rmis=%g\n", rmis);
+  }
+  double const lo_lc_ = (*lo_lc)(lo, lc, rmis);
+  if (isbad("lo_lc_", lo_lc_)) {
+    printf("lo_lc bad: lo_lc_=%g  lo=%g lc=%g rmis=%g\n", lo_lc_, lo, lc, rmis);
+  }
+  double const mor_ = (*mor)(lc, lnM, zt);
+  if (isbad("mor_", mor_)) {
+    printf("mor bad: lo=%g lnM=%g zt=%g\n", lc, lnM, zt);
+  }
+  double const dv_do_dz_ = (*dv_do_dz)(zt);
+  if (isbad("dv_do_dz_", dv_do_dz_)) {
+    printf("dv_do_dz bad: zt=%g\n", zt);
+  }
+  double const hmf_ = (*hmf)(lnM, zt);
+  if (isbad("hmf_", hmf_)) {
+    printf("hmf bad: lnM=%g zt=%g\n", lnM, zt);
+  }
+  double const omega_z_ = (*omega_z)(zt);
+  if (isbad("omega_z_", omega_z_)) {
+    printf("omega_z bad: zt=%g\n", zt);
+  }
+  double common_term = roffset_ * lo_lc_ *
+                       mor_ * dv_do_dz_ * hmf_ *
+                       omega_z_ / 2.0 / 3.1415926535897;
+  if (isbad("common_term", common_term)) {
+    printf("common_term bad roffset_=%g lo_lc_=%g mor_=%g dv_do_dz_=%g hmf_=%g omega_z_=%g\n", roffset_, lo_lc_, mor_, dv_do_dz_, hmf_, omega_z_);
+  }
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
                                  2 * rmis * radius_ * std::cos(theta));
-  auto const val = (*sigma)(scaled_Rmis, lnM, zt) *
-                   (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
-  if (isnan(val)) printf("operator(): generated a nan\n");
+  double const sigma_ = (*sigma)(scaled_Rmis, lnM, zt);
+  if (isbad("sigma_", sigma_)) {
+    printf("sigma bad: radius_=%g rmis=%g theta=%g scaled_Rmis=%g lnM=%g zt=%g\n", radius_, rmis, theta, scaled_Rmis, lnM, zt);
+  }
+  double const int_zo_zt_ = (*int_zo_zt)(zo_low_, zo_high_, zt);
+  if (isbad("int_zo_zt_", int_zo_zt_)) {
+    printf("int_zo_zt bad: zo_low_=%g zo_high_=%g zt=%g\n", zo_low_, zo_high_, zt);
+  }
+  double const val = sigma_ * int_zo_zt_ * common_term;
+  if (isbad("val", val)) {
+      printf("operator(): generated a bad\n");
+  }
   return val;
 }
 
@@ -182,13 +234,12 @@ SigmaMiscentY1CUDAIntegrand::module_label()
 }
 
 std::vector<SigmaMiscentY1CUDAIntegrand::volume_t>
-SigmaMiscentY1CUDAIntegrand::make_integration_volumes(
-  cosmosis::DataBlock& cfg)
+SigmaMiscentY1CUDAIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   return make_cuda_integration_volumes_wall_of_numbers(
     cfg,
     SigmaMiscentY1CUDAIntegrand::module_label(),
-   "lo",
+    "lo",
     "lc",
     "zt",
     "lnm",

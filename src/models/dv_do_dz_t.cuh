@@ -9,10 +9,7 @@ class DV_DO_DZ_t {
 public:
   DV_DO_DZ_t() = default;
 
-
-
-  DV_DO_DZ_t(quad::Interp1D& da, EZ ezt, double h)
-    : _da(da), _ezt(ezt), _h(h)
+  DV_DO_DZ_t(quad::Interp1D& da, EZ ezt, double h) : _da(da), _ezt(ezt), _h(h)
   {}
 
   explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
@@ -20,7 +17,7 @@ public:
     , _ezt(EZ())
     , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
   {}
-    
+
   __device__ double
   operator()(double zt) const
   {

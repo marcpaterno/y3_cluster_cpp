@@ -6,7 +6,6 @@
 
 #include <vector>
 
-
 using doubles = std::vector<double>;
 
 inline quad::Interp1D
@@ -19,7 +18,6 @@ make_Interp1D(cosmosis::DataBlock& cfg,
   std::vector<double> ys = cfg.view<doubles>(section, y_axis_name);
   assert(xs.size() == ys.size());
   return {xs.data(), ys.data(), xs.size()};
- }
-
+}
 
 #endif

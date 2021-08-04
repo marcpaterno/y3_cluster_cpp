@@ -1,39 +1,38 @@
 #ifndef Y3_CLUSTER_SIGMA_PHOTOZ_T_CUH
 #define Y3_CLUSTER_SIGMA_PHOTOZ_T_CUH
 
+struct SIGMA_PHOTOZ_DES_t {
 
-  struct SIGMA_PHOTOZ_DES_t {
+  __device__ double
+  operator()(double zt) const
+  {
+    double constexpr poly_coeff[] = {-40358.8315,
+                                     2798.08304,
+                                     9333.80185,
+                                     -657.348248,
+                                     -840.565610,
+                                     46.8506649,
+                                     37.8839498,
+                                     -0.868811858,
+                                     -0.808928182,
+                                     0.00890199353,
+                                     0.0139811265};
+    double sigma = 0;
+    double z_for_fit = zt;
 
-    __device__ double
-    operator()(double zt) const
-    {
-      double constexpr poly_coeff[] = {-40358.8315,
-                                       2798.08304,
-                                       9333.80185,
-                                       -657.348248,
-                                       -840.565610,
-                                       46.8506649,
-                                       37.8839498,
-                                       -0.868811858,
-                                       -0.808928182,
-                                       0.00890199353,
-                                       0.0139811265};
-      double sigma = 0;
-      double z_for_fit = zt;
+    // We do not extrapolate outside of the data range
+    if (z_for_fit < 0.15) { z_for_fit = 0.15; }
+    if (z_for_fit > 0.7) { z_for_fit = 0.7; }
 
-      // We do not extrapolate outside of the data range
-      if (z_for_fit < 0.15) { z_for_fit = 0.15; }
-      if (z_for_fit > 0.7) { z_for_fit = 0.7; }
-
-      // Compute the fit at pivot (z-.4)
-      z_for_fit = z_for_fit - 0.4;
-      for (int ii = 0; ii < 10; ii++) {
-        sigma = (poly_coeff[ii] + sigma) * z_for_fit;
-      }
-      sigma = sigma + poly_coeff[10];
-
-      return sigma;
+    // Compute the fit at pivot (z-.4)
+    z_for_fit = z_for_fit - 0.4;
+    for (int ii = 0; ii < 10; ii++) {
+      sigma = (poly_coeff[ii] + sigma) * z_for_fit;
     }
-  };
+    sigma = sigma + poly_coeff[10];
+
+    return sigma;
+  }
+};
 
 #endif

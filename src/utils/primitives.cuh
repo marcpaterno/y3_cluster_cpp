@@ -5,7 +5,7 @@
 
 #include <limits>
 
-namespace y3_cuda{
+namespace y3_cuda {
 
   namespace detail {
     double constexpr sqrtNewtonRaphson(double x, double curr, double prev)
@@ -21,9 +21,8 @@ namespace y3_cuda{
   // https://stackoverflow.com/questions/8622256/in-c11-is-sqrt-defined-as-constexpr
   double constexpr sqrt(double x)
   {
-    return (x >= 0.0 && isfinite(x)) ?
-             detail::sqrtNewtonRaphson(x, x, 0) :
-             std::numeric_limits<double>::quiet_NaN();
+    return (x >= 0.0 && isfinite(x)) ? detail::sqrtNewtonRaphson(x, x, 0) :
+                                       std::numeric_limits<double>::quiet_NaN();
   }
   // This is the double-precision hexidecimal floating point value
   // closes to pi.
@@ -39,8 +38,7 @@ namespace y3_cuda{
 
   double constexpr invsqrt2pi() { return 1. / sqrt(2. * pi()); }
 
-  inline 
-  __device__ double
+  inline __device__ double
   gaussian(double x, double mu, double sigma)
   {
     double const z = (x - mu) / sigma;

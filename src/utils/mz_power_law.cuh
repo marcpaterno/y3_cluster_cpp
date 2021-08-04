@@ -1,31 +1,28 @@
 #ifndef Y3_CLUSTER_MZ_POWER_LAW_CUH
 #define Y3_CLUSTER_MZ_POWER_LAW_CUH
 
-  // mz_power_law represents a commonly-used power law relationship, with the
-  // form
-  //       A * m**B * (1+z)**C
-  // with A, B and C being constants set in the construction of the power law
-  // object.
+// mz_power_law represents a commonly-used power law relationship, with the
+// form
+//       A * m**B * (1+z)**C
+// with A, B and C being constants set in the construction of the power law
+// object.
 
-  class mz_power_law {
-  public:
-    mz_power_law(double A, double B, double C) noexcept;
+class mz_power_law {
+public:
+  mz_power_law(double A, double B, double C) noexcept;
 
-    // The function call operator evaluates the power law at the given
-    // values of lnM and z. Note that the first parameter is not mass,
-    // but ln(mass).
-    __device__ double operator()(double lnM, double z) const noexcept;
+  // The function call operator evaluates the power law at the given
+  // values of lnM and z. Note that the first parameter is not mass,
+  // but ln(mass).
+  __device__ double operator()(double lnM, double z) const noexcept;
 
-  private:
-    double const log_A_;
-    double const B_;
-    double const C_;
-  };
+private:
+  double const log_A_;
+  double const B_;
+  double const C_;
+};
 
-
-inline mz_power_law::mz_power_law(double A,
-                                              double B,
-                                              double C) noexcept
+inline mz_power_law::mz_power_law(double A, double B, double C) noexcept
   : log_A_(log(A)), B_(B), C_(C)
 {}
 
