@@ -7,14 +7,10 @@
 
 class DV_DO_DZ_t {
 public:
-  DV_DO_DZ_t() = default;
-
-  DV_DO_DZ_t(quad::Interp1D& da, EZ ezt, double h) : _da(da), _ezt(ezt), _h(h)
-  {}
 
   explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
     : _da(make_Interp1D(sample, "distances", "z", "d_a"))
-    , _ezt(EZ())
+    , _ezt(EZ(sample))
     , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
   {}
 
@@ -30,7 +26,7 @@ public:
 private:
   quad::Interp1D _da;
   EZ _ezt;
-  double _h = 0.0;
+  double _h;
 };
 
 #endif

@@ -3,8 +3,6 @@
 
 class EZ_sq {
 public:
-  EZ_sq() = default;
-
   EZ_sq(double omega_m, double omega_l, double omega_k)
     : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
   {}
@@ -19,9 +17,9 @@ public:
   }
 
 private:
-  double _omega_m = 0.0;
-  double _omega_l = 0.0;
-  double _omega_k = 0.0;
+  double _omega_m;
+  double _omega_l;
+  double _omega_k;
 };
 
 #endif

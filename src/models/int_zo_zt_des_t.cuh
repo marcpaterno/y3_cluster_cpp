@@ -7,7 +7,6 @@
 
 class INT_ZO_ZT_DES_t {
 public:
-  explicit INT_ZO_ZT_DES_t() {}
 
   __device__ double
   operator()(double zomin, double zomax, double zt) const
