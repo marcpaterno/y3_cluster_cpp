@@ -5,7 +5,6 @@
 #include "utils/polynomial.cuh"
 
 struct OMEGA_Z_DES {
-  OMEGA_Z_DES() {}
   OMEGA_Z_DES(cosmosis::DataBlock&) {}
 
   __device__ double

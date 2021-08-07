@@ -5,8 +5,6 @@
 
 class LO_LC_t {
 public:
-  LO_LC_t() = default;
-
   LO_LC_t(double alpha, double a, double b, double R_lambda)
     : _alpha(alpha), _a(a), _b(b), _R_lambda(R_lambda)
   {}
@@ -31,10 +29,10 @@ public:
   }
 
 private:
-  double _alpha = 0.0;
-  double _a = 0.0;
-  double _b = 0.0;
-  double _R_lambda = 0.0;
+  double _alpha;
+  double _a;
+  double _b;
+  double _R_lambda;
 };
 
 #endif
