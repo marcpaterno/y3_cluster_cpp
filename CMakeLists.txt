@@ -1,12 +1,24 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
-project(y3_cluster_cpp VERSION 0.2.0 LANGUAGES CXX CUDA)
+# In an environment without the CUDA tools, deactivate the
+# line the declares we use the CUDA langauge.
+project(y3_cluster_cpp VERSION 0.3.0 LANGUAGES CXX CUDA)
+# project(y3_cluster_cpp VERSION 0.3.0 LANGUAGES CXX)
 enable_testing()
+
+# In an environment without the CUDA tools, set USE_CUDA to
+# OFF. This can also be done on the cmake command line using:
+#  -DUSE_CUDA=OFF
+# set(USE_CUDA OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CUDA_STANDARD 17)
-set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
+if (USE_CUDA)
+  set(CMAKE_CUDA_STANDARD 17)
+  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+endif()
+
 
 # These flags are used by everything in the project. Put anything that affects
 # the ABI here -- e.g., the standard level.
