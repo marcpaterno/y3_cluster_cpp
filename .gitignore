@@ -40,3 +40,7 @@ rules.ninja
 .vscode
 .Rhistory
 *.gz
+debug-build/
+release-build/
+*.tsv
+*.csv
