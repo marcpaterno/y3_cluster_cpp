@@ -160,6 +160,7 @@ void
 SigmaMiscentY1MortScalarIntegrand::set_grid_point(
   grid_point_t const& grid_point)
 {
+  user_breakpoint();
   radius_ = grid_point[2];
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];

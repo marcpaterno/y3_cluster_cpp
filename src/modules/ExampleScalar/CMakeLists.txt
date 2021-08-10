@@ -22,6 +22,7 @@ target_link_libraries(ExampleScalarIntegrationModule
                       PRIVATE
                       cosmosis
                       example_scalar_integrand
+                      utils
                       ${CUBA_LIBRARIES})
 target_include_directories(ExampleScalarIntegrationModule
                            PRIVATE
