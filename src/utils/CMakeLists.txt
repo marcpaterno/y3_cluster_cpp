@@ -3,6 +3,7 @@ link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
 add_library(utils SHARED
             bessel_polynomial_integral.cc
             datablock_reader.cc
+            debugging.cc
             #fits_loader.cc
             interp_1d.cc
             interp_2d.cc
