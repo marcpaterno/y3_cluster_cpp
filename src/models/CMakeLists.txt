@@ -25,6 +25,7 @@ target_include_directories(models
                            ${EIGEN3_INCLUDE_DIR}
                            ${GSL_INCLUDE_DIR})
 
+if (USE_CUDA)
 add_library(cuda_models SHARED
             int_lc_lt_des_t.cu)
 
@@ -40,3 +41,4 @@ target_include_directories(cuda_models PRIVATE
   $ENV{COSMOSIS_SRC_DIR}
   ${PAGANI_DIR})
 target_compile_options(cuda_models PRIVATE "--expt-relaxed-constexpr")
+endif()
