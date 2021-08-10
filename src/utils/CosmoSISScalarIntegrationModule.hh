@@ -8,6 +8,7 @@
 
 #include "utils/make_grid_points.hh"
 #include "utils/multi_dimensional_integrator.hh"
+#include "utils/debugging.hh"
 
 #include <iostream>
 #include <stdexcept>
@@ -192,8 +193,6 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::finalize_sample(
   cosmosis::DataBlock& sample,
   std::vector<cubacpp::integration_result> const& res) const
 {
-  std::cerr << "Finalizing sample.\n";
-  std::cerr << "Grid points are:\n";
   if (use_cartesian_product_of_volumes_and_gridpoints_)
     finalize_sample_cartesian_product_of_volumes_and_gridpoints(sample, res);
   else
@@ -258,6 +257,7 @@ y3_cluster::CosmoSISScalarIntegrationModule<I>::
   using cosmosis::ndarray;
   using cubacpp::integration_result;
 
+  user_breakpoint();
   auto const nresults = num_results();
 
   auto const ngrid_points = grid_points_.size();
