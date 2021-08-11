@@ -17,7 +17,7 @@
 #include "models/omega_z_des.cuh"
 #include "models/roffset_t.cuh"
 #include "models/sig_sum.cuh"
-#
+
 #include <iostream>
 #include <optional>
 #include <vector>

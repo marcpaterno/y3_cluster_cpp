@@ -13,6 +13,7 @@
 
 #include "cudaPagani/quad/util/Volume.cuh"
 #include "cudaPagani/quad/GPUquad/Pagani.cuh"
+#include "vegas/vegasT.cuh"
 
 #include <iostream>
 #include <stdexcept>
@@ -89,7 +90,7 @@ namespace y3_cluster {
       std::vector<integration_results_t> const& results) const;
 
     IntegrandType integrand_;
-    quad::Pagani<double, ndim>  algorithm_;
+    y3_cuda::MultidimensionalIntegrator algorithm_;
     std::vector<volume_t> volumes_;
     my_grid_t grid_points_;
     double eps_rel_;
@@ -103,7 +104,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::CosmoSISSICUDAModule(
   cosmosis::DataBlock& cfg)
 try : integrand_(cfg),
     // The c'tor for algorithm_ will get adjusted at some later date...
-  algorithm_(),
+  algorithm_(cfg.view<std::string>("algorithm")),
   volumes_(IntegrandType::make_integration_volumes(cfg)),
   grid_points_(IntegrandType::make_grid_points(cfg)),
   eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
@@ -118,6 +119,7 @@ try : integrand_(cfg),
         "but the number of volumes did not equal the number of gridpoints.\n");
     }
   }
+  algorithm_.set_maxeval(cfg.view<int>(IntegrandType::module_label(), "max_eval"));
 }
 catch (cosmosis::Exception const&) {
   std::cerr
