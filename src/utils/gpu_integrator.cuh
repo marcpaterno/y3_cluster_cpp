@@ -1,12 +1,16 @@
 #ifndef Y3_CLUSTER_UTIL_CUDA_INTEGRATOR_CUH
 #define Y3_CLUSTER_UTIL_CUDA_INTEGRATOR_CUH
 
+#include "cubacpp/arity.hh"
 #include "cudaPagani/quad/GPUquad/Pagani.cuh"
+#include "cudaPagani/quad/util/Volume.cuh"
+#include "vegas/mcubes.cuh"
 #include "vegas/vegasT.cuh"
 
 #include <tuple>
 
 namespace y3_cuda {
+  template <int ndim>
   class MultiDimensionalIntegrator {
   public:
     std::size_t num_algs() const;
@@ -15,41 +19,38 @@ namespace y3_cuda {
     explicit MultiDimensionalIntegrator(std::string const& name);
 
     template <class F>
-    cubacpp::integration_result integrate(int which,
-                                          F f,
-                                          double epsrel,
-                                          double epsabs) const;
+    cuhreResult<double> integrate(int which,
+                                  F f,
+                                  double epsrel,
+                                  double epsabs);
 
     template <class F>
-    cubacpp::integration_result integrate(
-      int which,
-      F f,
-      double epsrel,
-      double epsabs,
-      typename cubacpp::integration_volume_for<F>::type vol) const;
+    cuhreResult<double> integrate(int which,
+                                  F f,
+                                  double epsrel,
+                                  double epsabs,
+                                  quad::Volume<double, ndim> const* vol);
 
     template <class F>
-    cubacpp::integration_result integrate(F f,
-                                          double epsrel,
-                                          double epsabs) const;
+    cuhreResult<double> integrate(F f, double epsrel, double epsabs);
 
     template <class F>
-    cubacpp::integration_result integrate(
-      F f,
-      double epsrel,
-      double epsabs,
-      typename cubacpp::integration_volume_for<F>::type vol) const;
+    cuhreResult<double> integrate(F f,
+                                  double epsrel,
+                                  double epsabs,
+                                  quad::Volume<double, ndim> const* vol);
 
-    void set_maxeval(double m);
+    void set_maxeval(long long int m);
 
   private:
-    using algs_t = std::tuple<quad::Pagani, quad::mcubes>;
+    using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes>;
     algs_t algorithms_;
     int which_ = 0;
   };
 }
 
-inline y3_cuda::MultiDimensionalIntegrator::MultiDimensionalIntegrator(
+template <int N>
+y3_cuda::MultiDimensionalIntegrator<N>::MultiDimensionalIntegrator(
   std::string const& name)
 {
   if (name == std::string("pagani"))
@@ -61,18 +62,20 @@ inline y3_cuda::MultiDimensionalIntegrator::MultiDimensionalIntegrator(
                              "unrecognized algorithm");
 }
 
-inline std::size_t
-y3_cuda::MultiDimensionalIntegrator::num_algs() const
+template <int N>
+std::size_t
+y3_cuda::MultiDimensionalIntegrator<N>::num_algs() const
 {
   return std::tuple_size_v<algs_t>;
 }
 
+template <int N>
 template <class F>
-cubacpp::integration_result
-y3_cuda::MultiDimensionalIntegrator::integrate(int which,
-                                                  F f,
-                                                  double epsabs,
-                                                  double epsrel) const
+cuhreResult<double>
+y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
+                                               F f,
+                                               double epsabs,
+                                               double epsrel)
 {
   switch (which) {
     case 0:
@@ -81,23 +84,21 @@ y3_cuda::MultiDimensionalIntegrator::integrate(int which,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 2:
-      return std::get<2>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
   }
 }
 
+template <int N>
 template <class F>
-cubacpp::integration_result
-y3_cuda::MultiDimensionalIntegrator::integrate(
+cuhreResult<double>
+y3_cuda::MultiDimensionalIntegrator<N>::integrate(
   int which,
   F f,
   double epsabs,
   double epsrel,
-  typename cubacpp::integration_volume_for<F>::type vol) const
+  quad::Volume<double, N> const* vol)
 {
   switch (which) {
     case 0:
@@ -106,20 +107,18 @@ y3_cuda::MultiDimensionalIntegrator::integrate(
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel, vol);
-    case 2:
-      return std::get<2>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel, vol);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
   }
 }
 
+template <int N>
 template <class F>
-cubacpp::integration_result
-y3_cuda::MultiDimensionalIntegrator::integrate(F f,
-                                                  double epsabs,
-                                                  double epsrel) const
+cuhreResult<double>
+y3_cuda::MultiDimensionalIntegrator<N>::integrate(F f,
+                                               double epsabs,
+                                               double epsrel)
 {
   switch (which_) {
     case 0:
@@ -128,44 +127,42 @@ y3_cuda::MultiDimensionalIntegrator::integrate(F f,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 2:
-      return std::get<2>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
   }
 }
 
+template <int N>
 template <class F>
-cubacpp::integration_result
-y3_cuda::MultiDimensionalIntegrator::integrate(
+cuhreResult<double>
+y3_cuda::MultiDimensionalIntegrator<N>::integrate(
   F f,
   double epsabs,
   double epsrel,
-  typename cubacpp::integration_volume_for<F>::type vol) const
+  quad::Volume<double, N> const* vol)
 {
   switch (which_) {
     case 0:
       return std::get<0>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel, vol);
-    case 1:
-      return std::get<1>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel, vol);
-    case 2:
-      return std::get<2>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel, vol);
+        .integrate(f, epsrel, epsabs, vol);
+  case 1:{
+      auto x = std::get<1>(algorithms_)
+        .integrate(f, epsabs, epsrel, vol);
+      return x;
+      break;
+  }
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
   }
 }
 
+template <int N>
 void
-y3_cuda::MultiDimensionalIntegrator::set_maxeval(long long int m)
+y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval(long long int m)
 {
-  std::get<0>(algorithms_).maxeval = m;
-  std::get<1>(algorithms_).maxeval = m;
+  std::get<1>(algorithms_).maxcalls = m;
 }
 
 #endif

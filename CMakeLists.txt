@@ -8,7 +8,8 @@ enable_testing()
 # In an environment without the CUDA tools, set USE_CUDA to
 # OFF. This can also be done on the cmake command line using:
 #  -DUSE_CUDA=OFF
-# set(USE_CUDA OFF)
+#set(USE_CUDA OFF)
+set(USE_CUDA ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
