@@ -21,23 +21,23 @@ namespace y3_cuda {
     template <class F>
     cuhreResult<double> integrate(int which,
                                   F f,
-                                  double epsrel,
-                                  double epsabs);
+                                  double epsabs,
+                                  double epsrel);
 
     template <class F>
     cuhreResult<double> integrate(int which,
                                   F f,
-                                  double epsrel,
                                   double epsabs,
+                                  double epsrel,
                                   quad::Volume<double, ndim> const* vol);
 
     template <class F>
-    cuhreResult<double> integrate(F f, double epsrel, double epsabs);
+    cuhreResult<double> integrate(F f, double epsabs, double epsrel);
 
     template <class F>
     cuhreResult<double> integrate(F f,
-                                  double epsrel,
                                   double epsabs,
+                                  double epsrel,
                                   quad::Volume<double, ndim> const* vol);
 
     void set_maxeval(long long int m);
