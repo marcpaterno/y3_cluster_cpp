@@ -173,7 +173,7 @@ y3_cluster::CosmoSISSICUDAModule<
     for (auto const& grid_point : grid_points_.points) {
       integrand_.set_grid_point(grid_point);
       cuhreResult res = 
-        algorithm_.integrate(integrand_, eps_rel_, eps_abs_, &volume);
+        algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
       results.push_back(cubacpp::integration_result(
             res.estimate,
             res.errorest,
@@ -196,7 +196,7 @@ y3_cluster::CosmoSISSICUDAModule<
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_points_.points[i]);
     cuhreResult res = 
-      algorithm_.integrate(integrand_, eps_rel_, eps_abs_, &volumes_[i]);
+      algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volumes_[i]);
      results.push_back(cubacpp::integration_result(
            res.estimate,
            res.errorest,
