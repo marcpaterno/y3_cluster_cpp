@@ -31,7 +31,8 @@ target_link_libraries(test_ExampleOneDIntegrationModule
                       cosmosis
                       example_oned_integrand
                       ExampleOneDIntegrationModule
-                      example_oned_integrand)
+                      example_oned_integrand
+		      ${GSL_LIBRARIES})
 target_include_directories(test_ExampleOneDIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src)
@@ -44,7 +45,8 @@ target_link_libraries(ExampleOneDIntegrand_test
                       cosmosis
                       ${CUBA_LIBRARIES}
                       ExampleOneDIntegrationModule
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(ExampleOneDIntegrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src

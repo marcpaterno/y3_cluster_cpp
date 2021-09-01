@@ -2,7 +2,7 @@ include_directories($ENV{COSMOSIS_SRC_DIR} ${CUBA_INCLUDE_DIR})
 link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
 
 add_library(example_vector_integrand SHARED ExampleVectorIntegrand.cc)
-target_link_libraries(example_vector_integrand PRIVATE cosmosis utils)
+target_link_libraries(example_vector_integrand PRIVATE cosmosis utils ${GSL_LIBRARIES})
 target_include_directories(example_vector_integrand
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -36,10 +36,12 @@ target_link_libraries(test_ExampleVectorIntegrationModule
                       example_vector_integrand
                       ExampleVectorIntegrationModule
                       example_vector_integrand
-                      ${CUBA_LIBRARIES})
+                      ${CUBA_LIBRARIES}
+		      ${GSL_LIBRARIES})
 target_include_directories(test_ExampleVectorIntegrationModule
                            PRIVATE
-                           ${CMAKE_SOURCE_DIR}/src)
+                           ${CMAKE_SOURCE_DIR}/src
+			   ${GSL_INCLUDE_DIRS})
 add_test(test_ExampleVectorIntegrationModule test_ExampleVectorIntegrationModule)
 
 
@@ -49,7 +51,8 @@ target_link_libraries(ExampleVectorIntegrand_test
                       example_vector_integrand
                       cosmosis
                       ${CUBA_LIBRARIES}
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(ExampleVectorIntegrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
