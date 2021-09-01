@@ -43,7 +43,7 @@ public:
     , _q(sample.view<double>("cluster_abundance", "hmf_q"))
   {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double lnM, double zt) const
   {
     return _nmz.clamp(lnM, zt) *

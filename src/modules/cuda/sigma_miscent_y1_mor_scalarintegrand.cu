@@ -84,7 +84,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __device__ double operator()(double lo,
+  __host__ __device__ double operator()(double lo,
                                double lc,
                                double zt,
                                double lnM,
@@ -155,7 +155,7 @@ SigmaMiscentY1CUDAIntegrand::set_grid_point(grid_point_t grid_point)
   zo_high_ = grid_point[1];
 }
 
-__device__ double
+__device__ __host__ double
 SigmaMiscentY1CUDAIntegrand::operator()(double lo,
                                         double lc,
                                         double zt,

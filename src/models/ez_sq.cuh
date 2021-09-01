@@ -7,7 +7,7 @@ public:
     : _omega_m(omega_m), _omega_l(omega_l), _omega_k(omega_k)
   {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double z) const
   {
     // NOTE: this is valid only for \Lambda CDM cosmology, not wCDM

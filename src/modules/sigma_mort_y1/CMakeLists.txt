@@ -15,6 +15,7 @@ add_library(SigmaMiscentY1MortScalarIntegrand MODULE  sigma_miscent_y1_mort_scal
 target_link_libraries(SigmaMiscentY1MortScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(SigmaMiscentY1MortScalarIntegrand
                            PRIVATE
+			   ${PAGANI_DIR}
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
                            ${GSL_INCLUDE_DIRS}

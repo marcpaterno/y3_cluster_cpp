@@ -7,7 +7,7 @@
 struct OMEGA_Z_DES {
   OMEGA_Z_DES(cosmosis::DataBlock&) {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double zt) const
   {
     static const y3_cuda::polynomial<6> SDSS_fit{

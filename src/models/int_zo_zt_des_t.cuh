@@ -8,7 +8,7 @@
 class INT_ZO_ZT_DES_t {
 public:
 
-  __device__ double
+  __device__ __host__ double
   operator()(double zomin, double zomax, double zt) const
   {
     double _sigma = _sigma_photoz_des(zt);

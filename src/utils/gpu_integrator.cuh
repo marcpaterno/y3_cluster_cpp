@@ -43,7 +43,7 @@ namespace y3_cuda {
     void set_maxeval(long long int m);
 
   private:
-    using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes>;
+    using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes, VegasNRC, quad::mcubesSeq>;
     algs_t algorithms_;
     int which_ = 0;
   };
@@ -57,6 +57,10 @@ y3_cuda::MultiDimensionalIntegrator<N>::MultiDimensionalIntegrator(
     which_ = 0;
   else if (name == std::string("mcubes"))
     which_ = 1;
+  else if(name == std::string("vegasnrc"))
+    which_ = 2;
+  else if(name == std::string("seqmcubes"))
+    which_ = 3;
   else
     throw std::runtime_error("MultiDimensionalIntegrator::integrate called for "
                              "unrecognized algorithm");
@@ -84,7 +88,13 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    default:
+    case 2:
+      return std::get<2>(algorithms_)
+        .integrate(std::forward<F>(f), epsabs, epsrel);
+    case 3:
+      return std::get<3>(algorithms_)
+        .integrate(std::forward<F>(f), epsabs, epsrel);
+  default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
   }
@@ -127,6 +137,13 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(F f,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
+    case 2:
+      return std::get<2>(algorithms_)
+        .integrate(std::forward<F>(f), epsabs, epsrel);
+    case 3:
+      return std::get<3>(algorithms_)
+        .integrate(std::forward<F>(f), epsabs, epsrel);
+    
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -148,6 +165,19 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
         .integrate(f, epsrel, epsabs, vol);
   case 1:{
       auto x = std::get<1>(algorithms_)
+        .integrate(f, epsabs, epsrel, vol);
+      return x;
+      break;
+  }
+  case 2:{
+    auto x = std::get<2>(algorithms_)
+        .integrate(f, epsabs, epsrel, vol);
+      return x;
+      break;
+  }
+
+  case 3:{
+    auto x = std::get<3>(algorithms_)
         .integrate(f, epsabs, epsrel, vol);
       return x;
       break;
