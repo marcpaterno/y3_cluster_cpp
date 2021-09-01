@@ -14,7 +14,7 @@ public:
   // The function call operator evaluates the power law at the given
   // values of lnM and z. Note that the first parameter is not mass,
   // but ln(mass).
-  __device__ double operator()(double lnM, double z) const noexcept;
+  __device__ __host__ double operator()(double lnM, double z) const noexcept;
 
 private:
   double const log_A_;
@@ -26,7 +26,7 @@ inline mz_power_law::mz_power_law(double A, double B, double C) noexcept
   : log_A_(log(A)), B_(B), C_(C)
 {}
 
-inline __device__ double
+inline __device__ __host__ double
 mz_power_law::operator()(double lnM, double z) const noexcept
 {
   double const log_res = B_ * lnM + C_ * std::log1p(z) + log_A_;

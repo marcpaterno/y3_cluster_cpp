@@ -38,7 +38,7 @@ namespace y3_cuda {
 
   double constexpr invsqrt2pi() { return 1. / sqrt(2. * pi()); }
 
-  inline __device__ double
+  inline __device__ __host__ double
   gaussian(double x, double mu, double sigma)
   {
     double const z = (x - mu) / sigma;
