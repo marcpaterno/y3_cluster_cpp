@@ -14,7 +14,7 @@ public:
     , _h(get_datablock<double>(sample, "cosmological_parameters", "h0"))
   {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double zt) const
   {
     double const da_z = _da(zt); // da_z needs to be in Mpc

@@ -3,7 +3,7 @@
 
 struct SIGMA_PHOTOZ_DES_t {
 
-  __device__ double
+  __device__ __host__ double
   operator()(double zt) const
   {
     double constexpr poly_coeff[] = {-40358.8315,

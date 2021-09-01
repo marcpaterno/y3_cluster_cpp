@@ -12,7 +12,7 @@ public:
 
   explicit ROFFSET_t(double tau) : _tau(tau) {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double x) const
   {
     // eq. 36
