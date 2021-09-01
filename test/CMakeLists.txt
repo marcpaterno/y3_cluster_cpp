@@ -11,7 +11,8 @@ target_link_libraries(get_grid_axes_from_datablock_test
                       PRIVATE
                       cosmosis
                       utils
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(get_grid_axes_from_datablock_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -25,7 +26,8 @@ target_link_libraries(make_grid_splatted_test
                       PRIVATE
                       cosmosis
                       utils
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(make_grid_splatted_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -41,7 +43,8 @@ target_link_libraries(make_grid_cartesian_product_test
                       PRIVATE
                       cosmosis
                       utils
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(make_grid_cartesian_product_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -56,7 +59,8 @@ target_link_libraries(make_grid_points_cartesian_product_test
                       PRIVATE
                       cosmosis
                       utils
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(make_grid_points_cartesian_product_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -70,7 +74,8 @@ target_link_libraries(make_grid_points_test
                       PRIVATE
                       cosmosis
                       utils
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(make_grid_points_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -84,7 +89,8 @@ target_link_libraries(make_integration_volume_test
                       PRIVATE
                       cosmosis
                       utils
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(make_integration_volume_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -165,7 +171,7 @@ target_include_directories(fpsupport_test
 add_test(fpsupport_test fpsupport_test)
 
 add_executable(omega_z_sdss_test omega_z_sdss.test.cc)
-target_link_libraries(omega_z_sdss_test PRIVATE testmain utils cosmosis)
+target_link_libraries(omega_z_sdss_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(omega_z_sdss_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -192,7 +198,7 @@ target_include_directories(sample_variance_test
 #add_test(hmf_t_test hmf_t_test)
 
 add_executable(lo_lc_t_test lo_lc_t.test.cc)
-target_link_libraries(lo_lc_t_test PRIVATE testmain utils cosmosis)
+target_link_libraries(lo_lc_t_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(lo_lc_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -216,7 +222,7 @@ target_include_directories(ez_test
 add_test(ez_test ez_test)
 
 add_executable(roffset_t_test roffset_t.test.cc)
-target_link_libraries(roffset_t_test PRIVATE testmain utils cosmosis)
+target_link_libraries(roffset_t_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(roffset_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -337,7 +343,7 @@ target_include_directories(integrate_delta_sigma
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(sigma_crit_inv_test sigma_crit_inv.test.cc)
-target_link_libraries(sigma_crit_inv_test PRIVATE testmain utils cosmosis)
+target_link_libraries(sigma_crit_inv_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(sigma_crit_inv_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -429,7 +435,7 @@ target_include_directories(integrate_roffset
                            ${EIGEN3_INCLUDE_DIR})
 
 add_executable(pxizeta_t_test pxizeta_t.test.cc)
-target_link_libraries(pxizeta_t_test PRIVATE testmain utils cosmosis)
+target_link_libraries(pxizeta_t_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(pxizeta_t_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -437,7 +443,7 @@ target_include_directories(pxizeta_t_test
 add_test(pxizeta_t_test pxizeta_t_test)
 
 add_executable(omega_z_y3xspt_test omega_z_y3xspt.test.cc)
-target_link_libraries(omega_z_y3xspt_test PRIVATE testmain utils cosmosis)
+target_link_libraries(omega_z_y3xspt_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(omega_z_y3xspt_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -445,7 +451,7 @@ target_include_directories(omega_z_y3xspt_test
 add_test(omega_z_y3xspt_test omega_z_y3xspt_test)
 
 add_executable(int_zo_zt_des_test int_zo_zt_des_t.test.cc)
-target_link_libraries(int_zo_zt_des_test PRIVATE testmain utils cosmosis)
+target_link_libraries(int_zo_zt_des_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(int_zo_zt_des_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -453,7 +459,7 @@ target_include_directories(int_zo_zt_des_test
 add_test(int_zo_zt_des_test int_zo_zt_des_test)
 
 add_executable(zo_zt_des_test zo_zt_des_t.test.cc)
-target_link_libraries(zo_zt_des_test PRIVATE testmain utils cosmosis)
+target_link_libraries(zo_zt_des_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(zo_zt_des_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -461,7 +467,7 @@ target_include_directories(zo_zt_des_test
 add_test(zo_zt_des_test zo_zt_des_test)
 
 add_executable(ln_mez_power_law ln_mez_power_law.test.cc)
-target_link_libraries(ln_mez_power_law PRIVATE testmain utils cosmosis)
+target_link_libraries(ln_mez_power_law PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
 target_include_directories(ln_mez_power_law
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src

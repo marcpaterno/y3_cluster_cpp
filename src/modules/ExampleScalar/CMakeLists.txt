@@ -23,7 +23,8 @@ target_link_libraries(ExampleScalarIntegrationModule
                       cosmosis
                       example_scalar_integrand
                       utils
-                      ${CUBA_LIBRARIES})
+                      ${CUBA_LIBRARIES}
+		      ${GSL_LIBRARIES})
 target_include_directories(ExampleScalarIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
@@ -40,7 +41,8 @@ target_link_libraries(test_ExampleScalarIntegrationModule
                       example_scalar_integrand
                       ExampleScalarIntegrationModule
                       example_scalar_integrand
-                      ${CUBA_LIBRARIES})
+                      ${CUBA_LIBRARIES}
+		      ${GSL_LIBRARIES})
 target_include_directories(test_ExampleScalarIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src)
@@ -54,7 +56,8 @@ target_link_libraries(ExampleScalarIntegrand_test
                       example_scalar_integrand
                       cosmosis
                       ${CUBA_LIBRARIES}
-                      testmain)
+                      testmain
+		      ${GSL_LIBRARIES})
 target_include_directories(ExampleScalarIntegrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
