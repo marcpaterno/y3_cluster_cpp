@@ -16,7 +16,7 @@ public:
     , _R_lambda(sample.view<double>("cluster_abundance", "LO_LC_R_lambda"))
   {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double lo, double lc, double R_mis) const
   {
     /* eq. (35) */

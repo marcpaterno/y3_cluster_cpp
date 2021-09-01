@@ -20,7 +20,7 @@ public:
     , _alpha(sample.view<double>("cluster_abundance", "mor_alpha"))
   {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double lt, double lnM, double zt) const
   {
     /* eq. (34) */

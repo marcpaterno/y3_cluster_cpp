@@ -16,7 +16,7 @@ public:
         sample.view<double>("cosmological_parameters", "omega_k"))
   {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double z) const
   {
     auto const sqr = _ezsq(z);

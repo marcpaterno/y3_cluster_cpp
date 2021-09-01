@@ -14,7 +14,7 @@ struct INT_LC_LT_DES_t {
   explicit INT_LC_LT_DES_t(const cosmosis::DataBlock&) {}
   INT_LC_LT_DES_t() {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double lc, double lt, double zt) const
   {
     double val = 0;

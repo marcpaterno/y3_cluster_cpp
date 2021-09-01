@@ -45,7 +45,7 @@ public:
                           "bias"))
   {}
 
-  __device__ double
+  __device__ __host__ double
   operator()(double r, double lnM, double zt) const
   /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
   {
