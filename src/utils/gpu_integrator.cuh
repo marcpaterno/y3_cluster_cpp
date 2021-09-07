@@ -6,6 +6,9 @@
 #include "cudaPagani/quad/util/Volume.cuh"
 #include "vegas/mcubes.cuh"
 #include "vegas/vegasT.cuh"
+#include "vegas/vegasNRC.cuh" //we can't use the .hh equivalent because that one defiend __device__ __host__ to be empty
+//#include "vegas/vegasNRC.hh"
+#include "vegas/vegasSeqMcubes.hh"
 
 #include <tuple>
 
@@ -43,7 +46,7 @@ namespace y3_cuda {
     void set_maxeval(long long int m);
 
   private:
-    using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes, VegasNRC, quad::mcubesSeq>;
+    using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes, quad::vegasNRC, VegasSEQmcubes>;
     algs_t algorithms_;
     int which_ = 0;
   };

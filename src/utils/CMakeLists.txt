@@ -22,4 +22,5 @@ target_include_directories(utils PRIVATE
                            ${CUBA_INCLUDE_DIR}
                            ${GSL_INCLUDE_DIRS}
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${EIGEN3_INCLUDE_DIR}
+                           ${VEGAS_DIR})
