@@ -1,4 +1,4 @@
-include_directories($ENV{COSMOSIS_SRC_DIR} ${GSL_INCLUDE_DIRS})
+include_directories($ENV{COSMOSIS_SRC_DIR} ${GSL_INCLUDE_DIRS} ${VEGAS_DIR})
 link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
 add_library(testmain SHARED main.cc)
 target_include_directories(testmain
@@ -500,5 +500,6 @@ target_include_directories(multi_dimensional_integrator_test PRIVATE ${CMAKE_SOU
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR}
+                           ${PAGANI_DIR}
                            ${EIGEN3_INCLUDE_DIR})
 add_test(multi_dimensional_integrator_test multi_dimensional_integrator_test)
