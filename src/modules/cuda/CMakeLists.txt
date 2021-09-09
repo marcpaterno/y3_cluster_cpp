@@ -9,7 +9,7 @@ target_include_directories(SigmaMiscentY1MortCUDAScalarIntegrand PRIVATE
   ${CMAKE_SOURCE_DIR}/src
  ${CUBACPP_DIR}
  ${PAGANI_DIR})
-target_compile_options(SigmaMiscentY1MortCUDAScalarIntegrand PRIVATE "--expt-relaxed-constexpr")
+target_compile_options(SigmaMiscentY1MortCUDAScalarIntegrand PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
 add_executable(constexpr_test constexpr_test.cu)
 set_target_properties(constexpr_test PROPERTIES
