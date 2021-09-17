@@ -199,6 +199,7 @@ y3_cluster::MultiDimensionalIntegrator::set_maxeval(long long int m)
   std::get<0>(algorithms_).maxeval = m;
   std::get<1>(algorithms_).maxeval = m;
   std::get<2>(algorithms_).maxeval = m; 
+  std::get<4>(algorithms_).maxcalls = m;
 }
 
 #endif
