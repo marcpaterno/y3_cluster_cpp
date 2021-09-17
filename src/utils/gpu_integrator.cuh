@@ -43,7 +43,7 @@ namespace y3_cuda {
                                   double epsrel,
                                   quad::Volume<double, ndim> const* vol);
 
-    void set_maxeval(long long int m);
+    void set_maxeval(double m);
 
   private:
     using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes, quad::vegasNRC, VegasSEQmcubes>;
@@ -193,9 +193,11 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
 
 template <int N>
 void
-y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval(long long int m)
+y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval(double m)
 {
-  std::get<1>(algorithms_).maxcalls = m;
+  std::cout<<"y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval maxcalls:"<<m<<"\n";
+  std::get<1>(algorithms_).maxcalls = static_cast<long long>(m);
+  std::get<3>(algorithms_).maxcalls = static_cast<unsigned long>(m);
 }
 
 #endif
