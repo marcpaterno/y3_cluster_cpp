@@ -121,7 +121,7 @@ try : integrand_(cfg),
         "but the number of volumes did not equal the number of gridpoints.\n");
     }
   }
-  algorithm_.set_maxeval(cfg.view<int>(IntegrandType::module_label(), "max_eval"));
+  algorithm_.set_maxeval(cfg.view<double>(IntegrandType::module_label(), "max_eval"));
 }
 catch (cosmosis::Exception const&) {
   std::cerr
