@@ -1,6 +1,6 @@
-#include <cubacpp/gsl.hh>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_sf_bessel.h>
+#include "cubacpp/detail/gsl.hh"
+#include "gsl/gsl_errno.h"
+#include "gsl/gsl_sf_bessel.h"
 #include <iostream>
 
 #include "catch2/catch.hpp"

@@ -18,6 +18,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if (USE_CUDA)
   set(CMAKE_CUDA_STANDARD 17)
   set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+  if (NOT DEFINED Y3GCC_TARGET_ARCH)
+	  message(FATAL_ERROR "You must specify -DY3GCC_TARGET_ARCH=<arch> to generate code for the right GPU e.g. '=70-real' for V100")
+  endif()
 endif()
 
 
