@@ -22,7 +22,6 @@ target_include_directories(models
                            ${CUBA_INCLUDE_DIR}
                            $ENV{COSMOSIS_SRC_DIR}
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
                            ${GSL_INCLUDE_DIR})
 
 if (USE_CUDA)
@@ -35,7 +34,7 @@ target_link_libraries(cuda_models
             utils)
 set_target_properties(cuda_models PROPERTIES
   POSITION_INDEPENDENT_CODE ON
-  CUDA_ARCHITECTURES 70-real)
+  CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
 target_include_directories(cuda_models PRIVATE
   ${CMAKE_SOURCE_DIR}/src
   $ENV{COSMOSIS_SRC_DIR}

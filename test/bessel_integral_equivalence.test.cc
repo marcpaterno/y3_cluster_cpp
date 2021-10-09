@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "catch2/catch.hpp"
-#include "cubacpp/gsl.hh"
+#include "cubacpp/detail/gsl.hh"
 #include "gsl/gsl_sf_bessel.h"
 #include "models/dv_do_dz_t.hh"
 #include "models/ez.hh"
