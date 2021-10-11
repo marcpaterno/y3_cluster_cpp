@@ -195,7 +195,10 @@ template <int N>
 void
 y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval(double m)
 {
-  std::cout<<"y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval maxcalls:"<<m<<"\n";
+  if (m <= 0.0) {
+    throw std::runtime_error("MultiDimensionalIntegrator: maxcalls can not be negative\n");
+  }
+
   std::get<1>(algorithms_).maxcalls = static_cast<long long>(m);
   std::get<3>(algorithms_).maxcalls = static_cast<unsigned long>(m);
 }
