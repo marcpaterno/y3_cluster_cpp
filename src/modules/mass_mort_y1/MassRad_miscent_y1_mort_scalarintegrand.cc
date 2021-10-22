@@ -200,7 +200,7 @@ MassRadMiscentY1MortScalarIntegrand::make_integration_volumes(
 MassRadMiscentY1MortScalarIntegrand::grid_t
 MassRadMiscentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_cartesian_product(
+  return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
     MassRadMiscentY1MortScalarIntegrand::module_label(),
     "zo_low",

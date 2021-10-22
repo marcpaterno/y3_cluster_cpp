@@ -14,7 +14,7 @@
 #include "models/mor_t.hh"
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
-#include "models/sig_sum.hh"
+#include "models/sig_max.hh"
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -69,7 +69,7 @@ private:
   std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<ROFFSET_t> roffset;
   std::optional<LO_LC_t> lo_lc;
-  std::optional<SIG_SUM> sigma;
+  std::optional<SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -187,13 +187,14 @@ SigmaCentY1MortScalarIntegrand::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, SigmaCentY1MortScalarIntegrand::module_label(), "lt", "zt", "lnm");
+    cfg, SigmaCentY1MortScalarIntegrand::module_label(), "lo", "zt", "lnm");
 }
 
 SigmaCentY1MortScalarIntegrand::grid_t
 SigmaCentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_cartesian_product(
+  //return y3_cluster::make_grid_points_cartesian_product(
+  return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
     SigmaCentY1MortScalarIntegrand::module_label(),
     "zo_low",
