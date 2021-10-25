@@ -52,10 +52,10 @@ namespace y3_cluster {
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     {
-      double _sig_1 = _sigma1.clamp(r, lnM);
-      double _sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
-      double res = _sig_2;
-      if (_sig_1 >= _sig_2) { res = _sig_1; }
+      double sig_1 = _sigma1.clamp(r, lnM);
+      double sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
+      double res = sig_2;
+      if (sig_1 >= sig_2) { res = sig_1; }
       return res;
     }
   };
