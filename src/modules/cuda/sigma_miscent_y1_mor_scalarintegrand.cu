@@ -16,7 +16,7 @@
 #include "models/mor_t.cuh"
 #include "models/omega_z_des.cuh"
 #include "models/roffset_t.cuh"
-#include "models/sig_sum.cuh"
+#include "models/sig_max.cuh"
 
 #include <iostream>
 #include <optional>
@@ -59,7 +59,7 @@ private:
   std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<ROFFSET_t> roffset;
   std::optional<LO_LC_t> lo_lc;
-  std::optional<y3_cuda::SIG_SUM> sigma;
+  std::optional<y3_cuda::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
