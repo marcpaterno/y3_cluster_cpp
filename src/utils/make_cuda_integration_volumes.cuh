@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace y3_cluster {
+namespace y3_cuda {
   // These variadic function templates takes as arguments:
   //   1. a cosmosis::DataBlock (by reference),
   //   2. the name of the module being configured, and
@@ -29,13 +29,13 @@ namespace y3_cluster {
   // "wall of numbers" style of configuration.`
   template <typename... Ts>
   std::vector<quad::Volume<double, sizeof...(Ts)>>
-  make_cuda_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
+  make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
                                                 std::string const& modulelabel,
                                                 Ts... names);
 
   template <typename... Ts>
   std::vector<quad::Volume<double, sizeof...(Ts)>>
-  make_cuda_integration_volumes_cartesian_product(
+  make_integration_volumes_cartesian_product(
     cosmosis::DataBlock& cfg,
     std::string const& modulelabel,
     Ts... names);
@@ -104,7 +104,7 @@ namespace y3_cluster {
         // Construct an array from all the elements we pass in ts...
         res.push_back({ts...});
       };
-      detail::cartesian_product(accumulator, bounds...);
+      y3_cluster::detail::cartesian_product(accumulator, bounds...);
       return res;
     }
 
@@ -164,11 +164,11 @@ namespace y3_cluster {
     }
 
   } // namespace detail
-} // namespace y3_cluster
+} // namespace y3_cuda
 
 template <typename... Ts>
 std::vector<quad::Volume<double, sizeof...(Ts)>>
-y3_cluster::make_cuda_integration_volumes_wall_of_numbers(
+y3_cuda::make_integration_volumes_wall_of_numbers(
   cosmosis::DataBlock& cfg,
   std::string const& modulelabel,
   Ts... names)
@@ -196,7 +196,7 @@ y3_cluster::make_cuda_integration_volumes_wall_of_numbers(
 
 template <typename... Ts>
 std::vector<quad::Volume<double, sizeof...(Ts)>>
-y3_cluster::make_cuda_integration_volumes_cartesian_product(
+y3_cuda::make_integration_volumes_cartesian_product(
   cosmosis::DataBlock& cfg,
   std::string const& modulelabel,
   Ts... names)

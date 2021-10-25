@@ -22,7 +22,6 @@
 #include <optional>
 #include <vector>
 
-using namespace y3_cluster;
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
@@ -60,7 +59,7 @@ private:
   std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<ROFFSET_t> roffset;
   std::optional<LO_LC_t> lo_lc;
-  std::optional<SIG_SUM> sigma;
+  std::optional<y3_cuda::SIG_SUM> sigma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -189,7 +188,7 @@ SigmaMiscentY1CUDAIntegrand::module_label()
 std::vector<SigmaMiscentY1CUDAIntegrand::volume_t>
 SigmaMiscentY1CUDAIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
-  return make_cuda_integration_volumes_wall_of_numbers(
+  return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg,
     SigmaMiscentY1CUDAIntegrand::module_label(),
     "lo",
