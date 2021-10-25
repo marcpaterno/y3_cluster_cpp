@@ -4,6 +4,7 @@
 #include "cosmosis/datablock/datablock.hh"
 #include "cudaPagani/quad/GPUquad/Interp1D.cuh"
 #include "models/ez.cuh"
+#include "utils/make_interp_1d.cuh"
 
 class DV_DO_DZ_t {
 public:

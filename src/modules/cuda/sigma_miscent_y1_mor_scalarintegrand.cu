@@ -6,8 +6,6 @@
 #include "cubacpp/integration_result.hh"
 #include "cudaPagani/quad/util/Volume.cuh"
 
-#include "utils/make_interp_1d.cuh"
-
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/int_lc_lt_des_t.cuh"

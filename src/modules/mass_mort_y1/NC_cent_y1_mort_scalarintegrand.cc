@@ -18,7 +18,7 @@
 #include <iostream>
 #include <optional>
 #include <vector>
-using namespace y3_cluster;
+
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
@@ -61,14 +61,14 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<INT_LC_LT_DES_t> lc_lt;
-  std::optional<MOR_t> mor;
-  std::optional<OMEGA_Z_DES> omega_z;
-  std::optional<DV_DO_DZ_t> dv_do_dz;
-  std::optional<HMF_t> hmf;
-  std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<ROFFSET_t> roffset;
-  std::optional<LO_LC_t> lo_lc;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::MOR_t> mor;
+  std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
+  std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
+  std::optional<y3_cluster::HMF_t> hmf;
+  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
+  std::optional<y3_cluster::ROFFSET_t> roffset;
+  std::optional<y3_cluster::LO_LC_t> lo_lc;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
