@@ -11,8 +11,3 @@ target_include_directories(SigmaMiscentY1MortCUDAScalarIntegrand PRIVATE
  ${PAGANI_DIR})
 target_compile_options(SigmaMiscentY1MortCUDAScalarIntegrand PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
-add_executable(constexpr_test constexpr_test.cu)
-set_target_properties(constexpr_test PROPERTIES
-  POSITION_INDEPENDENT_CODE ON
-  CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
-#target_compile_options(constexpr_test PRIVATE "--expt-relaxed-constexpr")
