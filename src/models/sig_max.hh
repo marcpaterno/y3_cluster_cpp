@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_DEL_SIG_TOM_HH
-#define Y3_CLUSTER_DEL_SIG_TOM_HH
+#ifndef Y3_CLUSTER_SIG_MAX_HH
+#define Y3_CLUSTER_SIG_MAX_HH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"

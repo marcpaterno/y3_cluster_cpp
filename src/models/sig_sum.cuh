@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_DEL_SIG_TOM_CUH
-#define Y3_CLUSTER_DEL_SIG_TOM_CUH
+#ifndef Y3_CLUSTER_SIG_SUM_CUH
+#define Y3_CLUSTER_SIG_SUM_CUH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
