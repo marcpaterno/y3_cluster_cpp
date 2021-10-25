@@ -52,8 +52,8 @@ namespace y3_cluster {
     {
       double const sig_1 = _sigma1.clamp(r, lnM);
       double const sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
-     return (sig_1 + sig_2);
-   }
+      return (sig_1 + sig_2);
+    }
   };
 }
 

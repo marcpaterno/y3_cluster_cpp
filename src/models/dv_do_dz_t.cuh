@@ -7,7 +7,6 @@
 
 class DV_DO_DZ_t {
 public:
-
   explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
     : _da(make_Interp1D(sample, "distances", "z", "d_a"))
     , _ezt(EZ(sample))

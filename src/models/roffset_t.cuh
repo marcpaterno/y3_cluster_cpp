@@ -5,7 +5,6 @@
 
 class ROFFSET_t {
 public:
-
   ROFFSET_t(cosmosis::DataBlock& sample)
     : _tau(sample.view<double>("cluster_abundance", "roffset_tau"))
   {}
