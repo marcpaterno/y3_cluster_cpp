@@ -49,15 +49,9 @@ public:
   operator()(double r, double lnM, double zt) const
   /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
   {
-    double _sig_1 = _sigma1.clamp(r, lnM);
-    double _sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
-    // TODO: h factor?
-    // if (del_sig_1 >= del_sig_2) {
-    // return (1.+zt)*(1.+zt)*(1.+zt)*(_sig_1+_sig_2);
-    return (_sig_1 + _sig_2);
-    /*} else {
-      return 1e12*(1.+zt)*(1.+zt)*(1.+zt)*del_sig_2;
-    } */
+    double const sig_1 = _sigma1.clamp(r, lnM);
+    double const sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
+    return (sig_1 + sig_2);
   }
 };
 
