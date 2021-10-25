@@ -8,7 +8,7 @@
 #include "utils/make_interp_2d.hh"
 #include "utils/primitives.hh"
 
-#include <cmath>
+#include <algorithm>
 
 namespace y3_cluster {
   class SIG_MAX {
@@ -52,10 +52,9 @@ namespace y3_cluster {
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     {
-      double sig_1 = _sigma1.clamp(r, lnM);
-      double sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
-      double res = sig_2;
-      if (sig_1 >= sig_2) { res = sig_1; }
+      double const sig_1 = _sigma1.clamp(r, lnM);
+      double const sig_2 = _bias.clamp(zt, lnM) * _sigma2.clamp(r, zt);
+      double const res = std::max(sig_1, sig_2);
       return res;
     }
   };
