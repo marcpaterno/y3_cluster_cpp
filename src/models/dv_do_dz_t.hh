@@ -5,10 +5,7 @@
 #include "utils/datablock_reader.hh"
 #include "utils/interp_1d.hh"
 #include "utils/make_interp_1d.hh"
-#include "utils/read_vector.hh"
-
-#include <memory>
-#include <vector>
+#include "cosmosis/datablock/datablock.hh"
 
 namespace y3_cluster {
   class DV_DO_DZ_t {
@@ -16,8 +13,6 @@ namespace y3_cluster {
     DV_DO_DZ_t(Interp1D const& da, y3_cluster::EZ ezt, double h)
       : _da(da), _ezt(ezt), _h(h)
     {}
-
-    using doubles = std::vector<double>;
 
     explicit DV_DO_DZ_t(cosmosis::DataBlock& sample)
       : _da(make_Interp1D(sample, "distances", "z", "d_a"))
@@ -37,7 +32,7 @@ namespace y3_cluster {
 
   private:
     Interp1D _da;
-    y3_cluster::EZ _ezt;
+    EZ _ezt;
     double _h;
   };
 }

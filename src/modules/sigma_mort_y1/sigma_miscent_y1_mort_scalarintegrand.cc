@@ -24,24 +24,9 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// SigmaMiscentY1MortScalarIntegrand is a class that models the concept of
+// This is a class that models the concept of
 // "CosmoSISScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
-//
-// Notes:
-//    1) std::optional<T> is used for data members that are not
-//    constructible from CosmoSIS configuration parameters.
-//
-//    2) The object as created by the only constructor does not need to be
-//    in a callable state.
-//
-//    3) After calls to both set_sample and set_grid_point have been made, the
-//    object must be in a callable state.
-//
-//    4) State that *can* be correctly set by the constructor *should* be set by
-//    the constructor. Do not needlessly repeat initialization in calls to
-//    set_sample.
-//
 //
 class SigmaMiscentY1MortScalarIntegrand {
 public:
@@ -60,8 +45,6 @@ private:
   // <none in this example>
 
   // State obtained from each sample.
-  // If there were a type X that did not have a default constructor,
-  // we would use std::optional<X> as our data member.
   std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
   std::optional<y3_cluster::MOR_t> mor;
   std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
@@ -161,7 +144,6 @@ void
 SigmaMiscentY1MortScalarIntegrand::set_grid_point(
   grid_point_t const& grid_point)
 {
-  user_breakpoint();
   radius_ = grid_point[2];
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
@@ -175,8 +157,6 @@ SigmaMiscentY1MortScalarIntegrand::operator()(double lo,
                                               double rmis,
                                               double theta) const
 {
-  // For any data members of type std::optional<X>, we have to use operator*
-  // to access the X object (as if we were dereferencing a pointer).
   double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
                        (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
                        (*omega_z)(zt) / 2.0 / 3.1415926535897;
@@ -218,7 +198,7 @@ SigmaMiscentY1MortScalarIntegrand::make_integration_volumes(
 SigmaMiscentY1MortScalarIntegrand::grid_t
 SigmaMiscentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  //return y3_cluster::make_grid_points_cartesian_product(
+  // return y3_cluster::make_grid_points_cartesian_product(
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
     SigmaMiscentY1MortScalarIntegrand::module_label(),

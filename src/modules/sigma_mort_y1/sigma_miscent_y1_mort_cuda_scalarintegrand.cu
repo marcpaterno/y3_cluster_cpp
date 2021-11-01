@@ -25,10 +25,8 @@ using cosmosis::ndarray;
 using cubacpp::integration_result;
 
 // This is a class that models the concept of
-// "CosmoSISScalarIntegrand", and is thus suitable for use as the template
+// "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISSICUDAModule.
-//
-// CAUTION: This is *very* preliminary. Don't hurt yourself.
 //
 class SigmaMiscentY1CUDAIntegrand {
 public:
@@ -47,16 +45,14 @@ private:
   // <none in this example>
 
   // State obtained from each sample.
-  // If there were a type X that did not have a default constructor,
-  // we would use std::optional<X> as our data member.
-  std::optional<INT_LC_LT_DES_t> lc_lt;
-  std::optional<MOR_t> mor;
-  std::optional<OMEGA_Z_DES> omega_z;
-  std::optional<DV_DO_DZ_t> dv_do_dz;
-  std::optional<HMF_t> hmf;
-  std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<ROFFSET_t> roffset;
-  std::optional<LO_LC_t> lo_lc;
+  std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cuda::MOR_t> mor;
+  std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
+  std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
+  std::optional<y3_cuda::HMF_t> hmf;
+  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
+  std::optional<y3_cuda::ROFFSET_t> roffset;
+  std::optional<y3_cuda::LO_LC_t> lo_lc;
   std::optional<y3_cuda::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
@@ -82,11 +78,11 @@ public:
   // function is const because calling it does not change the state of the
   // object.
   __host__ __device__ double operator()(double lo,
-                               double lc,
-                               double zt,
-                               double lnM,
-                               double rmis,
-                               double theta) const;
+                                        double lc,
+                                        double zt,
+                                        double lnM,
+                                        double rmis,
+                                        double theta) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -160,21 +156,20 @@ SigmaMiscentY1CUDAIntegrand::operator()(double lo,
                                         double rmis,
                                         double theta) const
 {
-  double const roffset_ = (*roffset)(rmis);
-  double const lo_lc_ = (*lo_lc)(lo, lc, rmis);
-  double const mor_ = (*mor)(lc, lnM, zt);
-  double const dv_do_dz_ = (*dv_do_dz)(zt);
-  double const hmf_ = (*hmf)(lnM, zt);
-  double const omega_z_ = (*omega_z)(zt);
-  double common_term = roffset_ * lo_lc_ *
-                       mor_ * dv_do_dz_ * hmf_ *
-                       omega_z_ / 2.0 / 3.1415926535897;
+  double const roffset_v = (*roffset)(rmis);
+  double const lo_lc_v = (*lo_lc)(lo, lc, rmis);
+  double const mor_v = (*mor)(lc, lnM, zt);
+  double const dv_do_dz_v = (*dv_do_dz)(zt);
+  double const hmf_v = (*hmf)(lnM, zt);
+  double const omega_z_v = (*omega_z)(zt);
+  double common_term = roffset_v * lo_lc_v * mor_v * dv_do_dz_v * hmf_v *
+                       omega_z_v / 2.0 / 3.1415926535897;
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
                                  2 * rmis * radius_ * std::cos(theta));
-  double const sigma_ = (*sigma)(scaled_Rmis, lnM, zt);
-  double const int_zo_zt_ = (*int_zo_zt)(zo_low_, zo_high_, zt);
-  double const val = sigma_ * int_zo_zt_ * common_term;
-   return val;
+  double const sigma_v = (*sigma)(scaled_Rmis, lnM, zt);
+  double const int_zo_zt_v = (*int_zo_zt)(zo_low_, zo_high_, zt);
+  double const val = sigma_v * int_zo_zt_v * common_term;
+  return val;
 }
 
 char const*
