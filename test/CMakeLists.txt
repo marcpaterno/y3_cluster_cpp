@@ -17,8 +17,7 @@ target_include_directories(get_grid_axes_from_datablock_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
-                       ${CMAKE_SOURCE_DIR}/externals)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(get_grid_axes_from_datablock_test get_grid_axes_from_datablock_test)
 
 add_executable(make_grid_splatted_test make_grid_splatted.test.cc)
@@ -32,8 +31,7 @@ target_include_directories(make_grid_splatted_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
-                       ${CMAKE_SOURCE_DIR}/externals)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(make_grid_splatted_test make_grid_splatted_test)
 
 
@@ -44,13 +42,12 @@ target_link_libraries(make_grid_cartesian_product_test
                       cosmosis
                       utils
                       testmain
-		      ${GSL_LIBRARIES})
+                      ${GSL_LIBRARIES})
 target_include_directories(make_grid_cartesian_product_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
-                       ${CMAKE_SOURCE_DIR}/externals)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(make_grid_cartesian_product_test make_grid_cartesian_product_test)
 
 
@@ -65,8 +62,7 @@ target_include_directories(make_grid_points_cartesian_product_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
-                       ${CMAKE_SOURCE_DIR}/externals)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(make_grid_points_cartesian_product_test make_grid_points_cartesian_product_test)
 
 add_executable(make_grid_points_test make_grid_points.test.cc)
@@ -75,13 +71,12 @@ target_link_libraries(make_grid_points_test
                       cosmosis
                       utils
                       testmain
-		      ${GSL_LIBRARIES})
+                      ${GSL_LIBRARIES})
 target_include_directories(make_grid_points_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
-                       ${CMAKE_SOURCE_DIR}/externals)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(make_grid_points_test make_grid_points_test)
 
 add_executable(make_integration_volume_test make_integration_volume.test.cc)
@@ -90,13 +85,12 @@ target_link_libraries(make_integration_volume_test
                       cosmosis
                       utils
                       testmain
-		      ${GSL_LIBRARIES})
+                      ${GSL_LIBRARIES})
 target_include_directories(make_integration_volume_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
-                       ${CMAKE_SOURCE_DIR}/externals)
+                           ${CMAKE_SOURCE_DIR}/externals)
 add_test(make_integration_volume_test make_integration_volume_test)
 
 
@@ -107,8 +101,7 @@ target_include_directories(integration_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 add_test(integration_test integration_test)
 
 add_executable(transform_test transform.test.cc)
@@ -185,8 +178,7 @@ target_include_directories(sample_variance_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 #add_test(sample_variance_test sample_variance_test)
 
 #add_executable(hmf_t_test hmf_t.test.cc)
@@ -245,8 +237,7 @@ target_include_directories(lc_lt_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 add_test(lc_lt_probability_test lc_lt_probability_test)
 
 add_executable(dv_do_dz_t_test dv_do_dz_t.test.cc)
@@ -283,8 +274,7 @@ target_include_directories(lo_lc_probability_unity_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 add_test(lo_lc_probability_unity_test lo_lc_probability_unity_test)
 
 add_executable(mor_t2_test mor_t2.test.cc)
@@ -303,8 +293,7 @@ target_include_directories(mor_probability_unity_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 add_test(mor_probability_unity_test mor_probability_unity_test)
 
 add_executable(mor2_probability_test mor2_probability_unity.test.cc)
@@ -315,8 +304,7 @@ target_include_directories(mor2_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 add_test(mor2_probability_test mor2_probability_test)
 
 add_executable(roffset_probability_test roffset_probability_unity.test.cc)
@@ -327,8 +315,7 @@ target_include_directories(roffset_probability_test
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 add_test(roffset_probability_test roffset_probability_test)
 
 add_executable(integrate_delta_sigma integrate_delta_sigma.cc)
@@ -339,8 +326,7 @@ target_include_directories(integrate_delta_sigma
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 
 add_executable(sigma_crit_inv_test sigma_crit_inv.test.cc)
 target_link_libraries(sigma_crit_inv_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
@@ -387,8 +373,7 @@ add_test(bessel_integral_equivalence_test bessel_integral_equivalence_test)
 #                           ${CMAKE_SOURCE_DIR}/src
 #                           ${CMAKE_SOURCE_DIR}/externals
 #                           ${CUBA_INCLUDE_DIR}
-#                           ${CUBACPP_DIR}
-#                           ${EIGEN3_INCLUDE_DIR})
+#                           ${CUBACPP_DIR})
 
 add_executable(integrate_lc_lt integrate_lc_lt.cc)
 target_link_libraries(integrate_lc_lt PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils models cosmosis)
@@ -398,8 +383,7 @@ target_include_directories(integrate_lc_lt
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 
 add_executable(integrate_lo_lc integrate_lo_lc.cc)
 target_link_libraries(integrate_lo_lc PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
@@ -409,8 +393,7 @@ target_include_directories(integrate_lo_lc
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 
 add_executable(integrate_mor integrate_mor.cc)
 target_link_libraries(integrate_mor PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
@@ -420,8 +403,7 @@ target_include_directories(integrate_mor
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 
 add_executable(integrate_roffset integrate_roffset.cc)
 target_link_libraries(integrate_roffset PRIVATE ${CUBA_LIBRARIES} ${GSL_LIBRARIES} utils cosmosis)
@@ -431,8 +413,7 @@ target_include_directories(integrate_roffset
                            ${CMAKE_SOURCE_DIR}/src
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
-                           ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${CUBACPP_DIR})
 
 add_executable(pxizeta_t_test pxizeta_t.test.cc)
 target_link_libraries(pxizeta_t_test PRIVATE testmain utils cosmosis ${GSL_LIBRARIES})
@@ -500,6 +481,5 @@ target_include_directories(multi_dimensional_integrator_test PRIVATE ${CMAKE_SOU
                            ${CMAKE_SOURCE_DIR}/externals
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR}
-                           ${PAGANI_DIR}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${PAGANI_DIR})
 add_test(multi_dimensional_integrator_test multi_dimensional_integrator_test)

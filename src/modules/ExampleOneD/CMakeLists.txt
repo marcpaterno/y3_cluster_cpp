@@ -22,7 +22,6 @@ target_include_directories(ExampleOneDIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
                            ${GSL_INCLUDE_DIRS})
 
 add_executable(test_ExampleOneDIntegrationModule test_ExampleOneDIntegrationModule.cc)
@@ -46,12 +45,11 @@ target_link_libraries(ExampleOneDIntegrand_test
                       ${CUBA_LIBRARIES}
                       ExampleOneDIntegrationModule
                       testmain
-		      ${GSL_LIBRARIES})
+                      ${GSL_LIBRARIES})
 target_include_directories(ExampleOneDIntegrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ExampleOneDIntegrand_test ExampleOneDIntegrand_test)
 

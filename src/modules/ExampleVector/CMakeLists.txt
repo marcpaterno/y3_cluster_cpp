@@ -7,7 +7,6 @@ target_include_directories(example_vector_integrand
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
                            ${GSL_INCLUDE_DIRS})
 
 
@@ -26,8 +25,7 @@ target_include_directories(ExampleVectorIntegrationModule
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
 
 add_executable(test_ExampleVectorIntegrationModule test_ExampleVectorIntegrationModule.cc)
 target_link_libraries(test_ExampleVectorIntegrationModule
@@ -57,7 +55,6 @@ target_include_directories(ExampleVectorIntegrand_test
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${EIGEN3_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/externals)
 add_test(ExampleVectorIntegrand_test ExampleVectorIntegrand_test)
 
@@ -74,8 +71,5 @@ target_include_directories(ExampleVectorIntegration
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBA_INCLUDE_DIR}
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
-
+                           ${GSL_INCLUDE_DIRS})
 

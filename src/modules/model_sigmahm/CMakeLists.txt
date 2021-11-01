@@ -7,8 +7,7 @@ target_include_directories(sigma_nl
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
 
 
 add_library(model_sigmahm MODULE model_sigmahm.cc)
@@ -17,6 +16,5 @@ target_include_directories(model_sigmahm
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
 

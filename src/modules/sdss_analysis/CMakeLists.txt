@@ -7,7 +7,6 @@ target_include_directories(sdss_analysis
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
 
 

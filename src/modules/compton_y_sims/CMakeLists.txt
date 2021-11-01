@@ -7,6 +7,5 @@ target_include_directories(compton_y_sims
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
 

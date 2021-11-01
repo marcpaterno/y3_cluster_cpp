@@ -7,9 +7,7 @@ target_include_directories(y1_analysis
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
-
+                           ${GSL_INCLUDE_DIRS})
 
 
 add_library(y1_analysis_mor MODULE y1_analysis_mor.cc)
@@ -18,5 +16,4 @@ target_include_directories(y1_analysis_mor
                            PRIVATE
                            ${CMAKE_SOURCE_DIR}/src
                            ${CUBACPP_DIR}
-                           ${GSL_INCLUDE_DIRS}
-                           ${EIGEN3_INCLUDE_DIR})
+                           ${GSL_INCLUDE_DIRS})
