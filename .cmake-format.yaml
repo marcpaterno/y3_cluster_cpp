@@ -27,7 +27,7 @@ format:
   disable: false
   _help_line_width:
   - How wide to allow formatted cmake files
-  line_width: 80
+  line_width: 120
   _help_tab_size:
   - How many spaces to tab for indent
   tab_size: 2
@@ -70,7 +70,7 @@ format:
   _help_dangle_parens:
   - If a statement is wrapped to more than one line, than dangle
   - the closing parenthesis on its own line.
-  dangle_parens: true
+  dangle_parens: false
   _help_dangle_align:
   - If the trailing parenthesis must be 'dangled' on its on
   - 'line, then align it to this reference: `prefix`: the start'
@@ -214,7 +214,7 @@ lint:
   max_conditionals_custom_parser: 2
   _help_min_statement_spacing:
   - Require at least this many newlines between statements
-  min_statement_spacing: 1
+  min_statement_spacing: 2
   _help_max_statement_spacing:
   - Require no more than this many newlines between statements
   max_statement_spacing: 2

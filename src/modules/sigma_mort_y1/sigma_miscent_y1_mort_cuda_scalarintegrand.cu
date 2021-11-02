@@ -195,7 +195,7 @@ SigmaMiscentY1CUDAIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
 SigmaMiscentY1CUDAIntegrand::grid_t
 SigmaMiscentY1CUDAIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_grid_points_cartesian_product(
+  return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
     SigmaMiscentY1CUDAIntegrand::module_label(),
     "zo_low",

@@ -1,20 +1,20 @@
+#include "utils/cuda_module_macros.cuh"
+#include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
-#include "utils/make_integration_volumes.hh"
-#include "utils/module_macros.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
-#include "cubacpp/integration_volume.hh"
+#include "cudaPagani/quad/util/Volume.cuh"
 
-#include "models/dv_do_dz_t.hh"
-#include "models/hmf_t.hh"
-#include "models/int_lc_lt_des_t.hh"
-#include "models/int_zo_zt_des_t.hh"
-#include "models/lo_lc_t.hh"
-#include "models/mor_t.hh"
-#include "models/omega_z_des.hh"
-#include "models/roffset_t.hh"
-#include "models/sig_max.hh"
+#include "models/dv_do_dz_t.cuh"
+#include "models/hmf_t.cuh"
+#include "models/int_lc_lt_des_t.cuh"
+#include "models/int_zo_zt_des_t.cuh"
+#include "models/lo_lc_t.cuh"
+#include "models/mor_t.cuh"
+#include "models/omega_z_des.cuh"
+#include "models/roffset_t.cuh"
+#include "models/sig_max.cuh"
 
 #include <iostream>
 #include <optional>
@@ -24,11 +24,11 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// SigmaCentY1MortScalarIntegrand is a class that models the concept of
-// "CosmoSISScalarIntegrand", and is thus suitable for use as the template
+// This is a class that models the concept of
+// "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class SigmaCentY1MortScalarIntegrand {
+class SigmaCentY1CUDAIntegrand {
 public:
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
@@ -38,24 +38,22 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = cubacpp::IntegrationVolume<3>;
+  using volume_t = quad::Volume<double, 3>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
   // <none in this example>
 
   // State obtained from each sample.
-  // If there were a type X that did not have a default constructor,
-  // we would use std::optional<X> as our data member.
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
-  std::optional<y3_cluster::MOR_t> mor;
-  std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
-  std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
-  std::optional<y3_cluster::HMF_t> hmf;
-  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cluster::ROFFSET_t> roffset;
-  std::optional<y3_cluster::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::SIG_MAX> sigma;
+  std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cuda::MOR_t> mor;
+  std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
+  std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
+  std::optional<y3_cuda::HMF_t> hmf;
+  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
+  std::optional<y3_cuda::ROFFSET_t> roffset;
+  std::optional<y3_cuda::LO_LC_t> lo_lc;
+  std::optional<y3_cuda::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -65,7 +63,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit SigmaCentY1MortScalarIntegrand(cosmosis::DataBlock& config);
+  explicit SigmaCentY1CUDAIntegrand(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -79,7 +77,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(double lo, double zt, double lnM) const;
+  __host__ __device__ double operator()(double lo, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -106,7 +104,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-SigmaCentY1MortScalarIntegrand::SigmaCentY1MortScalarIntegrand(DataBlock&)
+SigmaCentY1CUDAIntegrand::SigmaCentY1CUDAIntegrand(DataBlock&)
   : lc_lt()
   , mor()
   , omega_z()
@@ -120,7 +118,7 @@ SigmaCentY1MortScalarIntegrand::SigmaCentY1MortScalarIntegrand(DataBlock&)
 {}
 
 void
-SigmaCentY1MortScalarIntegrand::set_sample(DataBlock& sample)
+SigmaCentY1CUDAIntegrand::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -134,15 +132,15 @@ SigmaCentY1MortScalarIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-SigmaCentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
+SigmaCentY1CUDAIntegrand::set_grid_point(grid_point_t const& grid_point)
 {
   radius_ = grid_point[2];
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
 
-double
-SigmaCentY1MortScalarIntegrand::operator()(double lo,
+__device__ __host__ double
+SigmaCentY1CUDAIntegrand::operator()(double lo,
                                            double zt,
                                            double lnM) const
 {
@@ -156,9 +154,9 @@ SigmaCentY1MortScalarIntegrand::operator()(double lo,
 }
 
 char const*
-SigmaCentY1MortScalarIntegrand::module_label()
+SigmaCentY1CUDAIntegrand::module_label()
 {
-  return "SigmaCentY1MortScalarIntegrand";
+  return "SigmaCentY1CUDAIntegrand";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -168,23 +166,23 @@ SigmaCentY1MortScalarIntegrand::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<SigmaCentY1MortScalarIntegrand::volume_t>
-SigmaCentY1MortScalarIntegrand::make_integration_volumes(
+std::vector<SigmaCentY1CUDAIntegrand::volume_t>
+SigmaCentY1CUDAIntegrand::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
-  return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, SigmaCentY1MortScalarIntegrand::module_label(), "lo", "zt", "lnm");
+  return y3_cuda::make_integration_volumes_wall_of_numbers(
+    cfg, SigmaCentY1CUDAIntegrand::module_label(), "lo", "zt", "lnm");
 }
 
-SigmaCentY1MortScalarIntegrand::grid_t
-SigmaCentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+SigmaCentY1CUDAIntegrand::grid_t
+SigmaCentY1CUDAIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    SigmaCentY1MortScalarIntegrand::module_label(),
+    SigmaCentY1CUDAIntegrand::module_label(),
     "zo_low",
     "zo_high",
     "radii");
 }
 
-DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(SigmaCentY1MortScalarIntegrand)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(SigmaCentY1CUDAIntegrand)
