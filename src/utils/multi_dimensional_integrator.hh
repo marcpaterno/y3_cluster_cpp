@@ -2,8 +2,6 @@
 #define Y3_CLUSTER_UTIL_MULTIDIMENSIONAL_INTEGRATOR
 
 #include "cubacpp/cubacpp.hh"
-#include "vegas/vegasNRC.hh"
-#include "vegas/vegasSeqMcubes.hh"
 #include <cstddef>
 #include <stdexcept>
 #include <tuple>
@@ -45,7 +43,7 @@ namespace y3_cluster {
     void set_maxeval(long long int m);
 
   private:
-    using algs_t = std::tuple<cubacpp::Cuhre, cubacpp::Vegas, cubacpp::Suave, VegasNRC, VegasSEQmcubes>;
+    using algs_t = std::tuple<cubacpp::Cuhre, cubacpp::Vegas, cubacpp::Suave>;
     algs_t algorithms_;
     int which_ = 0;
   };
@@ -60,10 +58,6 @@ inline y3_cluster::MultiDimensionalIntegrator::MultiDimensionalIntegrator(
     which_ = 1;
   else if (name == std::string("suave"))
     which_ = 2;
-  else if(name == std::string("vegasnrc"))
-    which_ = 3;
-  else if(name == std::string("seqmcubes"))
-	  which_ = 4;
   else
     throw std::runtime_error("MultiDimensionalIntegrator::integrate called for "
                              "unrecognized algorithm");
@@ -92,12 +86,6 @@ y3_cluster::MultiDimensionalIntegrator::integrate(int which,
     case 2:
       return std::get<2>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-  case 3:
-    return std::get<3>(algorithms_)
-      .integrate(std::forward<F>(f), epsabs, epsrel);
-  case 4:
-    return std::get<4>(algorithms_)
-      .integrate(std::forward<F>(f), epsabs, epsrel);
   default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -123,12 +111,6 @@ y3_cluster::MultiDimensionalIntegrator::integrate(
     case 2:
       return std::get<2>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel, vol);
-    case 3:
-      return std::get<3>(algorithms_)
-	.integrate(std::forward<F>(f), epsabs, epsrel, vol);
-    case 4:
-      return std::get<4>(algorithms_)
-	.integrate(std::forward<F>(f), epsabs, epsrel, vol);
   default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -151,12 +133,6 @@ y3_cluster::MultiDimensionalIntegrator::integrate(F f,
     case 2:
       return std::get<2>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-  case 3:
-    return std::get<3>(algorithms_)
-      .integrate(std::forward<F>(f), epsabs, epsrel);
-  case 4:
-    return std::get<4>(algorithms_)
-      .integrate(std::forward<F>(f), epsabs, epsrel);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -181,12 +157,6 @@ y3_cluster::MultiDimensionalIntegrator::integrate(
     case 2:
       return std::get<2>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel, vol);
-    case 3:
-      return std::get<3>(algorithms_)
-      .integrate(std::forward<F>(f), epsabs, epsrel, vol);
-    case 4:
-      return std::get<4>(algorithms_)
-      .integrate(std::forward<F>(f), epsabs, epsrel, vol);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -199,7 +169,6 @@ y3_cluster::MultiDimensionalIntegrator::set_maxeval(long long int m)
   std::get<0>(algorithms_).maxeval = m;
   std::get<1>(algorithms_).maxeval = m;
   std::get<2>(algorithms_).maxeval = m; 
-  std::get<4>(algorithms_).maxcalls = m;
 }
 
 #endif

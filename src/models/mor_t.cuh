@@ -7,6 +7,7 @@
 #include <cmath>
 
 namespace y3_cuda {
+
   class MOR_t {
   public:
     MOR_t(mz_power_law lambda, double sigma_i, double alpha)

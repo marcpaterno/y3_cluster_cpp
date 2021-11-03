@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+project(y3_cluster_cpp VERSION 0.4.0 LANGUAGES CXX)
 
 if (USE_CUDA)
-  project(y3_cluster_cpp VERSION 0.4.0 LANGUAGES CXX CUDA)
+  enable_language(CUDA)
+  message("We will build the CUDA modules")
 elseif ()
-  project(y3_cluster_cpp VERSION 0.4.0 LANGUAGES CXX)
+  message("We will not build the CUDA modules")
 endif ()
 
 enable_testing()
