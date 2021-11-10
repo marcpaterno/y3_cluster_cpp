@@ -30,10 +30,10 @@ def execute(block, config):
     data_vector, covmat, ncs, nc_covmat, rad, Redges = config
 
     #read in the model values at this sample point. 
-    profiles_miscent_model = block['SigmaMiscentY1MortScalarIntegrand', "vals"]
-    profiles_cent_model = block['SigmaCentY1MortScalarIntegrand', "vals"]
-    NC_miscent_model = block['NCMiscentY1MortScalarIntegrand', "vals"]
-    NC_cent_model = block['NCCentY1MortScalarIntegrand', "vals"]
+    profiles_miscent_model = block['SigmaMiscentY1CUDAIntegrand', "vals"]
+    profiles_cent_model = block['SigmaCentY1CUDAIntegrand', "vals"]
+    NC_miscent_model = block['NCMiscentY1CUDAIntegrand', "vals"]
+    NC_cent_model = block['NCCentY1CUDAIntegrand', "vals"]
     miscent_fraction = block['cluster_abundance', 'fcen'] 
    
     sigma = profiles_miscent_model/NC_miscent_model * miscent_fraction + (profiles_cent_model/NC_cent_model)*(1-miscent_fraction)
