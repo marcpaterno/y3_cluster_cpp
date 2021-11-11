@@ -65,7 +65,7 @@ def cleanup(config):
 
 def sig_gamma(rad, profiles, xx0):
     ds= np.zeros([profiles.shape[0], len(rad)])
-    print(ds.shape)
+    #print(ds.shape)
     for jj in range(profiles.shape[0]):
         for ii in range(len(rad)):
             ds[jj, ii] = np.trapz(profiles[jj, :ii]*rad[jj, :ii], rad[jj, :ii])*2.0/(rad[ii])**2 - profiles[jj, ii]
@@ -75,18 +75,20 @@ def sig_gamma(rad, profiles, xx0):
 
 def convert_s2ds(rad, profiles, Redges):
     ds= np.zeros([profiles.shape[0], len(rad)])
-    print(ds.shape, profiles.shape)
+    #print(ds.shape, profiles.shape)
     for jj in range(profiles.shape[0]):
         for ii in range(len(rad)):
             ds[jj, ii] = np.trapz(profiles[jj, :ii]*rad[:ii], rad[:ii])*2.0/(rad[ii])**2 - profiles[jj, ii]
 
 
     res = np.zeros([profiles.shape[0], len(Redges)-1])
-    for jj in range(profiles.shape[0]):
-        prof_interp=interp1d(rad, ds[jj, :])
-        prof_func=lambda x: prof_interp(x) * x
-        for ii in range(len(Redges)-1):
-            print(jj, ii, integrate.quad(prof_func, Redges[ii], Redges[ii+1])*2/((Redges[ii+1]**2) - (Redges[ii]**2)))
+    # MFP: Commented out this double loop, because it appears to have no purpose except to print -- and we don't
+    # want the printout in production running.
+    #for jj in range(profiles.shape[0]):
+    #    prof_interp=interp1d(rad, ds[jj, :])
+    #    prof_func=lambda x: prof_interp(x) * x
+    #    for ii in range(len(Redges)-1):
+    #        print(jj, ii, integrate.quad(prof_func, Redges[ii], Redges[ii+1])*2/((Redges[ii+1]**2) - (Redges[ii]**2)))
     return ds, res
 
 
