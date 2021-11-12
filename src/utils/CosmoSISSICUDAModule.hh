@@ -11,6 +11,7 @@
 #include "utils/make_grid_points.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/gpu_integrator.cuh"
+#include "utils/timing_sentry.hh"
 
 #include "cudaPagani/quad/util/Volume.cuh"
 #include "cudaPagani/quad/GPUquad/Pagani.cuh"
