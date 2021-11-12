@@ -7,7 +7,6 @@
 #include "vegas/mcubes.cuh"
 #include "vegas/vegasT.cuh"
 #include "vegas/vegasNRC.cuh" //we can't use the .hh equivalent because that one defiend __device__ __host__ to be empty
-//#include "vegas/vegasNRC.hh"
 #include "vegas/vegasSeqMcubes.hh"
 
 #include <tuple>
@@ -75,6 +74,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::num_algs() const
 {
   return std::tuple_size_v<algs_t>;
 }
+
 
 template <int N>
 template <class F>
