@@ -19,8 +19,7 @@ namespace y3_cluster {
 
   public:
     explicit TimingSentry(std::ostream* os)
-      : os_(os)
-      , start_(std::chrono::steady_clock::now())
+      : os_(os), start_(std::chrono::steady_clock::now())
     {}
 
     ~TimingSentry()
@@ -35,6 +34,5 @@ namespace y3_cluster {
     }
   };
 }
-
 
 #endif
