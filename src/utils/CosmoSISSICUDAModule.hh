@@ -18,6 +18,8 @@
 #include "vegas/vegasT.cuh"
 
 #include <iostream>
+#include <fstream>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -99,6 +101,14 @@ namespace y3_cluster {
     double eps_rel_;
     double eps_abs_;
     bool use_cartesian_product_of_volumes_and_gridpoints_;
+    std::optional<std::ofstream> timing_data_;
+
+    // Give access to the contained ostream (for writing timing data), if
+    // there is one.
+    std::ostream* timing_data_stream_() {
+      if (timing_data_) return &(*timing_data_);
+      return nullptr;
+    }
   };
 } // namespace y3_cluster
 
@@ -123,6 +133,12 @@ try : integrand_(cfg),
     }
   }
   algorithm_.set_maxeval(cfg.view<double>(IntegrandType::module_label(), "max_eval"));
+  std::string timing_filename;
+  auto status = cfg.get_val(IntegrandType::module_label(), "timing_file", timing_filename);
+  if (status == DBS_SUCCESS) {
+      timing_data_.emplace(timing_filename);
+      *timing_data_ << "# integration times in microseconds\n";
+  }
 }
 catch (cosmosis::Exception const& e) {
   std::cerr
@@ -175,8 +191,12 @@ y3_cluster::CosmoSISSICUDAModule<
   for (auto& volume : volumes_) {
     for (auto const& grid_point : grid_points_.points) {
       integrand_.set_grid_point(grid_point);
-      cuhreResult res = 
-        algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
+      // Note: I would be better to have a scope for TimingSentry that just
+      // included the call to algorithm_.integrate, and not also the push_back
+      // of the result; but doing that crashes the nvcc compiler
+      // (build cuda_11.1.TC455_06.29190527_0 of nvcc).
+      TimingSentry sentry(timing_data_stream_());
+      cuhreResult res = algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
       results.push_back(cubacpp::integration_result(
             res.estimate,
             res.errorest,
@@ -198,6 +218,7 @@ y3_cluster::CosmoSISSICUDAModule<
   results.reserve(num_results());
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_points_.points[i]);
+    TimingSentry sentry(timing_data_stream_());
     cuhreResult res = 
       algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volumes_[i]);
      results.push_back(cubacpp::integration_result(
