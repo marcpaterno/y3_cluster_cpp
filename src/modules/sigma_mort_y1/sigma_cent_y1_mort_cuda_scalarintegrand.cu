@@ -10,7 +10,6 @@
 #include "models/hmf_t.cuh"
 #include "models/int_lc_lt_des_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/lo_lc_t.cuh"
 #include "models/mor_t.cuh"
 #include "models/omega_z_des.cuh"
 #include "models/roffset_t.cuh"
@@ -52,7 +51,6 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<y3_cuda::ROFFSET_t> roffset;
-  std::optional<y3_cuda::LO_LC_t> lo_lc;
   std::optional<y3_cuda::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.

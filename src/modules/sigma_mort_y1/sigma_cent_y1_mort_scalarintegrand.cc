@@ -10,7 +10,6 @@
 #include "models/hmf_t.hh"
 #include "models/int_lc_lt_des_t.hh"
 #include "models/int_zo_zt_des_t.hh"
-#include "models/lo_lc_t.hh"
 #include "models/mor_t.hh"
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
@@ -54,7 +53,6 @@ private:
   std::optional<y3_cluster::HMF_t> hmf;
   std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<y3_cluster::ROFFSET_t> roffset;
-  std::optional<y3_cluster::LO_LC_t> lo_lc;
   std::optional<y3_cluster::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.

@@ -8,7 +8,6 @@
 
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
-#include "models/int_lc_lt_des_t.hh"
 #include "models/int_zo_zt_des_t.hh"
 #include "models/lo_lc_t.hh"
 #include "models/mor_t.hh"
@@ -61,7 +60,6 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<INT_LC_LT_DES_t> lc_lt;
   std::optional<MOR_t> mor;
   std::optional<OMEGA_Z_DES> omega_z;
   std::optional<DV_DO_DZ_t> dv_do_dz;
@@ -119,8 +117,7 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 MassMiscentY1MortScalarIntegrand::MassMiscentY1MortScalarIntegrand(DataBlock&)
-  : lc_lt()
-  , mor()
+  : mor()
   , omega_z()
   , dv_do_dz()
   , hmf()
@@ -137,7 +134,6 @@ MassMiscentY1MortScalarIntegrand::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  lc_lt.emplace(sample);
   mor.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
