@@ -6,8 +6,6 @@
 #include "cudaPagani/quad/util/Volume.cuh"
 #include "vegas/mcubes.cuh"
 #include "vegas/vegasT.cuh"
-#include "vegas/vegasNRC.cuh" //we can't use the .hh equivalent because that one defiend __device__ __host__ to be empty
-//#include "vegas/vegasNRC.hh"
 #include "vegas/vegasSeqMcubes.hh"
 
 #include <tuple>
@@ -60,8 +58,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::MultiDimensionalIntegrator(
     which_ = 0;
   else if (name == std::string("mcubes"))
     which_ = 1;
-  else if(name == std::string("vegasnrc"))
-    which_ = 2;
   else if(name == std::string("seqmcubes"))
     which_ = 3;
   else
@@ -91,9 +87,9 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 2:
-      return std::get<2>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel);
+    //case 2:
+    //  return std::get<2>(algorithms_)
+    //    .integrate(std::forward<F>(f), epsabs, epsrel);
     case 3:
       return std::get<3>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
@@ -140,9 +136,9 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(F f,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 2:
-      return std::get<2>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel);
+    //case 2:
+    //  return std::get<2>(algorithms_)
+    //    .integrate(std::forward<F>(f), epsabs, epsrel);
     case 3:
       return std::get<3>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
@@ -172,12 +168,12 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
       return x;
       break;
   }
-  case 2:{
+  /*case 2:{
     auto x = std::get<2>(algorithms_)
         .integrate(f, epsabs, epsrel, vol);
       return x;
       break;
-  }
+  }*/
 
   case 3:{
     auto x = std::get<3>(algorithms_)
