@@ -12,9 +12,9 @@
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/gpu_integrator.cuh"
 
-#include "cudaPagani/quad/util/Volume.cuh"
-#include "cudaPagani/quad/GPUquad/Pagani.cuh"
-#include "vegas/vegasT.cuh"
+#include "cuda/cudaPagani/quad/util/Volume.cuh"
+#include "cuda/cudaPagani/quad/GPUquad/Pagani.cuh"
+#include "cuda/mcubes/vegasT.cuh"
 
 #include <iostream>
 #include <stdexcept>

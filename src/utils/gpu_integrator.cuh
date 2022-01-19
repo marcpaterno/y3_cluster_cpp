@@ -2,11 +2,11 @@
 #define Y3_CLUSTER_UTIL_CUDA_INTEGRATOR_CUH
 
 #include "cubacpp/arity.hh"
-#include "cudaPagani/quad/GPUquad/Pagani.cuh"
-#include "cudaPagani/quad/util/Volume.cuh"
-#include "vegas/mcubes.cuh"
-#include "vegas/vegasT.cuh"
-#include "vegas/vegasSeqMcubes.hh"
+#include "cuda/cudaPagani/quad/GPUquad/Pagani.cuh"
+#include "cuda/cudaPagani/quad/util/Volume.cuh"
+#include "cuda/mcubes/mcubes.cuh"
+#include "cuda/mcubes/vegasT.cuh"
+#include "cuda/mcubes/vegasSeqMcubes.hh"
 
 #include <tuple>
 
@@ -87,9 +87,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    //case 2:
-    //  return std::get<2>(algorithms_)
-    //    .integrate(std::forward<F>(f), epsabs, epsrel);
     case 3:
       return std::get<3>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
@@ -136,9 +133,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(F f,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    //case 2:
-    //  return std::get<2>(algorithms_)
-    //    .integrate(std::forward<F>(f), epsabs, epsrel);
     case 3:
       return std::get<3>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
@@ -168,12 +162,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
       return x;
       break;
   }
-  /*case 2:{
-    auto x = std::get<2>(algorithms_)
-        .integrate(f, epsabs, epsrel, vol);
-      return x;
-      break;
-  }*/
 
   case 3:{
     auto x = std::get<3>(algorithms_)

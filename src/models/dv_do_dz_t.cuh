@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_DV_DO_DZ_T_CUH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cudaPagani/quad/GPUquad/Interp1D.cuh"
+#include "cuda/cudaPagani/quad/GPUquad/Interp1D.cuh"
 #include "ez.cuh"
 #include "utils/datablock_reader.hh"
 #include "utils/make_interp_1d.cuh"

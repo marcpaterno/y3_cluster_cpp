@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_CPP_HMF_T_CUH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cudaPagani/quad/GPUquad/Interp2D.cuh"
+#include "cuda/cudaPagani/quad/GPUquad/Interp2D.cuh"
 
 #include <vector>
 
