@@ -7,6 +7,7 @@ import scipy.special
 import cluster_toolkit as ct
 from scipy import optimize
 section_name="y1_analysis"
+import matplotlib.pyplot as plt
 
 def setup(options):
     section = option_section
@@ -35,8 +36,13 @@ def execute(block, config):
             for ii in range(len(l_low)):
                for jj in range(len(z_low)):
                 outf.write('%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n'%(l_low[ii], l_high[ii], z_low[jj], z_high[jj], teo_nc[jj, ii], nn[ii, jj]/(l_high[ii]-l_low[ii]), teo_logm[jj, ii], logM[ii, jj]))
-
-
+        dat=np.genfromtxt(outfile)
+        plt.plot(dat[:, 0], dat[:, 4], 'ko')
+        plt.plot(dat[:, 0], dat[:, 5], 'ro')
+        plt.show()
+        plt.plot(dat[:, 0], dat[:, 6], 'ks')
+        plt.plot(dat[:, 0], dat[:, 7], 'rs')
+        plt.show()
         return 0
 
 
