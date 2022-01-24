@@ -64,6 +64,7 @@ def execute(block, config):
         loglike1 = -0.5 * np.dot(delta, np.dot(weight, delta))
         print("theory vector M and NC:", theory_M, theory_nc)
         print("Data vector M and Corr:", M_data, corr)
+        print("Data vector NC:", nc_data)
   
         '''
         delta2 = mass_data - theory_M
