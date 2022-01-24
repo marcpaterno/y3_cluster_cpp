@@ -70,7 +70,8 @@ def execute(block, config):
         weight = np.linalg.inv(covmat)
         loglike1 = -0.5 * np.dot(delta, np.dot(weight, delta))
         print("theory vector M and NC:", theory_M, theory_nc)
-        print("Data vector M and Corr:", M_data, corr)
+        print("theory NC cent, miscent:", nncent, nnMiscent)
+        print("Data vector M and Corr:", M_data, nc_data)
   
         '''
         delta2 = mass_data - theory_M
