@@ -81,7 +81,7 @@ def any_model_too_small(small, *models):
 
     Return True if any entry is too small, and False otherwise.
     """
-    for model in *models:
+    for model in models:
         if np.any(model < small):
             return True
     return False
