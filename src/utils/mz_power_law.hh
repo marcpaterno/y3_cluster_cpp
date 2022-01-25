@@ -36,7 +36,9 @@ inline double
 y3_cluster::mz_power_law::operator()(double lnM, double z) const noexcept
 {
   double const log_res = B_ * lnM + C_ * std::log1p(z) + log_A_;
-  // std::cout << log_res << " " << lnM << " " << log_A_<<"\n";
+#ifdef DEBUG_PRINT
+  printf("mz_power_law %.17e %.17e %.17e %.17e %.17e %.17e\n", lnM, z, log_A_, B_, C_, log_res);
+#endif  
   return std::exp(log_res);
 }
 #endif

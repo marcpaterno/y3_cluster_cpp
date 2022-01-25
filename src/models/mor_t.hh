@@ -32,7 +32,12 @@ namespace y3_cluster {
       double const x = lt - ltm;
       double const erfarg = -1.0 * _alpha * (x) / (std::sqrt(2.) * _sigma);
       double const erfterm = std::erfc(erfarg);
-      return y3_cluster::gaussian(x, 0.0, _sigma) * erfterm;
+      double const res = y3_cluster::gaussian(x, 0.0, _sigma) * erfterm;
+#ifdef DEBUG_PRINT
+      printf("mor_t %.17e %.17e %.17e %.17e %.17e %.17e %.17e\n",
+          lt, lnM, zt, ltm, _sigma, erfterm, res);
+#endif
+      return res;
     }
 
   private:

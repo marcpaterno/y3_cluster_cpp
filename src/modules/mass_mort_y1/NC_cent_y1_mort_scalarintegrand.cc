@@ -154,9 +154,14 @@ NCCentY1MortScalarIntegrand::operator()(double lo, double zt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
+  double const mor_v = (*mor)(lo, lnM, zt);
+
   double common_term =
-    (*mor)(lo, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+    mor_v * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+#ifdef DEBUG_PRINT
+  printf("nc %.17e %.17e %.17e %.17e %.17e\n", lo, lnM, zt, mor_v, val);
+#endif
   return val;
 }
 
