@@ -44,7 +44,7 @@ namespace y3_cuda {
     void set_maxeval(double m);
 
   private:
-    using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes, quad::vegasNRC, VegasSEQmcubes>;
+    using algs_t = std::tuple<quad::Pagani<double, ndim>, quad::mcubes, VegasSEQmcubes>;
     algs_t algorithms_;
     int which_ = 0;
   };
@@ -59,7 +59,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::MultiDimensionalIntegrator(
   else if (name == std::string("mcubes"))
     which_ = 1;
   else if(name == std::string("seqmcubes"))
-    which_ = 3;
+    which_ = 2;
   else
     throw std::runtime_error("MultiDimensionalIntegrator::integrate called for "
                              "unrecognized algorithm");
@@ -87,7 +87,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 3:
+    case 2:
       return std::get<3>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
   default:
@@ -113,6 +113,9 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel, vol);
+    case 2:
+      return std::get<2>(algorithms_)
+        .integrate(std::forward<F>(f), epsabs, epsrel, vol);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -133,7 +136,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(F f,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 3:
+    case 2:
       return std::get<3>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
     
@@ -163,8 +166,8 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
       break;
   }
 
-  case 3:{
-    auto x = std::get<3>(algorithms_)
+  case 2:{
+    auto x = std::get<2>(algorithms_)
         .integrate(f, epsabs, epsrel, vol);
       return x;
       break;
@@ -183,8 +186,9 @@ y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval(double m)
     throw std::runtime_error("MultiDimensionalIntegrator: maxcalls can not be negative\n");
   }
 
+  // PAGANI does not use maxcalls
   std::get<1>(algorithms_).maxcalls = static_cast<long long>(m);
-  std::get<3>(algorithms_).maxcalls = static_cast<unsigned long>(m);
+  std::get<2>(algorithms_).maxcalls = static_cast<unsigned long>(m);
 }
 
 #endif

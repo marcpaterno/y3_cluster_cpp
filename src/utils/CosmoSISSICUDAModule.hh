@@ -144,9 +144,7 @@ catch (cosmosis::Exception const& e) {
   std::cerr
     << "\nDuring construction of a CosmoSISSICUDAModule, the "
        "lookup of some parameter"
-    << "\nfailed. It may be a wrong name, or a wrong type.\n"
-    << e
-    << '\n';
+    << "\nfailed. It may be a wrong name, or a wrong type.\n";
 }
 catch (std::exception const& e) {
   std::cerr << "\nDuring construction of a CosmoSISSICUDAModule, an "
