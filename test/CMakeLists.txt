@@ -5,6 +5,36 @@ target_include_directories(
   testmain PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/externals
   )
 
+# Use of CUDA is optional
+
+if (USE_CUDA)
+add_executable(
+  timing_sentry_cuda_test timing_sentry_test.cu
+  )
+target_link_libraries(
+  timing_sentry_cuda_test PRIVATE testmain
+  )
+target_include_directories(
+  timing_sentry_cuda_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals
+  )
+set_target_properties(timing_sentry_cuda_test
+  PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH}
+  )
+target_compile_options(timing_sentry_cuda_test PRIVATE "--expt-relaxed-constexpr")
+add_test(timing_sentry_cuda_test timing_sentry_cuda_test)
+endif()
+
+add_executable(
+  timing_sentry_test timing_sentry_test.cc
+  )
+target_link_libraries(
+  timing_sentry_test PRIVATE testmain
+  )
+target_include_directories(
+  timing_sentry_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals
+  )
+add_test(timing_sentry_test timing_sentry_test)
+
 add_executable(
   get_grid_axes_from_datablock_test get_grid_axes_from_datablock.test.cc
   )

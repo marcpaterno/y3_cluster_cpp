@@ -61,14 +61,14 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<INT_LC_LT_DES_t> lc_lt;
-  std::optional<MOR_DES_t> mor;
-  std::optional<OMEGA_Z_DES> omega_z;
-  std::optional<DV_DO_DZ_t> dv_do_dz;
-  std::optional<HMF_t> hmf;
-  std::optional<INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<ROFFSET_t> roffset;
-  std::optional<LO_LC_t> lo_lc;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::MOR_DES_t> mor;
+  std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
+  std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
+  std::optional<y3_cluster::HMF_t> hmf;
+  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
+  std::optional<y3_cluster::ROFFSET_t> roffset;
+  std::optional<y3_cluster::LO_LC_t> lo_lc;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -154,9 +154,14 @@ NCCentY1MortScalarIntegrand::operator()(double lo, double zt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
+  double const mor_v = (*mor)(lo, lnM, zt);
+
   double common_term =
-    (*mor)(lo, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+    mor_v * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+#ifdef DEBUG_PRINT
+  printf("nc %.17e %.17e %.17e %.17e %.17e\n", lo, lnM, zt, mor_v, val);
+#endif
   return val;
 }
 
