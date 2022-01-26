@@ -124,7 +124,7 @@ ggplot(omega_z) +
 ```{r fig.cap = "Relative residual between our implementation results and the expected values. Blue horizontal lines are the error tolerance bounds. Blue points pass, and red points fail, the absolute residual test."}
 ggplot(omega_z, aes(x = z, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab(expression(z)) +
   ylab("fractional residual") +
@@ -190,7 +190,7 @@ ggplot(hmf) +
 ```{r fig.asp=0.4,fig.cap = "Relative residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(hmf, aes(x = mass, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab(expression(M)) +
   ylab("fractional residual") +
   geom_hline(yintercept = local.frac.errormargin, color = "blue") +
@@ -247,7 +247,7 @@ ggplot(dvdodz) +
 ```{r fig.cap = "Relative residual comparison or implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(dvdodz, aes(x = z, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   ylim(-local.frac.errormargin, local.frac.errormargin) +
   xlab(expression(z)) +
   ylab("fractional residual") +
@@ -311,7 +311,7 @@ ggplot(mor_t2) +
 ```{r fig.asp=0.4,fig.cap = "Relative residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(mor_t2, aes(x = lambda, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab(expression(lambda)) +
   ylab("fractional residual") +
   geom_hline(yintercept = local.frac.errormargin, color = "blue") +
@@ -323,7 +323,7 @@ ggplot(mor_t2, aes(x = lambda, y = fracerr, color = within.abs)) +
 ```{r fig.asp=0.4, fig.cap = "Absolute residual comparison of our approximation to the expected results for MOR. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
 ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   geom_hline(yintercept = local.abs.errormargin, color = "blue") +
   geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
   ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
@@ -385,7 +385,7 @@ ggplot(lc_lt) +
 ```{r fig.asp=0.7, fig.cap = "Relative residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(lc_lt, aes(x = lambda_cen, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab(expression(lambda_c)) +
   ylab("fractional residual") +
   geom_hline(yintercept = local.frac.errormargin, color = "blue") +
@@ -397,7 +397,7 @@ ggplot(lc_lt, aes(x = lambda_cen, y = fracerr, color = within.abs)) +
 ```{r fig.asp=0.7, fig.cap = "Absolute residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
 ggplot(lc_lt, aes(x= lambda_cen, y = resid, color = within.frac)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   geom_hline(yintercept = local.abs.errormargin, color = "blue") +
   geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
   ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
@@ -461,7 +461,7 @@ ggplot(lo_lc) +
 ```{r fig.asp=0.7, fig.cap = "Relative residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(lo_lc, aes(x = deltal, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab(expression(lambda_miscent/lambda_cent)) +
   ylab("fractional residual") +
   geom_hline(yintercept = local.frac.errormargin, color = "blue") +
@@ -473,7 +473,7 @@ ggplot(lo_lc, aes(x = deltal, y = fracerr, color = within.abs)) +
 ```{r fig.asp = 0.7, fig.cap = "Absolute residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
 ggplot(lo_lc, aes(x= deltal, y = resid, color = within.frac)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   geom_hline(yintercept = local.abs.errormargin, color = "blue") +
   geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
   ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
@@ -534,7 +534,7 @@ ggplot(inte) +
 ```{r fig.cap = "Relative residual implementation or our approximation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
   geom_point() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   scale_x_log10() +
   xlab("richness") +
   ylab("fractional residual for number counts") +
@@ -556,7 +556,7 @@ ggplot(inte) +
 ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
   geom_point() +
   scale_x_log10() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab("richness") +
   ylab("fractional residual for average mass") +
    ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
@@ -619,7 +619,7 @@ ggplot(inte) +
 ggplot(inte, aes(x = lambda, y = fracerrn, color = within.abs)) +
   geom_point() +
   scale_x_log10() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab("richness") +
   ylab("fractional residual for number counts") +
    ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
@@ -642,7 +642,7 @@ ggplot(inte) +
 ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
   geom_point() +
   scale_x_log10() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab("richness") +
   ylab("fractional residual for average mass") +
    ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
@@ -718,7 +718,7 @@ ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0),
       aes(x = r, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   xlab(expression(r)) +
   ylab("fractional residual") +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
@@ -786,7 +786,7 @@ ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0),
        aes(x = r, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   #ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab(expression(r)) +
   ylab("fractional residual") +
@@ -847,7 +847,7 @@ ggplot(sig_nfw) +
 ggplot(sig_nfw, aes(x = r, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab("R [Mpc/h]") +
   ylab("fractional residual") +
@@ -909,7 +909,7 @@ ggplot(sig_nfw) +
 ggplot(sig_nfw, aes(x = r, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
   scale_x_log10() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab("R [Mpc/h]") +
   ylab("fractional residual") +
@@ -974,7 +974,7 @@ ggplot(bias) +
 ```{r, fig.cap = "Relative residual implementation of our approximation to the expected results. Blue points pass, and red points fail, the absolute residual test.", warning = FALSE}
 ggplot(bias, aes(x = logmass, y = fracerr, color = within.abs)) +
   geom_point() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   scale_y_log10() +
   xlab("Log M200m") +
   ylab("fractional residual") +
@@ -1035,7 +1035,7 @@ ggplot(miscent) +
 ```{r fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test."}
 ggplot(miscent, aes(x = rmis, y = fracerr, color = within.abs)) +
   geom_point() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   xlab(expression(R_mis)) +
   ylab("fractional residual") +
@@ -1100,7 +1100,7 @@ ggplot(sig_crit) +
 ```{r fig.asp=0.7, fig.cap = "Absolute residual comparison of our implementation to the expected results. Blue points pass, and red points fail, the relative residual test.", warning = FALSE}
 ggplot(sig_crit, aes(x= zs, y = resid, color = within.frac)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   geom_hline(yintercept = local.abs.errormargin, color = "blue") +
   geom_hline(yintercept = -1 * local.abs.errormargin, color = "blue") +
   ylim(-2 * local.abs.errormargin, 2 * local.abs.errormargin) +
@@ -1111,7 +1111,7 @@ ggplot(sig_crit, aes(x= zs, y = resid, color = within.frac)) +
 ```{r fig.asp=0.7, fig.cap = "Relative residual comparison or our implementation to the expected results. Points in blue pass, and points in red fail, the absolute residual test. In this plot, the relative residual is forced to be 0 when both the true and test values are 0, as is the case when zs <= zl"}
 ggplot(sig_crit, aes(x = zs, y = fracerr, color = within.abs)) +
   geom_smallpoint() +
-  guides(color = FALSE) +
+  guides(color = "none") +
   geom_hline(yintercept = local.frac.errormargin, color="blue") +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")+
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
