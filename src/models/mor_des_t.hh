@@ -6,8 +6,8 @@
 #include "utils/mz_power_law.hh"
 #include "utils/primitives.hh"
 
+#include <array>
 #include <cmath>
-#include <string>
 
 namespace y3_cluster {
 
