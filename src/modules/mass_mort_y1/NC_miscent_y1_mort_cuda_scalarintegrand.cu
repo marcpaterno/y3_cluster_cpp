@@ -11,7 +11,7 @@
 #include "models/int_lc_lt_des_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/lo_lc_t.cuh"
-#include "models/mor_t.cuh"
+#include "models/mor_des_t.cuh"
 #include "models/omega_z_des.cuh"
 #include "models/roffset_t.cuh"
 #include "models/sig_sum.cuh"
@@ -24,11 +24,11 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// NCMiscentY1CUDAIntegrand is a class that models the concept of
+// NCMiscentY1MortCUDAScalarIntegrand is a class that models the concept of
 // "CosmoSISCUDAIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class NCMiscentY1CUDAIntegrand {
+class NCMiscentY1MortCUDAScalarIntegrand {
 public:
   using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
@@ -46,7 +46,7 @@ private:
 
   // State obtained from each sample.
   std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
-  std::optional<y3_cuda::MOR_t> mor;
+  std::optional<y3_cuda::MOR_DES_t> mor;
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
@@ -61,7 +61,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit NCMiscentY1CUDAIntegrand(cosmosis::DataBlock& config);
+  explicit NCMiscentY1MortCUDAScalarIntegrand(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -106,7 +106,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-NCMiscentY1CUDAIntegrand::NCMiscentY1CUDAIntegrand(DataBlock&)
+NCMiscentY1MortCUDAScalarIntegrand::NCMiscentY1MortCUDAScalarIntegrand(DataBlock&)
   : lc_lt()
   , mor()
   , omega_z()
@@ -120,7 +120,7 @@ NCMiscentY1CUDAIntegrand::NCMiscentY1CUDAIntegrand(DataBlock&)
 {}
 
 void
-NCMiscentY1CUDAIntegrand::set_sample(DataBlock& sample)
+NCMiscentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -135,18 +135,18 @@ NCMiscentY1CUDAIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-NCMiscentY1CUDAIntegrand::set_grid_point(grid_point_t grid_point)
+NCMiscentY1MortCUDAScalarIntegrand::set_grid_point(grid_point_t grid_point)
 {
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
 
 __device__ __host__ double
-NCMiscentY1CUDAIntegrand::operator()(double lo,
-                                           double lc,
-                                           double zt,
-                                           double lnM,
-                                           double rmis) const
+NCMiscentY1MortCUDAScalarIntegrand::operator()(double lo,
+                                               double lc,
+                                               double zt,
+                                               double lnM,
+                                               double rmis) const
 {
   double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
                        (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
@@ -156,18 +156,18 @@ NCMiscentY1CUDAIntegrand::operator()(double lo,
 }
 
 char const*
-NCMiscentY1CUDAIntegrand::module_label()
+NCMiscentY1MortCUDAScalarIntegrand::module_label()
 {
-  return "NCMiscentY1CUDAIntegrand";
+  return "NCMiscentY1MortCUDAScalarIntegrand";
 }
 
-std::vector<NCMiscentY1CUDAIntegrand::volume_t>
-NCMiscentY1CUDAIntegrand::make_integration_volumes(
+std::vector<NCMiscentY1MortCUDAScalarIntegrand::volume_t>
+NCMiscentY1MortCUDAScalarIntegrand::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg,
-    NCMiscentY1CUDAIntegrand::module_label(),
+    NCMiscentY1MortCUDAScalarIntegrand::module_label(),
     "lo",
     "lc",
     "zt",
@@ -175,11 +175,11 @@ NCMiscentY1CUDAIntegrand::make_integration_volumes(
     "rmis");
 }
 
-NCMiscentY1CUDAIntegrand::grid_t
-NCMiscentY1CUDAIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+NCMiscentY1MortCUDAScalarIntegrand::grid_t
+NCMiscentY1MortCUDAScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, NCMiscentY1CUDAIntegrand::module_label(), "zo_low", "zo_high");
+    cfg, NCMiscentY1MortCUDAScalarIntegrand::module_label(), "zo_low", "zo_high");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(NCMiscentY1CUDAIntegrand)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(NCMiscentY1MortCUDAScalarIntegrand)

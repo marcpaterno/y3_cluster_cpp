@@ -229,8 +229,8 @@ namespace y3_cuda {
         0.005605, 0.004194, 0.004040, 0.004002, 0.004299, 0.004607, 0.004030,
         0.003770, 0.002902, 0.003709, 0.002591, 0.001857, 0.002333, 0.002402}}};
 
-    static quad::Interp2D const sig_interp;
-    static quad::Interp2D const skews_interp;
+    quad::Interp2D _sig_interp;
+    quad::Interp2D _skews_interp;
 
     double _A;
     double _B;
@@ -255,7 +255,9 @@ namespace y3_cuda {
     {}
 
     explicit MOR_DES_t(cosmosis::DataBlock& sample)
-      : _A(sample.view<double>("cluster_abundance", "mor_A"))
+      : _sig_interp(test_sigintr, test_lsat, sig_skewnorml_flat)
+      , _skews_interp(test_sigintr, test_lsat, skews )
+      , _A(sample.view<double>("cluster_abundance", "mor_A"))
       , _B(sample.view<double>("cluster_abundance", "mor_B"))
       , _C(sample.view<double>("cluster_abundance", "mor_alpha"))
       , _sigma_intr(sample.view<double>("cluster_abundance", "mor_sigma"))
@@ -275,8 +277,8 @@ namespace y3_cuda {
       // Computing sigma from the interpolation
       // ltm is lambda_true_given_M; _sigma_intr is sigma_intrisic
 
-      double const _sigma = sig_interp.clamp(_sigma_intr, ltm);
-      double const _skw = skews_interp.clamp(_sigma_intr, ltm);
+      double const _sigma = _sig_interp.clamp(_sigma_intr, ltm);
+      double const _skw = _skews_interp.clamp(_sigma_intr, ltm);
 
       // Eq. B1 of Matteo's paper, adding the normalization part
       double const x = lt - ltm;
@@ -286,10 +288,5 @@ namespace y3_cuda {
     }
   };
 }
-
-quad::Interp2D const y3_cuda::MOR_DES_t::sig_interp =
-  quad::Interp2D(test_sigintr, test_lsat, sig_skewnorml_flat);
-quad::Interp2D const y3_cuda::MOR_DES_t::skews_interp =
-  quad::Interp2D(test_sigintr, test_lsat, skews);
 
 #endif
