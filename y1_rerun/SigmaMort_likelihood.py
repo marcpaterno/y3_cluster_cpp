@@ -32,11 +32,21 @@ def execute(block, config):
     data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err = config
 
     #read in the model values at this sample point.
-     
-    profiles_miscent_model = block['SigmaMiscentY1MortScalarIntegrand', "vals"]
-    profiles_cent_model = block['SigmaCentY1MortScalarIntegrand', "vals"]
-    NC_miscent_model = block['NCMiscentY1MortScalarIntegrand', "vals"]
-    NC_cent_model = block['NCCentY1MortScalarIntegrand', "vals"]
+    # We look for CUDA algorithm results first; if that fails, we look for CPU-based
+    # algorithm results. If that fails the module fails. This implementation assumes
+    # that we are either using all CUDA algorithms or all CPU algorithms. If that is
+    # not sufficient, we need a slightly more complex bit of logic here.
+    try:
+        profiles_miscent_model = block['SigmaMiscentY1MortCUDAScalarIntegrand', "vals"]
+        profiles_cent_model = block['SigmaCentY1MortCUDAScalarIntegrand', "vals"]
+        NC_miscent_model = block['NCMiscentY1MortCUDAScalarIntegrand', "vals"]
+        NC_cent_model = block['NCCentY1MortCUDAScalarIntegrand', "vals"]
+    except:
+        profiles_miscent_model = block['SigmaMiscentY1MortScalarIntegrand', "vals"]
+        profiles_cent_model = block['SigmaCentY1MortScalarIntegrand', "vals"]
+        NC_miscent_model = block['NCMiscentY1MortScalarIntegrand', "vals"]
+        NC_cent_model = block['NCCentY1MortScalarIntegrand', "vals"]
+
     miscent_fraction = block['cluster_abundance', 'fcen'] 
     
     '''
