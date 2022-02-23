@@ -11,6 +11,7 @@
 #include "utils/make_grid_points.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/gpu_integrator.cuh"
+#include "utils/mpi_support.hh"
 #include "utils/timing_sentry.hh"
 
 #include "cuda/cudaPagani/quad/util/Volume.cuh"
@@ -25,6 +26,30 @@
 
 
 namespace y3_cluster {
+
+  // DeviceInitializer initializes a CUDA device upon construction.
+  struct DeviceInitializer {
+    int id = 0;
+
+    DeviceInitializer(mpi_info const& info) : id(info.local_rank) {
+      int ndevices_on_node = 0;
+      int rc = cudaGetDeviceCount(&ndevices_on_node);
+      if (rc != cudaSuccess) {
+        throw std::runtime_error("Failed to get CUDA device count.\n");
+      }
+      if (info.local_rank >= ndevices_on_node) {
+        throw std::runtime_error("Tried to allocate too many devices on node.\n");
+      }
+      rc = cudaSetDevice(id);
+      if (rc != cudaSuccess) {
+        std::cerr << "Failed to initialize CUDA device\n"
+          << "MPI info: " << info << '\n';
+        throw std::runtime_error("Failed to set CUDA device\n");
+      }
+    }
+  };
+
+
   // CosmoSISSICUDAModule is a class template used to create a class
   // that is a CosmoSIS physics module, and which, for each CosmoSIS sample,
   // calculates the definite integral of a scalar-valued function.
@@ -93,7 +118,15 @@ namespace y3_cluster {
     void finalize_sample_zipped_sequence_of_volumes_and_gridpoints(
       cosmosis::DataBlock& sample,
       std::vector<integration_results_t> const& results) const;
+    
+    // Give access to the contained ostream (for writing timing data), if
+    // there is one.
+    std::ostream* timing_data_stream_() {
+      if (timing_data_) return &(*timing_data_);
+      return nullptr;
+    }
 
+    DeviceInitializer device_;
     IntegrandType integrand_;
     y3_cuda::MultiDimensionalIntegrator<ndim> algorithm_;
     std::vector<volume_t> volumes_;
@@ -102,20 +135,16 @@ namespace y3_cluster {
     double eps_abs_;
     bool use_cartesian_product_of_volumes_and_gridpoints_;
     std::optional<std::ofstream> timing_data_;
-
-    // Give access to the contained ostream (for writing timing data), if
-    // there is one.
-    std::ostream* timing_data_stream_() {
-      if (timing_data_) return &(*timing_data_);
-      return nullptr;
-    }
-  };
+    mpi_info mpi_info_;
+ };
 } // namespace y3_cluster
 
 template <typename I>
 y3_cluster::CosmoSISSICUDAModule<I>::CosmoSISSICUDAModule(
   cosmosis::DataBlock& cfg)
-try : integrand_(cfg),
+try :
+   device_(get_mpi_info()),
+   integrand_(cfg),
     // The c'tor for algorithm_ will get adjusted at some later date...
 	algorithm_(cfg.view<std::string>(IntegrandType::module_label(), "algorithm")),
   volumes_(IntegrandType::make_integration_volumes(cfg)),
@@ -124,6 +153,7 @@ try : integrand_(cfg),
   eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")),
   use_cartesian_product_of_volumes_and_gridpoints_(
     cfg.view<bool>(IntegrandType::module_label(), "use_cartesian_product")) {
+    // Check validity of configuration of volumes and gridpoints.
   if (not use_cartesian_product_of_volumes_and_gridpoints_) {
     if (volumes_.size() != grid_points_.size()) {
       throw std::runtime_error(
@@ -132,19 +162,24 @@ try : integrand_(cfg),
         "but the number of volumes did not equal the number of gridpoints.\n");
     }
   }
-  algorithm_.set_maxeval(cfg.view<double>(IntegrandType::module_label(), "max_eval"));
+  // Set up timing if requested.
   std::string timing_filename;
   auto status = cfg.get_val(IntegrandType::module_label(), "timing_file", timing_filename);
   if (status == DBS_SUCCESS) {
       timing_data_.emplace(timing_filename);
       *timing_data_ << "# integration times in microseconds\n";
   }
+  algorithm_.set_maxeval(cfg.view<double>(IntegrandType::module_label(), "max_eval"));
+  cfg.print_log();
+  mpi_info_ = get_mpi_info();
 }
 catch (cosmosis::Exception const& e) {
   std::cerr
-    << "\nDuring construction of a CosmoSISSICUDAModule, the "
-       "lookup of some parameter"
+    << "\nDuring construction of a CosmoSISSICUDAModule with label:  "
+    << IntegrandType::module_label()
+    << ", the lookup of some parameter"
     << "\nfailed. It may be a wrong name, or a wrong type.\n";
+  cfg.print_log();
 }
 catch (std::exception const& e) {
   std::cerr << "\nDuring construction of a CosmoSISSICUDAModule, an "
@@ -162,6 +197,14 @@ void
 y3_cluster::CosmoSISSICUDAModule<I>::execute(
   cosmosis::DataBlock& sample)
 {
+  // Is this call to cudaSetDevice really necessary? Since our MPI rank
+  // is connected to a specific GPU at construction time, unless the
+  // module *moves to a new rank*, this can not get out of sync. A new
+  // rank would be a different OS process -- objects do not migrate like
+  // that.
+  auto rc = cudaSetDevice(device_.id);
+  if (rc != 0) throw std::runtime_error("Failed to allocate GPU!\n");
+
   integrand_.set_sample(sample);
   auto results = use_cartesian_product_of_volumes_and_gridpoints_ ?
                    integrate_cartesian_product_of_volumes_and_gridpoints() :
@@ -198,7 +241,7 @@ y3_cluster::CosmoSISSICUDAModule<
       results.push_back(cubacpp::integration_result(
             res.estimate,
             res.errorest,
-            0.0,    // probability not returned by PAGANI
+            res.chi_sq,
             static_cast<long long>(res.neval),
             static_cast<int>(res.nregions),
             static_cast<int>(res.status)));

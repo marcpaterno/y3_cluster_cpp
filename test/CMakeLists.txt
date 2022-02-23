@@ -1,9 +1,15 @@
 include_directories($ENV{COSMOSIS_SRC_DIR} ${GSL_INCLUDE_DIRS} ${VEGAS_DIR})
 link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
+
 add_library(testmain SHARED main.cc)
 target_include_directories(
   testmain PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/externals
   )
+add_library(mpi_testmain SHARED mpi_main.cc)
+target_include_directories(
+  mpi_testmain PRIVATE ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/externals
+  )
+target_link_libraries(mpi_testmain PRIVATE MPI::MPI_CXX)
 
 # Use of CUDA is optional
 
@@ -23,6 +29,22 @@ set_target_properties(timing_sentry_cuda_test
 target_compile_options(timing_sentry_cuda_test PRIVATE "--expt-relaxed-constexpr")
 add_test(timing_sentry_cuda_test timing_sentry_cuda_test)
 endif()
+
+add_executable(
+  mpi_support_test mpi_support_test.cc
+  )
+target_link_libraries(
+  mpi_support_test PRIVATE utils testmain
+  )
+target_include_directories(
+  mpi_support_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals
+  )
+add_test(mpi_support_test mpi_support_test)
+
+add_executable(mpi_mpi_support_test mpi_mpi_support_test.cc)
+target_link_libraries(mpi_mpi_support_test PRIVATE utils mpi_testmain)
+target_include_directories(mpi_mpi_support_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals)
+add_mpi_test(mpi_mpi_support_test 2)
 
 add_executable(
   timing_sentry_test timing_sentry_test.cc

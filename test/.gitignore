@@ -65,3 +65,7 @@ get_grid_axes_from_datablock_test
 make_grid_cartesian_product_test
 make_grid_points_cartesian_product_test
 make_grid_splatted_test
+mpi_mpi_support_test
+mpi_support_test
+timing_sentry_cuda_test
+timing_sentry_test

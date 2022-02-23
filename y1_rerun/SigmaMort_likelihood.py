@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 from scipy import integrate
 from scipy.interpolate import interp1d
 
+from mpi4py import MPI
+
 def setup(options):
+    print(f"In SigmaMort_likelihood.setup: mpi rank is {MPI.COMM_WORLD.rank} total number of ranks is: {MPI.COMM_WORLD.size}")
     section = option_section
     # data vector 
     profiles = np.genfromtxt('data_files/wl_data_vector.txt')
@@ -28,7 +31,7 @@ def setup(options):
     return profiles, covmat, ncs, nc_covmat, rad, Redges, profiles_err
 
 def execute(block, config):
-
+    print(f"In SigmaMort_likelihood.execute: mpi rank is {MPI.COMM_WORLD.rank} total number of ranks is: {MPI.COMM_WORLD.size}")
     data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err = config
 
     #read in the model values at this sample point.
