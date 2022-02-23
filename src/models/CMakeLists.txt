@@ -31,5 +31,5 @@ if (USE_CUDA)
     cuda_models PRIVATE ${CMAKE_SOURCE_DIR}/src $ENV{COSMOSIS_SRC_DIR}
                         ${PAGANI_DIR}
     )
-  target_compile_options(cuda_models PRIVATE "--expt-relaxed-constexpr")
+  target_compile_options(cuda_models PRIVATE "--expt-relaxed-constexpr" "-lineinfo")
 endif ()
