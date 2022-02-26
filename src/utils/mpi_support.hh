@@ -2,9 +2,7 @@
 #define Y3_CLUSTER_CPP_UTILS_MPI_SUPPORT_HH
 
 
-#include "mpi.h"
 #include <iosfwd>
-#include <stdexcept>
 
 namespace y3_cluster {
 

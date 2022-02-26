@@ -1,6 +1,8 @@
 #include "mpi_support.hh"
 
+#include "mpi.h"
 #include <ostream>
+#include <stdexcept>
 
 namespace y3_cluster {
 
