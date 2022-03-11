@@ -21,11 +21,22 @@
 #include <iostream>
 #include <fstream>
 #include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
+#include <mpi.h>
+
 
 namespace y3_cluster {
+
+  inline void record_timestamp(std::ostream& os, char const* label) {
+    os << label
+      << '\t'
+      << std::setprecision(17)
+      << MPI_Wtime()
+      << std::endl; // we want the flush.
+  }
 
   // DeviceInitializer initializes a CUDA device upon construction.
   struct DeviceInitializer {
@@ -75,6 +86,8 @@ namespace y3_cluster {
     using integration_results_t = cubacpp::integration_result;
 
     explicit CosmoSISSICUDAModule(cosmosis::DataBlock& cfg);
+    
+    ~CosmoSISSICUDAModule();
 
     // Evaluate all the integrals specified (all grid points, and all volumes),
     // and record the results in the sample.
@@ -136,6 +149,7 @@ namespace y3_cluster {
     bool use_cartesian_product_of_volumes_and_gridpoints_;
     std::optional<std::ofstream> timing_data_;
     mpi_info mpi_info_;
+    std::ofstream mpi_time_file_;
  };
 } // namespace y3_cluster
 
@@ -172,6 +186,14 @@ try :
   algorithm_.set_maxeval(cfg.view<double>(IntegrandType::module_label(), "max_eval"));
   cfg.print_log();
   mpi_info_ = get_mpi_info();
+  std::ostringstream filename;
+  filename << "mpi_timing_"
+    << IntegrandType::module_label() 
+    << '_'
+    << mpi_info_.global_rank
+    << ".txt";
+  mpi_time_file_.open(filename.str(), std::ios_base::out | std::ios_base::trunc);
+  record_timestamp(mpi_time_file_, "constructed");
 }
 catch (cosmosis::Exception const& e) {
   std::cerr
@@ -193,10 +215,17 @@ catch (...) {
 }
 
 template <typename I>
+y3_cluster::CosmoSISSICUDAModule<I>::~CosmoSISSICUDAModule()
+{
+  record_timestamp(mpi_time_file_, "destroyed");
+}
+
+template <typename I>
 void
 y3_cluster::CosmoSISSICUDAModule<I>::execute(
   cosmosis::DataBlock& sample)
 {
+  record_timestamp(mpi_time_file_, "enter");
   // Is this call to cudaSetDevice really necessary? Since our MPI rank
   // is connected to a specific GPU at construction time, unless the
   // module *moves to a new rank*, this can not get out of sync. A new
@@ -210,6 +239,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::execute(
                    integrate_cartesian_product_of_volumes_and_gridpoints() :
                    integrate_zipped_sequence_of_volumes_and_gridpoints();
   finalize_sample(sample, results);
+  record_timestamp(mpi_time_file_, "exit");
 }
 
 template <typename I>
