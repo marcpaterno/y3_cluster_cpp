@@ -5,7 +5,7 @@
 #include "utils/datablock_reader.hh"
 #include "utils/meta.hh"
 
-#include "cuda/cudaPagani/quad/util/Volume.cuh"
+#include "cuda/pagani/quad/util/Volume.cuh"
 
 #include <array>
 #include <string>

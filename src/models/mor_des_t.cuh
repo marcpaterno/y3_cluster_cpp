@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_CPP_MOR_DES_T_CUH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cuda/cudaPagani/quad/GPUquad/Interp2D.cuh"
+#include "cuda/pagani/quad/GPUquad/Interp2D.cuh"
 #include "utils/mz_power_law.hh"
 #include "utils/primitives.hh"
 

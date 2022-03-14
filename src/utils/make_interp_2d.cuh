@@ -3,7 +3,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
-#include "cuda/cudaPagani/quad/GPUquad/Interp2D.cuh"
+#include "cuda/pagani/quad/GPUquad/Interp2D.cuh"
 
 #include <vector>
 

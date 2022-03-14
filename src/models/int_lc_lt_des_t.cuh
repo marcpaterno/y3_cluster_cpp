@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_INT_LC_LT_DES_T_CUH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cuda/cudaPagani/quad/GPUquad/Interp2D.cuh"
+#include "cuda/pagani/quad/GPUquad/Interp2D.cuh"
 
 namespace y3_cuda {
   struct INT_LC_LT_DES_t {

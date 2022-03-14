@@ -14,8 +14,8 @@
 #include "utils/mpi_support.hh"
 #include "utils/timing_sentry.hh"
 
-#include "cuda/cudaPagani/quad/util/Volume.cuh"
-#include "cuda/cudaPagani/quad/GPUquad/Pagani.cuh"
+#include "cuda/pagani/quad/util/Volume.cuh"
+#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
 #include "cuda/mcubes/vegasT.cuh"
 
 #include <iostream>

@@ -2,8 +2,8 @@
 #define Y3_CLUSTER_UTIL_CUDA_INTEGRATOR_CUH
 
 #include "cubacpp/arity.hh"
-#include "cuda/cudaPagani/quad/GPUquad/Pagani.cuh"
-#include "cuda/cudaPagani/quad/util/Volume.cuh"
+#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
+#include "cuda/pagani/quad/util/Volume.cuh"
 #include "cuda/mcubes/mcubes.cuh"
 #include "cuda/mcubes/vegasT.cuh"
 #include "cuda/mcubes/vegasSeqMcubes.hh"
