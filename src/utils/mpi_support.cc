@@ -1,6 +1,7 @@
 #include "mpi_support.hh"
 
 #include "mpi.h"
+#include <iomanip>
 #include <ostream>
 #include <stdexcept>
 
@@ -38,4 +39,15 @@ namespace y3_cluster {
       << " global: " << info.global_rank << '/' << info.global_size;
     return os;
   }
+
+  void record_timestamp(std::ostream& os, char const* label) {
+      os << label
+        << '\t'
+        << std::setprecision(17)
+        << MPI_Wtime()
+        << std::endl; // we want the flush.
+  }
+
+
+
 }

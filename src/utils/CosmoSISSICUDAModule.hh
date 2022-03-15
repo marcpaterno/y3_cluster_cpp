@@ -25,20 +25,9 @@
 #include <stdexcept>
 #include <vector>
 
-#include <mpi.h>
-
-
 namespace y3_cluster {
 
-  inline void record_timestamp(std::ostream& os, char const* label) {
-    os << label
-      << '\t'
-      << std::setprecision(17)
-      << MPI_Wtime()
-      << std::endl; // we want the flush.
-  }
-
-  // DeviceInitializer initializes a CUDA device upon construction.
+   // DeviceInitializer initializes a CUDA device upon construction.
   struct DeviceInitializer {
     int id = 0;
 

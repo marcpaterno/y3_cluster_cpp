@@ -22,5 +22,7 @@ namespace y3_cluster {
   mpi_info get_mpi_info();
 
   std::ostream& operator<<(std::ostream& os, mpi_info const& info);
+
+  void record_timestamp(std::ostream& os, char const* label);
 }
 #endif
