@@ -1,5 +1,5 @@
-include_directories($ENV{COSMOSIS_SRC_DIR} ${CUBA_INCLUDE_DIR})
-link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
+include_directories(${COSMOSIS_BASE_DIR} ${CUBA_INCLUDE_DIR})
+link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
 add_library(compton_y_sims MODULE compton_y_sims.cc)
 target_link_libraries(

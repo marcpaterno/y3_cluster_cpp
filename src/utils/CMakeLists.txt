@@ -1,4 +1,4 @@
-link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
+link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
 add_library(
   utils SHARED
@@ -21,6 +21,6 @@ add_library(
 target_link_libraries(utils PRIVATE ${GSL_LIBRARIES} PUBLIC cosmosis MPI::MPI_CXX)
 message(STATUS "CUBACPP_DIR is: ${CUBACPP_DIR}")
 target_include_directories(
-  utils PRIVATE $ENV{COSMOSIS_SRC_DIR} ${CUBA_INCLUDE_DIR} ${GSL_INCLUDE_DIRS}
+  utils PRIVATE ${COSMOSIS_BASE_DIR} ${CUBA_INCLUDE_DIR} ${GSL_INCLUDE_DIRS}
                 ${CUBACPP_DIR} ${VEGAS_DIR}
   )

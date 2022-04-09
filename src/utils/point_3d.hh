@@ -4,6 +4,7 @@
 #include "fpsupport.hh"
 
 #include <array>
+#include <stdexcept>
 #include <vector>
 
 namespace y3_cluster {

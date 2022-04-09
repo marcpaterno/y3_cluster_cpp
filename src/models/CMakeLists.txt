@@ -1,4 +1,4 @@
-link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
+link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
 add_library(
   models SHARED sample_variance.cc lc_lt_t.cc lc_lt_y1_t.cc int_lc_lt_des_t.cc
@@ -14,7 +14,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/src
           ${CMAKE_SOURCE_DIR}/externals
           ${CUBA_INCLUDE_DIR}
-          $ENV{COSMOSIS_SRC_DIR}
+          ${COSMOSIS_BASE_DIR}
           ${CUBACPP_DIR}
           ${GSL_INCLUDE_DIR}
   )
@@ -28,7 +28,7 @@ if (USE_CUDA)
                                                         ${Y3GCC_TARGET_ARCH}
     )
   target_include_directories(
-    cuda_models PRIVATE ${CMAKE_SOURCE_DIR}/src $ENV{COSMOSIS_SRC_DIR}
+    cuda_models PRIVATE ${CMAKE_SOURCE_DIR}/src ${COSMOSIS_BASE_DIR}
                         ${PAGANI_DIR}
     )
   target_compile_options(cuda_models PRIVATE "--expt-relaxed-constexpr" "-lineinfo")

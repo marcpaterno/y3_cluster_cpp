@@ -1,5 +1,5 @@
-include_directories($ENV{COSMOSIS_SRC_DIR} ${CUBA_INCLUDE_DIR})
-link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
+include_directories(${COSMOSIS_BASE_DIR} ${CUBA_INCLUDE_DIR})
+link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
 # Note The following three "modules" are abnormal, in that they are declared as
 # a shared libraries rather than as modules. This is so they can be used in

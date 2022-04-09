@@ -1,5 +1,5 @@
-include_directories($ENV{COSMOSIS_SRC_DIR} ${GSL_INCLUDE_DIRS} ${VEGAS_DIR})
-link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
+include_directories(${COSMOSIS_BASE_DIR} ${GSL_INCLUDE_DIRS} ${VEGAS_DIR})
+link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
 add_library(testmain SHARED main.cc)
 target_include_directories(
@@ -44,7 +44,7 @@ add_test(mpi_support_test mpi_support_test)
 add_executable(mpi_mpi_support_test mpi_mpi_support_test.cc)
 target_link_libraries(mpi_mpi_support_test PRIVATE utils mpi_testmain)
 target_include_directories(mpi_mpi_support_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals)
-add_mpi_test(mpi_mpi_support_test 2)
+# add_mpi_test(mpi_mpi_support_test 2)
 
 add_executable(
   timing_sentry_test timing_sentry_test.cc

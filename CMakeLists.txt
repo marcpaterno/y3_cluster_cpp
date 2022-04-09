@@ -65,6 +65,12 @@ endif ()
 set(MPI_CXX_SKIP_MPICXX)
 find_package(MPI REQUIRED COMPONENTS C CXX)
 
+# Make sure we know where CosmoSIS is found
+if ("{COSMOSIS_SRC_DIR}" STREQUAL "")
+  message(FATAL_ERROR "You must set up CosmoSIS before configuring the build of y3_cluster_cpp")
+endif()
+set(COSMOSIS_BASE_DIR "$ENV{COSMOSIS_SRC_DIR}/..")
+
 get_property(link_flags TARGET MPI::MPI_C PROPERTY INTERFACE_LINK_OPTIONS)
 string(REPLACE "," "$<COMMA>" link_flags "${link_flags}")
 set_property(TARGET MPI::MPI_C PROPERTY INTERFACE_LINK_OPTIONS "$<HOST_LINK:${link_flags}>")

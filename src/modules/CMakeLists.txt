@@ -1,8 +1,3 @@
-#include_directories(
-#  $ENV{COSMOSIS_SRC_DIR} ${CUBA_INCLUDE_DIR} ${VEGAS_DIR} ${PAGANI_DIR}
-#  )
-#link_directories($ENV{COSMOSIS_SRC_DIR}/cosmosis/datablock)
-
 add_subdirectory(mass_y1)
 add_subdirectory(mass_mort_y1)
 add_subdirectory(sigma_mort_y1)
