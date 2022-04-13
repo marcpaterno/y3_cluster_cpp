@@ -23,6 +23,7 @@
 #include <optional>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace y3_cluster {
@@ -38,7 +39,11 @@ namespace y3_cluster {
         throw std::runtime_error("Failed to get CUDA device count.\n");
       }
       if (info.local_rank >= ndevices_on_node) {
-        throw std::runtime_error("Tried to allocate too many devices on node.\n");
+        throw std::runtime_error("Tried to allocate " +
+            std::to_string(info.local_rank) +
+            " devices on node with only " +
+            std::to_string(ndevices_on_node) +
+            " available\n");
       }
       rc = cudaSetDevice(id);
       if (rc != cudaSuccess) {
