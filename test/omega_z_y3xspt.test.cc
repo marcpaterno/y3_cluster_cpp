@@ -39,6 +39,7 @@ TEST_CASE("omega_z_y3xspt works")
 
   // Prepare the output file for validation
   std::ofstream out{"../data/omega_z_y3xspt.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "z\tAtrue\tAtest\n";

@@ -38,6 +38,7 @@ TEST_CASE("Lc_Lt_t works")
   LC_LT_t lc_lt;
 
   std::ofstream out{"../data/lc_lt_test.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "lambda_cen\tlambda_true\tprobtrue\tprobtest\n";

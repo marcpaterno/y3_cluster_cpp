@@ -16,6 +16,7 @@ write_matter_power(
   std::ofstream output_file;
   output_file.open("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/"
                    "sample_variance_output/matter_power.csv");
+  if (!output_file) abort();
   output_file << "z,k_h,p_k,p_k_k_cubed\n";
   std::vector<double> zs{{0.1, 0.2, 0.3}};
   y3_cluster::IntegrationRange lnk_range{std::log(0.0001), std::log(1.0)};
@@ -36,6 +37,7 @@ write_bessel_sums(const y3_cluster::SampleVariance_t& sv)
   std::ofstream output_file;
   output_file.open("/cosmosis/cosmosis-standard-library/y3_cluster_cpp/test/"
                    "sample_variance_output/bessel_sums.csv");
+  if (!output_file) abort();
   output_file
     << "k_h,sum_of_bessels_z0_z0,sum_of_bessels_z1_z1,sum_of_bessels_z2_z2,"
     << "sum_of_bessels_z0_z1,sum_of_bessels_z0_z2,sum_of_bessels_z1_z2\n";

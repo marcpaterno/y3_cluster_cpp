@@ -83,7 +83,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r, include = FALSE}
-omega_z <- read_tsv("../data/omega_z_sdss.out")
+omega_z <- read_tsv("../release-build/data/omega_z_sdss.out")
 omega_z <- mutate(omega_z,
                   resid = ytrue - ytest,
                   fracerr = resid/ytrue,
@@ -207,7 +207,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r, include = FALSE}
-dvdodz <- read_tsv("../data/dvdodz_test.out")
+dvdodz <- read_tsv("../release-build/data/dvdodz_test.out")
 dvdodz <- mutate(dvdodz,
                   resid = ytrue - ytest,
                   fracerr = resid/ytrue,
@@ -265,7 +265,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-mor_t2 <- read_tsv("../data/mor_tt_test.out")
+mor_t2 <- read_tsv("../release-build/data/mor_tt_test.out")
 mor_t2$mbin <- as.factor(mor_t2$log10m/log(10))
 mor_t2 <- mutate(mor_t2,
                  resid = probtrue - probtest,
@@ -339,7 +339,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-lc_lt <- read_tsv("../data/lc_lt_test.out")
+lc_lt <- read_tsv("../release-build/data/lc_lt_test.out")
 lc_lt$lbin <- as.factor(lc_lt$lambda_true)
 lc_lt <- mutate(lc_lt,
                  resid = probtrue - probtest,
@@ -413,7 +413,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-lo_lc <- read_tsv("../data/lo_lc_test.out")
+lo_lc <- read_tsv("../release-build/data/lo_lc_test.out")
 lo_lc$Rbin <- as.factor(lo_lc$Rmis)
 lo_lc <- mutate(lo_lc,
                  resid = probtrue - probtest,
@@ -994,7 +994,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r, include = FALSE}
-miscent <- read_tsv("../data/Rmis_gammadist_test.out")
+miscent <- read_tsv("../release-build/data/Rmis_gammadist_test.out")
 miscent <- mutate(miscent,
                   resid = probtrue - probtest,
                   fracerr = resid/probtrue,
@@ -1053,7 +1053,7 @@ local.abs.errormargin = 1.0e-21
 ```
 
 ```{r include = FALSE}
-sig_crit <- read_tsv("../data/Sigma_crit_test.out")
+sig_crit <- read_tsv("../release-build/data/Sigma_crit_test.out")
 sig_crit$zbin <- as.factor(sig_crit$zl)
 sig_crit <- mutate(sig_crit,
                  resid = ytrue - ytest,

@@ -41,6 +41,7 @@ TEST_CASE("mor_sdss works")
   MOR_sdss mor_t(pow(10, 11.2), pow(10, 12.42), alpha, sigma_intr);
 
   std::ofstream out{"../data/mor_tt_test.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "lambda\tlog10m\tprobtrue\tprobtest\n";

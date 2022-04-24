@@ -42,6 +42,7 @@ TEST_CASE("mass function works")
   // HMF_t hmf(p1, 4.50732047e-02, 1.01958078e+00);
   HMF_t hmf(p1, 0.0, 1.0);
   std::ofstream out{"../data/hmf_test.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "mass\tredshift\tytrue\tytest\n";

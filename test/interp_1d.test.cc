@@ -59,6 +59,7 @@ TEST_CASE("Validate")
                          sqrt(2.8),
                          sqrt(3.9)};
   std::ofstream out{"../data/interp_1d.out"};
+  REQUIRE(out.good());
   out << "x\tytrue\tytest\n";
   for (auto x : xtest) { out << x << '\t' << fcn(x) << '\t' << f(x) << '\n'; }
 }

@@ -39,6 +39,7 @@ TEST_CASE("PXiZeta_t works")
 
   // Setup output stream for validation
   std::ofstream out{"../data/pxizeta_test.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "xi\tzeta\tprobtest\n";

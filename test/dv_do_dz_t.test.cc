@@ -40,6 +40,7 @@ TEST_CASE("dv_do_dz_t works")
   y3_cluster::DV_DO_DZ_t dvdodz(da_f, y3_cluster::EZ(0.3, 0.7, 0), 0.7);
 
   std::ofstream out{"../data/dvdodz_test.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "z\tytrue\tytest\n";

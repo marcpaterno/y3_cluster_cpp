@@ -41,6 +41,7 @@ TEST_CASE("roffset_t works")
   ROFFSET_t roffset(tau);
 
   std::ofstream out{"../data/Rmis_gammadist_test.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "rmis\tprobtrue\tprobtest\n";

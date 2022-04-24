@@ -26,6 +26,7 @@ TEST_CASE("Compare sigma_crit_inv against astropy", "[sigma_crit_inverse]")
 
   const size_t NCOSMO = 1;
   std::ofstream out{"../data/Sigma_crit_test.out"};
+  REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
   out << "zl\tzs\tytrue\tytest\n";
