@@ -38,7 +38,7 @@ TEST_CASE("omega_z_y3xspt works")
   OMEGA_Z_Y3XSPT omega;
 
   // Prepare the output file for validation
-  std::ofstream out{"../data/omega_z_y3xspt.out"};
+  std::ofstream out = y3_cluster::make_ofstream("data/omega_z_y3xspt.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
