@@ -737,8 +737,8 @@ local.abs.errormargin = abs.errormargin
 
 ```{r include = FALSE}
 xi_2h <- read_tsv("../deltasigma/test/xi_mm_2halo.out")
-# We limit the range of R in our plots. It would be better to do this
-# by controlling the generation of the xi_mm_2halo.out file.
+# We limit the range of R in our plots to be only positive values of xi_mm. 
+# In the generation of the xi_mm_2halo.out file, we cut at < 125 Mpc, where the fiducial xi_mm goes negative
 print(xi_2h)
 xi_2h <- mutate(xi_2h,
                  resid = ytrue - ytest,
@@ -766,7 +766,7 @@ a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
-$`r local.abs.errormargin`$.
+$`r local.abs.errormargin`$. 
 a. `r testresult(xi_2h)`
 
 The values of $\xi$ cover a very wide range, so a logarithmic $y$-axis is needed.
