@@ -37,7 +37,7 @@ TEST_CASE("Lo_Lc_t works")
   REQUIRE(lcs.size() == Rs.size());
   REQUIRE(Rs.size() == ys.size());
 
-  std::ofstream out{"../data/test_lolc.out"};
+  std::ofstream out = y3_cluster::make_ofstream("data/test_lolc.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
@@ -46,7 +46,7 @@ TEST_CASE("Lo_Lc_t works")
   // No longer relevant - redefined lo_lc
   LO_LC_t lolc(1.66, 0.26, 1.43, 1.0);
 
-  std::ofstream out2{"../data/lo_lc_test.out"};
+  std::ofstream out2 = y3_cluster::make_ofstream("data/lo_lc_test.out");
   REQUIRE(out2.good());
   out2 << std::setw(16);
   out2 << std::setprecision(16);

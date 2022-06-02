@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "utils/interp_1d.hh"
+#include "utils/make_ifstream.hh"
 #include "utils/transform.hh"
 
 #include <array>
@@ -58,7 +59,7 @@ TEST_CASE("Validate")
                          sqrt(2.7),
                          sqrt(2.8),
                          sqrt(3.9)};
-  std::ofstream out{"../data/interp_1d.out"};
+  std::ofstream out = y3_cluster::make_ofstream("data/interp_1d.out");
   REQUIRE(out.good());
   out << "x\tytrue\tytest\n";
   for (auto x : xtest) { out << x << '\t' << fcn(x) << '\t' << f(x) << '\n'; }

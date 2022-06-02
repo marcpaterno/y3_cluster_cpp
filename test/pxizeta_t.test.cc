@@ -38,7 +38,7 @@ TEST_CASE("PXiZeta_t works")
   PXiZeta_t pxizeta;
 
   // Setup output stream for validation
-  std::ofstream out{"../data/pxizeta_test.out"};
+  std::ofstream out = y3_cluster::make_ofstream("data/pxizeta_test.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
