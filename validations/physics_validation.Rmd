@@ -134,8 +134,7 @@ ggplot(omega_z, aes(x = z, y = fracerr, color = within.abs)) +
 
 # Halo Mass Function
 
-**This test requires running masses_test.ini in cosmosis_tests first**
-Need to do better than this in the future.
+
 
 ```{r}
 local.frac.errormargin = 0.01
@@ -156,7 +155,7 @@ hmf <- mutate(hmf,
 ```
 
 $n(M_{200m}, z)$ is the halo mass function, which describes the 3D cosmic density of halos at a given mass $M_{200m}$ and $z$. 
-We have modified the CosmoSIS halo mass function module to consider the effect of massive neutrinos (Costanzi et al. 2013).
+We have modified the CosmoSIS halo mass function module to consider the effect of massive neutrinos (Costanzi et al. 2013)- we use the $P_{cdm}$ power spectrum rather than the $P_{tot}$.
 
 For this testing, we compare results from our implementation to the  independent function evaluations from Matteo Costanzi in the SDSS cluster cosmology analysis (Costanzi et al. 2019)
 
@@ -198,6 +197,9 @@ ggplot(hmf, aes(x = mass, y = fracerr, color = within.abs)) +
   ylim(-2 * local.frac.errormargin, 2 * local.frac.errormargin) +
   facet_wrap(zbin~ .)
 ```
+
+**This test requires running masses_test.ini in cosmosis_tests first**
+Need to do better than this in the future.
 
 # Volume Element
 
@@ -735,8 +737,8 @@ local.abs.errormargin = abs.errormargin
 
 ```{r include = FALSE}
 xi_2h <- read_tsv("../deltasigma/test/xi_mm_2halo.out")
-# We limit the range of R in our plots. It would be better to do this
-# by controlling the generation of the xi_mm_2halo.out file.
+# We limit the range of R in our plots to be only positive values of xi_mm. 
+# In the generation of the xi_mm_2halo.out file, we cut at < 125 Mpc, where the fiducial xi_mm goes negative
 print(xi_2h)
 xi_2h <- mutate(xi_2h,
                  resid = ytrue - ytest,
@@ -764,7 +766,7 @@ a. For this test,
 we require the relative differences to be 
 less than $`r local.frac.errormargin`$,
 or the absolute difference to be less than
-$`r local.abs.errormargin`$.
+$`r local.abs.errormargin`$. 
 a. `r testresult(xi_2h)`
 
 The values of $\xi$ cover a very wide range, so a logarithmic $y$-axis is needed.
