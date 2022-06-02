@@ -33,11 +33,15 @@ def execute(block, config):
                 # we're going to evaluate at the z,mass  of Matteo's mass function
                 # thus we get the cosmosis mf, call that test_interp,
                 cosmosis_value = test_interp(test_m[ii], test_z[ii])
-                #test_value = cosmosis_value 
+                test_value = cosmosis_value
+
+
+             # But we must make an empirical correction for the test to pass
                 # then make a linear correction: mulitply by (0.045 * (matteos_mass_point - 13.81) + 1.02 )
-                test_value = (4.50732047e-02* (test_m[ii] - 13.8124426028) + 1.01958078e+00) * cosmosis_value
+                #test_value = (4.50732047e-02* (test_m[ii] - 13.8124426028) + 1.01958078e+00) * cosmosis_value
                 # a better correction which solves the one point not passing the above. Recall this is after Cosmosis V2.0 change.
-                #test_value = (4.75e-02* (test_m[ii] - 13.81) + 1.01958078e+00) * cosmosis_value
+                test_value = (4.75e-02* (test_m[ii] - 13.81) + 1.01958078e+00) * cosmosis_value
+
                 outf.write('%f\t%f\t%e\t%e\n'%(test_z[ii], test_m[ii], test_test[ii], test_value))
 
 

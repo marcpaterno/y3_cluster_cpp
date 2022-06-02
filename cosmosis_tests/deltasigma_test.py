@@ -35,7 +35,7 @@ def execute(block, config):
         with open('%s/test/xi_nfwonly.out' % basepath, 'w') as outf:
             outf.write('r\t ytrue\t ytest\n')
             for ii in range(len(test_r)):
-                outf.write('%f\t%f\t%f\n'%(test_r[ii], test_test[ii], test_values[ii]))
+                outf.write('%f\t%.12e\t%.12e\n'%(test_r[ii], test_test[ii], test_values[ii]))
 
         dat=np.genfromtxt('%s/test/Sigma_nfwonly.txt' % basepath, delimiter=',')
         test_r=dat[:, 0]; test_test=dat[:, 1]
@@ -44,17 +44,19 @@ def execute(block, config):
         with open('%s/test/Sigma_nfwonly.out' % basepath, 'w') as outf:
             outf.write('r\t ytrue\t ytest\n')
             for ii in range(len(test_r)):
-                outf.write('%f\t%f\t%f\n'%(test_r[ii], test_test[ii], test_values[ii]))
+                outf.write('%f\t%.12e\t%.12e\n'%(test_r[ii], test_test[ii], test_values[ii]))
 
 
         dat=np.genfromtxt('%s/test/xi_mm_2halo.txt' % basepath, delimiter=',')
         test_r=dat[:, 0]; test_test=dat[:, 1]
+        ix, = np.where(test_r < 125) # mpc
+        test_r = test_r[ix]
         test_interp=interp2d(Radii, zz, Xi_2, kind='cubic')
         test_values=test_interp(test_r, test_z)
         with open('%s/test/xi_mm_2halo.out' % basepath, 'w') as outf:
             outf.write('r\t ytrue\t ytest\n')
             for ii in range(len(test_r)):
-                outf.write('%f\t%f\t%f\n'%(test_r[ii], test_test[ii], test_values[ii]))
+                outf.write('%f\t%.12e\t%.12e\n'%(test_r[ii], test_test[ii], test_values[ii]))
 
         dat=np.genfromtxt('%s/test/Sigma_mm_2halo.txt' % basepath, delimiter=',')
         test_r=dat[:, 0]; test_test=dat[:, 1]
@@ -63,7 +65,7 @@ def execute(block, config):
         with open('%s/test/Sigma_mm_2halo.out' % basepath, 'w') as outf:
             outf.write('r\t ytrue\t ytest\n')
             for ii in range(len(test_r)):
-                outf.write('%f\t%f\t%f\n'%(test_r[ii], test_test[ii], test_values[ii]))
+                outf.write('%f\t%.12e\t%.12e\n'%(test_r[ii], test_test[ii], test_values[ii]))
 
         dat=np.genfromtxt('%s/test/bias.txt' % basepath, delimiter=',')
         test_mass=dat[:, 0]; test_test=dat[:, 2]
@@ -74,7 +76,7 @@ def execute(block, config):
             outf.write('M\t z\t ytrue\t ytest\n')
             for ii in range(len(test_mass)):
                 test_value=test_interp(test_z[ii], test_mass[ii])
-                outf.write('%f\t%f\t%f\t%f\n'%(test_mass[ii], test_z[ii], test_test[ii], test_value))
+                outf.write('%f\t%f\t%.12e\t%.12e\n'%(test_mass[ii], test_z[ii], test_test[ii], test_value))
 
 
         return 0

@@ -35,22 +35,22 @@ if __name__ == "__main__":
   dirname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/deltasigma/test')
   ff=open(os.path.join(dirname, 'Sigma_mm_2halo.txt'), 'w')
   for ii in range(len(Rp)):
-     ff.write('%f, %f \n'%(Rp[ii], SigmaMM[ii]))
+     ff.write('%f, %.12e \n'%(Rp[ii], SigmaMM[ii]))
   ff.close 
 
   ff=open(os.path.join(dirname, 'Sigma_nfwonly.txt'), 'w')
   for ii in range(len(Rp)):
-     ff.write('%f, %f \n'%(Rp[ii], SigmaNFW[ii]))
+     ff.write('%f, %.12e \n'%(Rp[ii], SigmaNFW[ii]))
   ff.close
 
   ff=open(os.path.join(dirname, 'xi_mm_2halo.txt'), 'w')
   for ii in range(len(R)):
-      ff.write('%f,  %f \n'%(R[ii], xiMM[ii]))
+      ff.write('%f,  %.12e \n'%(R[ii], xiMM[ii]))
   ff.close
   
   ff=open(os.path.join(dirname, 'xi_nfwonly.txt'), 'w')     
   for ii in range(len(R)):
-      ff.write('%f,  %f \n'%(R[ii], xiNFW[ii]))
+      ff.write('%f,  %.12e \n'%(R[ii], xiNFW[ii]))
   ff.close
 
   #generate bias test files using linear power spectrum
@@ -66,12 +66,12 @@ if __name__ == "__main__":
   bias=np.zeros(len(M))
   for ii in range(len(M)):
       bias[ii]=clusterwl.bias.bias_at_M(M[ii], klin, P, om)
-      ff.write('%f, %f, %f \n'%(M[ii], zz[ind], bias[ii]))
+      ff.write('%f, %f, %.12e \n'%(M[ii], zz[ind], bias[ii]))
  
   ind, =np.where(zz < 0.101)
   P=Plin[ind, :]
   bias=np.zeros(len(M))
   for ii in range(len(M)):
       bias[ii]=clusterwl.bias.bias_at_M(M[ii], klin, P, om)
-      ff.write('%f, %f, %f\n'%(M[ii], zz[ind], bias[ii]))
+      ff.write('%f, %f, %.12e\n'%(M[ii], zz[ind], bias[ii]))
   ff.close
