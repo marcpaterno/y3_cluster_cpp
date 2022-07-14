@@ -13,6 +13,7 @@
 #include "utils/gpu_integrator.cuh"
 #include "utils/mpi_support.hh"
 #include "utils/timing_sentry.hh"
+#include "utils/mem_tracking_sentry.hh"
 
 #include "cuda/pagani/quad/util/Volume.cuh"
 #include "cuda/pagani/quad/GPUquad/Pagani.cuh"
@@ -133,6 +134,13 @@ namespace y3_cluster {
       return nullptr;
     }
 
+    std::ostream* mem_track_data_stream_() {
+      if (mem_track_data_){
+	return &(*mem_track_data_);
+      }
+      return nullptr;
+    }
+    
     DeviceInitializer device_;
     IntegrandType integrand_;
     y3_cuda::MultiDimensionalIntegrator<ndim> algorithm_;
@@ -142,6 +150,7 @@ namespace y3_cluster {
     double eps_abs_;
     bool use_cartesian_product_of_volumes_and_gridpoints_;
     std::optional<std::ofstream> timing_data_;
+    std::optional<std::ofstream> mem_track_data_;
     mpi_info mpi_info_;
     std::ofstream mpi_time_file_;
  };
@@ -162,14 +171,14 @@ try :
   use_cartesian_product_of_volumes_and_gridpoints_(
     cfg.view<bool>(IntegrandType::module_label(), "use_cartesian_product")) {
     // Check validity of configuration of volumes and gridpoints.
-  if (not use_cartesian_product_of_volumes_and_gridpoints_) {
-    if (volumes_.size() != grid_points_.size()) {
-      throw std::runtime_error(
-        "An integration module was configured to use a zipped sequence of "
-        "volumes and gridpoints,\n"
-        "but the number of volumes did not equal the number of gridpoints.\n");
-    }
-  }
+     if (not use_cartesian_product_of_volumes_and_gridpoints_) {
+       if (volumes_.size() != grid_points_.size()) {
+	 throw std::runtime_error(
+				  "An integration module was configured to use a zipped sequence of "
+				  "volumes and gridpoints,\n"
+				  "but the number of volumes did not equal the number of gridpoints.\n");
+       }
+     }
   // Set up timing if requested.
   std::string timing_filename;
   auto status = cfg.get_val(IntegrandType::module_label(), "timing_file", timing_filename);
@@ -177,6 +186,18 @@ try :
       timing_data_.emplace(timing_filename);
       *timing_data_ << "# integration times in microseconds\n";
   }
+
+  std::string mem_track_filename;
+  auto mem_track_status = cfg.get_val(IntegrandType::module_label(), "memory_track_file", mem_track_filename);
+  {
+    
+    //if(mem_track_filename == "")
+    //  mem_track_filename = "integrand_memory_tracking.txt";
+    mem_track_data_.emplace(mem_track_filename, std::ios_base::app);
+    *mem_track_data_ << "free_mem, module_label, track_label, loc, volume_id, grid_point_id" << std::endl;
+  }
+  
+  
   algorithm_.set_maxeval(cfg.view<double>(IntegrandType::module_label(), "max_eval"));
   cfg.print_log();
   mpi_info_ = get_mpi_info();
@@ -227,11 +248,13 @@ y3_cluster::CosmoSISSICUDAModule<I>::execute(
   // that.
   auto rc = cudaSetDevice(device_.id);
   if (rc != 0) throw std::runtime_error("Failed to allocate GPU!\n");
-
+  
+  y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "module");
+  
   integrand_.set_sample(sample);
   auto results = use_cartesian_product_of_volumes_and_gridpoints_ ?
-                   integrate_cartesian_product_of_volumes_and_gridpoints() :
-                   integrate_zipped_sequence_of_volumes_and_gridpoints();
+    integrate_cartesian_product_of_volumes_and_gridpoints() :
+    integrate_zipped_sequence_of_volumes_and_gridpoints();
   finalize_sample(sample, results);
   record_timestamp(mpi_time_file_, "exit");
 }
@@ -252,15 +275,26 @@ y3_cluster::CosmoSISSICUDAModule<
 {
   std::vector<integration_results_t> results;
   results.reserve(num_results());
-
+  size_t num_vols = 0;
   for (auto& volume : volumes_) {
+    
+    num_vols++;
+    y3_cluster::MemTrackSentry mem_sentry_vol(mem_track_data_stream_(), IntegrandType::module_label(), "volume", num_vols);
+    size_t num_grid_points = 0;
+
     for (auto const& grid_point : grid_points_.points) {
+      num_grid_points++;
+      y3_cluster::MemTrackSentry mem_sentry_grid_point(mem_track_data_stream_(), IntegrandType::module_label(), "grid-point", num_vols, num_grid_points);
+
       integrand_.set_grid_point(grid_point);
+      
       // Note: I would be better to have a scope for TimingSentry that just
       // included the call to algorithm_.integrate, and not also the push_back
       // of the result; but doing that crashes the nvcc compiler
       // (build cuda_11.1.TC455_06.29190527_0 of nvcc).
       TimingSentry sentry(timing_data_stream_());
+      y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "integrate", num_vols, num_grid_points);
+		 
       cuhreResult res = algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
       results.push_back(cubacpp::integration_result(
             res.estimate,
@@ -303,7 +337,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::finalize_sample(
   cosmosis::DataBlock& sample,
   std::vector<cubacpp::integration_result> const& res) const
 {
-  std::cerr << "Finalizing sample.\n";
+  //std::cerr << "Finalizing sample.\n";
   if (use_cartesian_product_of_volumes_and_gridpoints_)
     finalize_sample_cartesian_product_of_volumes_and_gridpoints(sample, res);
   else
