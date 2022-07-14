@@ -21,22 +21,22 @@ namespace y3_cuda {
 
     template <class F>
     cuhreResult<double> integrate(int which,
-                                  F f,
+                                  F& f,
                                   double epsabs,
                                   double epsrel);
 
     template <class F>
     cuhreResult<double> integrate(int which,
-                                  F f,
+                                  F& f,
                                   double epsabs,
                                   double epsrel,
                                   quad::Volume<double, ndim> const* vol);
 
     template <class F>
-    cuhreResult<double> integrate(F f, double epsabs, double epsrel);
+    cuhreResult<double> integrate(F& f, double epsabs, double epsrel);
 
     template <class F>
-    cuhreResult<double> integrate(F f,
+    cuhreResult<double> integrate(F& f,
                                   double epsabs,
                                   double epsrel,
                                   quad::Volume<double, ndim> const* vol);
@@ -76,7 +76,7 @@ template <int N>
 template <class F>
 cuhreResult<double>
 y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
-                                               F f,
+                                               F& f,
                                                double epsabs,
                                                double epsrel)
 {
@@ -101,7 +101,7 @@ template <class F>
 cuhreResult<double>
 y3_cuda::MultiDimensionalIntegrator<N>::integrate(
   int which,
-  F f,
+  F& f,
   double epsabs,
   double epsrel,
   quad::Volume<double, N> const* vol)
@@ -125,10 +125,11 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
 template <int N>
 template <class F>
 cuhreResult<double>
-y3_cuda::MultiDimensionalIntegrator<N>::integrate(F f,
+y3_cuda::MultiDimensionalIntegrator<N>::integrate(F& f,
                                                double epsabs,
                                                double epsrel)
 {
+  std::cout<< "gpu_integrator::integrate" << std::endl;
   switch (which_) {
     case 0:
       return std::get<0>(algorithms_)
@@ -150,7 +151,7 @@ template <int N>
 template <class F>
 cuhreResult<double>
 y3_cuda::MultiDimensionalIntegrator<N>::integrate(
-  F f,
+  F& f,
   double epsabs,
   double epsrel,
   quad::Volume<double, N> const* vol)
