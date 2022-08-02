@@ -50,9 +50,7 @@ private:
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cuda::ROFFSET_t> roffset;
-  std::optional<y3_cuda::LO_LC_t> lo_lc;
-
+  
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;

@@ -11,7 +11,7 @@ namespace y3_cuda {
     __device__ __host__ double
     operator()(double zt) const
     {
-      static const y3_cuda::polynomial<6> SDSS_fit{
+      const y3_cuda::polynomial<6> SDSS_fit{
         {0.0, 0.0, 0.0, -0.00262353, 0.01940118, 0.45133063}};
       static const y3_cuda::polynomial<6> SDSS_fit2{{1.33647377e+4,
                                                      1.35291046e+3,

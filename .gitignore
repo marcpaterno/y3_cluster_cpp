@@ -45,3 +45,4 @@ release-build/
 *.tsv
 *.csv
 *_test_out/
+*.txt
