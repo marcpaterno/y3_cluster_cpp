@@ -254,6 +254,14 @@ namespace y3_cuda {
       , _z_pivot(z_pivot)
     {}
 
+    size_t
+    get_device_mem_footprint(){
+      size_t size = 0;
+      size += _sig_interp.get_device_mem_footprint();
+      size += _skews_interp.get_device_mem_footprint();
+      return size;
+    }
+    
     explicit MOR_DES_t(cosmosis::DataBlock& sample)
       : _sig_interp(test_sigintr, test_lsat, sig_skewnorml_flat)
       , _skews_interp(test_sigintr, test_lsat, skews )

@@ -18,6 +18,16 @@ namespace y3_cuda {
     quad::Interp2D _bias;
 
   public:
+
+    size_t
+    get_device_mem_footprint(){
+      size_t size = 0;
+      size += _sigma1.get_device_mem_footprint();
+      size += _sigma2.get_device_mem_footprint();
+      size += _bias.get_device_mem_footprint();
+      return size;
+    }
+    
     SIG_MAX(quad::Interp2D const& sigma1,
             quad::Interp2D const& sigma2,
             quad::Interp2D const& bias)

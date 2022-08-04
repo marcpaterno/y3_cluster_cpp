@@ -16,10 +16,16 @@ namespace y3_cluster {
     std::string module_label_;
     int volume_id_ = -1;
     int grid_point_id_ = -1;
+    size_t integrand_dev_mem_footprint = 0;
     
   public:
-    explicit MemTrackSentry(std::ostream* os, std::string module_label, std::string label, int volume_id = -1, int grid_point_id = -1)
-      : os_(os), module_label_(module_label),label_(label),volume_id_(volume_id), grid_point_id_(grid_point_id) 
+    explicit MemTrackSentry(std::ostream* os,
+			    std::string module_label,
+			    std::string label,
+			    size_t object_mem_size = 0,
+			    int volume_id = -1,
+			    int grid_point_id = -1)
+      : os_(os), module_label_(module_label),label_(label),volume_id_(volume_id), grid_point_id_(grid_point_id), integrand_dev_mem_footprint(object_mem_size)
     {
       print_free_device_mem("start");
     }
@@ -34,6 +40,7 @@ namespace y3_cluster {
 	}
 	
 	*os_ << free_physmem << ","
+	     << integrand_dev_mem_footprint << ","
 	     << module_label_ << ","
 	     << label_ << ","
 	     << user_string << ","

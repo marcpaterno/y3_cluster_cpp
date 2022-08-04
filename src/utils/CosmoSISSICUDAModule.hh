@@ -171,6 +171,7 @@ try :
   use_cartesian_product_of_volumes_and_gridpoints_(
     cfg.view<bool>(IntegrandType::module_label(), "use_cartesian_product")) {
     // Check validity of configuration of volumes and gridpoints.
+     
      if (not use_cartesian_product_of_volumes_and_gridpoints_) {
        if (volumes_.size() != grid_points_.size()) {
 	 throw std::runtime_error(
@@ -194,7 +195,7 @@ try :
     //if(mem_track_filename == "")
     //  mem_track_filename = "integrand_memory_tracking.txt";
     mem_track_data_.emplace(mem_track_filename, std::ios_base::app);
-    *mem_track_data_ << "free_mem, module_label, track_label, loc, volume_id, grid_point_id" << std::endl;
+    *mem_track_data_ << "free_mem, module_mem, module_label, track_label, loc, volume_id, grid_point_id" << std::endl;
   }
   
   
@@ -249,7 +250,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::execute(
   auto rc = cudaSetDevice(device_.id);
   if (rc != 0) throw std::runtime_error("Failed to allocate GPU!\n");
   
-  y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "module");
+  y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "module", integrand_.get_device_mem_footprint());
   
   integrand_.set_sample(sample);
   auto results = use_cartesian_product_of_volumes_and_gridpoints_ ?
@@ -279,12 +280,12 @@ y3_cluster::CosmoSISSICUDAModule<
   for (auto& volume : volumes_) {
     
     num_vols++;
-    y3_cluster::MemTrackSentry mem_sentry_vol(mem_track_data_stream_(), IntegrandType::module_label(), "volume", num_vols);
+    y3_cluster::MemTrackSentry mem_sentry_vol(mem_track_data_stream_(), IntegrandType::module_label(), "volume", integrand_.get_device_mem_footprint(), num_vols);
     size_t num_grid_points = 0;
 
     for (auto const& grid_point : grid_points_.points) {
       num_grid_points++;
-      y3_cluster::MemTrackSentry mem_sentry_grid_point(mem_track_data_stream_(), IntegrandType::module_label(), "grid-point", num_vols, num_grid_points);
+      y3_cluster::MemTrackSentry mem_sentry_grid_point(mem_track_data_stream_(), IntegrandType::module_label(), "grid-point", integrand_.get_device_mem_footprint(), num_vols, num_grid_points);
 
       integrand_.set_grid_point(grid_point);
       
@@ -293,7 +294,7 @@ y3_cluster::CosmoSISSICUDAModule<
       // of the result; but doing that crashes the nvcc compiler
       // (build cuda_11.1.TC455_06.29190527_0 of nvcc).
       TimingSentry sentry(timing_data_stream_());
-      y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "integrate", num_vols, num_grid_points);
+      y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "integrate", integrand_.get_device_mem_footprint(), num_vols, num_grid_points);
 		 
       cuhreResult res = algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
       results.push_back(cubacpp::integration_result(
