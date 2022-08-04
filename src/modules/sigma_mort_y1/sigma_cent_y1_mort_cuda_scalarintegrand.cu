@@ -47,7 +47,7 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
+  //std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
   //std::optional<y3_cuda::MOR_t> mor;
   std::optional<y3_cuda::MOR_DES_t> mor;
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
@@ -57,7 +57,7 @@ private:
   std::optional<y3_cuda::ROFFSET_t> roffset;
   std::optional<y3_cuda::LO_LC_t> lo_lc;
   std::optional<y3_cuda::SIG_MAX> sigma;
-
+  
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
@@ -75,6 +75,22 @@ public:
   // Set the data for the current bin.
   void set_grid_point(grid_point_t const& pt);
 
+  size_t get_device_mem_footprint(){
+    size_t dev_size = 0;
+    //if((bool)lc_lt == true)
+    //  dev_size += y3_cuda::INT_LC_LT_DES_t::get_device_mem_footprint();
+      //dev_size += (*lc_lt).get_device_mem_footprint();
+    if((bool)mor == true)
+      dev_size += (*mor).get_device_mem_footprint();
+    if((bool)dv_do_dz == true)
+      dev_size += (*dv_do_dz).get_device_mem_footprint();
+    if((bool)hmf == true)
+      dev_size += (*hmf).get_device_mem_footprint();
+    if((bool)sigma == true)
+    dev_size += (*sigma).get_device_mem_footprint();
+    return dev_size;
+  }
+  
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
   // integration routine does not work for functions of one variable). The
@@ -108,8 +124,10 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 SigmaCentY1MortCUDAScalarIntegrand::SigmaCentY1MortCUDAScalarIntegrand(DataBlock&)
-  : lc_lt()
-  , mor()
+  :
+  //lc_lt()
+  //,
+  mor()
   , omega_z()
   , dv_do_dz()
   , hmf()
@@ -126,7 +144,7 @@ SigmaCentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  lc_lt.emplace(sample);
+  //lc_lt.emplace(sample);
   mor.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);

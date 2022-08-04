@@ -45,7 +45,7 @@ private:
   // <none in this example>
 
   // State obtained from each sample.
-  std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
+  //std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
   std::optional<y3_cuda::MOR_DES_t> mor;
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
@@ -61,6 +61,22 @@ private:
   double radius_;
 
 public:
+  size_t get_device_mem_footprint(){
+    size_t dev_size = 0;
+    //if((bool)lc_lt == true)
+    //  dev_size += y3_cuda::INT_LC_LT_DES_t::get_device_mem_footprint();
+      // dev_size += (*lc_lt).get_device_mem_footprint();
+    if((bool)mor == true)
+      dev_size += (*mor).get_device_mem_footprint();
+    if((bool)dv_do_dz == true)
+      dev_size += (*dv_do_dz).get_device_mem_footprint();
+    if((bool)hmf == true)
+      dev_size += (*hmf).get_device_mem_footprint();
+    if((bool)sigma == true)
+      dev_size += (*sigma).get_device_mem_footprint();
+    return dev_size;
+  }
+  
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
   explicit SigmaMiscentY1MortCUDAScalarIntegrand(cosmosis::DataBlock& config);
@@ -110,8 +126,9 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 SigmaMiscentY1MortCUDAScalarIntegrand::SigmaMiscentY1MortCUDAScalarIntegrand(DataBlock&)
-  : lc_lt()
-  , mor()
+  : //lc_lt()
+  //,
+  mor()
   , omega_z()
   , dv_do_dz()
   , hmf()
@@ -130,7 +147,7 @@ SigmaMiscentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  lc_lt.emplace(sample);
+  //lc_lt.emplace(sample);
   mor.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
