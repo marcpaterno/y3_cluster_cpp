@@ -8,7 +8,6 @@
 
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
-#include "models/int_lc_lt_des_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/lo_lc_t.cuh"
 #include "models/mor_des_t.cuh"
@@ -47,8 +46,6 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  //std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
-  //std::optional<y3_cuda::MOR_t> mor;
   std::optional<y3_cuda::MOR_DES_t> mor;
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
@@ -77,9 +74,6 @@ public:
 
   size_t get_device_mem_footprint(){
     size_t dev_size = 0;
-    //if((bool)lc_lt == true)
-    //  dev_size += y3_cuda::INT_LC_LT_DES_t::get_device_mem_footprint();
-      //dev_size += (*lc_lt).get_device_mem_footprint();
     if((bool)mor == true)
       dev_size += (*mor).get_device_mem_footprint();
     if((bool)dv_do_dz == true)
@@ -124,10 +118,7 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 SigmaCentY1MortCUDAScalarIntegrand::SigmaCentY1MortCUDAScalarIntegrand(DataBlock&)
-  :
-  //lc_lt()
-  //,
-  mor()
+  : mor()
   , omega_z()
   , dv_do_dz()
   , hmf()
@@ -144,7 +135,6 @@ SigmaCentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  //lc_lt.emplace(sample);
   mor.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);

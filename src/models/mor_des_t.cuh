@@ -3,8 +3,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cuda/pagani/quad/GPUquad/Interp2D.cuh"
-#include "utils/mz_power_law.hh"
-#include "utils/primitives.hh"
+#include "utils/primitives.cuh"
 
 #include <array>
 #include <cmath>
