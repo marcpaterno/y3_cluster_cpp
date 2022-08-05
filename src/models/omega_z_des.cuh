@@ -13,13 +13,13 @@ namespace y3_cuda {
     {
       const y3_cuda::polynomial<6> SDSS_fit{
         {0.0, 0.0, 0.0, -0.00262353, 0.01940118, 0.45133063}};
-      static const y3_cuda::polynomial<6> SDSS_fit2{{1.33647377e+4,
-                                                     1.35291046e+3,
-                                                     -1.26204891e+2,
-                                                     -2.83454918e+1,
-                                                     -2.26465905,
-                                                     3.84958753e-1}};
-      static const y3_cuda::polynomial<6> SDSS_fit3{
+      const y3_cuda::polynomial<6> SDSS_fit2{{1.33647377e+4,
+	    1.35291046e+3,
+	    -1.26204891e+2,
+	    -2.83454918e+1,
+	    -2.26465905,
+	    3.84958753e-1}};
+      const y3_cuda::polynomial<6> SDSS_fit3{
         {0, 0, -1.88101967, 4.8071839, -4.11424324, 1.18196785}};
 
       // Returns effective survey area in rad^2
