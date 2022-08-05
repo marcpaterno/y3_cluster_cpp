@@ -31,19 +31,6 @@ namespace y3_cuda {
       }
       return val;
     }
-
-    static
-    size_t
-    get_device_mem_footprint(){
-      size_t size = 0;
-      //size += lambda0_interp.get_device_mem_footprint();
-      //size += lambda1_interp.get_device_mem_footprint();
-      //size += lambda2_interp.get_device_mem_footprint();
-      //size += lambda3_interp.get_device_mem_footprint();
-      return size;
-    }
-    
-    
   };
 }
 
