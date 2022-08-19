@@ -59,19 +59,18 @@ private:
   double radius_;
 
 public:
-  size_t get_device_mem_footprint(){
+  size_t
+  get_device_mem_footprint()
+  {
     size_t dev_size = 0;
-    if((bool)mor == true)
-      dev_size += (*mor).get_device_mem_footprint();
-    if((bool)dv_do_dz == true)
+    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
+    if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if((bool)hmf == true)
-      dev_size += (*hmf).get_device_mem_footprint();
-    if((bool)sigma == true)
-      dev_size += (*sigma).get_device_mem_footprint();
+    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
+    if ((bool)sigma == true) dev_size += (*sigma).get_device_mem_footprint();
     return dev_size;
   }
-  
+
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
   explicit SigmaMiscentY1MortCUDAScalarIntegrand(cosmosis::DataBlock& config);
@@ -120,7 +119,8 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-SigmaMiscentY1MortCUDAScalarIntegrand::SigmaMiscentY1MortCUDAScalarIntegrand(DataBlock&)
+SigmaMiscentY1MortCUDAScalarIntegrand::SigmaMiscentY1MortCUDAScalarIntegrand(
+  DataBlock&)
   : mor()
   , omega_z()
   , dv_do_dz()
@@ -159,11 +159,11 @@ SigmaMiscentY1MortCUDAScalarIntegrand::set_grid_point(grid_point_t grid_point)
 
 __device__ __host__ double
 SigmaMiscentY1MortCUDAScalarIntegrand::operator()(double lo,
-                                        double lc,
-                                        double zt,
-                                        double lnM,
-                                        double rmis,
-                                        double theta) const
+                                                  double lc,
+                                                  double zt,
+                                                  double lnM,
+                                                  double rmis,
+                                                  double theta) const
 {
   double const roffset_v = (*roffset)(rmis);
   double const lo_lc_v = (*lo_lc)(lo, lc, rmis);
@@ -188,7 +188,8 @@ SigmaMiscentY1MortCUDAScalarIntegrand::module_label()
 }
 
 std::vector<SigmaMiscentY1MortCUDAScalarIntegrand::volume_t>
-SigmaMiscentY1MortCUDAScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+SigmaMiscentY1MortCUDAScalarIntegrand::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg,
@@ -202,7 +203,8 @@ SigmaMiscentY1MortCUDAScalarIntegrand::make_integration_volumes(cosmosis::DataBl
 }
 
 SigmaMiscentY1MortCUDAScalarIntegrand::grid_t
-SigmaMiscentY1MortCUDAScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
+SigmaMiscentY1MortCUDAScalarIntegrand::make_grid_points(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,

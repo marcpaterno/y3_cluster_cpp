@@ -119,7 +119,8 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-MassRadMiscentY1MortScalarIntegrand::MassRadMiscentY1MortScalarIntegrand(DataBlock&)
+MassRadMiscentY1MortScalarIntegrand::MassRadMiscentY1MortScalarIntegrand(
+  DataBlock&)
   : lc_lt()
   , mor()
   , omega_z()
@@ -149,7 +150,8 @@ MassRadMiscentY1MortScalarIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-MassRadMiscentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
+MassRadMiscentY1MortScalarIntegrand::set_grid_point(
+  grid_point_t const& grid_point)
 {
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
@@ -158,9 +160,9 @@ MassRadMiscentY1MortScalarIntegrand::set_grid_point(grid_point_t const& grid_poi
 
 double
 MassRadMiscentY1MortScalarIntegrand::operator()(double lo,
-                                             double lc,
-                                             double zt,
-                                             double lnM) const
+                                                double lc,
+                                                double zt,
+                                                double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).

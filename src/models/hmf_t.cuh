@@ -35,10 +35,12 @@ namespace y3_cuda {
 
     using doubles = std::vector<double>;
 
-    size_t get_device_mem_footprint(){
+    size_t
+    get_device_mem_footprint()
+    {
       return _nmz.get_device_mem_footprint();
     }
-    
+
     explicit HMF_t(cosmosis::DataBlock& sample)
       : _nmz(
           _adjust_to_log(sample, sample.view<doubles>("mass_function", "m_h")),

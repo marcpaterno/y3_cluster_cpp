@@ -8,19 +8,19 @@
 #include "cubacpp/arity.hh"
 #include "cubacpp/integration_result.hh"
 
-#include "utils/make_grid_points.hh"
-#include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/gpu_integrator.cuh"
+#include "utils/make_cuda_integration_volumes.cuh"
+#include "utils/make_grid_points.hh"
+#include "utils/mem_tracking_sentry.hh"
 #include "utils/mpi_support.hh"
 #include "utils/timing_sentry.hh"
-#include "utils/mem_tracking_sentry.hh"
 
-#include "cuda/pagani/quad/util/Volume.cuh"
-#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
 #include "cuda/mcubes/vegasT.cuh"
+#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
+#include "cuda/pagani/quad/util/Volume.cuh"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -29,37 +29,36 @@
 
 namespace y3_cluster {
 
-   // DeviceInitializer initializes a CUDA device upon construction.
-   // Specifically, it initializes the device with a number matching
-   // the local MPI rank of the process, so that each device on a
-   // node is used by only one MPI rank, and each MPI rank gets one
-   // device. This assumes we are never running more MPI ranks on a
-   // node than there are devices on the node.
+  // DeviceInitializer initializes a CUDA device upon construction.
+  // Specifically, it initializes the device with a number matching
+  // the local MPI rank of the process, so that each device on a
+  // node is used by only one MPI rank, and each MPI rank gets one
+  // device. This assumes we are never running more MPI ranks on a
+  // node than there are devices on the node.
   struct DeviceInitializer {
     int id = 0;
 
-    DeviceInitializer(mpi_info const& info) : id(info.local_rank) {
+    DeviceInitializer(mpi_info const& info) : id(info.local_rank)
+    {
       int ndevices_on_node = 0;
       int rc = cudaGetDeviceCount(&ndevices_on_node);
       if (rc != cudaSuccess) {
         throw std::runtime_error("Failed to get CUDA device count.\n");
       }
       if (info.local_rank >= ndevices_on_node) {
-        throw std::runtime_error("Tried to allocate " +
-            std::to_string(info.local_rank) +
-            " devices on node with only " +
-            std::to_string(ndevices_on_node) +
-            " available\n");
+        throw std::runtime_error(
+          "Tried to allocate " + std::to_string(info.local_rank) +
+          " devices on node with only " + std::to_string(ndevices_on_node) +
+          " available\n");
       }
       rc = cudaSetDevice(id);
       if (rc != cudaSuccess) {
         std::cerr << "Failed to initialize CUDA device\n"
-          << "MPI info: " << info << '\n';
+                  << "MPI info: " << info << '\n';
         throw std::runtime_error("Failed to set CUDA device\n");
       }
     }
   };
-
 
   // CosmoSISSICUDAModule is a class template used to create a class
   // that is a CosmoSIS physics module, and which, for each CosmoSIS sample,
@@ -86,7 +85,7 @@ namespace y3_cluster {
     using integration_results_t = cubacpp::integration_result;
 
     explicit CosmoSISSICUDAModule(cosmosis::DataBlock& cfg);
-    
+
     ~CosmoSISSICUDAModule();
 
     // Evaluate all the integrals specified (all grid points, and all volumes),
@@ -131,21 +130,23 @@ namespace y3_cluster {
     void finalize_sample_zipped_sequence_of_volumes_and_gridpoints(
       cosmosis::DataBlock& sample,
       std::vector<integration_results_t> const& results) const;
-    
+
     // Give access to the contained ostream (for writing timing data), if
     // there is one.
-    std::ostream* timing_data_stream_() {
+    std::ostream*
+    timing_data_stream_()
+    {
       if (timing_data_) return &(*timing_data_);
       return nullptr;
     }
 
-    std::ostream* mem_track_data_stream_() {
-      if (mem_track_data_){
-	return &(*mem_track_data_);
-      }
+    std::ostream*
+    mem_track_data_stream_()
+    {
+      if (mem_track_data_) { return &(*mem_track_data_); }
       return nullptr;
     }
-    
+
     DeviceInitializer device_;
     IntegrandType integrand_;
     y3_cuda::MultiDimensionalIntegrator<ndim> algorithm_;
@@ -158,70 +159,68 @@ namespace y3_cluster {
     std::optional<std::ofstream> mem_track_data_;
     mpi_info mpi_info_;
     std::ofstream mpi_time_file_;
- };
+  };
 } // namespace y3_cluster
 
 template <typename I>
 y3_cluster::CosmoSISSICUDAModule<I>::CosmoSISSICUDAModule(
   cosmosis::DataBlock& cfg)
-try :
-   device_(get_mpi_info()),
-   integrand_(cfg),
-    // The c'tor for algorithm_ will get adjusted at some later date...
-	algorithm_(cfg.view<std::string>(IntegrandType::module_label(), "algorithm")),
+try : device_(get_mpi_info()), integrand_(cfg),
+  // The c'tor for algorithm_ will get adjusted at some later date...
+  algorithm_(cfg.view<std::string>(IntegrandType::module_label(), "algorithm")),
   volumes_(IntegrandType::make_integration_volumes(cfg)),
   grid_points_(IntegrandType::make_grid_points(cfg)),
   eps_rel_(cfg.view<double>(IntegrandType::module_label(), "eps_rel")),
   eps_abs_(cfg.view<double>(IntegrandType::module_label(), "eps_abs")),
   use_cartesian_product_of_volumes_and_gridpoints_(
     cfg.view<bool>(IntegrandType::module_label(), "use_cartesian_product")) {
-    // Check validity of configuration of volumes and gridpoints.
-     
-     if (not use_cartesian_product_of_volumes_and_gridpoints_) {
-       if (volumes_.size() != grid_points_.size()) {
-	 throw std::runtime_error(
-				  "An integration module was configured to use a zipped sequence of "
-				  "volumes and gridpoints,\n"
-				  "but the number of volumes did not equal the number of gridpoints.\n");
-       }
-     }
+  // Check validity of configuration of volumes and gridpoints.
+
+  if (not use_cartesian_product_of_volumes_and_gridpoints_) {
+    if (volumes_.size() != grid_points_.size()) {
+      throw std::runtime_error(
+        "An integration module was configured to use a zipped sequence of "
+        "volumes and gridpoints,\n"
+        "but the number of volumes did not equal the number of gridpoints.\n");
+    }
+  }
   // Set up timing if requested.
   std::string timing_filename;
-  auto status = cfg.get_val(IntegrandType::module_label(), "timing_file", timing_filename);
+  auto status =
+    cfg.get_val(IntegrandType::module_label(), "timing_file", timing_filename);
   if (status == DBS_SUCCESS) {
-      timing_data_.emplace(timing_filename);
-      *timing_data_ << "# integration times in microseconds\n";
+    timing_data_.emplace(timing_filename);
+    *timing_data_ << "# integration times in microseconds\n";
   }
 
   std::string mem_track_filename;
-  auto mem_track_status = cfg.get_val(IntegrandType::module_label(), "memory_track_file", mem_track_filename);
+  auto mem_track_status = cfg.get_val(
+    IntegrandType::module_label(), "memory_track_file", mem_track_filename);
   {
-    
-    //if(mem_track_filename == "")
-    //  mem_track_filename = "integrand_memory_tracking.txt";
+
+    // if(mem_track_filename == "")
+    //   mem_track_filename = "integrand_memory_tracking.txt";
     mem_track_data_.emplace(mem_track_filename, std::ios_base::app);
-    *mem_track_data_ << "free_mem, module_mem, module_label, track_label, loc, volume_id, grid_point_id" << std::endl;
+    *mem_track_data_ << "free_mem, module_mem, module_label, track_label, loc, "
+                        "volume_id, grid_point_id"
+                     << std::endl;
   }
-  
-  
-  algorithm_.set_maxeval(cfg.view<double>(IntegrandType::module_label(), "max_eval"));
+
+  algorithm_.set_maxeval(
+    cfg.view<double>(IntegrandType::module_label(), "max_eval"));
   cfg.print_log();
   mpi_info_ = get_mpi_info();
   std::ostringstream filename;
-  filename << "mpi_timing_"
-    << IntegrandType::module_label() 
-    << '_'
-    << mpi_info_.global_rank
-    << ".txt";
-  mpi_time_file_.open(filename.str(), std::ios_base::out | std::ios_base::trunc);
+  filename << "mpi_timing_" << IntegrandType::module_label() << '_'
+           << mpi_info_.global_rank << ".txt";
+  mpi_time_file_.open(filename.str(),
+                      std::ios_base::out | std::ios_base::trunc);
   record_timestamp(mpi_time_file_, "constructed");
 }
 catch (cosmosis::Exception const& e) {
-  std::cerr
-    << "\nDuring construction of a CosmoSISSICUDAModule with label:  "
-    << IntegrandType::module_label()
-    << ", the lookup of some parameter"
-    << "\nfailed. It may be a wrong name, or a wrong type.\n";
+  std::cerr << "\nDuring construction of a CosmoSISSICUDAModule with label:  "
+            << IntegrandType::module_label() << ", the lookup of some parameter"
+            << "\nfailed. It may be a wrong name, or a wrong type.\n";
   cfg.print_log();
 }
 catch (std::exception const& e) {
@@ -243,8 +242,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::~CosmoSISSICUDAModule()
 
 template <typename I>
 void
-y3_cluster::CosmoSISSICUDAModule<I>::execute(
-  cosmosis::DataBlock& sample)
+y3_cluster::CosmoSISSICUDAModule<I>::execute(cosmosis::DataBlock& sample)
 {
   record_timestamp(mpi_time_file_, "enter");
   // Is this call to cudaSetDevice really necessary? Since our MPI rank
@@ -254,13 +252,16 @@ y3_cluster::CosmoSISSICUDAModule<I>::execute(
   // that.
   auto rc = cudaSetDevice(device_.id);
   if (rc != 0) throw std::runtime_error("Failed to allocate GPU!\n");
-  
-  y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "module", integrand_.get_device_mem_footprint());
-  
+
+  y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(),
+                                        IntegrandType::module_label(),
+                                        "module",
+                                        integrand_.get_device_mem_footprint());
+
   integrand_.set_sample(sample);
   auto results = use_cartesian_product_of_volumes_and_gridpoints_ ?
-    integrate_cartesian_product_of_volumes_and_gridpoints() :
-    integrate_zipped_sequence_of_volumes_and_gridpoints();
+                   integrate_cartesian_product_of_volumes_and_gridpoints() :
+                   integrate_zipped_sequence_of_volumes_and_gridpoints();
   finalize_sample(sample, results);
   record_timestamp(mpi_time_file_, "exit");
 }
@@ -283,32 +284,50 @@ y3_cluster::CosmoSISSICUDAModule<
   results.reserve(num_results());
   size_t num_vols = 0;
   for (auto& volume : volumes_) {
-    
+
     num_vols++;
-    y3_cluster::MemTrackSentry mem_sentry_vol(mem_track_data_stream_(), IntegrandType::module_label(), "volume", integrand_.get_device_mem_footprint(), num_vols);
+    y3_cluster::MemTrackSentry mem_sentry_vol(
+      mem_track_data_stream_(),
+      IntegrandType::module_label(),
+      "volume",
+      integrand_.get_device_mem_footprint(),
+      num_vols);
     size_t num_grid_points = 0;
 
     for (auto const& grid_point : grid_points_.points) {
       num_grid_points++;
-      y3_cluster::MemTrackSentry mem_sentry_grid_point(mem_track_data_stream_(), IntegrandType::module_label(), "grid-point", integrand_.get_device_mem_footprint(), num_vols, num_grid_points);
+      y3_cluster::MemTrackSentry mem_sentry_grid_point(
+        mem_track_data_stream_(),
+        IntegrandType::module_label(),
+        "grid-point",
+        integrand_.get_device_mem_footprint(),
+        num_vols,
+        num_grid_points);
 
       integrand_.set_grid_point(grid_point);
-      
+
       // Note: I would be better to have a scope for TimingSentry that just
       // included the call to algorithm_.integrate, and not also the push_back
       // of the result; but doing that crashes the nvcc compiler
       // (build cuda_11.1.TC455_06.29190527_0 of nvcc).
       TimingSentry sentry(timing_data_stream_());
-      y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(), IntegrandType::module_label(), "integrate", integrand_.get_device_mem_footprint(), num_vols, num_grid_points);
-		 
-      cuhreResult res = algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
-      results.push_back(cubacpp::integration_result(
-            res.estimate,
-            res.errorest,
-            res.chi_sq,
-            static_cast<long long>(res.neval),
-            static_cast<int>(res.nregions),
-            static_cast<int>(res.status)));
+      y3_cluster::MemTrackSentry mem_sentry(
+        mem_track_data_stream_(),
+        IntegrandType::module_label(),
+        "integrate",
+        integrand_.get_device_mem_footprint(),
+        num_vols,
+        num_grid_points);
+
+      cuhreResult res =
+        algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
+      results.push_back(
+        cubacpp::integration_result(res.estimate,
+                                    res.errorest,
+                                    res.chi_sq,
+                                    static_cast<long long>(res.neval),
+                                    static_cast<int>(res.nregions),
+                                    static_cast<int>(res.status)));
     }
   }
   return results;
@@ -324,15 +343,15 @@ y3_cluster::CosmoSISSICUDAModule<
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_points_.points[i]);
     TimingSentry sentry(timing_data_stream_());
-    cuhreResult res = 
+    cuhreResult res =
       algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volumes_[i]);
-     results.push_back(cubacpp::integration_result(
-           res.estimate,
-           res.errorest,
-           0.0, // probability not returned by PAGANI
-           static_cast<long long>(res.neval),
-           static_cast<int>(res.nregions),
-           static_cast<int>(res.status)));
+    results.push_back(
+      cubacpp::integration_result(res.estimate,
+                                  res.errorest,
+                                  0.0, // probability not returned by PAGANI
+                                  static_cast<long long>(res.neval),
+                                  static_cast<int>(res.nregions),
+                                  static_cast<int>(res.status)));
   }
   return results;
 }
@@ -343,7 +362,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::finalize_sample(
   cosmosis::DataBlock& sample,
   std::vector<cubacpp::integration_result> const& res) const
 {
-  //std::cerr << "Finalizing sample.\n";
+  // std::cerr << "Finalizing sample.\n";
   if (use_cartesian_product_of_volumes_and_gridpoints_)
     finalize_sample_cartesian_product_of_volumes_and_gridpoints(sample, res);
   else

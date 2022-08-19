@@ -48,24 +48,23 @@ private:
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  
+
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
 
 public:
   size_t
-  get_device_mem_footprint(){
+  get_device_mem_footprint()
+  {
     size_t dev_size = 0;
-    if((bool)mor == true)
-      dev_size += (*mor).get_device_mem_footprint();
-    if((bool)dv_do_dz == true)
+    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
+    if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if((bool)hmf == true)
-      dev_size += (*hmf).get_device_mem_footprint();
+    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
     return dev_size;
   }
-  
+
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
   explicit NCCentY1MortCUDAScalarIntegrand(cosmosis::DataBlock& config);
@@ -109,7 +108,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-NCCentY1MortCUDAScalarIntegrand::NCCentY1MortCUDAScalarIntegrand(DataBlock&){}
+NCCentY1MortCUDAScalarIntegrand::NCCentY1MortCUDAScalarIntegrand(DataBlock&) {}
 
 void
 NCCentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
@@ -131,7 +130,9 @@ NCCentY1MortCUDAScalarIntegrand::set_grid_point(grid_point_t grid_point)
 }
 
 __host__ __device__ double
-NCCentY1MortCUDAScalarIntegrand::operator()(double lo, double zt, double lnM) const
+NCCentY1MortCUDAScalarIntegrand::operator()(double lo,
+                                            double zt,
+                                            double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
@@ -155,7 +156,8 @@ NCCentY1MortCUDAScalarIntegrand::module_label()
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
 std::vector<NCCentY1MortCUDAScalarIntegrand::volume_t>
-NCCentY1MortCUDAScalarIntegrand::make_integration_volumes(cosmosis::DataBlock& cfg)
+NCCentY1MortCUDAScalarIntegrand::make_integration_volumes(
+  cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg, NCCentY1MortCUDAScalarIntegrand::module_label(), "lo", "zt", "lnm");

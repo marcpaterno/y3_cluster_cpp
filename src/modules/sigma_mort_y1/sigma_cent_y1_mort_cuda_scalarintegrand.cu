@@ -1,6 +1,6 @@
-#include "utils/make_grid_points.hh"
-#include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/cuda_module_macros.cuh"
+#include "utils/make_cuda_integration_volumes.cuh"
+#include "utils/make_grid_points.hh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
@@ -54,7 +54,7 @@ private:
   std::optional<y3_cuda::ROFFSET_t> roffset;
   std::optional<y3_cuda::LO_LC_t> lo_lc;
   std::optional<y3_cuda::SIG_MAX> sigma;
-  
+
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
@@ -72,19 +72,18 @@ public:
   // Set the data for the current bin.
   void set_grid_point(grid_point_t const& pt);
 
-  size_t get_device_mem_footprint(){
+  size_t
+  get_device_mem_footprint()
+  {
     size_t dev_size = 0;
-    if((bool)mor == true)
-      dev_size += (*mor).get_device_mem_footprint();
-    if((bool)dv_do_dz == true)
+    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
+    if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if((bool)hmf == true)
-      dev_size += (*hmf).get_device_mem_footprint();
-    if((bool)sigma == true)
-    dev_size += (*sigma).get_device_mem_footprint();
+    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
+    if ((bool)sigma == true) dev_size += (*sigma).get_device_mem_footprint();
     return dev_size;
   }
-  
+
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
   // integration routine does not work for functions of one variable). The
@@ -117,7 +116,8 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-SigmaCentY1MortCUDAScalarIntegrand::SigmaCentY1MortCUDAScalarIntegrand(DataBlock&)
+SigmaCentY1MortCUDAScalarIntegrand::SigmaCentY1MortCUDAScalarIntegrand(
+  DataBlock&)
   : mor()
   , omega_z()
   , dv_do_dz()
@@ -143,7 +143,8 @@ SigmaCentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
 }
 
 void
-SigmaCentY1MortCUDAScalarIntegrand::set_grid_point(grid_point_t const& grid_point)
+SigmaCentY1MortCUDAScalarIntegrand::set_grid_point(
+  grid_point_t const& grid_point)
 {
   radius_ = grid_point[2];
   zo_low_ = grid_point[0];
@@ -152,8 +153,8 @@ SigmaCentY1MortCUDAScalarIntegrand::set_grid_point(grid_point_t const& grid_poin
 
 __host__ __device__ double
 SigmaCentY1MortCUDAScalarIntegrand::operator()(double lo,
-                                           double zt,
-                                           double lnM) const
+                                               double zt,
+                                               double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).

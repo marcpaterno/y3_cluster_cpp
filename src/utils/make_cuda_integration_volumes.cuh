@@ -30,15 +30,14 @@ namespace y3_cuda {
   template <typename... Ts>
   std::vector<quad::Volume<double, sizeof...(Ts)>>
   make_integration_volumes_wall_of_numbers(cosmosis::DataBlock& cfg,
-                                                std::string const& modulelabel,
-                                                Ts... names);
+                                           std::string const& modulelabel,
+                                           Ts... names);
 
   template <typename... Ts>
   std::vector<quad::Volume<double, sizeof...(Ts)>>
-  make_integration_volumes_cartesian_product(
-    cosmosis::DataBlock& cfg,
-    std::string const& modulelabel,
-    Ts... names);
+  make_integration_volumes_cartesian_product(cosmosis::DataBlock& cfg,
+                                             std::string const& modulelabel,
+                                             Ts... names);
 
   namespace detail {
     template <std::size_t N>

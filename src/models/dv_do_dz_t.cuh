@@ -26,17 +26,16 @@ namespace y3_cuda {
              _ezt(zt);
     }
 
-    size_t get_device_mem_footprint(){
+    size_t
+    get_device_mem_footprint()
+    {
       return _da.get_device_mem_footprint();
     }
-    
+
   private:
     quad::Interp1D _da;
     EZ _ezt;
     double _h;
-
-    
-    
   };
 }
 

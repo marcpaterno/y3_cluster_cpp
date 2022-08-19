@@ -631,9 +631,11 @@ namespace {
   };*/
 }
 
-//Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda0_interp = make_Interp2D(lambda0_arr);
-//Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda1_interp = make_Interp2D(lambda1_arr);
-//Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda2_interp = make_Interp2D(lambda2_arr);
-//Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda3_interp = make_Interp2D(lambda3_arr);
+// Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda0_interp =
+// make_Interp2D(lambda0_arr); Interp2D const
+// y3_cuda::INT_LC_LT_DES_t::lambda1_interp = make_Interp2D(lambda1_arr);
+// Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda2_interp =
+// make_Interp2D(lambda2_arr); Interp2D const
+// y3_cuda::INT_LC_LT_DES_t::lambda3_interp = make_Interp2D(lambda3_arr);
 
 #endif

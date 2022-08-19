@@ -1,7 +1,6 @@
 #ifndef Y3_CLUSTER_CPP_UTILS_MPI_SUPPORT_HH
 #define Y3_CLUSTER_CPP_UTILS_MPI_SUPPORT_HH
 
-
 #include <iosfwd>
 
 namespace y3_cluster {

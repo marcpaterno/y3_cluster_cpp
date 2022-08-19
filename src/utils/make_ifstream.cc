@@ -15,7 +15,7 @@ y3_cluster::make_ifstream(std::string const& path_fragment)
   fullpath += path_fragment;
   return std::ifstream(fullpath);
 }
-  
+
 std::ofstream
 y3_cluster::make_ofstream(std::string const& path_fragment)
 {

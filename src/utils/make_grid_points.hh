@@ -40,7 +40,11 @@ namespace y3_cluster {
 
     // The number of points in the grid is *not* a compile-time constant; it
     // is determined at runtime.
-    std::size_t size() const { return points.size(); }
+    std::size_t
+    size() const
+    {
+      return points.size();
+    }
 
     // The number of axes (and so the dimensionality of the space) is a
     // compile-time constant.

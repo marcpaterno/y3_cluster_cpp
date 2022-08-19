@@ -51,25 +51,23 @@ private:
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<y3_cuda::ROFFSET_t> roffset;
   std::optional<y3_cuda::LO_LC_t> lo_lc;
-  
+
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
 
 public:
-
   size_t
-  get_device_mem_footprint(){
+  get_device_mem_footprint()
+  {
     size_t dev_size = 0;
-    if((bool)mor == true)
-      dev_size += (*mor).get_device_mem_footprint();
-    if((bool)dv_do_dz == true)
+    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
+    if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if((bool)hmf == true)
-      dev_size += (*hmf).get_device_mem_footprint();
+    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
     return dev_size;
   }
-  
+
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
   explicit NCMiscentY1MortCUDAScalarIntegrand(cosmosis::DataBlock& config);
@@ -87,10 +85,10 @@ public:
   // function is const because calling it does not change the state of the
   // object.
   __host__ __device__ double operator()(double lo,
-                    double lc,
-                    double zt,
-                    double lnM,
-                    double rmis) const;
+                                        double lc,
+                                        double zt,
+                                        double lnM,
+                                        double rmis) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -117,7 +115,8 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-NCMiscentY1MortCUDAScalarIntegrand::NCMiscentY1MortCUDAScalarIntegrand(DataBlock&)
+NCMiscentY1MortCUDAScalarIntegrand::NCMiscentY1MortCUDAScalarIntegrand(
+  DataBlock&)
   : mor()
   , omega_z()
   , dv_do_dz()
@@ -188,7 +187,10 @@ NCMiscentY1MortCUDAScalarIntegrand::grid_t
 NCMiscentY1MortCUDAScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, NCMiscentY1MortCUDAScalarIntegrand::module_label(), "zo_low", "zo_high");
+    cfg,
+    NCMiscentY1MortCUDAScalarIntegrand::module_label(),
+    "zo_low",
+    "zo_high");
 }
 
 DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(NCMiscentY1MortCUDAScalarIntegrand)

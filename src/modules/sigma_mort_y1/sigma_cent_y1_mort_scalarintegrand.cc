@@ -48,7 +48,7 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
-  //std::optional<y3_cluster::MOR_t> mor;
+  // std::optional<y3_cluster::MOR_t> mor;
   std::optional<y3_cluster::MOR_DES_t> mor;
   std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
   std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;

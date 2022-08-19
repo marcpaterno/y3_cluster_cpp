@@ -28,17 +28,29 @@ namespace y3_cluster {
   }
   // This is the double-precision hexidecimal floating point value
   // closes to pi.
-  double constexpr pi() { return 0x1.5bf0a8b145769p+1; }
+  double constexpr pi()
+  {
+    return 0x1.5bf0a8b145769p+1;
+  }
 
   // TODO: Get higher precision!
   // Source: astropy's constants and unit conversion
-  double constexpr c() { return 9.71561189e-15; } // Mpc/s
+  double constexpr c()
+  {
+    return 9.71561189e-15;
+  } // Mpc/s
 
   // TODO: Get higher precision!
   // Source: astropy's constants and unit conversion
-  double constexpr G() { return 4.51710305e-48; } // Mpc^3 / M_sol / s^2
+  double constexpr G()
+  {
+    return 4.51710305e-48;
+  } // Mpc^3 / M_sol / s^2
 
-  double constexpr invsqrt2pi() { return 1. / sqrt(2. * pi()); }
+  double constexpr invsqrt2pi()
+  {
+    return 1. / sqrt(2. * pi());
+  }
 
   inline double
   gaussian(double x, double mu, double sigma)

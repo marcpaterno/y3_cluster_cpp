@@ -11,7 +11,6 @@ namespace y3_cluster {
   // Y3_CLUSTER_CPP_DIR is not set, a std::runtime_error is thrown.
   std::ifstream make_ifstream(std::string const& path_fragment);
 
-
   // Given the path fragement from the top y3_cluster_cpp directory,
   // create and open the file. If the required environment variable
   // Y3_CLUSTER_CPP_DIR is not set, a std::runtime_error is thrown.

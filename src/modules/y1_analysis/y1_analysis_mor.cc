@@ -71,9 +71,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  std::vector<double> operator()(double lo,
-                                 double zt,
-                                 double lnM) const;
+  std::vector<double> operator()(double lo, double zt, double lnM) const;
 
   // finalize_sample() is where products can be put into the cosmosis::DataBlock
   // representing the current sample. The object 'sample' passed to this
@@ -110,10 +108,10 @@ y1_analysis_mor::y1_analysis_mor(DataBlock& config)
   , dv_do_dz()
   , hmf()
   , int_zo_zt()
-  , zo_low_(
-      config.view<std::vector<double>>(y1_analysis_mor::module_label(), "zo_low"))
-  , zo_high_(
-      config.view<std::vector<double>>(y1_analysis_mor::module_label(), "zo_high"))
+  , zo_low_(config.view<std::vector<double>>(y1_analysis_mor::module_label(),
+                                             "zo_low"))
+  , zo_high_(config.view<std::vector<double>>(y1_analysis_mor::module_label(),
+                                              "zo_high"))
 {}
 
 void
@@ -136,8 +134,8 @@ y1_analysis_mor::operator()(double lo, double zt, double lnM) const
   // to access the X object (as if we were dereferencing a pointer).
   std::vector<double> results(2 * zo_low_.size());
   double mass = std::exp(lnM);
-  double common_term = (*mor)(lo, lnM, zt) *
-                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+  double common_term =
+    (*mor)(lo, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
   // Number counts first in the returned results, followed by the masses
   for (std::size_t i = 0; i != zo_low_.size(); i++) {
     results[i] = (*int_zo_zt)(zo_low_[i], zo_high_[i], zt) * common_term;
@@ -230,7 +228,7 @@ y1_analysis_mor::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   try {
     return y3_cluster::make_integration_volumes_wall_of_numbers(
-      cfg, module_label(), "lo","zt", "lnm");
+      cfg, module_label(), "lo", "zt", "lnm");
   }
   catch (std::exception const& ex) {
     std::cerr << ex.what();

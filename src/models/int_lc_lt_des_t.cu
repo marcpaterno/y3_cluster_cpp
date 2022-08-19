@@ -593,7 +593,6 @@ namespace {
     0.496403, 0.312320, 0.155206, 0.053726, 0.000000, 0.000000, 0.000000,
     0.000000};
 
-  
   // make_short_vec creates an std::vector<double> from an std::array,
   // using all but the last element of the std::array.
   template <size_t N>
@@ -630,7 +629,11 @@ namespace {
   };
 }
 
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda0_interp = make_Interp2D(lambda0_arr);
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda1_interp = make_Interp2D(lambda1_arr);
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda2_interp = make_Interp2D(lambda2_arr);
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda3_interp = make_Interp2D(lambda3_arr);
+Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda0_interp =
+  make_Interp2D(lambda0_arr);
+Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda1_interp =
+  make_Interp2D(lambda1_arr);
+Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda2_interp =
+  make_Interp2D(lambda2_arr);
+Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda3_interp =
+  make_Interp2D(lambda3_arr);

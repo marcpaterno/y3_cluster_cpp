@@ -86,7 +86,7 @@ y3_cluster::MultiDimensionalIntegrator::integrate(int which,
     case 2:
       return std::get<2>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-  default:
+    default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
   }
@@ -111,7 +111,7 @@ y3_cluster::MultiDimensionalIntegrator::integrate(
     case 2:
       return std::get<2>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel, vol);
-  default:
+    default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
   }
@@ -168,7 +168,7 @@ y3_cluster::MultiDimensionalIntegrator::set_maxeval(long long int m)
 {
   std::get<0>(algorithms_).maxeval = m;
   std::get<1>(algorithms_).maxeval = m;
-  std::get<2>(algorithms_).maxeval = m; 
+  std::get<2>(algorithms_).maxeval = m;
 }
 
 #endif

@@ -91,7 +91,11 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(double lo, double lc, double zt, double lnM, double rmis) const;
+  double operator()(double lo,
+                    double lc,
+                    double zt,
+                    double lnM,
+                    double rmis) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -157,14 +161,15 @@ double
 MassMiscentY1MortScalarIntegrand::operator()(double lo,
                                              double lc,
                                              double zt,
-                                             double lnM, 
+                                             double lnM,
                                              double rmis) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double mass = std::exp(lnM);
-  double common_term = (*lo_lc)(lo, lc, rmis) * (*roffset)(rmis) * (*mor)(lc, lnM, zt) *
-                       (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+  double common_term = (*lo_lc)(lo, lc, rmis) * (*roffset)(rmis) *
+                       (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
+                       (*omega_z)(zt);
   auto const val = mass * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
@@ -192,7 +197,7 @@ MassMiscentY1MortScalarIntegrand::make_integration_volumes(
     "lo",
     "lc",
     "zt",
-    "lnm", 
+    "lnm",
     "rmis");
 }
 
@@ -200,10 +205,7 @@ MassMiscentY1MortScalarIntegrand::grid_t
 MassMiscentY1MortScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg,
-    MassMiscentY1MortScalarIntegrand::module_label(),
-    "zo_low",
-    "zo_high");
+    cfg, MassMiscentY1MortScalarIntegrand::module_label(), "zo_low", "zo_high");
 }
 
 DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(MassMiscentY1MortScalarIntegrand)

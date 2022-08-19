@@ -8,13 +8,17 @@
 namespace y3_cuda {
   struct INT_LC_LT_DES_t {
 
-     static quad::Interp2D const lambda0_interp;
-     static quad::Interp2D const lambda1_interp;
-     static quad::Interp2D const lambda2_interp;
-     static quad::Interp2D const lambda3_interp;
-    
+    static quad::Interp2D const lambda0_interp;
+    static quad::Interp2D const lambda1_interp;
+    static quad::Interp2D const lambda2_interp;
+    static quad::Interp2D const lambda3_interp;
+
     explicit INT_LC_LT_DES_t(const cosmosis::DataBlock&) {}
-    INT_LC_LT_DES_t()/* :lambda0_interp(lt_bins, zt_bins, lambda0_arr), lambda1_interp(lt_bins, zt_bins, lambda1_arr), lambda2_interp(lt_bins, zt_bins, lambda2_arr), lambda3_interp(lt_bins, zt_bins, lambda3_arr)*/ {}
+    INT_LC_LT_DES_t() /* :lambda0_interp(lt_bins, zt_bins, lambda0_arr),
+                         lambda1_interp(lt_bins, zt_bins, lambda1_arr),
+                         lambda2_interp(lt_bins, zt_bins, lambda2_arr),
+                         lambda3_interp(lt_bins, zt_bins, lambda3_arr)*/
+    {}
 
     __device__ __host__ double
     operator()(double lc, double lt, double zt) const
