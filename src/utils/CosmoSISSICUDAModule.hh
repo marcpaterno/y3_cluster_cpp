@@ -30,6 +30,11 @@
 namespace y3_cluster {
 
    // DeviceInitializer initializes a CUDA device upon construction.
+   // Specifically, it initializes the device with a number matching
+   // the local MPI rank of the process, so that each device on a
+   // node is used by only one MPI rank, and each MPI rank gets one
+   // device. This assumes we are never running more MPI ranks on a
+   // node than there are devices on the node.
   struct DeviceInitializer {
     int id = 0;
 
