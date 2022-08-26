@@ -8,19 +8,19 @@
 #include "cubacpp/arity.hh"
 #include "cubacpp/integration_result.hh"
 
-#include "utils/gpu_integrator.cuh"
-#include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
-#include "utils/mem_tracking_sentry.hh"
+#include "utils/make_cuda_integration_volumes.cuh"
+#include "utils/gpu_integrator.cuh"
 #include "utils/mpi_support.hh"
 #include "utils/timing_sentry.hh"
+#include "utils/mem_tracking_sentry.hh"
 
-#include "cuda/mcubes/vegasT.cuh"
-#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
 #include "cuda/pagani/quad/util/Volume.cuh"
+#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
+#include "cuda/mcubes/vegasT.cuh"
 
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <optional>
 #include <sstream>
 #include <stdexcept>

@@ -1,6 +1,6 @@
-#include "utils/cuda_module_macros.cuh"
-#include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
+#include "utils/make_cuda_integration_volumes.cuh"
+#include "utils/cuda_module_macros.cuh"
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"

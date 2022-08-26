@@ -6,9 +6,9 @@
 #include "cosmosis/datablock/ndarray.hh"
 #include "cubacpp/cubacpp.hh"
 
-#include "utils/debugging.hh"
 #include "utils/make_grid_points.hh"
 #include "utils/multi_dimensional_integrator.hh"
+#include "utils/debugging.hh"
 
 #include <iostream>
 #include <stdexcept>

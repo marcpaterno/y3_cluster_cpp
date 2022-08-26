@@ -1,11 +1,11 @@
 #ifndef Y3_CLUSTER_MEM_TRACK_SENTRY_HH
 #define Y3_CLUSTER_MEM_TRACK_SENTRY_HH
 
-#include <cuda.h>
 #include <optional>
 #include <ostream>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <cuda.h>
 #include <string>
 
 namespace y3_cluster {
