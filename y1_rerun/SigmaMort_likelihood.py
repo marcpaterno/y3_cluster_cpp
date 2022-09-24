@@ -95,7 +95,6 @@ def execute(block, config):
     return 0
 
 def cleanup(config):
-    data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err = config
     #nothing to clean up
     return 0
 
