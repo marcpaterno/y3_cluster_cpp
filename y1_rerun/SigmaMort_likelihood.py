@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 from scipy import integrate
 from scipy.interpolate import interp1d
 
-from mpi4py import MPI
-
 def setup(options):
     section = option_section
     # data vector 
@@ -15,18 +13,12 @@ def setup(options):
     covmat = np.genfromtxt('data_files/wl_cov.txt')
     ncs = np.genfromtxt('data_files/nc.txt', delimiter=',')
     nc_covmat = np.genfromtxt('data_files/Cov_ij_bestfit_DESY1_105.txt')
-    #ncs = ncs[0, :]
     nc_covmat = nc_covmat[:12, :12]
 
     # model module     
-    '''profile_blockname = options[section,"profile_blockname"]
-    NCs_blockname = options[section,"NCs_blockname"]
-    snapshot_zs = options[section, "snapshot_zs"]
-    snapshot_lnm = options[section, "lnm_low"]
-    snapshot_radii = options[section, "radii"]'''
     rad = options[section, "radius"]
     Redges = np.logspace(np.log10(0.0323), np.log10(30.), num=15+1)
-    return profiles, covmat, ncs, nc_covmat, rad, Redges, profiles_err, 
+    return profiles, covmat, ncs, nc_covmat, rad, Redges, profiles_err
 
 def execute(block, config):
     data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err = config
@@ -49,20 +41,9 @@ def execute(block, config):
 
     miscent_fraction = block['cluster_abundance', 'fcen'] 
     
-    '''
-    profiles_miscent_model = np.genfromtxt('sigma_y1_output/sigmamiscenty1mortscalarintegrand/vals.txt')
-    profiles_cent_model = np.genfromtxt('sigma_y1_output/sigmacenty1mortScalarintegrand/vals.txt')
-    NC_miscent_model = np.genfromtxt('sigma_y1_output/ncmiscentY1mortscalarintegrand/vals.txt')
-    NC_cent_model = np.genfromtxt('sigma_y1_output/nccenty1mortscalarintegrand/vals.txt')
-    miscent_fraction = 0.7 #np.genfromtxt('sigma_y1_output/cluster_abundance/fcen.txt') 
-    '''
-
     sigma = profiles_miscent_model/NC_miscent_model * miscent_fraction + (profiles_cent_model/NC_cent_model)*(1-miscent_fraction)
     ncs_vector = NC_miscent_model * miscent_fraction + (NC_cent_model)*(1-miscent_fraction)
-    #sigma = profiles_miscent_model/NC_miscent_model # * miscent_fraction # + (profiles_cent_model/NC_cent_model)*(1-miscent_fraction)
-    #ncs_vector = NC_miscent_model # * miscent_fraction # + (NC_cent_model)*(1-miscent_fraction)
-    #sigma = (profiles_cent_model/NC_cent_model)
-    #ncs_vector = (NC_cent_model)
+
     model_ncs = np.array([])
     ngrid = sigma.shape[1]/len(rad)
     ngrid = int(ngrid)
@@ -85,12 +66,6 @@ def execute(block, config):
     loglike = loglike1 + loglike2
     block[section_names.likelihoods, 'SigmaMort_Like_like'] = loglike
 
-    #print(block['cluster_mass_profile', "concentration"], block['cosmological_parameters', "omega_m"], block['cosmological_parameters', "sigma_8"], loglike1, loglike2, loglike, delta, delta2, model_ncs, ncs, model_vector)
-    #plt.plot(model_vector, 'k--');plt.plot(data_vector, 'b:');plt.show()
-    #plt.plot(ncs, 'k--');plt.plot(model_ncs, 'b:');plt.show()
-    #make_plots(3, 4, Redges, aver_ds, data_array,  data_vector_err, ncs, model_ncs, nc_covmat)
-    #make_plots_compare(3, 4, 18, model_vector, data_vector, covmat)
-
     return 0
 
 def cleanup(config):
@@ -98,7 +73,6 @@ def cleanup(config):
     return 0
 
 def convert_s2ds(rad, profiles, Redges):
-    #print(ds.shape, profiles.shape)
     ngrid=int(profiles.shape[1]/len(rad))
     ds= np.zeros([profiles.shape[0]*ngrid, len(rad)])
     for jj in range(profiles.shape[0]):
@@ -112,14 +86,11 @@ def convert_s2ds(rad, profiles, Redges):
     res = np.zeros([ds.shape[0], len(Redges)-1])
     for jj in range(ds.shape[0]):
         prof_interp=interp1d(rad, ds[jj, :])
-        #prof_interp=interp1d(rad, profiles[jj, :])
         prof_func=lambda x: prof_interp(x) * x
         for ii in range(len(Redges)-1):
             # averaging DS ranges
             res_int, unc_int = integrate.quad(prof_func, Redges[ii], Redges[ii+1])
             res_int = res_int *2/((Redges[ii+1]**2) - (Redges[ii]**2))
-
-            #print(jj, ii, res_int)
             res[jj, ii] = res_int
     return ds, res
 
@@ -141,12 +112,7 @@ def make_plots(ngriddim, nvoldim, rad_edges, model_vector, data_vector, data_err
         axs[0, j].set_xticks(range(nvoldim))
         axs[0, j].set_xticklabels(lam_labels) 
         for i in range(nvoldim):
-            #ndim1=j*nvoldim
-            #ndim2=(j+1)*nvoldim
-            #axs[j, nvoldim].plot(model_vector[ndim1:ndim2])
-            #print(model_ncs, ncs, unc_nc)
             axs[1, j].plot(rad, model_vector[j*nvoldim+i], label = "Models "+lam_labels[i])
-            #print(dim1, dim2, len(unc), model_vector[dim1:dim2])
             dim1 = i * len(rad)
             dim2 = (i+1) * len(rad)
             axs[1, j].errorbar(rad, data_vector[j*nvoldim+i], yerr=unc[j*nvoldim+i], fmt='o', color = 'gray')
