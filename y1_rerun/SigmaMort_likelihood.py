@@ -8,10 +8,6 @@ from scipy.interpolate import interp1d
 from mpi4py import MPI
 
 def setup(options):
-    timing_file = open(f"mpi_timing_SigmaMortlikelihood_{MPI.COMM_WORLD.rank}.txt", mode='w')
-    print(f"constructed\t{MPI.Wtime()}", file = timing_file, flush=True);
-
-    print(f"In SigmaMort_likelihood.setup: mpi rank is {MPI.COMM_WORLD.rank} total number of ranks is: {MPI.COMM_WORLD.size}")
     section = option_section
     # data vector 
     profiles = np.genfromtxt('data_files/wl_data_vector.txt')
@@ -30,12 +26,11 @@ def setup(options):
     snapshot_radii = options[section, "radii"]'''
     rad = options[section, "radius"]
     Redges = np.logspace(np.log10(0.0323), np.log10(30.), num=15+1)
-    return profiles, covmat, ncs, nc_covmat, rad, Redges, profiles_err, timing_file
+    return profiles, covmat, ncs, nc_covmat, rad, Redges, profiles_err, 
 
 def execute(block, config):
     print(f"In SigmaMort_likelihood.execute: mpi rank is {MPI.COMM_WORLD.rank} total number of ranks is: {MPI.COMM_WORLD.size}")
-    data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err, timing_file = config
-    print(f"enter\t{MPI.Wtime()}", file = timing_file, flush=True);
+    data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err = config
 
     #read in the model values at this sample point.
     # We look for CUDA algorithm results first; if that fails, we look for CPU-based
@@ -97,12 +92,10 @@ def execute(block, config):
     #make_plots(3, 4, Redges, aver_ds, data_array,  data_vector_err, ncs, model_ncs, nc_covmat)
     #make_plots_compare(3, 4, 18, model_vector, data_vector, covmat)
 
-    print(f"exit\t{MPI.Wtime()}", file = timing_file, flush=True);
     return 0
 
 def cleanup(config):
-    data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err, timing_file = config
-    print(f"destroyed\t{MPI.Wtime()}", file = timing_file, flush=True);
+    data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err = config
     #nothing to clean up
     return 0
 
