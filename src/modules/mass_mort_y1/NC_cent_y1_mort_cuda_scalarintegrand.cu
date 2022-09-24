@@ -3,8 +3,9 @@
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
 
-#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock_status.h"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
 #include "models/dv_do_dz_t.cuh"
@@ -59,7 +60,7 @@ private:
 
 
   // Should we use cartesian grid? If not, we use a wall-of-numbers.
-  bool do_cartesian_product_of_bins_;
+  bool do_cartesian_product_of_bins_ = false;
   
   // In this integrand, the name "cartesian product" is a bit misleading; it
   // is used in case later development introduces another grid dimenstion over
@@ -129,10 +130,17 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-NCCentY1MortCUDAScalarIntegrand::NCCentY1MortCUDAScalarIntegrand(DataBlock& cfg) :
-  do_cartesian_product_of_bins_(cfg.view<bool>(module_label(),
-        "do_cartesian_product_of_bins"))
-{}
+NCCentY1MortCUDAScalarIntegrand::NCCentY1MortCUDAScalarIntegrand(DataBlock& cfg)
+{
+  auto rc = 
+    cfg.get_val(module_label(),
+                "do_cartesian_product_of_bins",
+                false,
+                do_cartesian_product_of_bins_);
+  if (rc != DBS_SUCCESS) {
+    throw std::runtime_error("NCCentY1MortCUDAScalarIntegrand failed to find do_cartesian_product_of_bins\n");
+  }
+}
 
 void
 NCCentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
@@ -192,8 +200,8 @@ NCCentY1MortCUDAScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
   char const * const label =
     NCCentY1MortCUDAScalarIntegrand::module_label();
-  bool do_cartesian_product_of_bins =
-    cfg.view<bool>(label, "do_cartesian_product_of_bins");
+  bool do_cartesian_product_of_bins = false;
+  auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
 
   if (do_cartesian_product_of_bins)
   {
