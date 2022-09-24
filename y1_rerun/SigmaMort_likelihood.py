@@ -40,15 +40,24 @@ def execute(block, config):
         NC_cent_model = block['NCCentY1MortScalarIntegrand', "vals"]
 
     miscent_fraction = block['cluster_abundance', 'fcen'] 
-    
+
     sigma = profiles_miscent_model/NC_miscent_model * miscent_fraction + (profiles_cent_model/NC_cent_model)*(1-miscent_fraction)
     ncs_vector = NC_miscent_model * miscent_fraction + (NC_cent_model)*(1-miscent_fraction)
 
     model_ncs = np.array([])
     ngrid = sigma.shape[1]/len(rad)
     ngrid = int(ngrid)
+
     for kk in range(ngrid):
+        # concatenate all the values for radius bin 0
         model_ncs = np.append(model_ncs, ncs_vector[:, kk*(len(rad))])
+
+    # The following code would do the same as that above:
+    #
+    # ncs_vector.shape = (4, 3, 23) ; 4 volumes, 3 nbins, 23 radii
+    # model_ncs = ncs_vector[:,:,0] ; only use 0'th radius bin
+    # model_ncs = model_ncs.T       ; not sure why we want the transpose
+    
     ds, aver_ds = convert_s2ds(rad, sigma, Redges)
     model_vector = aver_ds.flatten()
     
@@ -73,14 +82,16 @@ def cleanup(config):
     return 0
 
 def convert_s2ds(rad, profiles, Redges):
-    ngrid=int(profiles.shape[1]/len(rad))
-    ds= np.zeros([profiles.shape[0]*ngrid, len(rad)])
-    for jj in range(profiles.shape[0]):
+    n_radii = len(rad)
+    n_volumes = profiles.shape[0]
+    ngrid=int(profiles.shape[1]/n_radii)
+    ds= np.zeros([n_volumes*ngrid, n_radii])
+    for jj in range(n_volumes):
         for kk in range(ngrid):
-            for ii in range(len(rad)):
-                profiles_ind = kk * len(rad)
+            for ii in range(n_radii):
+                profiles_ind = kk * n_radii
                 ds_int = np.trapz(profiles[jj, profiles_ind:(profiles_ind+ii+1)]*rad[:(ii+1)], rad[:(ii+1)])*2.0/(rad[ii])**2 - profiles[jj, (profiles_ind+ii)]
-                ds[kk*profiles.shape[0]+jj, ii] = ds_int
+                ds[kk*n_volumes+jj, ii] = ds_int
 
 
     res = np.zeros([ds.shape[0], len(Redges)-1])
