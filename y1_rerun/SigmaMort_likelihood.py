@@ -29,7 +29,6 @@ def setup(options):
     return profiles, covmat, ncs, nc_covmat, rad, Redges, profiles_err, 
 
 def execute(block, config):
-    print(f"In SigmaMort_likelihood.execute: mpi rank is {MPI.COMM_WORLD.rank} total number of ranks is: {MPI.COMM_WORLD.size}")
     data_array, covmat, ncs, nc_covmat, rad, Redges, data_vector_err = config
 
     #read in the model values at this sample point.
@@ -98,16 +97,6 @@ def cleanup(config):
     #nothing to clean up
     return 0
 
-def sig_gamma(rad, profiles, xx0):
-    ds= np.zeros([profiles.shape[0], len(rad)])
-    print(ds.shape)
-    for jj in range(profiles.shape[0]):
-        for ii in range(len(rad)):
-            ds[jj, ii] = np.trapz(profiles[jj, :ii]*rad[jj, :ii], rad[jj, :ii])*2.0/(rad[ii])**2 - profiles[jj, ii]
-    f=interp1d(rad, ds)
-    mean=ds -f(xx0)*xx0**2/rad**2
-    return mean
-
 def convert_s2ds(rad, profiles, Redges):
     #print(ds.shape, profiles.shape)
     ngrid=int(profiles.shape[1]/len(rad))
@@ -133,18 +122,6 @@ def convert_s2ds(rad, profiles, Redges):
             #print(jj, ii, res_int)
             res[jj, ii] = res_int
     return ds, res
-
-
-def assemble_vector(profiles_model, NCs_model, radii, snapshot_zs):
-    averaged_profiles = profiles_model/NCs_model
-    for ii in range(len(snapshot_zs)):
-        if ii == 0:
-           model_vec = NCs_model[:, 0]
-        else:
-           model_vec=np.append(model_vec, NCs_model[:,len(radii)*ii])
-    model_vec=np.append(model_vec, averaged_profiles)
-
-    return model_vec
 
 def make_plots(ngriddim, nvoldim, rad_edges, model_vector, data_vector, data_err, ncs, model_ncs, nc_covmat):
 
@@ -207,8 +184,4 @@ def make_plots_compare(ngriddim, nvoldim, nrad, model_vector, data_vector, covma
             axs[j, i].set_ylim([0.5, 2.0])
             axs[j, nvoldim].set_ylim([0.5, 2.0])
     plt.show()
-
-
-
-
 
