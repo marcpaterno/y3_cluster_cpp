@@ -15,8 +15,6 @@
 #include "utils/mem_tracking_sentry.hh"
 
 #include "cuda/pagani/quad/util/Volume.cuh"
-#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
-#include "cuda/mcubes/vegasT.cuh"
 
 #include <iostream>
 #include <fstream>
@@ -302,7 +300,7 @@ y3_cluster::CosmoSISSICUDAModule<
         num_grid_points);
 
       cuhreResult res =
-        algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
+        algorithm_.integrate(integrand_, eps_abs_, eps_rel_, volume);
       // MFP: considuer using emplace_back and being rid of the explicit
       // construction of the temporary.
       results.push_back(
@@ -327,7 +325,7 @@ y3_cluster::CosmoSISSICUDAModule<
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_points_.points[i]);
     cuhreResult res =
-      algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volumes_[i]);
+      algorithm_.integrate(integrand_, eps_abs_, eps_rel_, volumes_[i]);
     results.push_back(
       cubacpp::integration_result(res.estimate,
                                   res.errorest,
