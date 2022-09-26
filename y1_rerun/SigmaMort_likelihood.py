@@ -84,10 +84,13 @@ def cleanup(config):
 def convert_s2ds(rad, profiles, Redges):
     n_radii = len(rad)
     n_volumes = profiles.shape[0]
-    ngrid=int(profiles.shape[1]/n_radii)
-    ds= np.zeros([n_volumes*ngrid, n_radii])
+    n_gridpoints = profiles.shape[1]
+    n_dz_bins=int(n_gridpoints/n_radii)
+
+    # Can we turn profiles into a 3-d array, and make ds a 3-d aray?
+    ds= np.zeros([n_volumes*n_dz_bins, n_radii])
     for jj in range(n_volumes):
-        for kk in range(ngrid):
+        for kk in range(n_dz_bins):
             for ii in range(n_radii):
                 profiles_ind = kk * n_radii
                 ds_int = np.trapz(profiles[jj, profiles_ind:(profiles_ind+ii+1)]*rad[:(ii+1)], rad[:(ii+1)])*2.0/(rad[ii])**2 - profiles[jj, (profiles_ind+ii)]
