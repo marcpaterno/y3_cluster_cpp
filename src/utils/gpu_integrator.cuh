@@ -4,9 +4,10 @@
 #include "cubacpp/arity.hh"
 #include "cuda/pagani/quad/GPUquad/Workspace.cuh"
 #include "cuda/pagani/quad/util/Volume.cuh"
-#include "cuda/mcubes/mcubes.cuh"
 #include "cuda/mcubes/vegasT.cuh"
-#include "cuda/mcubes/vegasSeqMcubes.hh"
+#include "cuda/mcubes/mcubes.cuh"
+
+#include "common/integration_result.hh"
 
 #include <tuple>
 
@@ -20,23 +21,23 @@ namespace y3_cuda {
     explicit MultiDimensionalIntegrator(std::string const& name);
 
     template <class F>
-    cuhreResult<double> integrate(int which,
+    numint::integration_result integrate(int which,
                                   F& f,
                                   double epsabs,
                                   double epsrel);
 
     template <class F>
-    cuhreResult<double> integrate(int which,
+    numint::integration_result integrate(int which,
                                   F& f,
                                   double epsabs,
                                   double epsrel,
                                   quad::Volume<double, ndim> const& vol);
 
     template <class F>
-    cuhreResult<double> integrate(F& f, double epsabs, double epsrel);
+    numint::integration_result integrate(F& f, double epsabs, double epsrel);
 
     template <class F>
-    cuhreResult<double> integrate(F& f,
+    numint::integration_result integrate(F& f,
                                   double epsabs,
                                   double epsrel,
                                   quad::Volume<double, ndim> const& vol);
@@ -44,7 +45,7 @@ namespace y3_cuda {
     void set_maxeval(double m);
 
   private:
-    using algs_t = std::tuple<Workspace<ndim>, quad::mcubes, VegasSEQmcubes>;
+    using algs_t = std::tuple<Workspace<double, ndim>, quad::mcubes>;
     algs_t algorithms_;
     int which_ = 0;
   };
@@ -58,8 +59,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::MultiDimensionalIntegrator(
     which_ = 0;
   else if (name == std::string("mcubes"))
     which_ = 1;
-  else if (name == std::string("seqmcubes"))
-    which_ = 2;
   else
     throw std::runtime_error("MultiDimensionalIntegrator::integrate called for "
                              "unrecognized algorithm");
@@ -74,7 +73,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::num_algs() const
 
 template <int N>
 template <class F>
-cuhreResult<double>
+numint::integration_result
 y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
                                                   F& f,
                                                   double epsabs,
@@ -87,9 +86,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 2:
-      return std::get<3>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -98,7 +94,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(int which,
 
 template <int N>
 template <class F>
-cuhreResult<double>
+numint::integration_result
 y3_cuda::MultiDimensionalIntegrator<N>::integrate(
   int which,
   F& f,
@@ -112,10 +108,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
         .integrate(std::forward<F>(f), epsabs, epsrel, vol);
     case 1:
       return std::get<1>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel, &vol);
-    case 2:
-      return std::get<2>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel, &vol);
+        .integrate(std::forward<F>(f), epsabs, epsrel, vol);
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -124,7 +117,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
 
 template <int N>
 template <class F>
-cuhreResult<double>
+numint::integration_result
 y3_cuda::MultiDimensionalIntegrator<N>::integrate(F& f,
                                                   double epsabs,
                                                   double epsrel)
@@ -137,10 +130,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(F& f,
     case 1:
       return std::get<1>(algorithms_)
         .integrate(std::forward<F>(f), epsabs, epsrel);
-    case 2:
-      return std::get<3>(algorithms_)
-        .integrate(std::forward<F>(f), epsabs, epsrel);
-
     default:
       throw std::runtime_error("MultiDimensionalIntegrator::integrate called "
                                "for unrecognized algorithm");
@@ -149,7 +138,7 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(F& f,
 
 template <int N>
 template <class F>
-cuhreResult<double>
+numint::integration_result
 y3_cuda::MultiDimensionalIntegrator<N>::integrate(
   F& f,
   double epsabs,
@@ -160,12 +149,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::integrate(
     case 0: return std::get<0>(algorithms_).integrate(f, epsrel, epsabs, vol);
     case 1: {
       auto x = std::get<1>(algorithms_).integrate(f, epsabs, epsrel, &vol);
-      return x;
-      break;
-    }
-
-    case 2: {
-      auto x = std::get<2>(algorithms_).integrate(f, epsabs, epsrel, &vol);
       return x;
       break;
     }
@@ -186,7 +169,6 @@ y3_cuda::MultiDimensionalIntegrator<N>::set_maxeval(double m)
 
   // PAGANI does not use maxcalls
   std::get<1>(algorithms_).maxcalls = static_cast<long long>(m);
-  std::get<2>(algorithms_).maxcalls = static_cast<unsigned long>(m);
 }
 
 #endif

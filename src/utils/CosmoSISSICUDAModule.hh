@@ -5,6 +5,7 @@
 #include "cosmosis/datablock/entry.hh"
 #include "cosmosis/datablock/ndarray.hh"
 
+#include "common/integration_result.hh"
 #include "cubacpp/arity.hh"
 #include "cubacpp/integration_result.hh"
 
@@ -299,7 +300,7 @@ y3_cluster::CosmoSISSICUDAModule<
         num_vols,
         num_grid_points);
 
-      cuhreResult res =
+      numint::integration_result res =
         algorithm_.integrate(integrand_, eps_abs_, eps_rel_, volume);
       // MFP: considuer using emplace_back and being rid of the explicit
       // construction of the temporary.
@@ -324,7 +325,7 @@ y3_cluster::CosmoSISSICUDAModule<
   results.reserve(num_results());
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_points_.points[i]);
-    cuhreResult res =
+    numint::integration_result res =
       algorithm_.integrate(integrand_, eps_abs_, eps_rel_, volumes_[i]);
     results.push_back(
       cubacpp::integration_result(res.estimate,
