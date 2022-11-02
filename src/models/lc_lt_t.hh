@@ -39,7 +39,7 @@ namespace y3_cluster {
         return std::erfc((a - b) / root_two_sigma);
       };
 
-      // eq. (33)
+      // eq. (33)     https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
       return (1.0 - fmsk) * (1.0 - fprj) * y3_cluster::gaussian(lc, mu, sigma) +
              0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lt) * exptau *
                erfc_scaled(mu_tau_sig_sqr, lc) +

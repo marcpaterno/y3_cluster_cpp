@@ -25,7 +25,7 @@ namespace y3_cluster {
     double
     operator()(double lt, double lnM, double zt) const
     {
-      /* eq. (34) */
+      /* eq. (34) https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2 */
       double const ltm = _lambda(lnM, zt);
       double const _sigma =
         std::max(std::sqrt(_sigma_intr * _sigma_intr * ltm * ltm + ltm), 4.0);

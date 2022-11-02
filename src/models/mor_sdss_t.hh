@@ -252,9 +252,9 @@ namespace y3_cluster {
     double
     operator()(double lt, double lnM, double) const
     {
-      // Now _lambda returns the evaluation of the eq.(9) of the
+      // Now _lambda returns the evaluation of the eq.(9) of the   
       // Matteo's paper, i.e., lambda_sat_given_M. 1. is a dummy
-      // value for z. We are not using z here.
+      // value for z. We are not using z here.    Costanzi, Rozo, Simet, Zhang, et al 2019
       double ltm = pow((std::exp(lnM) - _A) / (_B - _A), _C);
 
       // Computing sigma from the interpolation
@@ -262,7 +262,7 @@ namespace y3_cluster {
       double _sigma = sig_interp.clamp(_sigma_intr, ltm);
       double _skw = skews_interp.clamp(_sigma_intr, ltm);
 
-      // Eq. B1 of Matteo's paper, adding the normalization part
+      // Eq. B1 of Matteo's paper, adding the normalization part  Costanzi, Rozo, Simet, Zhang, et al 2019
       double const x = lt - ltm;
       double const erfarg = -1.0 * _skw * (x) / (std::sqrt(2.) * _sigma);
       double const erfterm = std::erfc(erfarg);
