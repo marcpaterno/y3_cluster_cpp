@@ -17,6 +17,11 @@ namespace y3_cluster {
 
   template <std::size_t NAXES>
   struct grid_t {
+    // class template grid_t<NAXES> represents a set of points in a NAXES-
+    // dimensional space.
+    // The data member 'points' is the actual points.
+    // The data member 'names' is the names of the axes.
+
     // value_type for a grid_t defines what a point on the grid is.
     // It is the array-based representation of an n-dimensional point,
     // where the number of dimensions in the space is NAXES.

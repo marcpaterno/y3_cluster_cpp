@@ -12,12 +12,9 @@
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/gpu_integrator.cuh"
 #include "utils/mpi_support.hh"
-#include "utils/timing_sentry.hh"
 #include "utils/mem_tracking_sentry.hh"
 
 #include "cuda/pagani/quad/util/Volume.cuh"
-#include "cuda/pagani/quad/GPUquad/Pagani.cuh"
-#include "cuda/mcubes/vegasT.cuh"
 
 #include <iostream>
 #include <fstream>
@@ -42,6 +39,7 @@ namespace y3_cluster {
     {
       int ndevices_on_node = 0;
       int rc = cudaGetDeviceCount(&ndevices_on_node);
+
       if (rc != cudaSuccess) {
         throw std::runtime_error("Failed to get CUDA device count.\n");
       }
@@ -131,19 +129,10 @@ namespace y3_cluster {
       cosmosis::DataBlock& sample,
       std::vector<integration_results_t> const& results) const;
 
-    // Give access to the contained ostream (for writing timing data), if
-    // there is one.
-    std::ostream*
-    timing_data_stream_()
-    {
-      if (timing_data_) return &(*timing_data_);
-      return nullptr;
-    }
-
     std::ostream*
     mem_track_data_stream_()
     {
-      if (mem_track_data_) { return &(*mem_track_data_); }
+      if (mem_track_data_) return &(*mem_track_data_);
       return nullptr;
     }
 
@@ -158,7 +147,6 @@ namespace y3_cluster {
     std::optional<std::ofstream> timing_data_;
     std::optional<std::ofstream> mem_track_data_;
     mpi_info mpi_info_;
-    std::ofstream mpi_time_file_;
   };
 } // namespace y3_cluster
 
@@ -184,22 +172,27 @@ try : device_(get_mpi_info()), integrand_(cfg),
         "but the number of volumes did not equal the number of gridpoints.\n");
     }
   }
+  mpi_info_ = get_mpi_info();
+
   // Set up timing if requested.
-  std::string timing_filename;
+  bool do_timing;
   auto status =
-    cfg.get_val(IntegrandType::module_label(), "timing_file", timing_filename);
-  if (status == DBS_SUCCESS) {
-    timing_data_.emplace(timing_filename);
-    *timing_data_ << "# integration times in microseconds\n";
+    cfg.get_val(IntegrandType::module_label(), "do_timing", do_timing);
+  if (status == DBS_SUCCESS && do_timing)
+  {
+    // Create a timing file specific for this module and MPI rank.
+    std::ostringstream filename;
+    filename << "mpi_timing_" << IntegrandType::module_label() << '_'
+      << mpi_info_.global_rank << ".txt";
+    timing_data_.emplace(filename.str());
+    record_timestamp(*timing_data_, "constructed");
   }
 
+  // Set up memory tracking if requested.
   std::string mem_track_filename;
   auto mem_track_status = cfg.get_val(
     IntegrandType::module_label(), "memory_track_file", mem_track_filename);
   {
-
-    // if(mem_track_filename == "")
-    //   mem_track_filename = "integrand_memory_tracking.txt";
     mem_track_data_.emplace(mem_track_filename, std::ios_base::app);
     *mem_track_data_ << "free_mem, module_mem, module_label, track_label, loc, "
                         "volume_id, grid_point_id"
@@ -208,14 +201,6 @@ try : device_(get_mpi_info()), integrand_(cfg),
 
   algorithm_.set_maxeval(
     cfg.view<double>(IntegrandType::module_label(), "max_eval"));
-  cfg.print_log();
-  mpi_info_ = get_mpi_info();
-  std::ostringstream filename;
-  filename << "mpi_timing_" << IntegrandType::module_label() << '_'
-           << mpi_info_.global_rank << ".txt";
-  mpi_time_file_.open(filename.str(),
-                      std::ios_base::out | std::ios_base::trunc);
-  record_timestamp(mpi_time_file_, "constructed");
 }
 catch (cosmosis::Exception const& e) {
   std::cerr << "\nDuring construction of a CosmoSISSICUDAModule with label:  "
@@ -237,14 +222,14 @@ catch (...) {
 template <typename I>
 y3_cluster::CosmoSISSICUDAModule<I>::~CosmoSISSICUDAModule()
 {
-  record_timestamp(mpi_time_file_, "destroyed");
+  if (timing_data_) record_timestamp(*timing_data_, "destroyed");
 }
 
 template <typename I>
 void
 y3_cluster::CosmoSISSICUDAModule<I>::execute(cosmosis::DataBlock& sample)
 {
-  record_timestamp(mpi_time_file_, "enter");
+  if (timing_data_) record_timestamp(*timing_data_, "enter");
   // Is this call to cudaSetDevice really necessary? Since our MPI rank
   // is connected to a specific GPU at construction time, unless the
   // module *moves to a new rank*, this can not get out of sync. A new
@@ -263,7 +248,7 @@ y3_cluster::CosmoSISSICUDAModule<I>::execute(cosmosis::DataBlock& sample)
                    integrate_cartesian_product_of_volumes_and_gridpoints() :
                    integrate_zipped_sequence_of_volumes_and_gridpoints();
   finalize_sample(sample, results);
-  record_timestamp(mpi_time_file_, "exit");
+  if (timing_data_) record_timestamp(*timing_data_, "exit");
 }
 
 template <typename I>
@@ -306,11 +291,6 @@ y3_cluster::CosmoSISSICUDAModule<
 
       integrand_.set_grid_point(grid_point);
 
-      // Note: I would be better to have a scope for TimingSentry that just
-      // included the call to algorithm_.integrate, and not also the push_back
-      // of the result; but doing that crashes the nvcc compiler
-      // (build cuda_11.1.TC455_06.29190527_0 of nvcc).
-      TimingSentry sentry(timing_data_stream_());
       y3_cluster::MemTrackSentry mem_sentry(
         mem_track_data_stream_(),
         IntegrandType::module_label(),
@@ -320,7 +300,9 @@ y3_cluster::CosmoSISSICUDAModule<
         num_grid_points);
 
       cuhreResult res =
-        algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volume);
+        algorithm_.integrate(integrand_, eps_abs_, eps_rel_, volume);
+      // MFP: considuer using emplace_back and being rid of the explicit
+      // construction of the temporary.
       results.push_back(
         cubacpp::integration_result(res.estimate,
                                     res.errorest,
@@ -342,9 +324,8 @@ y3_cluster::CosmoSISSICUDAModule<
   results.reserve(num_results());
   for (std::size_t i = 0; i != num_results(); ++i) {
     integrand_.set_grid_point(grid_points_.points[i]);
-    TimingSentry sentry(timing_data_stream_());
     cuhreResult res =
-      algorithm_.integrate(integrand_, eps_abs_, eps_rel_, &volumes_[i]);
+      algorithm_.integrate(integrand_, eps_abs_, eps_rel_, volumes_[i]);
     results.push_back(
       cubacpp::integration_result(res.estimate,
                                   res.errorest,

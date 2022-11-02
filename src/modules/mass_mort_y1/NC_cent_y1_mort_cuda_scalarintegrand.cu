@@ -1,9 +1,11 @@
 #include "utils/cuda_module_macros.cuh"
+#include "utils/datablock_reader.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
 
-#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock_status.h"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
 #include "models/dv_do_dz_t.cuh"
@@ -28,6 +30,9 @@ using cubacpp::integration_result;
 //
 class NCCentY1MortCUDAScalarIntegrand {
 public:
+  // Note we're slightly abusing the concept of the "grid" here. We are
+  // really iterating over a single sequence of pairs, with the pairs
+  // denoting the bottoms and tops of a set of zo bins.
   using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
 
@@ -53,15 +58,32 @@ private:
   double zo_low_;
   double zo_high_;
 
+
+  // Should we use cartesian grid? If not, we use a wall-of-numbers.
+  bool do_cartesian_product_of_bins_ = false;
+  
+  // In this integrand, the name "cartesian product" is a bit misleading; it
+  // is used in case later development introduces another grid dimenstion over
+  // which we'll operate.
+  //
+  // If we are using the cartesian grid, the relevant congifuration parameters
+  // are zo_bottom (an array of arbitrary length)  and zo_bin_width (a array of
+  // the same length as zo_bottom). These *two* parameters make a single axis
+  // for the grid (the "zo bins").
+  //
+  // If we are using the wall-of-numbers configuration, the relevant
+  // configuration parameters are zo_lo (an array of arbitrary length) and
+  // zo_high. These *two* parameters make a single axis for the grid (the "zo
+  // bins").
+
 public:
   size_t
   get_device_mem_footprint()
   {
     size_t dev_size = 0;
-    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
-    if ((bool)dv_do_dz == true)
-      dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
+    if (mor) dev_size += (*mor).get_device_mem_footprint();
+    if (dv_do_dz) dev_size += (*dv_do_dz).get_device_mem_footprint();
+    if (hmf) dev_size += (*hmf).get_device_mem_footprint();
     return dev_size;
   }
 
@@ -108,7 +130,17 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-NCCentY1MortCUDAScalarIntegrand::NCCentY1MortCUDAScalarIntegrand(DataBlock&) {}
+NCCentY1MortCUDAScalarIntegrand::NCCentY1MortCUDAScalarIntegrand(DataBlock& cfg)
+{
+  auto rc = 
+    cfg.get_val(module_label(),
+                "do_cartesian_product_of_bins",
+                false,
+                do_cartesian_product_of_bins_);
+  if (rc != DBS_SUCCESS) {
+    throw std::runtime_error("NCCentY1MortCUDAScalarIntegrand failed to find do_cartesian_product_of_bins\n");
+  }
+}
 
 void
 NCCentY1MortCUDAScalarIntegrand::set_sample(DataBlock& sample)
@@ -166,6 +198,30 @@ NCCentY1MortCUDAScalarIntegrand::make_integration_volumes(
 NCCentY1MortCUDAScalarIntegrand::grid_t
 NCCentY1MortCUDAScalarIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
 {
+  char const * const label =
+    NCCentY1MortCUDAScalarIntegrand::module_label();
+  bool do_cartesian_product_of_bins = false;
+  auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
+
+  if (do_cartesian_product_of_bins)
+  {
+    auto const bottoms = get_vector_double(cfg, label, "zo_bottom");
+    auto const widths= get_vector_double(cfg, label, "zo_bin_width");
+    if (bottoms.size() != widths.size()) {
+        throw std::runtime_error("zo_bottom and zo_bin_width must be the same length\n");
+    }
+
+    grid_t result;
+    result.set_names(std::vector<std::string>{"zo_bottom", "zo_bin_width"});
+    // This could probably be simplified by using the ranges library.
+    for (std::size_t i = 0; i != bottoms.size(); ++i) {
+      double bottom = bottoms[i];
+      double top = bottoms[i] + widths[i];
+      result.push_back({bottom, top});
+    }
+    return result;
+  };
+
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg, NCCentY1MortCUDAScalarIntegrand::module_label(), "zo_low", "zo_high");
 }
