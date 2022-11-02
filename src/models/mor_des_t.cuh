@@ -278,7 +278,7 @@ namespace y3_cuda {
     {
       // Now _lambda returns the evaluation of the eq.(9) of the
       // Matteo's paper, i.e., lambda_sat_given_M. 1. is a dummy
-      // value for z. We are not using z here.
+      // value for z. We are not using z here.   Costanzi, Rozo, Simet, Zhang, et al 2019
       double const ltm = pow((exp(lnM) - _A) / (_B - _A), _C) *
                          pow((1.0 + zt) / (1.0 + _z_pivot), _epsilon);
 
@@ -288,7 +288,7 @@ namespace y3_cuda {
       double const _sigma = _sig_interp.clamp(_sigma_intr, ltm);
       double const _skw = _skews_interp.clamp(_sigma_intr, ltm);
 
-      // Eq. B1 of Matteo's paper, adding the normalization part
+      // Eq. B1 of Matteo's paper, adding the normalization part   Costanzi, Rozo, Simet, Zhang, et al 2019
       double const x = lt - ltm;
       double const erfarg = -1.0 * _skw * (x) / (sqrt(2.) * _sigma);
       double const erfterm = erfc(erfarg);
