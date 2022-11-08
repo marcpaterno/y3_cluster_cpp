@@ -1,7 +1,7 @@
 link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
 add_library(
-  models SHARED sample_variance.cc lc_lt_t.cc lc_lt_y1_t.cc int_lc_lt_des_t.cc
+  models SHARED sample_variance.cc lc_lt_t.cc lc_lt_y1_t.cc int_lc_lt_des_t.cc int_lo_lt_des_t.cc
   )
 
 target_link_libraries(
@@ -21,6 +21,7 @@ target_include_directories(
 
 if (USE_CUDA)
   add_library(cuda_models SHARED int_lc_lt_des_t.cu)
+  add_library(cuda_models SHARED int_lo_lt_des_t.cu)
 
   target_link_libraries(cuda_models PRIVATE cosmosis utils)
   set_target_properties(

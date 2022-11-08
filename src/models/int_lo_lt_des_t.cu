@@ -1,9 +1,9 @@
-#include "int_lc_lt_des_t.hh"
-using namespace y3_cluster;
+#include "int_lo_lt_des_t.cuh"
+//#include "models/interpolation_tables.cuh"
 
+using namespace quad;
 
 namespace {
-
   std::array<double, 16> constexpr zt_bins = {0.000000,
                                               0.050000,
                                               0.100000,
@@ -620,7 +620,8 @@ namespace {
                     std::array<double, N> const& ys,
                     std::array<double, (N) * (M)> const& zs)
   {
-    return {make_vec(xs), make_vec(ys), make_vec(zs)};
+    printf("Creating static interpolation table of size %lu x %lu\n", M, N);
+    return {xs, ys, zs};
   }
 
   auto make_Interp2D = [](auto zs) {
@@ -628,7 +629,11 @@ namespace {
   };
 }
 
-Interp2D const INT_LC_LT_DES_t::lambda0_interp = make_Interp2D(lambda0_arr);
-Interp2D const INT_LC_LT_DES_t::lambda1_interp = make_Interp2D(lambda1_arr);
-Interp2D const INT_LC_LT_DES_t::lambda2_interp = make_Interp2D(lambda2_arr);
-Interp2D const INT_LC_LT_DES_t::lambda3_interp = make_Interp2D(lambda3_arr);
+Interp2D const y3_cuda::INT_LO_LT_DES_t::lambda0_interp =
+  make_Interp2D(lambda0_arr);
+Interp2D const y3_cuda::INT_LO_LT_DES_t::lambda1_interp =
+  make_Interp2D(lambda1_arr);
+Interp2D const y3_cuda::INT_LO_LT_DES_t::lambda2_interp =
+  make_Interp2D(lambda2_arr);
+Interp2D const y3_cuda::INT_LO_LT_DES_t::lambda3_interp =
+  make_Interp2D(lambda3_arr);
