@@ -6,13 +6,14 @@
 #include "cubacpp/integration_result.hh"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
+#include "models/omega_z_des.cuh"
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
-#include "models/int_zo_zt_des_t.cuh"
-#include "models/lo_lc_t.cuh"
 #include "models/mor_des_t.cuh"
-#include "models/omega_z_des.cuh"
+#include "models/lo_lc_t.cuh"
+#include "models/int_lc_lt_des_t.hh"
 #include "models/roffset_t.cuh"
+#include "models/int_zo_zt_des_t.cuh"
 #include "models/sig_sum.cuh"
 
 #include <iostream>
@@ -44,13 +45,20 @@ private:
   // <none in this example>
 
   // State obtained from each sample.
-  std::optional<y3_cuda::MOR_DES_t> mor;
+  //
+  // the volume
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
+  // the mass function
   std::optional<y3_cuda::HMF_t> hmf;
-  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cuda::ROFFSET_t> roffset;
+  // mass-observable relation
+  std::optional<y3_cuda::MOR_DES_t> mor;
+  // projection model
   std::optional<y3_cuda::LO_LC_t> lo_lc;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cuda::ROFFSET_t> roffset;
+  // z model
+  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -84,6 +92,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
+  //    the miscentered integral has lc,rmis in addition to the usual centered lo,zt lnM
   __host__ __device__ double operator()(double lo,
                                         double lc,
                                         double zt,
@@ -117,13 +126,13 @@ using cubacpp::integration_result;
 
 summedNumbersMiscentY1GPU::summedNumbersMiscentY1GPU(
   DataBlock&)
-  : mor()
   , omega_z()
   , dv_do_dz()
   , hmf()
-  , int_zo_zt()
-  , roffset()
+  : mor()
   , lo_lc()
+  , roffset()
+  , int_zo_zt()
   , zo_low_()
   , zo_high_()
 {}
@@ -134,12 +143,12 @@ summedNumbersMiscentY1GPU::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  mor.emplace(sample);
+  omega_z.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
-  omega_z.emplace(sample);
-  roffset.emplace(sample);
+  mor.emplace(sample);
   lo_lc.emplace(sample);
+  roffset.emplace(sample);
 }
 
 void
@@ -156,9 +165,9 @@ summedNumbersMiscentY1GPU::operator()(double lo,
                                                double lnM,
                                                double rmis) const
 {
-  double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
-                       (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       (*omega_z)(zt);
+  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
+                       (*mor)(lc, lnM, zt) * (*lo_lc)(lo, lc, rmis) *
+                       (*roffset)(rmis)
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }

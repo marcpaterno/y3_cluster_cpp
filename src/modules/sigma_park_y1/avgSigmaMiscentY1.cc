@@ -6,15 +6,15 @@
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
+#include "models/omega_z_des.hh"
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
+#include "models/mor_des_t.hh"
+#include "models/lo_lc_t.hh"
 #include "models/int_lc_lt_des_t.hh"
 #include "models/int_zo_zt_des_t.hh"
-#include "models/lo_lc_t.hh"
-#include "models/mor_des_t.hh"
-#include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
-#include "models/sig_max.hh"
+#include "models/sig_sum.hh"
 
 #include <iostream>
 #include <optional>
@@ -45,14 +45,20 @@ private:
   // <none in this example>
 
   // State obtained from each sample.
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
-  std::optional<y3_cluster::MOR_DES_t> mor;
-  std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
+  // the volume
   std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
+  std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
+  // the mass function
   std::optional<y3_cluster::HMF_t> hmf;
-  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cluster::ROFFSET_t> roffset;
+  // mass-observable relation
+  std::optional<y3_cluster::MOR_DES_t> mor;
+  // projection model
   std::optional<y3_cluster::LO_LC_t> lo_lc;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::ROFFSET_t> roffset;
+  // z model
+  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
+  // and the sigma profile
   std::optional<y3_cluster::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
@@ -110,14 +116,14 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 avgSigmaMiscentY1::avgSigmaMiscentY1(DataBlock&)
-  : lc_lt()
-  , mor()
-  , omega_z()
+  : omega_z()
   , dv_do_dz()
   , hmf()
+  , mor()
+  , lo_lc()
+  , lc_lt()
   , int_zo_zt()
   , roffset()
-  , lo_lc()
   , sigma()
   , zo_low_()
   , zo_high_()
@@ -130,13 +136,13 @@ avgSigmaMiscentY1::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  lc_lt.emplace(sample);
-  mor.emplace(sample);
+  omega_z.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
-  omega_z.emplace(sample);
-  roffset.emplace(sample);
+  mor.emplace(sample);
   lo_lc.emplace(sample);
+  lc_lt.emplace(sample);
+  roffset.emplace(sample);
   sigma.emplace(sample);
 }
 
@@ -157,9 +163,9 @@ avgSigmaMiscentY1::operator()(double lo,
                                               double rmis,
                                               double theta) const
 {
-  double common_term = (*roffset)(rmis) * (*lo_lc)(lo, lc, rmis) *
-                       (*mor)(lc, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       (*omega_z)(zt) / 2.0 / 3.1415926535897;
+  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
+                       (*mor)(lc, lnM, zt) * (*lo_lc)(lo, lc, rmis) * 
+                       (*roffset)(rmis) ;
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
                                  2 * rmis * radius_ * std::cos(theta));
   auto const val = (*sigma)(scaled_Rmis, lnM, zt) *

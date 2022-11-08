@@ -6,15 +6,14 @@
 #include "cubacpp/integration_result.hh"
 #include "cubacpp/integration_volume.hh"
 
+#include "models/omega_z_des.hh"
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
-#include "models/int_lc_lt_des_t.hh"
-#include "models/int_zo_zt_des_t.hh"
-#include "models/lo_lc_t.hh"
 #include "models/mor_des_t.hh"
-#include "models/omega_z_des.hh"
-#include "models/roffset_t.hh"
-#include "models/sig_sum.hh"
+#include "models/lo_lc_t.hh"
+#include "models/int_lo_lt_des_t.hh"
+#include "models/int_zo_zt_des_t.hh"
+
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -23,6 +22,8 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
+// summedNumbersCentY1 sum the counts of clusters in a bin of lambda and z
+//
 // summedNumbersCentY1 is a class that models the concept of
 // "CosmoSISScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
@@ -61,14 +62,19 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
-  std::optional<y3_cluster::MOR_DES_t> mor;
+  //
+  // the volume
   std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
   std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
+  // the mass function
   std::optional<y3_cluster::HMF_t> hmf;
-  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cluster::ROFFSET_t> roffset;
+  // mass-observable relation
+  std::optional<y3_cluster::MOR_DES_t> mor;
+  // projection model
   std::optional<y3_cluster::LO_LC_t> lo_lc;
+  std::optional<y3_cluster::INT_LO_LT_DES_t> lo_lt;
+  // z model
+  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -119,11 +125,11 @@ using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
 summedNumbersCentY1::summedNumbersCentY1(DataBlock&)
-  : lc_lt()
-  , mor()
-  , omega_z()
+  : omega_z()
   , dv_do_dz()
   , hmf()
+  , mor()
+  , lo_lt()
   , int_zo_zt()
   , zo_low_()
   , zo_high_()
@@ -135,11 +141,11 @@ summedNumbersCentY1::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  lc_lt.emplace(sample);
-  mor.emplace(sample);
+  omega_z.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
-  omega_z.emplace(sample);
+  mor.emplace(sample);
+  lo_lt.emplace(sample);
 }
 
 void
@@ -156,8 +162,7 @@ summedNumbersCentY1::operator()(double lo, double zt, double lnM) const
   // to access the X object (as if we were dereferencing a pointer).
   double const mor_v = (*mor)(lo, lnM, zt);
 
-  double common_term =
-    mor_v * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v  ;
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
 #ifdef DEBUG_PRINT
   printf("nc %.17e %.17e %.17e %.17e %.17e\n", lo, lnM, zt, mor_v, val);

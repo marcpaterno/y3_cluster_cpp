@@ -6,14 +6,15 @@
 #include "cubacpp/integration_result.hh"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
+#include "models/omega_z_des.cuh"
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
-#include "models/int_zo_zt_des_t.cuh"
-#include "models/lo_lc_t.cuh"
 #include "models/mor_des_t.cuh"
-#include "models/omega_z_des.cuh"
+#include "models/lo_lc_t.cuh"
+#include "models/int_lo_lt_des_t.hh"
 #include "models/roffset_t.cuh"
-#include "models/sig_max.cuh"
+#include "models/int_zo_zt_des_t.cuh"
+#include "models/sig_sum.cuh"
 
 #include <iostream>
 #include <optional>
@@ -46,14 +47,21 @@ private:
   // State obtained from each sample.
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
-  std::optional<y3_cuda::MOR_DES_t> mor;
+  //
+  // the volume
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
+  // the mass function
   std::optional<y3_cuda::HMF_t> hmf;
-  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cuda::ROFFSET_t> roffset;
+  // mass-observable relation
+  std::optional<y3_cuda::MOR_DES_t> mor;
+  // projection model
   std::optional<y3_cuda::LO_LC_t> lo_lc;
-  std::optional<y3_cuda::SIG_MAX> sigma;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> lo_lt;
+  // z model
+  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
+  // and the sigma profile
+  std::optional<y3_cuda::SIG_SUM> sigma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -118,10 +126,11 @@ using cubacpp::integration_result;
 
 avgSigmaCentY1GPU::avgSigmaCentY1GPU(
   DataBlock&)
-  : mor()
   , omega_z()
   , dv_do_dz()
   , hmf()
+  : mor()
+  , lo_lt()
   , int_zo_zt()
   , sigma()
   , zo_low_()
@@ -135,10 +144,11 @@ avgSigmaCentY1GPU::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  mor.emplace(sample);
+  omega_z.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
-  omega_z.emplace(sample);
+  mor.emplace(sample);
+  lo_lt.emplace(sample);
   sigma.emplace(sample);
 }
 
@@ -159,7 +169,7 @@ avgSigmaCentY1GPU::operator()(double lo,
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double common_term =
-    (*mor)(lo, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
+      (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*mor)(lo, lnM, zt) ;
   auto const val = (*sigma)(radius_, lnM, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;

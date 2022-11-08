@@ -6,14 +6,15 @@
 #include "cubacpp/integration_result.hh"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
+#include "models/omega_z_des.cuh"
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
-#include "models/int_zo_zt_des_t.cuh"
-#include "models/lo_lc_t.cuh"
 #include "models/mor_des_t.cuh"
-#include "models/omega_z_des.cuh"
+#include "models/lo_lc_t.cuh"
+#include "models/int_lc_lt_des_t.hh"
+#include "models/int_zo_zt_des_t.cuh"
 #include "models/roffset_t.cuh"
-#include "models/sig_max.cuh"
+#include "models/sig_sum.cuh"
 
 #include <iostream>
 #include <optional>
@@ -44,13 +45,21 @@ private:
   // <none in this example>
 
   // State obtained from each sample.
-  std::optional<y3_cuda::MOR_DES_t> mor;
+  //
+  // the volume
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
+  // the mass function
   std::optional<y3_cuda::HMF_t> hmf;
-  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cuda::ROFFSET_t> roffset;
+  // mass-observable relation
+  std::optional<y3_cuda::MOR_DES_t> mor;
+  // projection model
   std::optional<y3_cuda::LO_LC_t> lo_lc;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cuda::ROFFSET_t> roffset;
+  // z model
+  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
+  // and the sigma profile
   std::optional<y3_cuda::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
@@ -121,13 +130,14 @@ using cubacpp::integration_result;
 
 avgSigmaMiscentY1GPU::avgSigmaMiscentY1GPU(
   DataBlock&)
-  : mor()
   , omega_z()
   , dv_do_dz()
   , hmf()
+  : mor()
+  , lo_lc()
+  , lc_lt()
   , int_zo_zt()
   , roffset()
-  , lo_lc()
   , sigma()
   , zo_low_()
   , zo_high_()
@@ -140,12 +150,13 @@ avgSigmaMiscentY1GPU::set_sample(DataBlock& sample)
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
-  mor.emplace(sample);
+  omega_z.emplace(sample);
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
-  omega_z.emplace(sample);
-  roffset.emplace(sample);
+  mor.emplace(sample);
   lo_lc.emplace(sample);
+  lc_lt.emplace(sample);
+  roffset.emplace(sample);
   sigma.emplace(sample);
 }
 
@@ -165,19 +176,13 @@ avgSigmaMiscentY1GPU::operator()(double lo,
                                                   double rmis,
                                                   double theta) const
 {
-  double const roffset_v = (*roffset)(rmis);
-  double const lo_lc_v = (*lo_lc)(lo, lc, rmis);
-  double const mor_v = (*mor)(lc, lnM, zt);
-  double const dv_do_dz_v = (*dv_do_dz)(zt);
-  double const hmf_v = (*hmf)(lnM, zt);
-  double const omega_z_v = (*omega_z)(zt);
-  double common_term = roffset_v * lo_lc_v * mor_v * dv_do_dz_v * hmf_v *
-                       omega_z_v / 2.0 / 3.1415926535897;
+  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
+                       (*mor)(lc, lnM, zt) * (*lo_lc)(lo, lc, rmis) *
+                       (*roffset)(rmis) ;
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
                                  2 * rmis * radius_ * std::cos(theta));
-  double const sigma_v = (*sigma)(scaled_Rmis, lnM, zt);
-  double const int_zo_zt_v = (*int_zo_zt)(zo_low_, zo_high_, zt);
-  double const val = sigma_v * int_zo_zt_v * common_term;
+  auto const val = (*sigma)(scaled_Rmis, lnM, zt) *
+                   (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
 
