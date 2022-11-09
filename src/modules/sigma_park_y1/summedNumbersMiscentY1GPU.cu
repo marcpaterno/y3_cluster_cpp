@@ -1,9 +1,11 @@
 #include "utils/cuda_module_macros.cuh"
+#include "utils/datablock_reader.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
 
-#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock_status.h"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
 #include "models/omega_z_des.cuh"
@@ -55,7 +57,7 @@ private:
   std::optional<y3_cuda::MOR_DES_t> mor;
   // projection model
   std::optional<y3_cuda::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
   std::optional<y3_cuda::ROFFSET_t> roffset;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
@@ -63,6 +65,23 @@ private:
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
+
+  // Should we use cartesian grid? If not, we use a wall-of-numbers.
+  bool do_cartesian_product_of_bins_ = false;
+
+  // In this integrand, the name "cartesian product" is a bit misleading; it
+  // is used in case later development introduces another grid dimenstion over
+  // which we'll operate.
+  //
+  // If we are using the cartesian grid, the relevant congifuration parameters
+  // are zo_bottom (an array of arbitrary length)  and zo_bin_width (a array of
+  // the same length as zo_bottom). These *two* parameters make a single axis
+  // for the grid (the "zo bins").
+  //
+  // If we are using the wall-of-numbers configuration, the relevant
+  // configuration parameters are zo_lo (an array of arbitrary length) and
+  // zo_high. These *two* parameters make a single axis for the grid (the "zo
+  // bins").
 
 public:
   size_t
@@ -124,18 +143,17 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-summedNumbersMiscentY1GPU::summedNumbersMiscentY1GPU(
-  DataBlock&)
-  , omega_z()
-  , dv_do_dz()
-  , hmf()
-  : mor()
-  , lo_lc()
-  , roffset()
-  , int_zo_zt()
-  , zo_low_()
-  , zo_high_()
-{}
+summedNumbersMiscentY1GPU::summedNumbersMiscentY1GPU(DataBlock&)
+{
+  auto rc =
+    cfg.get_val(module_label(),
+                "do_cartesian_product_of_bins",
+                false,
+                do_cartesian_product_of_bins_);
+  if (rc != DBS_SUCCESS) {
+    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+  }
+}
 
 void
 summedNumbersMiscentY1GPU::set_sample(DataBlock& sample)
@@ -148,6 +166,7 @@ summedNumbersMiscentY1GPU::set_sample(DataBlock& sample)
   hmf.emplace(sample);
   mor.emplace(sample);
   lo_lc.emplace(sample);
+  int_lc_lt.emplace(sample);
   roffset.emplace(sample);
 }
 
@@ -165,9 +184,10 @@ summedNumbersMiscentY1GPU::operator()(double lo,
                                                double lnM,
                                                double rmis) const
 {
+  double const mor_v = (*mor)(lo, lnM, zt);
+  double const lc_lt = (*int_lc_lt)(lo, lt, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       (*mor)(lc, lnM, zt) * (*lo_lc)(lo, lc, rmis) *
-                       (*roffset)(rmis)
+                       mor_v * (*lo_lc)(lo, lc, rmis) * lc_lt * (*roffset)(rmis) ;
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
@@ -195,6 +215,30 @@ summedNumbersMiscentY1GPU::make_integration_volumes(
 summedNumbersMiscentY1GPU::grid_t
 summedNumbersMiscentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
 {
+  char const * const label =
+    summedNumbersCentY1GPU::module_label();
+  bool do_cartesian_product_of_bins = false;
+  auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
+
+  if (do_cartesian_product_of_bins)
+  {
+    auto const bottoms = get_vector_double(cfg, label, "zo_bottom");
+    auto const widths= get_vector_double(cfg, label, "zo_bin_width");
+    if (bottoms.size() != widths.size()) {
+        throw std::runtime_error("zo_bottom and zo_bin_width must be the same length\n");
+    }
+
+    grid_t result;
+    result.set_names(std::vector<std::string>{"zo_bottom", "zo_bin_width"});
+    // This could probably be simplified by using the ranges library.
+    for (std::size_t i = 0; i != bottoms.size(); ++i) {
+      double bottom = bottoms[i];
+      double top = bottoms[i] + widths[i];
+      result.push_back({bottom, top});
+    }
+    return result;
+  };
+
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
     summedNumbersMiscentY1GPU::module_label(),

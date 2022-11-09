@@ -12,7 +12,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_t.cuh"
-#include "models/lo_lc_t.cuh"
+#include "models/int_lc_lt_des_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/roffset_t.cuh"
 
@@ -55,9 +55,8 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_t> mor;
-  // projection model
-  std::optional<y3_cluster::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LO_LT_DES_t> lo_lt;
+  // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
+  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
 
@@ -124,7 +123,7 @@ public:
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
   static std::vector<volume_t> make_integration_volumes(
-    cosmosis::DataBlock& cfg);
+          cosmosis::DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
@@ -159,7 +158,7 @@ summedNumbersCentY1GPU::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  lo_lt.emplace(sample);
+  int_lc_lt.emplace(sample);
 }
 
 void
@@ -176,8 +175,9 @@ summedNumbersCentY1GPU::operator()(double lo,
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-      (*mor)(lo, lnM, zt);
+  double const mor_v = (*mor)(lo, lnM, zt);
+  double const lo_lt = (*int_lc_lt)(lo, lt, zt);
+  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v * lo_lt ;
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
@@ -200,7 +200,11 @@ summedNumbersCentY1GPU::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, summedNumbersCentY1GPU::module_label(), "lo", "zt", "lnm");
+    cfg, 
+    summedNumbersCentY1GPU::module_label(), 
+    "lo", 
+    "zt", 
+    "lnm");
 }
 
 summedNumbersCentY1GPU::grid_t
@@ -231,7 +235,10 @@ summedNumbersCentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
   };
 
   return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, summedNumbersCentY1GPU::module_label(), "zo_low", "zo_high");
+    cfg, 
+    summedNumbersCentY1GPU::module_label(), 
+    "zo_low", 
+    "zo_high");
 }
 
 DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(summedNumbersCentY1GPU)

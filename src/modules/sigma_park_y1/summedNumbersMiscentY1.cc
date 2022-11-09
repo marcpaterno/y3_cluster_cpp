@@ -70,7 +70,7 @@ private:
   std::optional<y3_cluster::MOR_DES_t> mor;
   // projection model
   std::optional<y3_cluster::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
   std::optional<y3_cluster::ROFFSET_t> roffset;
   // z model
   std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
@@ -134,7 +134,7 @@ summedNumbersMiscentY1::summedNumbersMiscentY1(DataBlock&)
   , hmf()
   , mor()
   , lo_lc()
-  , lc_lt()
+  , int_lc_lt()
   , roffset()
   , int_zo_zt()
   , zo_low_()
@@ -152,7 +152,7 @@ summedNumbersMiscentY1::set_sample(DataBlock& sample)
   hmf.emplace(sample);
   mor.emplace(sample);
   lo_lc.emplace(sample);
-  lc_lt.emplace(sample);
+  int_lc_lt.emplace(sample);
   roffset.emplace(sample);
 }
 
@@ -172,9 +172,10 @@ summedNumbersMiscentY1::operator()(double lo,
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
+  double const mor_v = (*mor)(lo, lnM, zt);
+  double const lc_lt = (*int_lc_lt)(lo, lt, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       (*mor)(lc, lnM, zt) * (*lo_lc)(lo, lc, rmis) *
-                       (*roffset)(rmis) 
+                       mor_v * (*lo_lc)(lo, lc, rmis) * lc_lt * (*roffset)(rmis) ;
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }

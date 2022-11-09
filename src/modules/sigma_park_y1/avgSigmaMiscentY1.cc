@@ -54,12 +54,12 @@ private:
   std::optional<y3_cluster::MOR_DES_t> mor;
   // projection model
   std::optional<y3_cluster::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
   std::optional<y3_cluster::ROFFSET_t> roffset;
   // z model
   std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the sigma profile
-  std::optional<y3_cluster::SIG_MAX> sigma;
+  std::optional<y3_cluster::SIG_SUM> sigma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -121,9 +121,9 @@ avgSigmaMiscentY1::avgSigmaMiscentY1(DataBlock&)
   , hmf()
   , mor()
   , lo_lc()
-  , lc_lt()
-  , int_zo_zt()
+  , int_lc_lt()
   , roffset()
+  , int_zo_zt()
   , sigma()
   , zo_low_()
   , zo_high_()
@@ -141,7 +141,7 @@ avgSigmaMiscentY1::set_sample(DataBlock& sample)
   hmf.emplace(sample);
   mor.emplace(sample);
   lo_lc.emplace(sample);
-  lc_lt.emplace(sample);
+  int_lc_lt.emplace(sample);
   roffset.emplace(sample);
   sigma.emplace(sample);
 }
@@ -163,9 +163,10 @@ avgSigmaMiscentY1::operator()(double lo,
                                               double rmis,
                                               double theta) const
 {
+  double const mor_v = (*mor)(lo, lnM, zt);
+  double const lc_lt = (*int_lc_lt)(lo, lt, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       (*mor)(lc, lnM, zt) * (*lo_lc)(lo, lc, rmis) * 
-                       (*roffset)(rmis) ;
+                       mor_v * (*lo_lc)(lo, lc, rmis) * lc_lt * (*roffset)(rmis) ;
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
                                  2 * rmis * radius_ * std::cos(theta));
   auto const val = (*sigma)(scaled_Rmis, lnM, zt) *

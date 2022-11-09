@@ -10,8 +10,7 @@
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
 #include "models/mor_des_t.hh"
-#include "models/lo_lc_t.hh"
-#include "models/int_lo_lt_des_t.hh"
+#include "models/int_lc_lt_des_t.hh"
 #include "models/int_zo_zt_des_t.hh"
 
 #include <iostream>
@@ -70,9 +69,8 @@ private:
   std::optional<y3_cluster::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cluster::MOR_DES_t> mor;
-  // projection model
-  std::optional<y3_cluster::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LO_LT_DES_t> lo_lt;
+  // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
+  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
   // z model
   std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
 
@@ -129,7 +127,7 @@ summedNumbersCentY1::summedNumbersCentY1(DataBlock&)
   , dv_do_dz()
   , hmf()
   , mor()
-  , lo_lt()
+  , int_lc_lt()
   , int_zo_zt()
   , zo_low_()
   , zo_high_()
@@ -145,7 +143,7 @@ summedNumbersCentY1::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  lo_lt.emplace(sample);
+  int_lc_lt.emplace(sample);
 }
 
 void
@@ -161,8 +159,9 @@ summedNumbersCentY1::operator()(double lo, double zt, double lnM) const
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double const mor_v = (*mor)(lo, lnM, zt);
+  double const lo_lt = (*int_lc_lt)(lo, lt, zt);
 
-  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v  ;
+  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v * lo_lt ;
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
 #ifdef DEBUG_PRINT
   printf("nc %.17e %.17e %.17e %.17e %.17e\n", lo, lnM, zt, mor_v, val);

@@ -1,9 +1,11 @@
 #include "utils/cuda_module_macros.cuh"
+#include "utils/datablock_reader.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
 
-#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock_status.h"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
 #include "models/omega_z_des.cuh"
@@ -14,7 +16,7 @@
 #include "models/int_lc_lt_des_t.hh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/roffset_t.cuh"
-#include "models/sig_sum.cuh"
+#include "models/sig_max.cuh"
 
 #include <iostream>
 #include <optional>
@@ -55,7 +57,7 @@ private:
   std::optional<y3_cuda::MOR_DES_t> mor;
   // projection model
   std::optional<y3_cuda::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
   std::optional<y3_cuda::ROFFSET_t> roffset;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
@@ -128,21 +130,17 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgSigmaMiscentY1GPU::avgSigmaMiscentY1GPU(
-  DataBlock&)
-  , omega_z()
-  , dv_do_dz()
-  , hmf()
-  : mor()
-  , lo_lc()
-  , lc_lt()
-  , int_zo_zt()
-  , roffset()
-  , sigma()
-  , zo_low_()
-  , zo_high_()
-  , radius_()
-{}
+avgSigmaMiscentY1GPU::avgSigmaMiscentY1GPU( DataBlock&)
+{
+  auto rc =
+    cfg.get_val(module_label(),
+                "do_cartesian_product_of_bins",
+                false,
+                do_cartesian_product_of_bins_);
+  if (rc != DBS_SUCCESS) {
+    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+  }
+}
 
 void
 avgSigmaMiscentY1GPU::set_sample(DataBlock& sample)
@@ -155,7 +153,7 @@ avgSigmaMiscentY1GPU::set_sample(DataBlock& sample)
   hmf.emplace(sample);
   mor.emplace(sample);
   lo_lc.emplace(sample);
-  lc_lt.emplace(sample);
+  int_lc_lt.emplace(sample);
   roffset.emplace(sample);
   sigma.emplace(sample);
 }
@@ -176,9 +174,10 @@ avgSigmaMiscentY1GPU::operator()(double lo,
                                                   double rmis,
                                                   double theta) const
 {
+  double const mor_v = (*mor)(lo, lnM, zt);
+  double const lc_lt = (*int_lc_lt)(lo, lt, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       (*mor)(lc, lnM, zt) * (*lo_lc)(lo, lc, rmis) *
-                       (*roffset)(rmis) ;
+                       mor_v * (*lo_lc)(lo, lc, rmis) * lc_lt * (*roffset)(rmis) ;
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
                                  2 * rmis * radius_ * std::cos(theta));
   auto const val = (*sigma)(scaled_Rmis, lnM, zt) *

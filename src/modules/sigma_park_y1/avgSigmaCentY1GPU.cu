@@ -1,20 +1,21 @@
-#include "utils/make_grid_points.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
+#include "utils/datablock_reader.hh"
 #include "utils/cuda_module_macros.cuh"
+#include "utils/make_grid_points.hh"
 
-#include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "cosmosis/datablock/datablock_status.h"
 #include "cuda/pagani/quad/util/Volume.cuh"
 
 #include "models/omega_z_des.cuh"
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_t.cuh"
-#include "models/lo_lc_t.cuh"
-#include "models/int_lo_lt_des_t.hh"
+#include "models/int_lc_lt_des_t.hh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/sig_sum.cuh"
+#include "models/sig_max.cuh"
 
 #include <iostream>
 #include <optional>
@@ -55,13 +56,12 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_t> mor;
-  // projection model
-  std::optional<y3_cuda::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lo_lt;
+  // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
+  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the sigma profile
-  std::optional<y3_cuda::SIG_SUM> sigma;
+  std::optional<y3_cuda::SIG_MAX> sigma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -124,19 +124,17 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgSigmaCentY1GPU::avgSigmaCentY1GPU(
-  DataBlock&)
-  , omega_z()
-  , dv_do_dz()
-  , hmf()
-  : mor()
-  , lo_lt()
-  , int_zo_zt()
-  , sigma()
-  , zo_low_()
-  , zo_high_()
-  , radius_()
-{}
+avgSigmaCentY1GPU::avgSigmaCentY1GPU( DataBlock&)
+{
+  auto rc = 
+    cfg.get_val(module_label(),
+                "do_cartesian_product_of_bins",
+                false,
+                do_cartesian_product_of_bins_);
+  if (rc != DBS_SUCCESS) {
+    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+  }
+}
 
 void
 avgSigmaCentY1GPU::set_sample(DataBlock& sample)
@@ -148,7 +146,7 @@ avgSigmaCentY1GPU::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  lo_lt.emplace(sample);
+  int_lc_lt.emplace(sample);
   sigma.emplace(sample);
 }
 
@@ -168,8 +166,10 @@ avgSigmaCentY1GPU::operator()(double lo,
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double common_term =
-      (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*mor)(lo, lnM, zt) ;
+  double const mor_v = (*mor)(lo, lnM, zt);
+  double const lo_lt = (*int_lc_lt)(lo, lt, zt);
+
+  double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v * lo_lt ;
   auto const val = (*sigma)(radius_, lnM, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
