@@ -41,6 +41,9 @@ def execute(block, config):
     sigma8 = block[cosmo, "sigma8_input"]
     h0 = block[cosmo, "h0"]
 
+    mstar = block["mstar", "mstar"]
+    mstar_z = block["mstar", "z"]
+
     k = block["matter_power_lin", "k_h"]
     P_k = block["matter_power_lin", "p_k"]
     z_k = block["matter_power_lin", "z"]
@@ -63,7 +66,7 @@ def execute(block, config):
         # this, the 1-halo term is independent of redshift, which is computationally efficient.
         # We'll have to assume a mean redshift and compute the c from M at that z.
         z = 0.33
-        concentration = massconcen.c_from_m200 (M[i], z, omega_m, omega_b, sigma8, h0)
+        concentration = massconcen.c_from_m200 (M[i], z, omega_m, omega_b, sigma8, h0, mstar, mstar_z)
         sigma1 = ct.deltasigma.Sigma_nfw_at_R(
             R_perp, M[i], concentration, omega_m)
         Xi_1[i] = ct.xi.xi_nfw_at_r(Radii, M[i], concentration, omega_m)
@@ -76,7 +79,7 @@ def execute(block, config):
         # Note that the gx computation has a singularity at x=1, and will blow up there. 
         # WE SHOULD FIX THAT.
         delta = 200 # M200m
-        rhocrit = 2.77533742639e+11
+        rhocrit = 2.77533742639e+11  #h^2 M_sun Mpc^-3
         # 1e4*3.*Mpcperkm*Mpcperkm/(8.*PI*G); units are SM h^2/Mpc^3
         rhom = omega_m*rhocrit # SM h^2/Mpc^3
         deltac = delta*(1./3.)*concentration**3/ (
