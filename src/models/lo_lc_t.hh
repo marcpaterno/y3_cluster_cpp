@@ -6,6 +6,10 @@
 
 #include <cmath>
 
+// In Yuanyaun's section 9 summary of the Lighthouse document
+// https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
+// this is equation 53, labeled P(\lambda_o|\lambda_c,R_cent)
+
 namespace y3_cluster {
 
   class LO_LC_t {
@@ -24,7 +28,8 @@ namespace y3_cluster {
     double
     operator()(double lo, double lc, double R_mis) const
     {
-      /* eq. (35) https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2 */
+      //  https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2 
+      // equation 35, and  equation 51 in Yuanyuan's clean up section 
       double x = R_mis / _R_lambda;
       double y = lo / lc;
       double mu_y = std::exp(-x * x / _alpha / _alpha);

@@ -3,6 +3,8 @@
 
 #include <string>
 
+// apparently reading in a table from a file
+
 namespace {
   inline std::string
   augment_filename(char const* part)

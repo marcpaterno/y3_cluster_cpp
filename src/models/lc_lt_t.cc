@@ -1,6 +1,10 @@
 #include "lc_lt_t.hh"
 using namespace y3_cluster;
 
+// Implementing Costanzi, Rozo, Rykoff et al 2018 equation 15
+// which is a P(\lambda^obs | \lambda^true, z) form
+ // incorporating background, projection, and percolation
+
 namespace {
 
   // Define zt_max and l_max large enough to be safe.

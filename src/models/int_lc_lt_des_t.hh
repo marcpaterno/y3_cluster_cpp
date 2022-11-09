@@ -9,6 +9,10 @@
 #include <fstream>
 #include <iostream>
 
+// Not in the Lighthouse proposal.
+// Appears to be a re-implementation of the P(\lambda_c|\lambda_t)
+// using a lookup table of considerable length.
+
 namespace y3_cluster {
   struct INT_LC_LT_DES_t {
 

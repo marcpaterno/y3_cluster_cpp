@@ -8,6 +8,14 @@
 #include <algorithm>
 #include <cmath>
 
+// Implementing Costanzi, Rozo, Rykoff et al 2018 equation 15
+// which is a P(\lambda^obs | \lambda^true, z) form
+// incorporating background, projection, and percolation
+// 
+// In Yuanyaun's section 9 summary of the Lighthouse document
+// https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
+// Costanzi's eq 15 is labeled P(\lambda_c|\lambda_t) (eq 51).
+
 namespace y3_cluster {
   struct LC_LT_t {
 
@@ -40,6 +48,10 @@ namespace y3_cluster {
       };
 
       // eq. (33)     https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
+      // But also eq 51 in Yuanyuan's clean up section in that paper
+      // and
+      // Implementing Costanzi, Rozo, Rykoff et al 2018 equation 15
+      // which is a P(\lambda^obs | \lambda^true, z) form
       return (1.0 - fmsk) * (1.0 - fprj) * y3_cluster::gaussian(lc, mu, sigma) +
              0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lt) * exptau *
                erfc_scaled(mu_tau_sig_sqr, lc) +

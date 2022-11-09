@@ -5,6 +5,9 @@
 #include "utils/interp_2d.hh"
 #include "utils/primitives.hh"
 
+// Implementing Costanzi, Rozo, Rykoff et al 2018 equation 6
+// which is a P(\lambda^obs | \lambda^true, z) form
+
 #include <cmath>
 
 namespace y3_cluster {
