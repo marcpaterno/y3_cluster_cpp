@@ -40,7 +40,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 6>;
+  using volume_t = quad::Volume<double, 7>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -68,6 +68,7 @@ private:
   double zo_low_;
   double zo_high_;
   double radius_;
+  bool do_cartesian_product_of_bins_;
 
 public:
   size_t
@@ -100,6 +101,7 @@ public:
   // object.
   __host__ __device__ double operator()(double lo,
                                         double lc,
+                                        double lt,
                                         double zt,
                                         double lnM,
                                         double rmis,
@@ -130,7 +132,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgSigmaMiscentY1GPU::avgSigmaMiscentY1GPU( DataBlock&)
+avgSigmaMiscentY1GPU::avgSigmaMiscentY1GPU( DataBlock& cfg)
 {
   auto rc =
     cfg.get_val(module_label(),
@@ -168,11 +170,12 @@ avgSigmaMiscentY1GPU::set_grid_point(grid_point_t grid_point)
 
 __device__ __host__ double
 avgSigmaMiscentY1GPU::operator()(double lo,
-                                                  double lc,
-                                                  double zt,
-                                                  double lnM,
-                                                  double rmis,
-                                                  double theta) const
+                                 double lc,
+                                 double lt,
+                                 double zt,
+                                 double lnM,
+                                 double rmis,
+                                 double theta) const
 {
   double const mor_v = (*mor)(lo, lnM, zt);
   double const lc_lt = (*int_lc_lt)(lo, lt, zt);
@@ -200,6 +203,7 @@ avgSigmaMiscentY1GPU::make_integration_volumes(
     avgSigmaMiscentY1GPU::module_label(),
     "lo",
     "lc",
+    "lt",
     "zt",
     "lnm",
     "rmis",

@@ -1,25 +1,25 @@
 include_directories(${COSMOSIS_BASE_DIR} ${CUBA_INCLUDE_DIR})
 link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
-add_library(summedNumbersCentY1   MODULE summedNumbersCentY1.cc)
-target_link_libraries(summedNumbersCentY1 PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(summedNumbersCentY1 PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR}
-                                                               ${GSL_INCLUDE_DIRS})
+#add_library(summedNumbersCentY1   MODULE summedNumbersCentY1.cc)
+#target_link_libraries(summedNumbersCentY1 PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+#target_include_directories(summedNumbersCentY1 PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR}
+#                                                               ${GSL_INCLUDE_DIRS})
 
-add_library(summedNumbersMiscentY1  MODULE summedNumbersMiscentY1.cc)
-target_link_libraries(summedNumbersMiscentY1  PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(summedNumbersMiscentY1  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR}
-                                                                  ${GSL_INCLUDE_DIRS})
+#add_library(summedNumbersMiscentY1  MODULE summedNumbersMiscentY1.cc)
+#target_link_libraries(summedNumbersMiscentY1  PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+#target_include_directories(summedNumbersMiscentY1  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR}
+#                                                                  ${GSL_INCLUDE_DIRS})
 
-add_library(avgSigmaCentY1  MODULE avgSigmaCentY1.cc)
-target_link_libraries(avgSigmaCentY1  PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(avgSigmaCentY1  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR}
-                                                                  ${GSL_INCLUDE_DIRS})
+#add_library(avgSigmaCentY1  MODULE avgSigmaCentY1.cc)
+#target_link_libraries(avgSigmaCentY1  PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+#target_include_directories(avgSigmaCentY1  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR}
+#                                                                  ${GSL_INCLUDE_DIRS})
 
-add_library(avgSigmaMiscentY1 MODULE avgSigmaMiscentY1.cc)
-target_link_libraries(avgSigmaMiscentY1  PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
-target_include_directories(avgSigmaMiscentY1  PRIVATE ${PAGANI_DIR} ${CMAKE_SOURCE_DIR}/src
-                                                                     ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS})
+#add_library(avgSigmaMiscentY1 MODULE avgSigmaMiscentY1.cc)
+#target_link_libraries(avgSigmaMiscentY1  PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+#target_include_directories(avgSigmaMiscentY1  PRIVATE ${PAGANI_DIR} ${CMAKE_SOURCE_DIR}/src
+#                                                                     ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS})
 
 if (USE_CUDA)
   find_library(NVTX_LIBRARY nvToolsExt PATHS ENV LD_LIBRARY_PATH)

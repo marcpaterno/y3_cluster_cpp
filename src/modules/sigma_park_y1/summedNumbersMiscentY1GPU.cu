@@ -40,7 +40,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 5>;
+  using volume_t = quad::Volume<double, 6>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -114,6 +114,7 @@ public:
   //    the miscentered integral has lc,rmis in addition to the usual centered lo,zt lnM
   __host__ __device__ double operator()(double lo,
                                         double lc,
+                                        double lt,
                                         double zt,
                                         double lnM,
                                         double rmis) const;
@@ -143,7 +144,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-summedNumbersMiscentY1GPU::summedNumbersMiscentY1GPU(DataBlock&)
+summedNumbersMiscentY1GPU::summedNumbersMiscentY1GPU(DataBlock& cfg)
 {
   auto rc =
     cfg.get_val(module_label(),
@@ -179,10 +180,11 @@ summedNumbersMiscentY1GPU::set_grid_point(grid_point_t grid_point)
 
 __device__ __host__ double
 summedNumbersMiscentY1GPU::operator()(double lo,
-                                               double lc,
-                                               double zt,
-                                               double lnM,
-                                               double rmis) const
+                                      double lc,
+                                      double lt,
+                                      double zt,
+                                      double lnM,
+                                      double rmis) const
 {
   double const mor_v = (*mor)(lo, lnM, zt);
   double const lc_lt = (*int_lc_lt)(lo, lt, zt);
@@ -207,6 +209,7 @@ summedNumbersMiscentY1GPU::make_integration_volumes(
     summedNumbersMiscentY1GPU::module_label(),
     "lo",
     "lc",
+    "lt",
     "zt",
     "lnm",
     "rmis");
@@ -216,7 +219,7 @@ summedNumbersMiscentY1GPU::grid_t
 summedNumbersMiscentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
 {
   char const * const label =
-    summedNumbersCentY1GPU::module_label();
+    summedNumbersMiscentY1GPU::module_label();
   bool do_cartesian_product_of_bins = false;
   auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
 

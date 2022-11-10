@@ -41,7 +41,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 3>;
+  using volume_t = quad::Volume<double, 4>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -56,7 +56,7 @@ private:
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_t> mor;
   // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
-  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_t> int_lc_lt;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
 
@@ -109,7 +109,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(double lo, double zt, double lnM) const;
+  __host__ __device__ double operator()(double lo, double lt, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -170,8 +170,9 @@ summedNumbersCentY1GPU::set_grid_point(grid_point_t grid_point)
 
 __host__ __device__ double
 summedNumbersCentY1GPU::operator()(double lo,
-                                            double zt,
-                                            double lnM) const
+                                   double lt,
+                                   double zt,
+                                   double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
@@ -202,7 +203,8 @@ summedNumbersCentY1GPU::make_integration_volumes(
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg, 
     summedNumbersCentY1GPU::module_label(), 
-    "lo", 
+    "lo",
+    "lt",
     "zt", 
     "lnm");
 }

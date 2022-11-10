@@ -52,7 +52,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = cubacpp::IntegrationVolume<3>;
+  using volume_t = cubacpp::IntegrationVolume<4>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -95,7 +95,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  double operator()(double lo, double zt, double lnM) const;
+  double operator()(double lo, double lt, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -154,7 +154,7 @@ summedNumbersCentY1::set_grid_point(grid_point_t const& grid_point)
 }
 
 double
-summedNumbersCentY1::operator()(double lo, double zt, double lnM) const
+summedNumbersCentY1::operator()(double lo, double lt, double zt, double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
@@ -186,7 +186,7 @@ std::vector<summedNumbersCentY1::volume_t>
 summedNumbersCentY1::make_integration_volumes(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_integration_volumes_wall_of_numbers(
-    cfg, summedNumbersCentY1::module_label(), "lo", "zt", "lnm");
+    cfg, summedNumbersCentY1::module_label(), "lo", "lt", "zt", "lnm");
 }
 
 summedNumbersCentY1::grid_t

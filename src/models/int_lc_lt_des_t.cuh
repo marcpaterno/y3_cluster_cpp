@@ -8,17 +8,19 @@
 namespace y3_cuda {
   struct INT_LC_LT_DES_t {
 
-    static quad::Interp2D const lambda0_interp;
-    static quad::Interp2D const lambda1_interp;
-    static quad::Interp2D const lambda2_interp;
-    static quad::Interp2D const lambda3_interp;
+    // CUDA/C++ does not support static data members of classes or structs
+    quad::Interp2D lambda0_interp;
+    quad::Interp2D lambda1_interp;
+    quad::Interp2D lambda2_interp;
+    quad::Interp2D lambda3_interp;
 
-    explicit INT_LC_LT_DES_t(const cosmosis::DataBlock&) {}
-    INT_LC_LT_DES_t() /* :lambda0_interp(lt_bins, zt_bins, lambda0_arr),
-                         lambda1_interp(lt_bins, zt_bins, lambda1_arr),
-                         lambda2_interp(lt_bins, zt_bins, lambda2_arr),
-                         lambda3_interp(lt_bins, zt_bins, lambda3_arr)*/
-    {}
+    // The default constructor is implemented in the .cu file.
+    INT_LC_LT_DES_t();
+
+    // The constructor from a datablock is required, but does the same thing
+    // as the default constructor. So we delegate the work to the default
+    // constructor.
+    explicit INT_LC_LT_DES_t(cosmosis::DataBlock const&) : INT_LC_LT_DES_t() { }
 
     __device__ __host__ double
     operator()(double lc, double lt, double zt) const

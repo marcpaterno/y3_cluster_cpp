@@ -4,7 +4,7 @@
 using namespace quad;
 
 namespace {
-  std::array<double, 16> constexpr zt_bins = {0.000000,
+  std::array<double, 16> const zt_bins = {0.000000,
                                               0.050000,
                                               0.100000,
                                               0.150000,
@@ -21,7 +21,7 @@ namespace {
                                               0.700000,
                                               0.750000};
 
-  std::array<double, 60> constexpr lt_bins = {
+  std::array<double, 60> const lt_bins = {
     1.000000,   2.000000,   3.000000,   4.000000,   5.000000,   6.000000,
     7.000000,   8.000000,   9.000000,   10.000000,  11.000000,  12.000000,
     13.000000,  14.000000,  15.000000,  16.000000,  17.000000,  18.000000,
@@ -33,7 +33,7 @@ namespace {
     95.000000,  99.000000,  105.000000, 115.000000, 125.000000, 135.000000,
     145.000000, 155.000000, 165.000000, 175.000000, 185.000000, 195.000000};
 
-  std::array<double, 960> constexpr lambda0_arr = {
+  std::array<double, 960> const lambda0_arr = {
     0.000000, 0.000000, 0.000000, 0.000090, 0.000000, 0.000000, 0.000000,
     0.001465, 0.003800, 0.006993, 0.013266, 0.025400, 0.046494, 0.080917,
     0.133356, 0.208246, 0.302287, 0.403247, 0.498395, 0.575000, 0.622843,
@@ -173,7 +173,7 @@ namespace {
     0.000004, 0.000003, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
     0.000000};
 
-  std::array<double, 960> constexpr lambda1_arr = {
+  std::array<double, 960> const lambda1_arr = {
     0.000000, 0.000000, 0.000000, 0.000005, 0.000000, 0.000000, 0.000000,
     0.000050, 0.000000, 0.000000, 0.000000, 0.000000, 0.001210, 0.003587,
     0.006758, 0.010590, 0.016091, 0.025590, 0.041492, 0.066200, 0.101608,
@@ -313,7 +313,7 @@ namespace {
     0.000000, 0.000000, 0.000008, 0.000011, 0.000000, 0.000000, 0.000000,
     0.000000};
 
-  std::array<double, 960> constexpr lambda2_arr = {
+  std::array<double, 960> const lambda2_arr = {
     0.000000, 0.000000, 0.000000, 0.000001, 0.000000, 0.000000, 0.000000,
     0.000008, 0.000000, 0.000000, 0.000000, 0.000000, 0.000148, 0.000265,
     0.000118, 0.000000, 0.000000, 0.000000, 0.000000, 0.000400, 0.004824,
@@ -453,7 +453,7 @@ namespace {
     0.000010, 0.000007, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
     0.000000};
 
-  std::array<double, 960> constexpr lambda3_arr = {
+  std::array<double, 960> const lambda3_arr = {
     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
     0.000000, 0.000000, 0.000001, 0.000002, 0.000000, 0.000000, 0.000000,
     0.000000, 0.000010, 0.000048, 0.000119, 0.000233, 0.000400, 0.000535,
@@ -620,20 +620,22 @@ namespace {
                     std::array<double, N> const& ys,
                     std::array<double, (N) * (M)> const& zs)
   {
-    printf("Creating static interpolation table of size %lu x %lu\n", M, N);
+    // printf("Creating static interpolation table of size %lu x %lu\n", M, N);
     return {xs, ys, zs};
   }
 
-  auto make_Interp2D = [](auto zs) {
+  template <size_t MN>
+  Interp2D
+  make_Interp2D(std::array<double, MN> const& zs)
+  {
     return make_Interp2D_aux(lt_bins, zt_bins, zs);
-  };
+  }
 }
 
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda0_interp =
-  make_Interp2D(lambda0_arr);
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda1_interp =
-  make_Interp2D(lambda1_arr);
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda2_interp =
-  make_Interp2D(lambda2_arr);
-Interp2D const y3_cuda::INT_LC_LT_DES_t::lambda3_interp =
-  make_Interp2D(lambda3_arr);
+y3_cuda::INT_LC_LT_DES_t::INT_LC_LT_DES_t() :
+  lambda0_interp(make_Interp2D(lambda0_arr)),
+  lambda1_interp(make_Interp2D(lambda1_arr)),
+  lambda2_interp(make_Interp2D(lambda2_arr)),
+  lambda3_interp(make_Interp2D(lambda3_arr))
+{}
+

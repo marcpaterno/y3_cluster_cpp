@@ -12,7 +12,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_t.cuh"
-#include "models/int_lc_lt_des_t.hh"
+#include "models/int_lc_lt_des_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/sig_max.cuh"
@@ -39,7 +39,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 3>;
+  using volume_t = quad::Volume<double, 4>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -57,7 +57,7 @@ private:
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_t> mor;
   // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
-  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_t> int_lc_lt;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the sigma profile
@@ -68,6 +68,7 @@ private:
   double zo_high_;
   double radius_;
 
+  bool do_cartesian_product_of_bins_;
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
@@ -97,7 +98,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(double lo, double zt, double lnM) const;
+  __host__ __device__ double operator()(double lo, double lt, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -124,7 +125,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgSigmaCentY1GPU::avgSigmaCentY1GPU( DataBlock&)
+avgSigmaCentY1GPU::avgSigmaCentY1GPU( DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -161,8 +162,9 @@ avgSigmaCentY1GPU::set_grid_point(
 
 __host__ __device__ double
 avgSigmaCentY1GPU::operator()(double lo,
-                                               double zt,
-                                               double lnM) const
+                              double lt,
+                              double zt,
+                              double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
@@ -193,7 +195,7 @@ avgSigmaCentY1GPU::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgSigmaCentY1GPU::module_label(), "lo", "zt", "lnm");
+    cfg, avgSigmaCentY1GPU::module_label(), "lo", "lt", "zt", "lnm");
 }
 
 avgSigmaCentY1GPU::grid_t
