@@ -26,11 +26,11 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// summedNumbersMiscentY1GPU is a class that models the concept of
+// summedNumbersMiscentY1 is a class that models the concept of
 // "CosmoSISCUDAIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class summedNumbersMiscentY1GPU {
+class summedNumbersMiscentY1 {
 public:
   using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
@@ -97,7 +97,7 @@ public:
 
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit summedNumbersMiscentY1GPU(cosmosis::DataBlock& config);
+  explicit summedNumbersMiscentY1(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -144,7 +144,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-summedNumbersMiscentY1GPU::summedNumbersMiscentY1GPU(DataBlock& cfg)
+summedNumbersMiscentY1::summedNumbersMiscentY1(DataBlock& cfg)
 {
   auto rc =
     cfg.get_val(module_label(),
@@ -152,12 +152,12 @@ summedNumbersMiscentY1GPU::summedNumbersMiscentY1GPU(DataBlock& cfg)
                 false,
                 do_cartesian_product_of_bins_);
   if (rc != DBS_SUCCESS) {
-    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+    throw std::runtime_error("summedNumbersCentY1 failed to find do_cartesian_product_of_bins\n");
   }
 }
 
 void
-summedNumbersMiscentY1GPU::set_sample(DataBlock& sample)
+summedNumbersMiscentY1::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -172,14 +172,14 @@ summedNumbersMiscentY1GPU::set_sample(DataBlock& sample)
 }
 
 void
-summedNumbersMiscentY1GPU::set_grid_point(grid_point_t grid_point)
+summedNumbersMiscentY1::set_grid_point(grid_point_t grid_point)
 {
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
 
 __device__ __host__ double
-summedNumbersMiscentY1GPU::operator()(double lo,
+summedNumbersMiscentY1::operator()(double lo,
                                       double lc,
                                       double lt,
                                       double zt,
@@ -195,18 +195,18 @@ summedNumbersMiscentY1GPU::operator()(double lo,
 }
 
 char const*
-summedNumbersMiscentY1GPU::module_label()
+summedNumbersMiscentY1::module_label()
 {
-  return "summedNumbersMiscentY1GPU";
+  return "summedNumbersMiscentY1";
 }
 
-std::vector<summedNumbersMiscentY1GPU::volume_t>
-summedNumbersMiscentY1GPU::make_integration_volumes(
+std::vector<summedNumbersMiscentY1::volume_t>
+summedNumbersMiscentY1::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg,
-    summedNumbersMiscentY1GPU::module_label(),
+    summedNumbersMiscentY1::module_label(),
     "lo",
     "lc",
     "lt",
@@ -215,11 +215,11 @@ summedNumbersMiscentY1GPU::make_integration_volumes(
     "rmis");
 }
 
-summedNumbersMiscentY1GPU::grid_t
-summedNumbersMiscentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
+summedNumbersMiscentY1::grid_t
+summedNumbersMiscentY1::make_grid_points(cosmosis::DataBlock& cfg)
 {
   char const * const label =
-    summedNumbersMiscentY1GPU::module_label();
+    summedNumbersMiscentY1::module_label();
   bool do_cartesian_product_of_bins = false;
   auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
 
@@ -244,9 +244,9 @@ summedNumbersMiscentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
 
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    summedNumbersMiscentY1GPU::module_label(),
+    summedNumbersMiscentY1::module_label(),
     "zo_low",
     "zo_high");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(summedNumbersMiscentY1GPU)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(summedNumbersMiscentY1)

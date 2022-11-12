@@ -29,7 +29,7 @@ using cubacpp::integration_result;
 // "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class avgSigmaCentY1GPU {
+class avgSigmaCentY1 {
 public:
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
@@ -72,7 +72,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit avgSigmaCentY1GPU(cosmosis::DataBlock& config);
+  explicit avgSigmaCentY1(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -125,7 +125,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgSigmaCentY1GPU::avgSigmaCentY1GPU( DataBlock& cfg)
+avgSigmaCentY1::avgSigmaCentY1( DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -133,12 +133,12 @@ avgSigmaCentY1GPU::avgSigmaCentY1GPU( DataBlock& cfg)
                 false,
                 do_cartesian_product_of_bins_);
   if (rc != DBS_SUCCESS) {
-    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+    throw std::runtime_error("summedNumbersCentY1 failed to find do_cartesian_product_of_bins\n");
   }
 }
 
 void
-avgSigmaCentY1GPU::set_sample(DataBlock& sample)
+avgSigmaCentY1::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -152,7 +152,7 @@ avgSigmaCentY1GPU::set_sample(DataBlock& sample)
 }
 
 void
-avgSigmaCentY1GPU::set_grid_point(
+avgSigmaCentY1::set_grid_point(
   grid_point_t const& grid_point)
 {
   radius_ = grid_point[2];
@@ -161,7 +161,7 @@ avgSigmaCentY1GPU::set_grid_point(
 }
 
 __host__ __device__ double
-avgSigmaCentY1GPU::operator()(double lo,
+avgSigmaCentY1::operator()(double lo,
                               double lt,
                               double zt,
                               double lnM) const
@@ -178,9 +178,9 @@ avgSigmaCentY1GPU::operator()(double lo,
 }
 
 char const*
-avgSigmaCentY1GPU::module_label()
+avgSigmaCentY1::module_label()
 {
-  return "avgSigmaCentY1GPU";
+  return "avgSigmaCentY1";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -190,23 +190,23 @@ avgSigmaCentY1GPU::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<avgSigmaCentY1GPU::volume_t>
-avgSigmaCentY1GPU::make_integration_volumes(
+std::vector<avgSigmaCentY1::volume_t>
+avgSigmaCentY1::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgSigmaCentY1GPU::module_label(), "lo", "lt", "zt", "lnm");
+    cfg, avgSigmaCentY1::module_label(), "lo", "lt", "zt", "lnm");
 }
 
-avgSigmaCentY1GPU::grid_t
-avgSigmaCentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
+avgSigmaCentY1::grid_t
+avgSigmaCentY1::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    avgSigmaCentY1GPU::module_label(),
+    avgSigmaCentY1::module_label(),
     "zo_low",
     "zo_high",
     "radii");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgSigmaCentY1GPU)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgSigmaCentY1)

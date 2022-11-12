@@ -24,11 +24,11 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// summedNumbersCentY1GPU is a class that models the concept of
+// summedNumbersCentY1 is a class that models the concept of
 // "CosmoSISScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class summedNumbersCentY1GPU {
+class summedNumbersCentY1 {
 public:
   // Note we're slightly abusing the concept of the "grid" here. We are
   // really iterating over a single sequence of pairs, with the pairs
@@ -95,7 +95,7 @@ public:
 
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit summedNumbersCentY1GPU(cosmosis::DataBlock& config);
+  explicit summedNumbersCentY1(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -136,7 +136,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-summedNumbersCentY1GPU::summedNumbersCentY1GPU(DataBlock& cfg)
+summedNumbersCentY1::summedNumbersCentY1(DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -144,12 +144,12 @@ summedNumbersCentY1GPU::summedNumbersCentY1GPU(DataBlock& cfg)
                 false,
                 do_cartesian_product_of_bins_);
   if (rc != DBS_SUCCESS) {
-    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+    throw std::runtime_error("summedNumbersCentY1 failed to find do_cartesian_product_of_bins\n");
   }
 }
 
 void
-summedNumbersCentY1GPU::set_sample(DataBlock& sample)
+summedNumbersCentY1::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -162,14 +162,14 @@ summedNumbersCentY1GPU::set_sample(DataBlock& sample)
 }
 
 void
-summedNumbersCentY1GPU::set_grid_point(grid_point_t grid_point)
+summedNumbersCentY1::set_grid_point(grid_point_t grid_point)
 {
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
 
 __host__ __device__ double
-summedNumbersCentY1GPU::operator()(double lo,
+summedNumbersCentY1::operator()(double lo,
                                    double lt,
                                    double zt,
                                    double lnM) const
@@ -184,9 +184,9 @@ summedNumbersCentY1GPU::operator()(double lo,
 }
 
 char const*
-summedNumbersCentY1GPU::module_label()
+summedNumbersCentY1::module_label()
 {
-  return "summedNumbersCentY1GPU";
+  return "summedNumbersCentY1";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -196,24 +196,24 @@ summedNumbersCentY1GPU::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<summedNumbersCentY1GPU::volume_t>
-summedNumbersCentY1GPU::make_integration_volumes(
+std::vector<summedNumbersCentY1::volume_t>
+summedNumbersCentY1::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg, 
-    summedNumbersCentY1GPU::module_label(), 
+    summedNumbersCentY1::module_label(), 
     "lo",
     "lt",
     "zt", 
     "lnm");
 }
 
-summedNumbersCentY1GPU::grid_t
-summedNumbersCentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
+summedNumbersCentY1::grid_t
+summedNumbersCentY1::make_grid_points(cosmosis::DataBlock& cfg)
 {
   char const * const label =
-    summedNumbersCentY1GPU::module_label();
+    summedNumbersCentY1::module_label();
   bool do_cartesian_product_of_bins = false;
   auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
 
@@ -238,9 +238,9 @@ summedNumbersCentY1GPU::make_grid_points(cosmosis::DataBlock& cfg)
 
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg, 
-    summedNumbersCentY1GPU::module_label(), 
+    summedNumbersCentY1::module_label(), 
     "zo_low", 
     "zo_high");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(summedNumbersCentY1GPU)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(summedNumbersCentY1)

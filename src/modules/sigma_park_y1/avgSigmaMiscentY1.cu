@@ -30,7 +30,7 @@ using cubacpp::integration_result;
 // "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISSICUDAModule.
 //
-class avgSigmaMiscentY1GPU {
+class avgSigmaMiscentY1 {
 public:
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
@@ -85,7 +85,7 @@ public:
 
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit avgSigmaMiscentY1GPU(cosmosis::DataBlock& config);
+  explicit avgSigmaMiscentY1(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -132,7 +132,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgSigmaMiscentY1GPU::avgSigmaMiscentY1GPU( DataBlock& cfg)
+avgSigmaMiscentY1::avgSigmaMiscentY1( DataBlock& cfg)
 {
   auto rc =
     cfg.get_val(module_label(),
@@ -140,12 +140,12 @@ avgSigmaMiscentY1GPU::avgSigmaMiscentY1GPU( DataBlock& cfg)
                 false,
                 do_cartesian_product_of_bins_);
   if (rc != DBS_SUCCESS) {
-    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+    throw std::runtime_error("summedNumbersCentY1 failed to find do_cartesian_product_of_bins\n");
   }
 }
 
 void
-avgSigmaMiscentY1GPU::set_sample(DataBlock& sample)
+avgSigmaMiscentY1::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -161,7 +161,7 @@ avgSigmaMiscentY1GPU::set_sample(DataBlock& sample)
 }
 
 void
-avgSigmaMiscentY1GPU::set_grid_point(grid_point_t grid_point)
+avgSigmaMiscentY1::set_grid_point(grid_point_t grid_point)
 {
   radius_ = grid_point[2];
   zo_low_ = grid_point[0];
@@ -169,7 +169,7 @@ avgSigmaMiscentY1GPU::set_grid_point(grid_point_t grid_point)
 }
 
 __device__ __host__ double
-avgSigmaMiscentY1GPU::operator()(double lo,
+avgSigmaMiscentY1::operator()(double lo,
                                  double lc,
                                  double lt,
                                  double zt,
@@ -189,18 +189,18 @@ avgSigmaMiscentY1GPU::operator()(double lo,
 }
 
 char const*
-avgSigmaMiscentY1GPU::module_label()
+avgSigmaMiscentY1::module_label()
 {
-  return "avgSigmaMiscentY1GPU";
+  return "avgSigmaMiscentY1";
 }
 
-std::vector<avgSigmaMiscentY1GPU::volume_t>
-avgSigmaMiscentY1GPU::make_integration_volumes(
+std::vector<avgSigmaMiscentY1::volume_t>
+avgSigmaMiscentY1::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg,
-    avgSigmaMiscentY1GPU::module_label(),
+    avgSigmaMiscentY1::module_label(),
     "lo",
     "lc",
     "lt",
@@ -210,16 +210,16 @@ avgSigmaMiscentY1GPU::make_integration_volumes(
     "theta");
 }
 
-avgSigmaMiscentY1GPU::grid_t
-avgSigmaMiscentY1GPU::make_grid_points(
+avgSigmaMiscentY1::grid_t
+avgSigmaMiscentY1::make_grid_points(
   cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    avgSigmaMiscentY1GPU::module_label(),
+    avgSigmaMiscentY1::module_label(),
     "zo_low",
     "zo_high",
     "radii");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgSigmaMiscentY1GPU)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgSigmaMiscentY1)
