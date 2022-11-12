@@ -62,7 +62,7 @@ private:
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the cluster-cluster correlation function
-  std::optional<y3_cuda::WP_CLUSTERX> wp_cc;
+  std::optional<y3_cuda::WP_CLUSTER> wp_cc;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -83,6 +83,17 @@ public:
   // Set the data for the current bin.
   void set_grid_point(grid_point_t pt);
 
+  size_t
+  get_device_mem_footprint()
+  {
+    size_t dev_size = 0;
+    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
+    if ((bool)dv_do_dz == true)
+      dev_size += (*dv_do_dz).get_device_mem_footprint();
+    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
+    if ((bool)wp_cc == true) dev_size += (*wp_cc).get_device_mem_footprint();
+    return dev_size;
+  }
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
   // integration routine does not work for functions of one variable). The

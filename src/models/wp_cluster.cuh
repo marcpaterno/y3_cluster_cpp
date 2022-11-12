@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_XI_SUM_CUH
-#define Y3_CLUSTER_XI_SUM_CUH
+#ifndef Y3_CLUSTER_WP_SUM_CUH
+#define Y3_CLUSTER_WP_SUM_CUH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
@@ -14,6 +14,15 @@ namespace y3_cuda {
     quad::Interp2D _bias;
 
   public:
+    size_t
+    get_device_mem_footprint()
+    {
+      size_t size = 0;
+      size += _sigma2.get_device_mem_footprint();
+      size += _bias.get_device_mem_footprint();
+      return size;
+    }
+
     WP_CLUSTER(quad::Interp2D const& sigma2,
             quad::Interp2D const& bias)
       :  _sigma2(sigma2), _bias(bias)
@@ -22,7 +31,7 @@ namespace y3_cuda {
     using doubles = std::vector<double>;
 
     explicit WP_CLUSTER(cosmosis::DataBlock& sample)
-      , _sigma2(make_Interp2D(sample,
+      : _sigma2(make_Interp2D(sample,
                               "deltasigma",
                               "r_sigma_deltasigma",
                               "matter_power_lin",
