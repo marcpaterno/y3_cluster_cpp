@@ -69,6 +69,21 @@ private:
   double radius_;
 
   bool do_cartesian_product_of_bins_;
+
+  // In this integrand, the name "cartesian product" is a bit misleading; it
+  // is used in case later development introduces another grid dimenstion over
+  // which we'll operate.
+  //
+  // If we are using the cartesian grid, the relevant congifuration parameters
+  // are zo_bottom (an array of arbitrary length)  and zo_bin_width (a array of
+  // the same length as zo_bottom). These *two* parameters make a single axis
+  // for the grid (the "zo bins").
+  //
+  // If we are using the wall-of-numbers configuration, the relevant
+  // configuration parameters are zo_lo (an array of arbitrary length) and
+  // zo_high. These *two* parameters make a single axis for the grid (the "zo
+  // bins").
+
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
@@ -162,9 +177,9 @@ avgWpCent::set_grid_point(
 
 __host__ __device__ double
 avgWpCent::operator()(double lo,
-                              double lt,
-                              double zt,
-                              double lnM) const
+                      double lt,
+                      double zt,
+                      double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
@@ -180,7 +195,7 @@ avgWpCent::operator()(double lo,
 char const*
 avgWpCent::module_label()
 {
-  return "aavgWpCent";
+  return "avgWpCent";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
