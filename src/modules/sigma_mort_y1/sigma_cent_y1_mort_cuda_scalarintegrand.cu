@@ -146,9 +146,9 @@ void
 SigmaCentY1MortCUDAScalarIntegrand::set_grid_point(
   grid_point_t const& grid_point)
 {
-  radius_ = grid_point[2];
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
+  radius_ = grid_point[2];
 }
 
 __host__ __device__ double
