@@ -192,6 +192,7 @@ avgWpCent::operator()(double lo,
   return val;
 }
 
+// string must match section block in pipeline.ini file
 char const*
 avgWpCent::module_label()
 {
