@@ -177,10 +177,11 @@ avgSigmaCentY1::operator()(double lo,
   return val;
 }
 
+// string must match section block in pipeline.ini file
 char const*
 avgSigmaCentY1::module_label()
 {
-  return "avgSigmaCentY1";
+  return "avgSigmaCent";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
