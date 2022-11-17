@@ -40,7 +40,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 6>;
+  using volume_t = quad::Volume<double, 7>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -113,11 +113,12 @@ public:
   // object.
   //    the miscentered integral has lc,rmis in addition to the usual centered lo,zt lnM
   __host__ __device__ double operator()(double lo,
-                                        double lc,
                                         double lt,
                                         double zt,
                                         double lnM,
-                                        double rmis) const;
+                                        double lc,
+                                        double rmis,
+                                        double theta) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -179,12 +180,13 @@ summedNumbersMiscentY1::set_grid_point(grid_point_t grid_point)
 }
 
 __device__ __host__ double
-summedNumbersMiscentY1::operator()(double lo,
-                                      double lc,
+summedNumbersMiscentY1::operator()(   double lo,
                                       double lt,
                                       double zt,
                                       double lnM,
-                                      double rmis) const
+                                      double lc,
+                                      double rmis,
+                                      double theta) const
 {
   double const mor_v = (*mor)(lo, lnM, zt);
   double const lc_lt = (*int_lc_lt)(lo, lt, zt);
@@ -194,10 +196,11 @@ summedNumbersMiscentY1::operator()(double lo,
   return val;
 }
 
+// string must match section block in pipeline.ini file
 char const*
 summedNumbersMiscentY1::module_label()
 {
-  return "summedNumbersMiscentY1";
+  return "summedNumbersMiscent";
 }
 
 std::vector<summedNumbersMiscentY1::volume_t>
@@ -208,11 +211,12 @@ summedNumbersMiscentY1::make_integration_volumes(
     cfg,
     summedNumbersMiscentY1::module_label(),
     "lo",
-    "lc",
     "lt",
     "zt",
     "lnm",
-    "rmis");
+    "lc",
+    "rmis",
+    "theta");
 }
 
 summedNumbersMiscentY1::grid_t
