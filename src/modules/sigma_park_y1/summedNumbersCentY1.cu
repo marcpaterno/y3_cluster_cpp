@@ -183,10 +183,11 @@ summedNumbersCentY1::operator()(double lo,
   return val;
 }
 
+// string must match section block in pipeline.ini file
 char const*
 summedNumbersCentY1::module_label()
 {
-  return "summedNumbersCentY1";
+  return "summedNumbersCent";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
