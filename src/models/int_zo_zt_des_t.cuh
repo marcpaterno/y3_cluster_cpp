@@ -3,6 +3,8 @@
 
 #include "models/sigma_photoz_des.cuh"
 
+// this is the result of integrating a gaussian(x) over a bin of xmin to xmax
+// If the cluster photo-z error is gaussian, then the integration is analytic
 namespace y3_cuda {
   class INT_ZO_ZT_DES_t {
   public:

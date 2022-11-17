@@ -5,6 +5,8 @@
 #include "utils/primitives.hh"
 // #include <cmath>
 
+// this is an integrand, if one wants to integrate over a bin of z_o from z_o_min to z_o_max
+
 namespace y3_cluster {
 
   class ZO_ZT_DES_t {
