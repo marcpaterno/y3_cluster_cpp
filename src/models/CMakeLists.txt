@@ -22,7 +22,7 @@ target_include_directories(
 if (USE_CUDA)
   add_library(cuda_models SHARED int_lc_lt_des_t.cu)
 
-  target_link_libraries(cuda_models PRIVATE cosmosis utils)
+  target_link_libraries(cuda_models PRIVATE cosmosis utils )
   set_target_properties(
     cuda_models PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES
                                                         ${Y3GCC_TARGET_ARCH}
