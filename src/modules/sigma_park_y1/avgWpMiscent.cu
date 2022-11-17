@@ -100,10 +100,10 @@ public:
   // function is const because calling it does not change the state of the
   // object.
   __host__ __device__ double operator()(double lo,
-                                        double lc,
                                         double lt,
                                         double zt,
                                         double lnM,
+                                        double lc,
                                         double rmis,
                                         double theta) const;
 
@@ -169,11 +169,11 @@ avgWpMiscent::set_grid_point(grid_point_t grid_point)
 }
 
 __device__ __host__ double
-avgWpMiscent::operator()(double lo,
-                                 double lc,
+avgWpMiscent::operator()(        double lo,
                                  double lt,
                                  double zt,
                                  double lnM,
+                                 double lc,
                                  double rmis,
                                  double theta) const
 {
@@ -188,6 +188,7 @@ avgWpMiscent::operator()(double lo,
   return val;
 }
 
+// string must match section block in pipeline.ini file
 char const*
 avgWpMiscent::module_label()
 {
@@ -202,10 +203,10 @@ avgWpMiscent::make_integration_volumes(
     cfg,
     avgWpMiscent::module_label(),
     "lo",
-    "lc",
     "lt",
     "zt",
     "lnm",
+    "lc",
     "rmis",
     "theta");
 }
