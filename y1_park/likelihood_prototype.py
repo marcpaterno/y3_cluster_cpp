@@ -1,18 +1,27 @@
 import os
 from cosmosis.datablock import option_section, names
 import numpy as np
-from scipy.special import erf
-import cluster_toolkit as ct
 
 ###########################################################
-############ Likelihood: Prototype #############
+################### UNDER CONSTRUCTION #################
+# ToDos:
+#   - create function that reads the datavector
+#   - check array structure of the model predictions
+#   - tbd...
+
+###########################################################
+################### Likelihood: Prototype #################
 # First likelihood version of the DES Y1 Park model project
+#
+# Likelihood = (dataVector - model) cov_inv (dataVector - model)^T
+#
 # In this version we implement:
 # - The data vector is (NC, GT, CRF)
 # - The covariance matrix is computed by Jackknife
 # - We use mock data build from the Buzzard Sims v1.9.8
+#
 ###########################################################
-############ Codes To Validate ###############
+################### Codes To Validate #####################
 # There are new scripts we should validate
 # 1) We build kappa instead of Sigma (see code.cc)
 # 2) We compute shear from the radial kappa excess (see buildShear.py)
@@ -21,7 +30,7 @@ import cluster_toolkit as ct
 # Note: We don't model boost-factor. 
 ###########################################################
 ###########################################################
-# Useful Nomeclature
+##### Useful Nomeclature
 ###########################################################
 # Datavector codenames
 # ---------------------------------------------------------
@@ -44,50 +53,77 @@ debug = True
 
 def setup(options):
     section = option_section
+
     return 0
 
 def execute(block, config):
+    # script based on y1_rerun/y1_analysis_mor_wmiscent_likelihood.py
 
-    # centering fraction
-    fcen = (block["cluster_abundance", "fcen"])
+    # read from the data
+    covmat, ncdata, Mdata, Om_corr, lnAS_corr = config
     
-    ## load model predictions
-    # centered component
-    NC_cen = block["NCCentY1MortScalarIntegrand", "vals"]    
-    GT_cen  = block["MassCentY1MortScalarIntegrand", "vals"]
-    CRF_cen= block["CorrCentY1MortScalarIntegrand", "vals"]
+    # pull predictions from the datablock; 
+    # arrays with shape (Nlbdins, Nzbins)
+    NC  = block["final_model", "NC"]
+    GT  = block["final_model", "GT"]
+    CRF = block["final_model", "CRF"]
+
+    # lambda and redshift bins
+    # why are they not setup in a global variable?
+    l_low = [20.0, 30.0, 45.0, 60.0]
+    l_high = [30.0, 45.0, 60.0, 190.0]
+    z_low = [0.2, 0.35, 0.5]
+    z_high = [0.35, 0.5, 0.65]
+
+    # concatanates the datavector over lambda and redshift bins
+    # NC has shape of (N_lbins, N_zbins)
+    # put models as 1d array
+    theory_nc = concatenate(NC, lbins=len(l_low), zbins=len(z_low))
+    theory_gt = concatenate(GT, lbins=len(l_low), zbins=len(z_low))
+    theory_crf = concatenate(CRF, lbins=len(l_low), zbins=len(z_low))
     
-    # mis-centered component
-    NC_mis = block["NCMiscentY1MortScalarIntegrand", "vals"]
-    GT_mis  = block["MassMiscentY1MortScalarIntegrand", "vals"]
-    CRF_mis= block["CorrMiscentY1MortScalarIntegrand", "vals"]
-    
-    # to check results; debug is a global variable
-    if debug:
-        print('number count predictions - centered')
-        print(NC_cen)
-        
-        print('number count predictions - mis-centered')
-        print(NC_mis)
-    
-    # cosmological parameters
-    Omega_m = (block["cosmological_parameters", "omega_m"])
-    loge10As = (block["cosmological_parameters", "log1e10As"])
-    fcen = (block["cluster_abundance", "fcen"])
-    
-    # final predictions
-    NC  = fcen*NC_cen + (1.0-fcen)*NC_mis
-    GT  = fcen*GT_cen + (1.0-fcen)*GT_mis
-    CRF = fcen*CRF_cen+ (1.0-fcen)*CRF_mis
-    
-    # why?????
-    logM = np.log10(GT/NC)
-    
+    ## check this lines on the original code
+    # corr_jjii=Om_corr[roww]*(Omega_m-0.3)+lnAS_corr[roww]*(loge10As-2.98239371)
+    # corr=np.append(corr, corr_jjii)
+    # M_data=M_data+corr
+
+    # unfolds the data
+    richnesses = ncdata[:, 2]
+    redshifts = ncdata[:, 0]
+    # data vector 
+    data_nc = ncdata[:, 4]
+    # dummy variables; to check data structrue
+    data_gt = gtdata[:, 4]
+    data_crf = crfdata[:, 4]
+
+    # joint datavector
+    data = np.append(data_nc, data_gt)
+    data = np.append(data, data_crf)
+
+    # model predictions
+    theory = np.append(theory_nc, theory_gt)
+    theory = np.append(theory, theory_crf)
+
+    # covariance matrix
+    cov_inv =np.linalg.inv(covmat)
+
+    # logLikelihood
+    delta = data - theory
+    loglike = -0.5 * np.dot(delta, np.dot(cov_inv, delta))
+
     # put into the datablock
-    block["final_model", "NC"] = NC
-    block["final_model", "GT"] = GT
-    block["final_model", "CRF"] = CRF
+    block[section_names.likelihoods, 'Y1Analysis_park'] = loglike
     return 0
 
+def concatenate_datavector(x, lbins=4, zbins=3):
+    # concatanates the datavector over lambda and redshift bins
+    # x has shape of (N_lbins, N_zbins)
+    # returns 1d array 
+    y = np.array([])
+    for jj in range(len(N_zbins)):
+        for ii in range(len(N_lbins)):
+            y = np.append(y, x[ii, jj])
+    return y
+    
 def cleanup(config):
     pass
