@@ -13,7 +13,7 @@
 #include "models/hmf_t.cuh"
 #include "models/mor_des_t.cuh"
 #include "models/lo_lc_t.cuh"
-#include "models/int_lc_lt_des_t.hh"
+#include "models/lc_lt_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/sig_sum.cuh"
@@ -57,7 +57,7 @@ private:
   std::optional<y3_cuda::MOR_DES_t> mor;
   // projection model
   std::optional<y3_cuda::LO_LC_t> lo_lc;
-  std::optional<y3_cluster::INT_LC_LT_DES_t> int_lc_lt;
+  std::optional<y3_cuda::LC_LT_t> lc_lt;
   std::optional<y3_cuda::ROFFSET_t> roffset;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
@@ -168,7 +168,7 @@ summedNumbersMiscentY1::set_sample(DataBlock& sample)
   hmf.emplace(sample);
   mor.emplace(sample);
   lo_lc.emplace(sample);
-  int_lc_lt.emplace(sample);
+  lc_lt.emplace(sample);
   roffset.emplace(sample);
 }
 
@@ -189,9 +189,8 @@ summedNumbersMiscentY1::operator()(   double lo,
                                       double theta) const
 {
   double const mor_v = (*mor)(lo, lnM, zt);
-  double const lc_lt = (*int_lc_lt)(lo, lt, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       mor_v * (*lo_lc)(lo, lc, rmis) * lc_lt * (*roffset)(rmis) ;
+                       mor_v * (*lo_lc)(lo, lc, rmis) * (*lc_lt)(lo, lt, zt) * (*roffset)(rmis) ;
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }

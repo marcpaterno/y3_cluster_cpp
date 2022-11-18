@@ -16,7 +16,7 @@
 #include "models/lc_lt_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/roffset_t.cuh"
-#include "models/sig_max.cuh"
+#include "models/wp_cluster.cuh"
 
 #include <iostream>
 #include <optional>
@@ -30,7 +30,7 @@ using cubacpp::integration_result;
 // "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISSICUDAModule.
 //
-class avgSigmaMiscentY1 {
+class avgWpMiscentY1 {
 public:
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
@@ -61,8 +61,8 @@ private:
   std::optional<y3_cuda::ROFFSET_t> roffset;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  // and the sigma profile
-  std::optional<y3_cuda::SIG_MAX> sigma;
+  // and the cluster-cluster correlation function
+  std::optional<y3_cuda::WP_CLUSTER> wp_cc;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -71,21 +71,10 @@ private:
   bool do_cartesian_product_of_bins_;
 
 public:
-  size_t
-  get_device_mem_footprint()
-  {
-    size_t dev_size = 0;
-    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
-    if ((bool)dv_do_dz == true)
-      dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)sigma == true) dev_size += (*sigma).get_device_mem_footprint();
-    return dev_size;
-  }
 
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit avgSigmaMiscentY1(cosmosis::DataBlock& config);
+  explicit avgWpMiscentY1(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -94,6 +83,17 @@ public:
   // Set the data for the current bin.
   void set_grid_point(grid_point_t pt);
 
+  size_t
+  get_device_mem_footprint()
+  {
+    size_t dev_size = 0;
+    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
+    if ((bool)dv_do_dz == true)
+      dev_size += (*dv_do_dz).get_device_mem_footprint();
+    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
+    if ((bool)wp_cc == true) dev_size += (*wp_cc).get_device_mem_footprint();
+    return dev_size;
+  }
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
   // integration routine does not work for functions of one variable). The
@@ -132,7 +132,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgSigmaMiscentY1::avgSigmaMiscentY1( DataBlock& cfg)
+avgWpMiscentY1::avgWpMiscentY1( DataBlock& cfg)
 {
   auto rc =
     cfg.get_val(module_label(),
@@ -145,7 +145,7 @@ avgSigmaMiscentY1::avgSigmaMiscentY1( DataBlock& cfg)
 }
 
 void
-avgSigmaMiscentY1::set_sample(DataBlock& sample)
+avgWpMiscentY1::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -157,11 +157,11 @@ avgSigmaMiscentY1::set_sample(DataBlock& sample)
   lo_lc.emplace(sample);
   lc_lt.emplace(sample);
   roffset.emplace(sample);
-  sigma.emplace(sample);
+  wp_cc.emplace(sample);
 }
 
 void
-avgSigmaMiscentY1::set_grid_point(grid_point_t grid_point)
+avgWpMiscentY1::set_grid_point(grid_point_t grid_point)
 {
   radius_ = grid_point[2];
   zo_low_ = grid_point[0];
@@ -169,7 +169,7 @@ avgSigmaMiscentY1::set_grid_point(grid_point_t grid_point)
 }
 
 __device__ __host__ double
-avgSigmaMiscentY1::operator()(   double lo,
+avgWpMiscentY1::operator()(        double lo,
                                  double lt,
                                  double zt,
                                  double lnM,
@@ -179,28 +179,28 @@ avgSigmaMiscentY1::operator()(   double lo,
 {
   double const mor_v = (*mor)(lo, lnM, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) *
-                       mor_v * (*lo_lc)(lo, lc, rmis) * (*lc_lt)(lc, lt, zt) * (*roffset)(rmis) ;
+                       mor_v * (*lo_lc)(lo, lc, rmis) * (*lc_lt)(lo, lt, zt) * (*roffset)(rmis) ;
   double scaled_Rmis = std::sqrt(radius_ * radius_ + rmis * rmis +
                                  2 * rmis * radius_ * std::cos(theta));
-  auto const val = (*sigma)(scaled_Rmis, lnM, zt) *
+  auto const val = (*wp_cc)(scaled_Rmis, lnM, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
 
 // string must match section block in pipeline.ini file
 char const*
-avgSigmaMiscentY1::module_label()
+avgWpMiscentY1::module_label()
 {
-  return "avgSigmaMiscentY1";
+  return "avgWpMiscentY1";
 }
 
-std::vector<avgSigmaMiscentY1::volume_t>
-avgSigmaMiscentY1::make_integration_volumes(
+std::vector<avgWpMiscentY1::volume_t>
+avgWpMiscentY1::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg,
-    avgSigmaMiscentY1::module_label(),
+    avgWpMiscentY1::module_label(),
     "lo",
     "lt",
     "zt",
@@ -210,16 +210,16 @@ avgSigmaMiscentY1::make_integration_volumes(
     "theta");
 }
 
-avgSigmaMiscentY1::grid_t
-avgSigmaMiscentY1::make_grid_points(
+avgWpMiscentY1::grid_t
+avgWpMiscentY1::make_grid_points(
   cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    avgSigmaMiscentY1::module_label(),
+    avgWpMiscentY1::module_label(),
     "zo_low",
     "zo_high",
     "radii");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgSigmaMiscentY1)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgWpMiscentY1)

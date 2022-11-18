@@ -12,7 +12,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_t.cuh"
-#include "models/int_lc_lt_des_t.cuh"
+#include "models/lc_lt_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/roffset_t.cuh"
 
@@ -56,7 +56,7 @@ private:
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_t> mor;
   // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
-  std::optional<y3_cuda::INT_LC_LT_DES_t> int_lc_lt;
+  std::optional<y3_cuda::LC_LT_t> lc_lt;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
 
@@ -158,7 +158,7 @@ summedNumbersCentY1::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  int_lc_lt.emplace(sample);
+  lc_lt.emplace(sample);
 }
 
 void
@@ -177,7 +177,7 @@ summedNumbersCentY1::operator()(double lo,
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double const mor_v = (*mor)(lo, lnM, zt);
-  double const lo_lt = (*int_lc_lt)(lo, lt, zt);
+  double const lo_lt = (*lc_lt)(lo, lt, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v * lo_lt ;
   auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;

@@ -37,20 +37,20 @@ if (USE_CUDA)
   target_compile_options(avgSigmaMiscentY1  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
   # avgWpCent.cu
-  add_library(avgWpCent   MODULE avgWpCent.cu)
-  target_link_libraries(avgWpCent  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
-  set_target_properties(avgWpCent  PROPERTIES POSITION_INDEPENDENT_CODE ON 
+  add_library(avgWpCentY1   MODULE avgWpCentY1.cu)
+  target_link_libraries(avgWpCentY1  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  set_target_properties(avgWpCentY1  PROPERTIES POSITION_INDEPENDENT_CODE ON 
                                                                    CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
-  target_include_directories(avgWpCent  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
-  target_compile_options(avgWpCent  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+  target_include_directories(avgWpCentY1  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  target_compile_options(avgWpCentY1  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
-  # avgWpMiscent.cu
-  add_library(avgWpMiscent   MODULE avgWpMiscent.cu)
-  target_link_libraries(avgWpMiscent  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
-  set_target_properties(avgWpMiscent  PROPERTIES POSITION_INDEPENDENT_CODE ON
+  # avgWpMiscentY1.cu
+  add_library(avgWpMiscentY1   MODULE avgWpMiscentY1.cu)
+  target_link_libraries(avgWpMiscentY1  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  set_target_properties(avgWpMiscentY1  PROPERTIES POSITION_INDEPENDENT_CODE ON
                                                                       CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
-  target_include_directories(avgWpMiscent  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
-  target_compile_options(avgWpMiscent  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+  target_include_directories(avgWpMiscentY1  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  target_compile_options(avgWpMiscentY1  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
 
 endif ()
