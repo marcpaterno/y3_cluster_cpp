@@ -9,14 +9,16 @@ cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
 
 #####################################################################
 ###################### Scale Shift Cosmology  #######################
-# There are some distances that we need to define a fiducial cosmology
-# To adapt to a given cosmology we can re-scale the distances.
+# In some parts of the code, we have quantities that are cosmology
+# dependent on the comoving/angular distance. 
+# To adapt to a new cosmology we can re-scale the distances by taking
+# into account the fiducial cosmolgoy.
 #
 # scaleShiftCosmo is basically the ratio of the comoving distance
 # and the hubble factor
 #     scaleShiftCosmo = (dist_c/h) / (dist_c_fid/h_fid)
 #
-# our fiducial cosmology is set as Omega_m = 0.3 and H0 = 70
+# the fiducial cosmology was set to Omega_m = 0.3 and H0 = 70
 ###################################################################
 # Author: Johnny Esteves
 # Created: 18th Nov, 2022
