@@ -72,12 +72,11 @@ def execute(block, config):
         c=9.71561189e-15 # Mpc/s
         
         # cosmological quantities
-        h0 = block[cosmo, "h0"]
         z_da = block["distances",'z']
-        da = block["distances",'da'] # Mpc
+        dc = block["distances",'da'] # Mpc
 
         # lens comoving distance
-        dc_lenses = interp1d(z_da, da)(z_lenses) * (1+z_lenses)
+        dc_lenses = interp1d(z_da, da)*(1+z_lenses) 
 
         # cosmological shift := (H/Hfid)*(dc/dc_fid)
         # fid stands for the fiducial cosmology
