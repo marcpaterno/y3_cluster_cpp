@@ -2,6 +2,10 @@ import os
 import numpy as np
 from cosmosis.datablock import option_section, names
 
+from scipy.special import erf
+import cluster_toolkit as ct
+import massconcen
+
 # redshift mean with format [z0, z1, z2, z0, z1, z2, ...]
 from setup_bins import zmeans_ij
 
@@ -144,7 +148,7 @@ def execute(block, config):
     Sigma_nfw = compute_Sigma_nfw(R_perp, M, cM, omega_m)
 
     # Step 3) Compute Bias (M, Z)
-    Bias = compute_bias(mass, k, P_k, omega_m)
+    Bias = compute_bias(M, k, P_k, omega_m)
     # NOTE: P_k depends on z; mass is a vector
     # Bias has shape (mass.size, z.size)
 
@@ -197,7 +201,7 @@ def pk_to_Xi(r, z, k, Pk):
     """
     # start the integration
     Xi = np.zeros((len(z), r.size))
-    for Pki in Pk:
+    for i, Pki in enumerate(Pk):
         # using cluster toolkit
         # switch to FFTlog
         Xi[i] = ct.xi.xi_mm_at_r(r, k, Pki)
@@ -247,9 +251,10 @@ def compute_Sigma_hh(R, r, Xi, omega_m=0.3,
         Sigma (ndarray): Projected NFW Profile, units h Msun/pc^2,
         (mass.size, r.size)
     """ 
-    Sigma = np.zeros_like(Xi)
+    zsize = Xi.shape[0]
+    Sigma = np.zeros((zsize, R.size))
 
-    for i in range(Xi.shape[0]):
+    for i in range(zsize):
         Sigma[i] = ct.deltasigma.Sigma_at_R(R, r, Xi[i],
                                            dummy_mass, dummy_conc, omega_m)
     return Sigma
@@ -318,8 +323,7 @@ def compute_bias(mass, k, P_k, omega_m=0.3):
     Bias = np.zeros((mass.size, zsize))
     for j in range(zsize):
             Bias[:, j] = ct.bias.bias_at_M(mass, k, P_k[j], omega_m)
-
-    return bias
+    return Bias
 
 def compute_conentration(z, mass, mstar, z_mstar, 
                          CosmoParams=(0.3, 0.05, 0.82, 0.7)):

@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_PK_DAMP_SUM_CUH
-#define Y3_CLUSTER_PK_DAMP_SUM_CUH
+#ifndef Y3_CLUSTER_PK_DAMP_CUH
+#define Y3_CLUSTER_PK_DAMP_CUH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
@@ -8,7 +8,7 @@
 #include "utils/primitives.cuh"
 
 namespace y3_cuda {
-  class PK_CLUSTER {
+  class PK_CLUSTER_DAMP {
   private:
     quad::Interp2D _pk_damp;
     quad::Interp2D _bias;
@@ -23,14 +23,14 @@ namespace y3_cuda {
       return size;
     }
 
-    PK_CLUSTER(quad::Interp2D const& pk,
+    PK_CLUSTER_DAMP(quad::Interp2D const& pk,
             quad::Interp2D const& bias)
       :  _pk_damp(pk), _bias(bias)
     {}
 
     using doubles = std::vector<double>;
 
-    explicit PK_CLUSTER(cosmosis::DataBlock& sample)
+    explicit PK_CLUSTER_DAMP(cosmosis::DataBlock& sample)
       : _pk_damp(make_Interp2D(sample,
                               "correlationFunction",
                               "k",

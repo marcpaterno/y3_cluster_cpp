@@ -65,8 +65,8 @@ def setup(options):
         # beta_fid = betaTable["beta_eff"] # ndshape (zbins.size, rbins.size)
         
         # fake data
-        z_beta = np.linspace(0.1, 1.2, 100)
-        r_beta = np.logspace(-2, 1.3, 100)
+        z_beta = np.linspace(0.1, 1.2, 64)
+        r_beta = np.logspace(-2, 2., 32)
 
         beta_fid = np.zeros((z_beta.size, r_beta.size))
         z_src = np.zeros((z_beta.size, r_beta.size))
@@ -83,14 +83,14 @@ def execute(block, config):
         
         # cosmological quantities
         z_da = block["distances",'z']
-        dc = block["distances",'da'] # Mpc
+        da = block["distances",'d_a'] # Mpc
 
         # lenses redshift is equal to the cluster mean redshifts
         z_lenses = block["correlationFunction", "z"]
         r_sigma = block["correlationFunction", "r_sigma"]
 
         # lens comoving distance
-        dc_lenses = interp1d(z_da, da)*(1+z_lenses) 
+        dc_lenses = interp1d(z_da, da*(1+z_da))(z_lenses)
 
         # cosmological shift := (H/Hfid)*(dc/dc_fid)
         # fid stands for the fiducial cosmology
@@ -98,7 +98,7 @@ def execute(block, config):
         shift = block['correlationFunction', 'scale_shift']
 
         # compute the shift ratio of dls/ds
-        scale_shift_func = interp1d(z_shift, shift)
+        scale_shift_func = interp1d(z_shift, shift, bounds_error=False)
 
         # compute beta
         zsize = z_lenses.size
@@ -107,7 +107,7 @@ def execute(block, config):
         for i in range(zsize):
                 zL = z_lenses[i]
                 # find zl indice in z_beta_lenses vector
-                ix = np.interp(zL, z_beta, range(z_beta.size))
+                ix = np.interp(zL, z_beta, range(z_beta.size)).astype(int)
                 zS = z_src[ix] # effective source redshift vector with r_beta size
                 betaFid = beta_fid[ix] # vector with r_beta size
 
@@ -121,10 +121,13 @@ def execute(block, config):
                 # if scale_ratio is one, beta equals to beta_fid
 
                 # compute sigma_crit_inv [Msun]
-                sigma_crit_inv_vec = 4.0*np.pi*G/c/c * dc_l * beta_zl
+                # sigma_crit_inv_vec = 4.0*np.pi*G/c/c * dc_lenses[i] * beta_zl
+
+                # for test purpose only
+                sigma_crit_inv_vec =  4.0*np.pi*G/c/c * dc_lenses[i] * np.ones_like(r_beta)
                 
                 # interpolate with the new binning scheme 
-                sigma_crit_inv[i] = interp1d(r_beta, sigma_crit_inv_vec)(r_sigma)
+                sigma_crit_inv[i] = interp1d(r_beta, sigma_crit_inv_vec, bounds_error=False)(r_sigma)
 
         block["sigmaCritInv", "r_sigma"] = r_sigma
         block["sigmaCritInv", "z"] = z_lenses
