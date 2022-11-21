@@ -85,7 +85,8 @@ def execute(block, config):
         zed = z[i]
         s2 = interp2(zed,R) # returns a vector of sigma(r) at z
         s2 = np.squeeze(s2)
-        interp1 = interp1d(s2,R)                    # returns 1d interp object returning r given sigma
+        # Johnny on 20th Nov added fill_value="extrapolate"
+        interp1 = interp1d(s2, R, fill_value="extrapolate")  # returns 1d interp object returning r given sigma
         Rstar[i] = interp1(1.686**2)                # collapse radial scale, Child's eq 13
 
     rhocrit = 2.77533742639e+11  #h^2 M_sun Mpc^-3
