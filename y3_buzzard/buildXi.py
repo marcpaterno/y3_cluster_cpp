@@ -150,7 +150,11 @@ def execute(block, config):
 
     # Step 4) Compute the damped halo-halo power spectrum
     # Pk times sqrt(pi)*erf(sigma_photoz * k_nl)/(2*sigma_photoz*k_nl)
-    damped_Pk_nl = compute_damped_pk(sigma_photoz, k_nl, P_k_nl)
+    damped_Pk_nl = compute_damped_pk(sigma_photoz*(1+z), k_nl, P_k_nl)
+
+    # Step 5) shift cosmological scale
+    # ratio of the comoving distance dC(cosmo)/dC(cosmo_fid)
+    scaleShift = scaleShiftCosmo(z, block, h0=h0)
 
     # put into the datablock
     block["correlationFunction", "m_h"] = M
@@ -171,6 +175,7 @@ def execute(block, config):
     block["correlationFunction", "bias"] = Bias
 
     # damped Pk
+    block["correlationFunction", "scale_shift"] = scaleShift
     block["correlationFunction", "k"] = k_nl
     block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
 
@@ -275,19 +280,21 @@ def compute_damped_pk(sigma_photoz, k, Pk):
     Accounts for the cluster photo-z error on Pk
 
     Args:
-        sigma_photoz (float): photo-z cluster error
+        sigma_photoz (array or float): photo-z cluster error
         k (array): wave number
         Pk (ndarray): power spectrum
 
     Returns:
         damped_pk: shape like pk
     """
+    if len(sigma_photoz)==0:
+        sigma_photoz = sigma_photoz*np.ones_like(Pk[:,0])
+    
     const = np.sqrt(np.pi)/2.
-    dampingFactor = const*erf(sigma_photoz * k)/(sigma_photoz*k)
-
     # multiply the power spectrum by the damping factor
     damped_Pk = np.zeros_like(Pk)
     for i in range(Pk.shape[0]):
+        dampingFactor = const*erf(sigma_photoz[i] * k)/(sigma_photoz[i] * k)
         damped_Pk[i]  = dampingFactor * Pk[i]
 
     return damped_Pk
