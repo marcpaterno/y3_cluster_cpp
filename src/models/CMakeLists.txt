@@ -20,8 +20,8 @@ target_include_directories(
   )
 
 if (USE_CUDA)
-  add_library(cuda_models SHARED int_lc_lt_des_t.cu )
-  # add_library(cuda_models SHARED int_lc_lt_des_t.cu lc_lt_t.cu)
+    #add_library(cuda_models SHARED int_lc_lt_des_t.cu )
+  add_library(cuda_models SHARED int_lc_lt_des_t.cu lc_lt_t.cu)
 
   target_link_libraries(cuda_models PRIVATE cosmosis utils )
   set_target_properties(

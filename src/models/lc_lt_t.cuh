@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_LC_LT_T_CUH
-#define Y3_CLUSTER_LC_LT_T_CUH
+#ifndef Y3_CUDA_LC_LT_T_CUH
+#define Y3_CUDA_LC_LT_T_CUH
 
 // jta conversion project to cuda Nov 2022
 
@@ -26,7 +26,7 @@ namespace y3_cuda {
     quad::Interp2D fprj_interp;
 
     // The default constructor is implemented in the .cu file
-    LC_LT_t() {}
+    LC_LT_t() ;
 
     // The constructor from a datablock is required, but does the same thing
     // as the default constructor. So we delegate the work to the default

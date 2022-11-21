@@ -8,21 +8,22 @@
 
 using namespace quad;
 
-namespace {
+namespace jack {
 
   // Define zt_max and l_max large enough to be safe.
+    // were used at end of zt_bins and lt_bis, as if to extrapolate
   double constexpr zt_max = 2.0;
   double constexpr lt_max = 300.0;
 
-  std::array<double, 6> constexpr zt_bins = {0.1, 0.15, 0.2, 0.25, 0.3, zt_max};
+  std::array<double, 5> const zt_bins = {0.1, 0.15, 0.2, 0.25, 0.3};
 
-  std::array<double, 23> constexpr lt_bins = {
+  std::array<double, 22> const lt_bins = {
     1.,          3.,          5.,          7.,          9.,         12.,
     15.55555534, 20.,         24.,         26.11111069, 30.,        36.66666412,
     40.,         47.22222137, 57.77777863, 68.33332825, 78.8888855, 89.44444275,
-    100.,        120.,        140.,        160.,        lt_max};
+    100.,        120.,        140.,        160.};
 
-  std::array<double, 110> constexpr sigma_arr = {
+  std::array<double, 110> const sigma_arr = {
     8.12748540e-01, 1.32292795e+00, 1.70726638e+00, 1.74780086e+00,
     2.01806368e+00, 2.23657343e+00, 2.40010333e+00, 2.70710073e+00,
     3.12735013e+00, 3.21122400e+00, 3.39146912e+00, 3.74153501e+00,
@@ -52,7 +53,7 @@ namespace {
     9.89865696e+00, 1.04363822e+01, 1.22443047e+01, 1.56979618e+01,
     2.19841273e+01, 2.53251473e+01};
 
-  std::array<double, 110> constexpr fmsk_arr = {
+  std::array<double, 110> const fmsk_arr = {
     3.27308389e-01, 3.12345575e-01, 3.00618261e-01, 2.57318771e-01,
     2.39648376e-01, 2.05210932e-01, 1.47652380e-01, 1.25691770e-01,
     1.06213660e-01, 9.42416400e-02, 8.31716990e-02, 6.29795509e-02,
@@ -82,7 +83,7 @@ namespace {
     2.49491123e-02, 1.76920787e-02, 1.17437463e-02, 5.64348319e-03,
     1.17441933e-05, 7.27777308e-04};
 
-  std::array<double, 110> constexpr fprj_arr = {
+  std::array<double, 110> const fprj_arr = {
     3.13611172e-03, 3.15339208e-03, 3.14040215e-03, 4.60751243e-01,
     4.84238370e-01, 9.30276933e-01, 6.54314508e-01, 8.86566453e-01,
     9.98820926e-01, 8.43829346e-01, 9.98926922e-01, 9.46901308e-01,
@@ -112,7 +113,7 @@ namespace {
     9.64462792e-01, 9.99220744e-01, 9.99288785e-01, 9.99252874e-01,
     9.98562896e-01, 9.77664929e-01};
 
-  std::array<double, 110> constexpr mu_arr = {
+  std::array<double, 110> const mu_arr = {
     5.11728114e-01,  2.45073138e+00, 4.52629062e+00,  6.16461776e+00,
     8.18578476e+00,  1.05000674e+01, 1.46462484e+01,  1.84203262e+01,
     2.23414249e+01,  2.50654122e+01, 2.87599971e+01,  3.52318878e+01,
@@ -142,7 +143,7 @@ namespace {
     8.48249508e+01,  9.56848225e+01, 1.09524905e+02,  1.35669400e+02,
     1.67234082e+02,  1.98382845e+02};
 
-  std::array<double, 110> constexpr tau_arr = {
+  std::array<double, 110> const tau_arr = {
     3.87497099e+00, 2.87383279e+00, 2.89974546e+00, 8.05299747e-01,
     5.82079679e-01, 4.25342329e-01, 3.16631643e-01, 2.31794166e-01,
     1.87431347e-01, 1.68846430e-01, 1.48897918e-01, 1.23155603e-01,
@@ -193,28 +194,29 @@ namespace {
 
   // Create an Interp2D from an x-axis, y-axis, and z "matrix", with the matrix
   // unrolled into a one-dimenstional array.
+  // The xs and ys arrays have 1 extra element and the last element is ignored.
   template <size_t M, std::size_t N>
   inline Interp2D
   make_Interp2D_aux(std::array<double, M> const& xs,
                     std::array<double, N> const& ys,
-                    std::array<double, (N - 1) * (M - 1)> const& zs)
+                    std::array<double, N * M > const& zs)
   {
     return {xs, ys, zs};
   }
 
-  template <size_t M>
+  template <size_t NM>
   inline Interp2D
-  make_Interp2D(std::array<double, M> const& zs)
+  make_Interp2D(std::array<double, NM> const& zs)
   {
-    return make_Interp2D_aux(lt_bins, zt_bins, zs);
+    return make_Interp2D_aux(jack::lt_bins, jack::zt_bins, zs);
   }
 }
 
 y3_cuda::LC_LT_t::LC_LT_t() :
-  tau_interp(make_Interp2D(tau_arr)),
-  mu_interp(make_Interp2D(mu_arr)),
-  sigma_interp(make_Interp2D(sigma_arr)),
-  fmask_interp(make_Interp2D(fmsk_arr)),
-  fprj_interp(make_Interp2D(lfprjarr))
+  tau_interp   (jack::make_Interp2D(jack::tau_arr)),
+  mu_interp    (jack::make_Interp2D(jack::mu_arr)),
+  sigma_interp (jack::make_Interp2D(jack::sigma_arr)),
+  fmsk_interp  (jack::make_Interp2D(jack::fmsk_arr)),
+  fprj_interp  (jack::make_Interp2D(jack::fprj_arr))
 {}
 
