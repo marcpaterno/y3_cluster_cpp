@@ -340,5 +340,43 @@ def compute_conentration(z, mass, mstar, z_mstar,
                                           sigma8, h0, mstar, z_mstar)
     return conc
 
+def scaleShiftCosmo(znew, block, h0=0.7):
+    """Scale Shift Cosmology
+
+    To adapt to a new cosmology we can re-scale the distances by taking
+    into account the fiducial cosmolgoy.
+    
+    scaleShiftCosmo is basically the ratio of the comoving distance
+    and the hubble factor
+        scaleShiftCosmo = (dist_c/h) / (dist_c_fid/h_fid)
+    
+    the fiducial cosmology was set to Omega_m = 0.3 and H0 = 70
+
+    Args:
+        znew (array): redshift vector
+        block (dict): data block
+        h0 (float, optional): small hubble constant. Defaults to 0.7.
+
+    Returns:
+        scale_shift: scale shift factor
+    """
+    # cosmological quantities
+    # h0 = block[cosmo, "h0"]
+
+    z_dc = block["distances",'z']
+    dc = block["distances",'d_a']*(1+z_dc) # comoving distance Mpc
+
+    # fiducical cosmology
+    h0_fid = cosmo.H0/100.
+    dc_fid = cosmo.comoving_distance(z_dc).value
+
+    # scale shift
+    scale_shift_vec = dc/dc_fid
+
+    # interpolate for the new redshift
+    scale_shift = np.interp(znew, z_dc, scale_shift_vec)
+    return scale_shift
+        
 def cleanup(config):
     pass
+
