@@ -8,13 +8,13 @@ from setup_bins import zmeans_ij
 #############################################
 ########### Build Shear Profile #############
 # Estimates the gamma profiles:
-#     gamma(r) = <kappa(<r)> - kappa(r)
+#     gamma(R) = <kappa(<R)> - kappa(R)
 #
 # Computes the mean kappa in a radii bin.
-# <kappa(r)> = 1/r \int_0^{r} kappa(r^\prime) dr^\prime
+# <kappa(R)> = 1/R \int_0^{R} kappa(R^\prime) dR^\prime
 # see buildKappa.py for information on kappa
 #
-# Converts gamma(r) to gamma(\theta)
+# Converts gamma(R) to gamma(\theta)
 # Units of theta are specified on the .ini file
 #
 # Returns: 
