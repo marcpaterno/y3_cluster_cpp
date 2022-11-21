@@ -26,6 +26,7 @@ namespace y3_cuda {
       size += _sigma1.get_device_mem_footprint();
       size += _sigma2.get_device_mem_footprint();
       size += _bias.get_device_mem_footprint();
+      size += _sigma_crit_inv.get_device_mem_footprint();
       return size;
     }
 

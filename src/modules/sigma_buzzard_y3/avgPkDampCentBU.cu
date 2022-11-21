@@ -29,7 +29,7 @@ using cubacpp::integration_result;
 // "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class avgPKDampCentBu {
+class avgPkDampCentBU {
 public:
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
@@ -66,7 +66,7 @@ private:
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
-  double radius_;
+  double k_;
 
   bool do_cartesian_product_of_bins_;
 
@@ -87,7 +87,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit avgPKDampCentBu(cosmosis::DataBlock& config);
+  explicit avgPkDampCentBU(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -143,7 +143,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgPKDampCentBu::avgPKDampCentBu( DataBlock& cfg)
+avgPkDampCentBU::avgPkDampCentBU( DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -156,7 +156,7 @@ avgPKDampCentBu::avgPKDampCentBu( DataBlock& cfg)
 }
 
 void
-avgPKDampCentBu::set_sample(DataBlock& sample)
+avgPkDampCentBU::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -169,16 +169,16 @@ avgPKDampCentBu::set_sample(DataBlock& sample)
 }
 
 void
-avgPKDampCentBu::set_grid_point(
+avgPkDampCentBU::set_grid_point(
   grid_point_t const& grid_point)
 {
-  radius_ = grid_point[2];
+  k_ = grid_point[2];
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
 
 __host__ __device__ double
-avgPKDampCentBu::operator()(double lo,
+avgPkDampCentBU::operator()(double lo,
                       double zt,
                       double lnM) const
 {
@@ -187,16 +187,16 @@ avgPKDampCentBu::operator()(double lo,
   double const mor_v = (*mor)(lo, lnM, zt);
 
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*pk_cc)(radius_, lnM, zt) *
+  auto const val = (*pk_cc)(k_, lnM, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
 
 // string must match section block in pipeline.ini file
 char const*
-avgPKDampCentBu::module_label()
+avgPkDampCentBU::module_label()
 {
-  return "avgPKDampCentBu";
+  return "avgPkDampCentBU";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -206,23 +206,23 @@ avgPKDampCentBu::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<avgPKDampCentBu::volume_t>
-avgPKDampCentBu::make_integration_volumes(
+std::vector<avgPkDampCentBU::volume_t>
+avgPkDampCentBU::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgPKDampCentBu::module_label(), "lo", "zt", "lnm");
+    cfg, avgPkDampCentBU::module_label(), "lo", "zt", "lnm");
 }
 
-avgPKDampCentBu::grid_t
-avgPKDampCentBu::make_grid_points(cosmosis::DataBlock& cfg)
+avgPkDampCentBU::grid_t
+avgPkDampCentBU::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    avgPKDampCentBu::module_label(),
+    avgPkDampCentBU::module_label(),
     "zo_low",
     "zo_high",
-    "radii");
+    "k");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgPKDampCentBu)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgPkDampCentBU)

@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from scipy.interpolate import interp1d
 from cosmosis.datablock import option_section, names
 
 # redshift mean with format [z0, z1, z2, z0, z1, z2, ...]
@@ -45,19 +46,23 @@ conv_factor = {"radians": 1.,
 
 def setup(options):
     section = option_section
+    
     # radii of xi_hm, in Mpc/h
     #Mpc/h comoving distance, distance on the sky
-    Radii_min = options[option_section,"Radii_min"]
-    Radii_max = options[option_section,"Radii_max"]
-    Radii_bins = int(options[option_section,"Radii_bins"])
+    Radii_min = options[section,"Radii_min"]
+    Radii_max = options[section,"Radii_max"]
+    Radii_bins = int(options[section,"Radii_bins"])
 
     # sep_units, default is arcmin
     sep_units = str(options[option_section,"sep_units"])
 
-    return Radii_min, Radii_max, Radii_bins, sep_units
+    # grab radius bins
+    r_kappa = options["avgKappaCentBu", "radius"]
+
+    return Radii_min, Radii_max, Radii_bins, r_kappa, sep_units
 
 def execute(block, config):
-    Radii_min, Radii_max, Radii_bins, sep_units  = config
+    Radii_min, Radii_max, Radii_bins, r_kappa, sep_units  = config
 
     # cosmological quantities
     h0 = block[cosmo, "h0"]
@@ -65,7 +70,7 @@ def execute(block, config):
     da = block['distances', 'd_a'] # Mpc
 
     # load auxialiary vectors
-    r_kappa = block["avgKappaCentBu", "r"]
+    # r_kappa = block["avgKappaCentBu", "radius"]
 
     # number of radial bins
     Nrbins = r_kappa.size
@@ -78,6 +83,7 @@ def execute(block, config):
 
     # get the number of redshift bins
     Nzbins = int(Nzr/Nrbins)
+    print("Number of redshift bins: %i"%Nzbins)
 
     # reshape: kappa is one profile (i.e. radial bins) for each row
     # each row is one (lambda, redshift) bin
@@ -92,15 +98,15 @@ def execute(block, config):
 
     # compute shear profile
     # \gamma(r) = <\kappa(<r)> - k(r)
-    shear_cen = np.zeros((Nlbins*Nzbin, Nrbins))
-    for ij in range(Nlbins*Nzbin):
-        shear_ij = compute_mean_profile(r_kappa, kappa_cen_reshaped[jj])
-        shear_cen[ij] = interp1d(r, shear_ij)(Radii)
+    shear_cen = np.zeros((Nlbins*Nzbins, Radii_bins))
+    for ij in range(Nlbins*Nzbins):
+        shear_ij = compute_mean_profile(r_kappa, kappa_cen_reshaped[ij])
+        shear_cen[ij] = interp1d(r_kappa, shear_ij, bounds_error=False)(Radii)
     
     # convert R [Mpc/h] to theta [arcmin/h]
     # theta depends on redshift, because of angular distance
     # for simplicity thetha will have the same shape of shear
-    theta = np.zeros((Nlbins*Nzbin, Nrbins))
+    theta = np.zeros((Nlbins*Nzbins, Radii_bins))
     for z in zmeans_ij:
         # convert R to theta
         theta[ij] = r_to_theta(Radii, z, da, z_da,
@@ -120,9 +126,9 @@ def compute_mean_profile(r, fx):
     """
     # start the integration
     delta_profile = np.zeros(r.size)
-    for ii, ri in enumerate(r):
+    for ii, ri in enumerate(r[1:]):
         ix = np.where(r<ri)[0]
-        delta_profile[ii]  = np.trapz(fx[ix], x=r[ix])/ri - fx[i]
+        delta_profile[ii]  = np.trapz(fx[ix], x=r[ix])/ri - fx[ii]
     return delta_profile    
 
 def r_to_theta(r, z, z_interp, da_interp, sep_units="arcmin"):
@@ -146,11 +152,11 @@ def r_to_theta(r, z, z_interp, da_interp, sep_units="arcmin"):
         theta (array): angular separation in units of sep_units
     """
     # theta = l * ang. distance [radians]
-    da_sep = np.interp(z, z_da, da)
+    da_sep = np.interp(z, z_interp, da_interp)
     theta_rad = r*da_sep 
 
     # convert to the sep_units
-    theta = theta_rad*conv_factor[sep_unit]
+    theta = theta_rad*conv_factor[sep_units]
 
     return theta
 
