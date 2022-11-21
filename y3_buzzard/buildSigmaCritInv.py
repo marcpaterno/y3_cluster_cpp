@@ -55,17 +55,20 @@ def setup(options):
         beta_lut_fname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/beta_buzzard_interp.npz')
         betaTable = np.load(beta_lut_fname)
 
+        # betaTable.keys() -> "zsrc", "rbins", "beta"
+        # beta has ndshape (zbins.size, rbins.size)
+        
         # interpolates beta over lens redshift
-        beta_fid = interp1d(betaTable['z'], betaTable['beta'])(zl_array)
-        z_src = betaTable['zsrc']
+        #beta_fid = interp1d(betaTable['z'], betaTable['beta'])(zl_array)
+        z_src = betaTable['zsrc'] # ndshape (zlens.size, rbins.size)
+        z_beta = betaTable['zlens']
+        r_beta = betaTable['rbins']
+        beta_fid = betaTable["beta_eff"] # ndshape (zbins.size, rbins.size)
 
-        return z_src, beta
+        return z_beta, r_beta, z_src, beta_fid
 
 def execute(block, config):
-        z_src, beta_fid_zl  = config
-
-        # lenses redshift is equal to the cluster mean redshifts
-        z_lenses = zmeans
+        z_beta, r_beta, z_src, beta_fid  = config
 
         # setup constants
         G=4.51710305e-48 # Mpc^3 / M_sol / s^2
@@ -74,6 +77,10 @@ def execute(block, config):
         # cosmological quantities
         z_da = block["distances",'z']
         dc = block["distances",'da'] # Mpc
+
+        # lenses redshift is equal to the cluster mean redshifts
+        z_lenses = block["correlationFunction", "z"]
+        r_sigma = block["correlationFunction", "r_sigma"]
 
         # lens comoving distance
         dc_lenses = interp1d(z_da, da)*(1+z_lenses) 
@@ -85,18 +92,36 @@ def execute(block, config):
 
         # compute the shift ratio of dls/ds
         scale_shift_func = interp1d(z_shift, shift)
-        scale_ratio = scale_shift_func(z_src)/scale_shift_func(z_lenses)
 
+        # compute beta
+        zsize = z_lenses.size
+        sigma_crit_inv = np.zeros((zsize, r_sigma.size))
         # beta with the cosmological correction
-        # beta = dls/ds is unitless
-        beta = 1 - scale_ratio*(1-beta_fid)
-        # if scale_ratio is one, beta equals to beta_fid
+        for i in range(zsize):
+                zL = z_lenses[i]
+                # find zl indice in z_beta_lenses vector
+                ix = np.interp(zL, z_beta, range(z_beta.size))
+                zS = z_src[ix] # effective source redshift vector with r_beta size
+                betaFid = beta_fid[ix] # vector with r_beta size
 
-        # compute sigma_crit_inv [Msun]
-        sigma_crit_inv = 4.0*np.pi*G/c/c * dc_l * beta
-        
-        block["sigma_crit_inv", "z"] = z_lenses
-        block["sigma_crit_inv", "sigma_crit"] = sigma_crit_inv
+                # compute scale factor
+                scale_src = scale_shift_func(zS)
+                scale_lens= scale_shift_func(zL)
+                scale_ratio = scale_src/scale_lens
+
+                # beta is unitless 
+                beta_zl = 1 - scale_ratio*(1-betaFid)
+                # if scale_ratio is one, beta equals to beta_fid
+
+                # compute sigma_crit_inv [Msun]
+                sigma_crit_inv_vec = 4.0*np.pi*G/c/c * dc_l * beta_zl
+                
+                # interpolate with the new binning scheme 
+                sigma_crit_inv[i] = interp1d(r_beta, sigma_crit_inv_vec)(r_sigma)
+
+        block["sigmaCritInv", "r_sigma"] = r_sigma
+        block["sigmaCritInv", "z"] = z_lenses
+        block["sigmaCritInv", "sigma_crit_inv"] = sigma_crit_inv
         return 0
 
 def cleanup(config):
