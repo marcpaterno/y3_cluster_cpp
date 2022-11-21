@@ -113,6 +113,7 @@ def execute(block, config):
     R_perp = np.logspace(np.log10(R_perp_min), np.log10(R_perp_max), R_perp_bins)
     Radii = np.logspace(np.log10(Radii_min), np.log10(Radii_max), Radii_bins)
     M = np.logspace(np.log10(M_min), np.log10(M_max), M_bins)
+    logM = np.log(M)
 
     # compute NFW concentration
     # assume mass-concentration relation
@@ -153,6 +154,7 @@ def execute(block, config):
 
     # put into the datablock
     block["correlationFunction", "m_h"] = M
+    block["correlationFunction", "lnM"] = logM
     block["correlationFunction", "z"] = z
 
     # Xi
@@ -243,7 +245,7 @@ def compute_Sigma_hh(R, r, Xi, omega_m=0.3,
     Sigma = np.zeros_like(Xi)
 
     for i in range(Xi.shape[0]):
-        Sigma[i] = ct.deltasigma.Sigma_at_R(R, r, xi_mm,
+        Sigma[i] = ct.deltasigma.Sigma_at_R(R, r, Xi[i],
                                            dummy_mass, dummy_conc, omega_m)
     return Sigma
 
