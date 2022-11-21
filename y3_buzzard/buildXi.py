@@ -340,6 +340,9 @@ def compute_conentration(z, mass, mstar, z_mstar,
                                           sigma8, h0, mstar, z_mstar)
     return conc
 
+from astropy.cosmology import FlatLambdaCDM
+cosmo_fid = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
+
 def scaleShiftCosmo(znew, block, h0=0.7):
     """Scale Shift Cosmology
 
@@ -367,8 +370,8 @@ def scaleShiftCosmo(znew, block, h0=0.7):
     dc = block["distances",'d_a']*(1+z_dc) # comoving distance Mpc
 
     # fiducical cosmology
-    h0_fid = cosmo.H0/100.
-    dc_fid = cosmo.comoving_distance(z_dc).value
+    h0_fid = cosmo_fid.H0/100.
+    dc_fid = cosmo_fid.comoving_distance(z_dc).value
 
     # scale shift
     scale_shift_vec = dc/dc_fid
