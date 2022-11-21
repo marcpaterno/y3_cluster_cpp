@@ -52,7 +52,7 @@ def setup(options):
     Radii_bins = int(options[option_section,"Radii_bins"])
 
     # sep_units, default is arcmin
-    sep_units = options[option_section,"sep_units"]
+    sep_units = str(options[option_section,"sep_units"])
 
     return Radii_min, Radii_max, Radii_bins, sep_units
 
@@ -65,7 +65,7 @@ def execute(block, config):
     da = block['distances', 'd_a'] # Mpc
 
     # load auxialiary vectors
-    r_kappa = block["avg_kappa", "r"]
+    r_kappa = block["avgKappaCentBu", "r"]
 
     # number of radial bins
     Nrbins = r_kappa.size
@@ -73,7 +73,7 @@ def execute(block, config):
     # the kappa shape from the datablock is 
     # (number lambda bins, number redshift bins times number radial bins)
     # the radial bins were stride Nzbins
-    kappa_cen  = block["avg_kappa", "vals"]
+    kappa_cen  = block["avgKappaCentBu", "vals"]
     Nlbins, Nzr = kappa_cen.shape
 
     # get the number of redshift bins
@@ -107,9 +107,9 @@ def execute(block, config):
                                sep_units)
 
     # put into the datablock
-    block["avg_shear", "r"] = Radii/h0 # Mpc/h
-    block["avg_shear", "theta"] = theta/h0 #sep_units/h
-    block["avg_shear", "shear_cen"] = shear_cen
+    block["avgShear", "r"] = Radii/h0 # Mpc/h
+    block["avgShear", "theta"] = theta/h0 #sep_units/h
+    block["avgShear", "shear_cen"] = shear_cen
     return 0
 
 def compute_mean_profile(r, fx):
