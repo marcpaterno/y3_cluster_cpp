@@ -52,18 +52,25 @@ def setup(options):
         section = option_section
 
         # loads beta table
-        beta_lut_fname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/beta_buzzard_interp.npz')
-        betaTable = np.load(beta_lut_fname)
-
+        #beta_lut_fname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/beta_buzzard_interp.npz')
+        #betaTable = np.load(beta_lut_fname)
         # betaTable.keys() -> "zsrc", "rbins", "beta"
         # beta has ndshape (zbins.size, rbins.size)
         
         # interpolates beta over lens redshift
         #beta_fid = interp1d(betaTable['z'], betaTable['beta'])(zl_array)
-        z_src = betaTable['zsrc'] # ndshape (zlens.size, rbins.size)
-        z_beta = betaTable['zlens']
-        r_beta = betaTable['rbins']
-        beta_fid = betaTable["beta_eff"] # ndshape (zbins.size, rbins.size)
+        # z_src = betaTable['zsrc'] # ndshape (zlens.size, rbins.size)
+        # z_beta = betaTable['zlens']
+        # r_beta = betaTable['rbins']
+        # beta_fid = betaTable["beta_eff"] # ndshape (zbins.size, rbins.size)
+        
+        # fake data
+        z_beta = np.linspace(0.1, 1.2, 100)
+        r_beta = np.logspace(-2, 1.3, 100)
+
+        beta_fid = np.zeros((z_beta.size, r_beta.size))
+        z_src = np.zeros((z_beta.size, r_beta.size))
+        z_src = z_src + (1+0.2)*(z_beta[:,np.newaxis])
 
         return z_beta, r_beta, z_src, beta_fid
 
@@ -87,8 +94,8 @@ def execute(block, config):
 
         # cosmological shift := (H/Hfid)*(dc/dc_fid)
         # fid stands for the fiducial cosmology
-        z_shift = block['cosmoShift', 'z']
-        shift = block['cosmoShift', 'shift']
+        z_shift = z_lenses
+        shift = block['correlationFunction', 'scale_shift']
 
         # compute the shift ratio of dls/ds
         scale_shift_func = interp1d(z_shift, shift)
