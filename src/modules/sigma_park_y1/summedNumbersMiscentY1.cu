@@ -199,7 +199,7 @@ summedNumbersMiscentY1::operator()(   double lo,
 char const*
 summedNumbersMiscentY1::module_label()
 {
-  return "summedNumbersMiscent";
+  return "numberCountsMis";
 }
 
 std::vector<summedNumbersMiscentY1::volume_t>

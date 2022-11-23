@@ -55,7 +55,7 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_t> mor;
-  // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
+  // projection model  
   std::optional<y3_cuda::LC_LT_t> lc_lt;
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
@@ -187,7 +187,7 @@ summedNumbersCentY1::operator()(double lo,
 char const*
 summedNumbersCentY1::module_label()
 {
-  return "summedNumbersCent";
+  return "numberCounts";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
