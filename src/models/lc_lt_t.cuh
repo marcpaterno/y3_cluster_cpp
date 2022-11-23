@@ -55,7 +55,7 @@ namespace y3_cuda {
       // eq. (33)     https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
       // But also eq 51 in Yuanyuan's clean up section in that paper
       // and
-      // Implementing Costanzi, Rozo, Rykoff et al 2018 equation 15
+      // Implementing Costanzi, Rozo, Rykoff et al 2019 equation 15
       // which is a P(\lambda^obs | \lambda^true, z) form
       return (1.0 - fmsk) * (1.0 - fprj) * y3_cuda::gaussian(lc, mu, sigma) +
              0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lt) * exptau *

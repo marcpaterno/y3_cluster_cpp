@@ -1,5 +1,6 @@
 link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 
+# C++ on CPU
 add_library(
   models SHARED sample_variance.cc lc_lt_t.cc lc_lt_y1_t.cc int_lc_lt_des_t.cc 
   )
@@ -20,6 +21,7 @@ target_include_directories(
   )
 
 if (USE_CUDA)
+    # C++ on GPU
     #add_library(cuda_models SHARED int_lc_lt_des_t.cu )
     add_library(cuda_models SHARED lc_lt_t.cu)
 

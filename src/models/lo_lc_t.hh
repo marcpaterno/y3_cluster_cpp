@@ -29,7 +29,7 @@ namespace y3_cluster {
     operator()(double lo, double lc, double R_mis) const
     {
       //  https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2 
-      // equation 35, and  equation 51 in Yuanyuan's clean up section 
+      // equation 35, and  equation 53 in Yuanyuan's clean up section 
       double x = R_mis / _R_lambda;
       double y = lo / lc;
       double mu_y = std::exp(-x * x / _alpha / _alpha);
