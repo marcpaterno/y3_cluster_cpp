@@ -181,7 +181,7 @@ avgKappaCentBu::operator()(   double lo,
 char const*
 avgKappaCentBu::module_label()
 {
-  return "avgKappaCentBu";
+  return "kappa";
 }
 
 // The implementation of make_integration_volumes can be almost the same for

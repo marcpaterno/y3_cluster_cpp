@@ -129,6 +129,8 @@ def execute(block, config):
                 # interpolate with the new binning scheme 
                 sigma_crit_inv[i] = interp1d(r_beta, sigma_crit_inv_vec, bounds_error=False)(r_sigma)
 
+        # JTA hack hack hack
+        sigma_crit_inv = sigma_crit_inv/sigma_crit_inv
         block["sigmaCritInv", "r_sigma"] = r_sigma
         block["sigmaCritInv", "z"] = z_lenses
         block["sigmaCritInv", "sigma_crit_inv"] = sigma_crit_inv

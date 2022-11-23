@@ -184,7 +184,7 @@ summedNumbersCentBu::operator()(double lo,
 char const*
 summedNumbersCentBu::module_label()
 {
-  return "summedNumbersCentBu";
+  return "numberCounts";
 }
 
 // The implementation of make_integration_volumes can be almost the same for

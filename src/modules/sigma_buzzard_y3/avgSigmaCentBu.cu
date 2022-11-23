@@ -181,7 +181,7 @@ avgSigmaCentBu::operator()(   double lo,
 char const*
 avgSigmaCentBu::module_label()
 {
-  return "avgSigmaCentBu";
+  return "sigma";
 }
 
 // The implementation of make_integration_volumes can be almost the same for

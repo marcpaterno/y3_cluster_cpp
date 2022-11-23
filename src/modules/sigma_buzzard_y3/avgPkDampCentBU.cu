@@ -196,7 +196,7 @@ avgPkDampCentBU::operator()(double lo,
 char const*
 avgPkDampCentBU::module_label()
 {
-  return "avgPkDampCentBU";
+  return "PkDamp";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
