@@ -158,7 +158,7 @@ def execute(block, config):
 
     # Step 5) shift cosmological scale
     # ratio of the comoving distance dC(cosmo)/dC(cosmo_fid)
-    scaleShift = scaleShiftCosmo(z, block, h0=h0)
+    scaleShift, hubbleShift = scaleShiftCosmo(z, block, h0=h0, omega_m=omega_m)
 
     # put into the datablock
     block["correlationFunction", "m_h"] = M
@@ -180,9 +180,10 @@ def execute(block, config):
 
     # damped Pk
     block["correlationFunction", "scale_shift"] = scaleShift
+    block["correlationFunction", "hubble_shift"] = hubbleShift
     block["correlationFunction", "k"] = k_nl
     block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
-
+    
     return 0
         
 def pk_to_Xi(r, z, k, Pk):
@@ -347,7 +348,7 @@ def compute_conentration(z, mass, mstar, z_mstar,
 from astropy.cosmology import FlatLambdaCDM
 cosmo_fid = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
 
-def scaleShiftCosmo(znew, block, h0=0.7):
+def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3):
     """Scale Shift Cosmology
 
     To adapt to a new cosmology we can re-scale the distances by taking
@@ -380,11 +381,15 @@ def scaleShiftCosmo(znew, block, h0=0.7):
     # scale shift
     scale_shift_vec = dc/dc_fid
 
+    # the hubble flow is th shift on the parallel direction of the los
+    # flat universe
+    H0_vec = (h0*100)*np.sqrt(1-omega_m*(1+z_dc)**3)
     hubble_shift_vec = H0_fid/H0_vec
 
     # interpolate for the new redshift
     scale_shift_perp = np.interp(znew, z_dc, scale_shift_vec)
-    return scale_shift_perp
+    hubble_shift = np.interp(znew, z_dc, hubble_shift_vec)
+    return scale_shift_perp, hubble_shift
         
 def cleanup(config):
     pass
