@@ -57,7 +57,7 @@ def setup(options):
     sep_units = str(options[option_section,"sep_units"])
 
     # grab radius bins
-    r_kappa = options["kappa", "radius"]
+    r_kappa = options["avgKappaCentBu", "radius"]
 
     return Radii_min, Radii_max, Radii_bins, r_kappa, sep_units
 
@@ -70,7 +70,7 @@ def execute(block, config):
     da = block['distances', 'd_a'] # Mpc
 
     # load auxialiary vectors
-    # r_kappa = block["avgKappaCent", "radius"]
+    # r_kappa = block["avgKappaCentBu", "radius"]
 
     # number of radial bins
     Nrbins = r_kappa.size
@@ -78,7 +78,7 @@ def execute(block, config):
     # the kappa shape from the datablock is 
     # (number lambda bins, number redshift bins times number radial bins)
     # the radial bins were stride Nzbins
-    kappa_cen  = block["kappa", "vals"]
+    kappa_cen  = block["avgKappaCentBu", "vals"]
     Nlbins, Nzr = kappa_cen.shape
 
     # get the number of redshift bins
