@@ -57,7 +57,7 @@ def setup(options):
     sep_units = str(options[option_section,"sep_units"])
 
     # grab radius bins
-    r_kappa = options["avgKappaCentBu", "radius"]
+    r_kappa = options["kappa", "radius"]
 
     return Radii_min, Radii_max, Radii_bins, r_kappa, sep_units
 
@@ -78,7 +78,7 @@ def execute(block, config):
     # the kappa shape from the datablock is 
     # (number lambda bins, number redshift bins times number radial bins)
     # the radial bins were stride Nzbins
-    kappa_cen  = block["avgKappaCentBu", "vals"]
+    kappa_cen  = block["kappa", "vals"]
     Nlbins, Nzr = kappa_cen.shape
 
     # get the number of redshift bins
@@ -113,9 +113,9 @@ def execute(block, config):
                                sep_units)
 
     # put into the datablock
-    block["avgShear", "r"] = Radii/h0 # Mpc/h
-    block["avgShear", "theta"] = theta/h0 #sep_units/h
-    block["avgShear", "shear_cen"] = shear_cen
+    block["shear", "r"] = Radii/h0 # Mpc/h
+    block["shear", "theta"] = theta/h0 #sep_units/h
+    block["shear", "shear_cen"] = shear_cen
     return 0
 
 def compute_mean_profile(r, fx):
@@ -153,7 +153,7 @@ def r_to_theta(r, z, z_interp, da_interp, sep_units="arcmin"):
     """
     # theta = l * ang. distance [radians]
     da_sep = np.interp(z, z_interp, da_interp)
-    theta_rad = r/da_sep 
+    theta_rad = (r/da_sep)
 
     # convert to the sep_units
     theta = theta_rad*conv_factor[sep_units]
