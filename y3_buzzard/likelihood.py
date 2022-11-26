@@ -81,6 +81,13 @@ def execute(block, config):
     theory_gt = concatenate(GT, lbins=len(l_low), zbins=len(z_low))
     theory_crf = concatenate(CRF, lbins=len(l_low), zbins=len(z_low))
     
+    # Pk assumed a fiducial cosmology to compute k
+    # rescale quantities to the fiducial cosmology
+    # TODO: k_fid = (k * hubbleShift, k * scaleShift)
+    # TODO: P(k_fid) = (scaleShift**2)*(hubbleShift) * P(k)
+    # Where, hubbleShift(z_mean) = H_fid(z_mean)/H(z_mean)  for each redshift bin
+    # and scaleShift(z_mean) = Da(z_mean)/Da_fid(z_mean)
+
     ## check this lines on the original code
     # corr_jjii=Om_corr[roww]*(Omega_m-0.3)+lnAS_corr[roww]*(loge10As-2.98239371)
     # corr=np.append(corr, corr_jjii)
