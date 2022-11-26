@@ -48,29 +48,35 @@ from setup_bins import zmeans
 
 cosmo = names.cosmological_parameters
 
+# for test purpose only
+fake_data = False
+
 def setup(options):
         section = option_section
-
+        
         # loads beta table
-        #beta_lut_fname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/beta_buzzard_interp.npz')
-        #betaTable = np.load(beta_lut_fname)
+        # beta_lut = options[section, "beta_lut"]
+        # beta_lut_fname = os.path.expandvars(str(beta_lut))
+        beta_lut_fname = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/beta_sigCrit_lut_mock_buzzard_zl.npz')
+        betaTable = np.load(beta_lut_fname)
+
         # betaTable.keys() -> "zsrc", "rbins", "beta"
         # beta has ndshape (zbins.size, rbins.size)
         
         # interpolates beta over lens redshift
-        #beta_fid = interp1d(betaTable['z'], betaTable['beta'])(zl_array)
-        # z_src = betaTable['zsrc'] # ndshape (zlens.size, rbins.size)
-        # z_beta = betaTable['zlens']
-        # r_beta = betaTable['rbins']
-        # beta_fid = betaTable["beta_eff"] # ndshape (zbins.size, rbins.size)
+        z_beta = betaTable['zlens']
+        r_beta = betaTable['Radii']
+        z_src = betaTable['zEff'] # ndshape (zlens.size, rbins.size)
+        beta_fid = betaTable["betaEff"] # ndshape (zbins.size, rbins.size)
         
         # fake data
-        z_beta = np.linspace(0.1, 1.2, 64)
-        r_beta = np.logspace(-2, 2., 32)
+        if fake_data:
+            z_beta = np.linspace(0.1, 1.2, 64)
+            r_beta = np.logspace(-2, 2., 32)
 
-        beta_fid = np.zeros((z_beta.size, r_beta.size))
-        z_src = np.zeros((z_beta.size, r_beta.size))
-        z_src = z_src + (1+0.2)*(z_beta[:,np.newaxis])
+            beta_fid = np.zeros((z_beta.size, r_beta.size))
+            z_src = np.zeros((z_beta.size, r_beta.size))
+            z_src = z_src + (1+0.2)*(z_beta[:,np.newaxis])
 
         return z_beta, r_beta, z_src, beta_fid
 
@@ -78,8 +84,9 @@ def execute(block, config):
         z_beta, r_beta, z_src, beta_fid  = config
 
         # setup constants
-        G=4.51710305e-48 # Mpc^3 / M_sol / s^2
-        c=9.71561189e-15 # Mpc/s
+        # 4piG/c^2
+        const = 6.01e-19 # Mpc/M_sol
+        const*= 1e6 # pc/M_sol
         
         # cosmological quantities
         z_da = block["distances",'z']
@@ -120,17 +127,18 @@ def execute(block, config):
                 beta_zl = 1 - scale_ratio*(1-betaFid)
                 # if scale_ratio is one, beta equals to beta_fid
 
-                # compute sigma_crit_inv [Msun]
-                # sigma_crit_inv_vec = 4.0*np.pi*G/c/c * dc_lenses[i] * beta_zl
+                # compute sigma_crit_inv [pc^2/Msun]
+                sigma_crit_inv_vec = const * (dc_lenses[i]*1e6) * beta_zl
 
                 # for test purpose only
-                sigma_crit_inv_vec =  4.0*np.pi*G/c/c * dc_lenses[i] * np.ones_like(r_beta)
+                # sigma_crit_inv_vec =  const * (dc_lenses[i]*1e6) * np.ones_like(r_beta)
                 
                 # interpolate with the new binning scheme 
                 sigma_crit_inv[i] = interp1d(r_beta, sigma_crit_inv_vec, bounds_error=False)(r_sigma)
 
         # JTA hack hack hack
-        sigma_crit_inv = sigma_crit_inv/sigma_crit_inv
+        #sigma_crit_inv = sigma_crit_inv/sigma_crit_inv
+        
         block["sigmaCritInv", "r_sigma"] = r_sigma
         block["sigmaCritInv", "z"] = z_lenses
         block["sigmaCritInv", "sigma_crit_inv"] = sigma_crit_inv
