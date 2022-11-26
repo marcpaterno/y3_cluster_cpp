@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_LC_LT_T_CUH
-#define Y3_CLUSTER_LC_LT_T_CUH
+#ifndef Y3_CUDA_LC_LT_T_CUH
+#define Y3_CUDA_LC_LT_T_CUH
 
 // jta conversion project to cuda Nov 2022
 
@@ -26,7 +26,7 @@ namespace y3_cuda {
     quad::Interp2D fprj_interp;
 
     // The default constructor is implemented in the .cu file
-    LC_LT_t() {}
+    LC_LT_t() ;
 
     // The constructor from a datablock is required, but does the same thing
     // as the default constructor. So we delegate the work to the default
@@ -55,7 +55,7 @@ namespace y3_cuda {
       // eq. (33)     https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
       // But also eq 51 in Yuanyuan's clean up section in that paper
       // and
-      // Implementing Costanzi, Rozo, Rykoff et al 2018 equation 15
+      // Implementing Costanzi, Rozo, Rykoff et al 2019 equation 15
       // which is a P(\lambda^obs | \lambda^true, z) form
       return (1.0 - fmsk) * (1.0 - fprj) * y3_cuda::gaussian(lc, mu, sigma) +
              0.5 * ((1.0 - fmsk) * fprj * tau + fmsk * fprj / lt) * exptau *

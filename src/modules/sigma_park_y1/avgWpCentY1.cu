@@ -196,7 +196,7 @@ avgWpCentY1::operator()(double lo,
 char const*
 avgWpCentY1::module_label()
 {
-  return "avgWpCentY1";
+  return "avgWpCent";
 }
 
 // The implementation of make_integration_volumes can be almost the same for

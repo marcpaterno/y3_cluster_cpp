@@ -15,7 +15,8 @@ namespace y3_cuda {
     __device__ __host__ double
     operator()(double x) const
     {
-      // eq. 36 https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
+      // eq. 43 https://www.overleaf.com/project/5c378b07f882d02f5b8c90e2
+        // from Yuanyuan Zhang's miscentering paper
       return x / _tau / _tau * exp(-x / _tau);
     }
 

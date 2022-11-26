@@ -1,7 +1,7 @@
 
 # sigma_park_y1 is the Oct 2022 work of Jim and Johnny
 # currently broken awaiting lc_lt.cuh debugging
-# add_subdirectory(sigma_park_y1)
+add_subdirectory(sigma_park_y1)
 
 # sigma_buzzard_y1 is the Nov 2022 buzzard validation dir
 add_subdirectory(sigma_buzzard_y3)

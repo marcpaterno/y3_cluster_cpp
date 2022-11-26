@@ -191,7 +191,7 @@ avgWpMiscentY1::operator()(        double lo,
 char const*
 avgWpMiscentY1::module_label()
 {
-  return "avgWpMiscentY1";
+  return "avgWpMiscent";
 }
 
 std::vector<avgWpMiscentY1::volume_t>
