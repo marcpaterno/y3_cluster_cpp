@@ -63,9 +63,9 @@ def execute(block, config):
     
     # pull predictions from the datablock; 
     # arrays with shape (Nlbdins, Nzbins)
-    NC  = block["summedNumbersCentBu", "vals"]
-    GT  = block["avg_shear", "shear_cen"]
-    CRF = block["avgPkDampCentBu", "vals"]
+    NC  = block["numberCounts", "vals"]
+    GT  = block["shear", "shear_cen"]
+    CRF = block["PkDamp", "vals"]
 
     # lambda and redshift bins
     # why are they not setup in a global variable?
@@ -109,7 +109,7 @@ def execute(block, config):
     loglike = -0.5 * np.dot(delta, np.dot(cov_inv, delta))
 
     # put into the datablock
-    block[section_names.likelihoods, 'BuzY3'] = loglike
+    block[section_names.likelihoods, 'log_like'] = loglike
     return 0
 
 def concatenate_datavector(x, lbins=4, zbins=3):
