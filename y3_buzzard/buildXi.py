@@ -374,15 +374,17 @@ def scaleShiftCosmo(znew, block, h0=0.7):
     dc = block["distances",'d_a']*(1+z_dc) # comoving distance Mpc
 
     # fiducical cosmology
-    h0_fid = cosmo_fid.H0/100.
+    H0_fid = cosmo_fid.H(z_dc).value
     dc_fid = cosmo_fid.comoving_distance(z_dc).value
 
     # scale shift
     scale_shift_vec = dc/dc_fid
 
+    hubble_shift_vec = H0_fid/H0_vec
+
     # interpolate for the new redshift
-    scale_shift = np.interp(znew, z_dc, scale_shift_vec)
-    return scale_shift
+    scale_shift_perp = np.interp(znew, z_dc, scale_shift_vec)
+    return scale_shift_perp
         
 def cleanup(config):
     pass
