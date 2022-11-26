@@ -153,7 +153,7 @@ def r_to_theta(r, z, z_interp, da_interp, sep_units="arcmin"):
     """
     # theta = l * ang. distance [radians]
     da_sep = np.interp(z, z_interp, da_interp)
-    theta_rad = r*da_sep 
+    theta_rad = r/da_sep 
 
     # convert to the sep_units
     theta = theta_rad*conv_factor[sep_units]
