@@ -95,15 +95,14 @@ def execute(block, config):
         # lenses redshift is equal to the cluster mean redshifts
         z_lenses = block["correlationFunction", "z"]
         r_sigma = block["correlationFunction", "r_sigma"]
-
+        shift = block['correlationFunction', 'scale_shift']
+        z_shift = z_lenses
+        
         # lens comoving distance
         dc_lenses = interp1d(z_da, da*(1+z_da))(z_lenses)
 
         # cosmological shift := (H/Hfid)*(dc/dc_fid)
         # fid stands for the fiducial cosmology
-        z_shift = z_lenses
-        shift = block['correlationFunction', 'scale_shift']
-
         # compute the shift ratio of dls/ds
         scale_shift_func = interp1d(z_shift, shift, bounds_error=False)
 
