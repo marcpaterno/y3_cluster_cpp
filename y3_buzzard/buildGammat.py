@@ -2,6 +2,7 @@ import os
 import numpy as np
 from scipy.interpolate import interp1d
 from cosmosis.datablock import option_section, names
+from scipy import integrate
 
 # redshift mean with format [z0, z1, z2, z0, z1, z2, ...]
 from setup_bins import zmeans_ij
@@ -107,9 +108,9 @@ def execute(block, config):
     # theta depends on redshift, because of angular distance
     # for simplicity thetha will have the same shape of shear
     theta = np.zeros((Nlbins*Nzbins, Radii_bins))
-    for z in zmeans_ij:
+    for ij, z in enumerate(zmeans_ij):
         # convert R to theta
-        theta[ij] = r_to_theta(Radii, z, da, z_da,
+        theta[ij] = r_to_theta(Radii, z, z_da, da,
                                sep_units)
 
     # put into the datablock
@@ -118,18 +119,25 @@ def execute(block, config):
     block["shear", "shear_cen"] = shear_cen
     return 0
 
-def compute_mean_profile(r, fx):
+def compute_mean_profile(r, fx, rmin=0.1):
     """Computes \Delta f(x) = <f(<x)> - f(x)
     
     Average profiles excess of f(x) 
     Example: f(x) = \Sigma
     """
     # start the integration
-    delta_profile = np.zeros(r.size)
-    for ii, ri in enumerate(r[1:]):
-        ix = np.where(r<ri)[0]
-        delta_profile[ii]  = np.trapz(fx[ix], x=r[ix])/ri - fx[ii]
-    return delta_profile    
+    # delta_profile = np.zeros(r.size)
+    # for ii, ri in enumerate(r[1:]):
+    #     ix = np.where(r<ri)[0]
+    #     #delta_profile[ii]  = np.trapz(fx[ix], x=r[ix])/ri - fx[ii]
+    profile = interp1d(r, fx, fill_value='extrapolate')
+    
+    delta_profile = np.full(r.size, np.nan)
+    for ii, ri in enumerate(r):
+        if ri>rmin:
+            delta_profile[ii] = integrate.quad(profile, 0.05, ri)[0]/ri - profile(ri)
+            #delta_profile[ii] = integrate.fixed_quad(profile, 0.001, ri)[0]/ri - profile(ri)
+    return delta_profile
 
 def r_to_theta(r, z, z_interp, da_interp, sep_units="arcmin"):
     """Physical Units to Angle
