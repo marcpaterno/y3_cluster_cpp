@@ -2,6 +2,7 @@ import os
 import numpy as np
 from cosmosis.datablock import option_section, names
 
+from scipy.interpolate import interp1d
 from scipy.special import erf
 import cluster_toolkit as ct
 import massconcen
@@ -374,20 +375,25 @@ def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3):
     z_dc = block["distances",'z']
     dc = block["distances",'d_a']*(1+z_dc) # comoving distance Mpc
 
+    z = block["growth_parameters","z"]
+    hz = block["growth_parameters","h"]
+
     # fiducical cosmology
     H0_fid = cosmo_fid.H(z_dc).value
     dc_fid = cosmo_fid.comoving_distance(z_dc).value
 
     # scale shift
     scale_shift_vec = dc/dc_fid
+    scale_shift_vec[0] = 1.
 
     # the hubble flow is th shift on the parallel direction of the los
-    # flat universe
-    H0_vec = (h0*100)*np.sqrt(1-omega_m*(1+z_dc)**3)
+    H0_vec = np.interp(z_dc, z, hz)
     hubble_shift_vec = H0_fid/H0_vec
 
     # interpolate for the new redshift
-    scale_shift_perp = np.interp(znew, z_dc, scale_shift_vec)
+    scale_shift_perp = interp1d(z_dc[1:], scale_shift_vec[1:], fill_value='extrapolate')(znew)
+    # avoids dc = 0
+
     hubble_shift = np.interp(znew, z_dc, hubble_shift_vec)
     return scale_shift_perp, hubble_shift
         
