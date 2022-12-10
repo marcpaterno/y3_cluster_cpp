@@ -46,3 +46,6 @@ release-build/
 *.csv
 *_test_out/
 y1_rerun/*.txt
+y1_rerun/*.tgz
+y3_buzzard/datablock*
+y3_buzzard/*.txt
