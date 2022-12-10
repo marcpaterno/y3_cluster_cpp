@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import numpy as np
 from scipy.interpolate import interp1d
@@ -59,7 +60,7 @@ def setup(options):
     sep_units = str(options[option_section,"sep_units"])
 
     # pimax; radial parallel component max value
-    pimax = str(options[option_section,"pimax"])
+    pimax = float(options[option_section,"pimax"])
 
     # grab radius bins
     r_xi = options["avgWp", "radius"]
@@ -117,32 +118,31 @@ def execute(block, config):
     # put into the datablock
     block["wp", "r"] = Radii/h0 # Mpc/h
     block["wp", "theta"] = theta/h0 #sep_units/h
-    block["wp", "wp_cen"] = shear_cen
+    block["wp", "wp_cen"] = wp_cen
     return 0
 
-def compute_abell_transform(r, fr, pimax=100, int_func=np.trapz):
-    """Computes Wp(R) = \int \xi(\sqrt{R^2+\pi^2}) d\pi
+def compute_abell_transform(r, fr, pimax=100., int_func=np.trapz):
+    # Computes Wp(R) = \int \xi(\sqrt{R^2+\pi^2}) d\pi
     
-    The equation above can be re-written to:
+    # The equation above can be re-written to:
 
-    Wp(R) = \int (dr/\sqrt{r^2-R^2}) r \xi(r).
+    # Wp(R) = \int (dr/\sqrt{r^2-R^2}) r \xi(r).
 
-    Calculation of the integral  used in Abel transform
-             r_max
-            ⌠
-            ⎮     r \xi(r)
-            ⎮ ────────────── dr
-            ⎮    ___________
-            ⎮   ╱  2   2
-            ⎮ ╲╱  r - R
-            ⌡
-            R
-    Where rmax=\sqrt{R^2+\pi_{max}^2}
-    Code based on: PyAbel package, direct method.
-    https://github.com/PyAbel/PyAbel/blob/master/abel/direct.py
-
-    TODO: Implement the C++ version.
-    """
+    # Calculation of the integral  used in Abel transform
+    #          r_max
+    #         ⌠
+    #         ⎮     r \xi(r)
+    #         ⎮ ────────────── dr
+    #         ⎮    ___________
+    #         ⎮   ╱  2   2
+    #         ⎮ ╲╱  r - R
+    #         ⌡
+    #         R
+    # Where rmax=\sqrt{R^2+\pi_{max}^2}
+    # Code based on: PyAbel package, direct method.
+    # https://github.com/PyAbel/PyAbel/blob/master/abel/direct.py
+    # TODO: Implement the C++ version.
+    
     # Switch to the r coordinates.
     fr *= 2*r
 
