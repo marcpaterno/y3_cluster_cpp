@@ -196,7 +196,7 @@ avgWpCentBu::operator()(double lo,
 char const*
 avgWpCentBu::module_label()
 {
-  return "wp";
+  return "avgWp";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
