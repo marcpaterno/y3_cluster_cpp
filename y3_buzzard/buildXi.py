@@ -7,6 +7,8 @@ from scipy.special import erf
 import cluster_toolkit as ct
 import massconcen
 
+import hankl
+
 # redshift mean with format [z0, z1, z2, z0, z1, z2, ...]
 from setup_bins import zmeans_ij
 
@@ -131,7 +133,7 @@ def execute(block, config):
     # compute halo-halo correlation function Xi_hh(r)
     # uses cluster-toolkit
     # TODO switch to FFTLog
-    Xi_hh = pk_to_Xi(Radii, z, k_nl, P_k_nl)
+    Xi_hh, s = pk_to_Xi(Radii, z, k_nl, P_k_nl)
 
     # the mass concentration relation is a function of redshift, but the way Y. Zhang designed 
     # this, the 1-halo term is independent of redshift, which is computationally efficient.
@@ -139,6 +141,10 @@ def execute(block, config):
 
     # compute nfw correlation function Xi_nfw(r)
     Xi_nfw = compute_Xi_nfw(Radii, M, cM, omega_m)
+
+    # Do 2d projection
+    Wp_hh = xi_to_wp(s, Xi_hh, pimax=100)
+    Wp_nfw = xi_to_wp(Radii, Xi_nfw, pimax=100)
 
     #### Step 2) Surface Mass Density Profiles - Sigma [h Msun/pc^2]
 
@@ -167,9 +173,14 @@ def execute(block, config):
     block["correlationFunction", "z"] = z
 
     # Xi
-    block["correlationFunction", "r_xi"] = Radii
+    block["correlationFunction", "r_xi"] = s
     block["correlationFunction", "Xi_hh"] = Xi_hh
     block["correlationFunction", "Xi_nfw"] = Xi_nfw
+
+    # Wp
+    block["correlationFunction", "Rp"] = Radii
+    block["correlationFunction", "Wp_hh"] = Wp_hh
+    block["correlationFunction", "Wp_nfw"] = Wp_nfw
 
     # Sigma
     block["correlationFunction", "r_sigma"] = R_perp
@@ -182,8 +193,16 @@ def execute(block, config):
     # damped Pk
     block["correlationFunction", "scale_shift"] = scaleShift
     block["correlationFunction", "hubble_shift"] = hubbleShift
-    block["correlationFunction", "k"] = k_nl
+    block["correlationFunction", "k"] = k
     block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
+
+    # Debug
+    pk_nl_in = pk_nl[25]
+    s, xi_nl = hankl.P2xi(k_nl, pk_nl_in, l=0)
+    xi_nl_ct = ct.xi.xi_mm_at_r(s, k_nl, pk_nl_in)
+    np.savez('./pk_nl.npz',k=k_nl,pk=pk_nl_in)
+    np.savez('./xi_hankl_nl.npz',r=s,pk=xi_nl)
+    np.savez('./xi_ct_nl.npz',r=s,pk=xi_nl_ct)
     
     return 0
         
@@ -202,13 +221,17 @@ def pk_to_Xi(r, z, k, Pk):
         Xi(r): correlation function
     """
     # start the integration
-    Xi = np.zeros((len(z), r.size))
-    for i, Pki in enumerate(Pk):
+    Xi = np.zeros((len(z), k.size))
+    for i in range(z.size):
         # using cluster toolkit
         # switch to FFTlog
-        Xi[i] = ct.xi.xi_mm_at_r(r, k, Pki)
+        # Xi[i] = ct.xi.xi_mm_at_r(r, k, Pk[i])
+        
+        si, xii = hankl.P2xi(k, Pk[i], l=0)
+        # Xi[i] = interp1d(si, xii.real)(r)
+        Xi[i] = xii
 
-    return Xi    
+    return Xi, si
 
 def compute_Xi_nfw(r, mass, c, omega_m=0.3):
     """ NFW Profile Correlation Function
@@ -396,7 +419,97 @@ def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3):
 
     hubble_shift = np.interp(znew, z_dc, hubble_shift_vec)
     return scale_shift_perp, hubble_shift
-        
+
+def xi_to_wp(r, xi, pimax=100):
+    """ Convert Xi(r) to Wp(R)
+
+        Project Xi(r) onto the sky plane by perfoming an Abell Transform.
+
+    Args:
+        r (array): radial vector
+        z (array): redshift vector
+        pimax (float): max values of the parallel direction
+        Wp (array): shape like (z or M size, r size)
+
+    Returns:
+        Wp(R): projected correlation function
+    """
+    # start the integration
+    Wp = np.zeros_like(xi)
+    for i, xii in enumerate(xi):
+        Wp[i] = compute_abell_transform(r, xii, pimax=pimax, int_func=np.trapz)
+    return Wp    
+
+
+def compute_abell_transform(r, fr, pimax=100., int_func=np.trapz):
+    # Computes Wp(R) = \int \xi(\sqrt{R^2+\pi^2}) d\pi
+    #
+    # The equation above can be re-written to:
+    #
+    # Wp(R) = \int (dr/\sqrt{r^2-R^2}) r \xi(r).
+    #
+    # Calculation of the integral  used in Abel transform
+    #          r_max
+    #         ⌠
+    #         ⎮     r \xi(r)
+    #         ⎮ ────────────── dr
+    #         ⎮    ___________
+    #         ⎮   ╱  2   2
+    #         ⎮ ╲╱  r - R
+    #         ⌡
+    #         R
+    # Where r_max=\sqrt{R^2+\pi_{max}^2}
+    # Code based on: PyAbel package, direct method.
+    # https://github.com/PyAbel/PyAbel/blob/master/abel/direct.py
+    # TODO: Implement the C++ version.
+    
+    # Switch to the r coordinates.
+    fr *= 2*r
+
+    if is_uniform_sampling(r):
+        int_opts = {'dx': abs(r[1] - r[0])}
+    else:
+        int_opts = {'x': r}
+
+    # Initializiate output
+    out = np.zeros(fr.size)
+
+    # Initialize grid
+    R, rr = np.meshgrid(r, r, indexing='ij')
+    i_vect = np.arange(len(r), dtype=int)
+    II, JJ = np.meshgrid(i_vect, i_vect, indexing='ij')
+
+    # Set integration limits
+    # only for R < r <= rmax 
+    mask = (II < JJ)
+    mask &= (rr <= np.sqrt(R**2 + pimax**2))
+
+    I_sqrt = np.zeros(R.shape)
+    I_sqrt[mask] = np.sqrt((rr**2 - R**2)[mask])
+
+    I_isqrt = np.zeros(R.shape)
+    I_isqrt[mask] = 1./I_sqrt[mask]
+
+    # create a mask that just shows the first two points of the integral
+    mask2 = ((II > JJ-2) & (II < JJ+1))
+    
+    # perfom the integration
+    Integrand = fr[None, :] * I_isqrt  # set up the integral
+    out = int_func(Integrand, axis=1, **int_opts)  # take the integral
+    # correct for the extra triangle at the start of the integral
+    out = out - 0.5*int_func(Integrand*mask2, axis=1, **int_opts)
+
+    return out
+
+def is_uniform_sampling(r):
+    """
+    Returns True if the array is uniformly spaced to within 1e-13.
+    Otherwise False.
+    """
+    dr = np.diff(r)
+    ddr = np.diff(dr)
+    return np.allclose(ddr, 0, atol=1e-13)
+
 def cleanup(config):
     pass
 

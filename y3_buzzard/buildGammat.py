@@ -106,7 +106,7 @@ def execute(block, config):
     
     # convert R [Mpc/h] to theta [arcmin/h]
     # theta depends on redshift, because of angular distance
-    # for simplicity thetha will have the same shape of shear
+    # for simplicity theta will have the same shape of shear
     theta = np.zeros((Nlbins*Nzbins, Radii_bins))
     for ij, z in enumerate(zmeans_ij):
         # convert R to theta

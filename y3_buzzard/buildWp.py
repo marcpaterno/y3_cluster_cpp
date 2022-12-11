@@ -65,10 +65,10 @@ def setup(options):
     # grab radius bins
     r_xi = options["avgWp", "radius"]
 
-    return Radii_min, Radii_max, Radii_bins, r_xi, pimax, sep_units
+    return Radii_min, Radii_max, Radii_bins, r_xi, sep_units
 
 def execute(block, config):
-    Radii_min, Radii_max, Radii_bins, r_xi, pimax, sep_units  = config
+    Radii_min, Radii_max, Radii_bins, r_xi, sep_units  = config
 
     # cosmological quantities
     h0 = block[cosmo, "h0"]
@@ -81,8 +81,8 @@ def execute(block, config):
     # the \xi shape from the datablock is 
     # (number lambda bins, number redshift bins times number radial bins)
     # the radial bins were stride Nzbins
-    xi_cen  = block["avgWp", "vals"]
-    Nlbins, Nzr = xi_cen.shape
+    wp_cen  = block["avgWp", "vals"]
+    Nlbins, Nzr = wp_cen.shape
 
     # get the number of redshift bins
     Nzbins = int(Nzr/Nrbins)
@@ -91,7 +91,7 @@ def execute(block, config):
     # reshape: wp is one profile (i.e. radial bins) for each row
     # each row is one (lambda, redshift) bin
     try:
-        xi_cen_reshaped = xi_cen.reshape(Nlbins*Nzbins, Nrbins)
+        wp_cen_reshaped = wp_cen.reshape(Nlbins*Nzbins, Nrbins)
     except:
         print("Error: kappa shape was not output correctly.")
         print("Shape should (Nlbdbins, Nzbins*Nrbins")
@@ -101,10 +101,10 @@ def execute(block, config):
 
     # compute the abell transform 
     # Wp(R) = \int \xi(\sqrt{R^2+\pi^2}) d\pi
-    wp_cen = np.zeros((Nlbins*Nzbins, Radii_bins))
+    wp_out = np.zeros((Nlbins*Nzbins, Radii_bins))
     for ij in range(Nlbins*Nzbins):
-        wp_ij = compute_abell_transform(r_xi, xi_cen_reshaped[ij], pimax)
-        wp_cen[ij] = interp1d(r_xi, wp_ij, bounds_error=False)(Radii)
+        # wp_ij = compute_abell_transform(r_xi, wp_cen_reshaped[ij], pimax)
+        wp_out[ij] = interp1d(r_xi, wp_cen_reshaped[ij], bounds_error=False)(Radii)
     
     # convert R [Mpc/h] to theta [arcmin/h]
     # theta depends on redshift, because of angular distance
@@ -118,16 +118,16 @@ def execute(block, config):
     # put into the datablock
     block["wp", "r"] = Radii/h0 # Mpc/h
     block["wp", "theta"] = theta/h0 #sep_units/h
-    block["wp", "wp_cen"] = wp_cen
+    block["wp", "wp_cen"] = wp_out
     return 0
 
 def compute_abell_transform(r, fr, pimax=100., int_func=np.trapz):
     # Computes Wp(R) = \int \xi(\sqrt{R^2+\pi^2}) d\pi
-    
+    #
     # The equation above can be re-written to:
-
+    #
     # Wp(R) = \int (dr/\sqrt{r^2-R^2}) r \xi(r).
-
+    #
     # Calculation of the integral  used in Abel transform
     #          r_max
     #         ⌠
@@ -138,7 +138,7 @@ def compute_abell_transform(r, fr, pimax=100., int_func=np.trapz):
     #         ⎮ ╲╱  r - R
     #         ⌡
     #         R
-    # Where rmax=\sqrt{R^2+\pi_{max}^2}
+    # Where r_max=\sqrt{R^2+\pi_{max}^2}
     # Code based on: PyAbel package, direct method.
     # https://github.com/PyAbel/PyAbel/blob/master/abel/direct.py
     # TODO: Implement the C++ version.

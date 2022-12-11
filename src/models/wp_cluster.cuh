@@ -13,8 +13,8 @@
 namespace y3_cuda {
   class WP_CLUSTER {
   private:
-    quad::Interp2D _sigma1;
-    quad::Interp2D _sigma2;
+    quad::Interp2D _wp1;
+    quad::Interp2D _wp2;
     quad::Interp2D _bias;
 
   public:
@@ -22,8 +22,8 @@ namespace y3_cuda {
     get_device_mem_footprint()
     {
       size_t size = 0;
-      size += _sigma1.get_device_mem_footprint();
-      size += _sigma2.get_device_mem_footprint();
+      size += _wp1.get_device_mem_footprint();
+      size += _wp2.get_device_mem_footprint();
       size += _bias.get_device_mem_footprint();
       return size;
     }
@@ -31,22 +31,22 @@ namespace y3_cuda {
     WP_CLUSTER(quad::Interp2D const& sigma1,
               quad::Interp2D const& sigma2,
               quad::Interp2D const& bias)
-      : _sigma1(sigma1), _sigma2(sigma2), _bias(bias)
+      : _wp1(sigma1), _wp2(sigma2), _bias(bias)
     {}
 
     using doubles = std::vector<double>;
 
     explicit WP_CLUSTER(cosmosis::DataBlock& sample)
-      : _sigma1(make_Interp2D(sample,
+      : _wp1(make_Interp2D(sample,
                               "correlationFunction",
-                              "r_sigma",
+                              "Rp",
                               "lnM",
-                              "Sigma_nfw"))
-      , _sigma2(make_Interp2D(sample,
+                              "Wp_nfw"))
+      , _wp2(make_Interp2D(sample,
                               "correlationFunction",
-                              "r_sigma",
+                              "Rp",
                               "z",
-                              "Sigma_hh"))
+                              "Wp_hh"))
       , _bias(make_Interp2D(sample,
                             "correlationFunction",
                             "z",
@@ -60,9 +60,9 @@ namespace y3_cuda {
     // TODOs: Check if it's a double integral on Mass for the bias
     // TODOs: \int \int dM1 dM2 bias(M1) bias(M2) ...
     {
-      double const sig_1 = _sigma1.clamp(r, lnM);
-      double const sig_2 = _bias.clamp(zt, lnM) * _bias.clamp(zt, lnM)  * _sigma2.clamp(r, zt);
-      double const res = sig_1+sig_2;
+      double const wp_1 = _wp1.clamp(r, lnM);
+      double const wp_2 = _bias.clamp(zt, lnM) * _bias.clamp(zt, lnM)  * _wp2.clamp(r, zt);
+      double const res = wp_1+wp_2;
       return res;
     }
   };
