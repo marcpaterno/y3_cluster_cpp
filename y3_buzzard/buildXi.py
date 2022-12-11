@@ -133,7 +133,7 @@ def execute(block, config):
     # compute halo-halo correlation function Xi_hh(r)
     # uses cluster-toolkit
     # TODO switch to FFTLog
-    Xi_hh, s = pk_to_Xi(Radii, z, k_nl, P_k_nl)
+    Xi_hh, s = pk_to_Xi(Radii, z, k_nl, P_k)
 
     # the mass concentration relation is a function of redshift, but the way Y. Zhang designed 
     # this, the 1-halo term is independent of redshift, which is computationally efficient.
@@ -197,16 +197,16 @@ def execute(block, config):
     block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
 
     # Debug
-    pk_nl_in = pk_nl[25]
+    pk_nl_in = P_k[25]
     s, xi_nl = hankl.P2xi(k_nl, pk_nl_in, l=0)
     xi_nl_ct = ct.xi.xi_mm_at_r(s, k_nl, pk_nl_in)
-    np.savez('./pk_nl.npz',k=k_nl,pk=pk_nl_in)
-    np.savez('./xi_hankl_nl.npz',r=s,pk=xi_nl)
-    np.savez('./xi_ct_nl.npz',r=s,pk=xi_nl_ct)
+    np.savez('./pk_nl.npz', k=k_nl, pk=pk_nl_in)
+    np.savez('./xi_hankl_nl.npz', r=s, pk=xi_nl)
+    np.savez('./xi_ct_nl.npz', r=s, pk=xi_nl_ct)
     
     return 0
         
-def pk_to_Xi(r, z, k, Pk):
+def pk_to_Xi(r, z, k, pk):
     """ Compute the hankel transformation of P(k)
 
         The correlation function Xi(r)
@@ -215,21 +215,21 @@ def pk_to_Xi(r, z, k, Pk):
         r (array): radial vector
         z (array): redshift vector
         k (array): wave number
-        Pk (array): power spectrum, shape like (z.size, k.size)
+        pk (array): power spectrum, shape like (z.size, k.size)
 
     Returns:
         Xi(r): correlation function
     """
     # start the integration
-    Xi = np.zeros((len(z), k.size))
+    Xi = np.zeros((len(z), k.size),dtype='d')
     for i in range(z.size):
         # using cluster toolkit
         # switch to FFTlog
         # Xi[i] = ct.xi.xi_mm_at_r(r, k, Pk[i])
         
-        si, xii = hankl.P2xi(k, Pk[i], l=0)
+        si, xii = hankl.P2xi(k, pk[i], l=0)
         # Xi[i] = interp1d(si, xii.real)(r)
-        Xi[i] = xii
+        Xi[i] = xii.real
 
     return Xi, si
 
