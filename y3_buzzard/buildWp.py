@@ -65,10 +65,13 @@ def setup(options):
     # grab radius bins
     r_xi = options["avgWp", "radius"]
 
-    return Radii_min, Radii_max, Radii_bins, r_xi, sep_units
+    # do the integral over kappa
+    do_int = int(options[section,"do_int"])
+
+    return Radii_min, Radii_max, Radii_bins, r_xi, sep_units, do_int
 
 def execute(block, config):
-    Radii_min, Radii_max, Radii_bins, r_xi, sep_units  = config
+    Radii_min, Radii_max, Radii_bins, r_xi, sep_units, do_int  = config
 
     # cosmological quantities
     h0 = block[cosmo, "h0"]
@@ -103,8 +106,11 @@ def execute(block, config):
     # Wp(R) = \int \xi(\sqrt{R^2+\pi^2}) d\pi
     wp_out = np.zeros((Nlbins*Nzbins, Radii_bins))
     for ij in range(Nlbins*Nzbins):
-        # wp_ij = compute_abell_transform(r_xi, wp_cen_reshaped[ij], pimax)
-        wp_out[ij] = interp1d(r_xi, wp_cen_reshaped[ij], bounds_error=False)(Radii)
+        if do_int:
+            wp_ij = compute_abell_transform(r_xi, wp_cen_reshaped[ij], pimax)
+        else:
+            wp_ij = wp_cen_reshaped[ij]
+        wp_out[ij] = interp1d(r_xi, wp_ij, bounds_error=False)(Radii)
     
     # convert R [Mpc/h] to theta [arcmin/h]
     # theta depends on redshift, because of angular distance
