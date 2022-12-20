@@ -60,10 +60,13 @@ def setup(options):
     # grab radius bins
     r_kappa = options["kappa", "radius"]
 
-    return Radii_min, Radii_max, Radii_bins, r_kappa, sep_units
+    # do the integral over kappa
+    do_int = int(options[section,"do_int"])
+
+    return Radii_min, Radii_max, Radii_bins, r_kappa, sep_units, do_int
 
 def execute(block, config):
-    Radii_min, Radii_max, Radii_bins, r_kappa, sep_units  = config
+    Radii_min, Radii_max, Radii_bins, r_kappa, sep_units, do_int  = config
 
     # cosmological quantities
     h0 = block[cosmo, "h0"]
@@ -101,7 +104,11 @@ def execute(block, config):
     # \gamma(r) = <\kappa(<r)> - k(r)
     shear_cen = np.zeros((Nlbins*Nzbins, Radii_bins))
     for ij in range(Nlbins*Nzbins):
-        shear_ij = compute_mean_profile(r_kappa, kappa_cen_reshaped[ij])
+        if do_int:
+            shear_ij = compute_mean_profile(r_kappa, kappa_cen_reshaped[ij])
+        else:
+            shear_ij = kappa_cen_reshaped[ij]
+            
         shear_cen[ij] = interp1d(r_kappa, shear_ij, bounds_error=False)(Radii)
     
     # convert R [Mpc/h] to theta [arcmin/h]
