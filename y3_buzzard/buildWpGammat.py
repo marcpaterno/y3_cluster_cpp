@@ -95,32 +95,28 @@ def execute(block, config):
 
     # compute NFW in fourrier space 
     # using Duffy Mass-Concetration Relation
-    # converting to R200 wo the redshift evolution
-    pk_nfw = np.array([pk_nfw_profile(k_h, mi, rho_c) for mi in M])
+    # converting M200 to R200 wo the redshift evolution
+    pk_nfw = np.array([pk_nfw_profile(k_h, mi, rho_c, omega_m) for mi in M])
     print('pk_nfw shape:', pk_nfw.shape)
 
     #### Step 1) Wp
     # compute halo-halo projected correlation function Wp_hh(R)
     # uses hankl fftlog
-    Wp_hh = pk_to_Wp(R_perp, z, k_nl, P_k)
-
-    # TODO
-    # - Duffy Mass-Concetration Relation
-    # - Fourier Transform of the NFW profile
-    Wp_nfw = pk_to_Wp(R_perp, z, k_nl, pk_nfw)
+    Wp_hh = pk_to_Wp(R_perp, z, k_h, P_k)
+    Wp_nfw = pk_to_Wp(R_perp, z, k_h, pk_nfw)
 
     #### Step 2) deltaSigma
     # compute the halo-halo projected deltaSigma profile
     # just missing sigma_crit to be gamma_t
-    dSigma_hh = pk_to_dSigma(R_perp, z, k_nl, P_k)
+    dSigma_hh = pk_to_dSigma(R_perp, z, k_h, P_k)
     dSigma_hh*= rho_m
 
     # compute the NFW projected profile
-    dSigma_nfw = pk_to_dSigma(R_perp, z, k_nl, pk_nfw)
+    dSigma_nfw = pk_to_dSigma(R_perp, z, k_h, pk_nfw)
     dSigma_nfw*= rho_m
 
     # Step 3) Compute Bias (M, Z)
-    Bias = compute_bias(M, k, P_k, omega_m)
+    Bias = compute_bias(M, k_h, P_k, omega_m)
     # NOTE: P_k depends on z; mass is a vector
     # Bias has shape (mass.size, z.size)
 
@@ -138,13 +134,14 @@ def execute(block, config):
     block["correlationFunction", "z"] = z
 
     # Wp
-    block["correlationFunction", "r"] = R_perp
+    block["correlationFunction", "Rp"] = Radii
     block["correlationFunction", "Wp_hh"] = Wp_hh
     block["correlationFunction", "Wp_nfw"] = Wp_nfw
 
     # deltaSigma
-    block["correlationFunction", "dSigma_hh"] = dSigma_hh
-    block["correlationFunction", "dSigma_nfw"] = dSigma_nfw
+    block["correlationFunction", "r_sigma"] = R_perp
+    block["correlationFunction", "Sigma_hh"] = dSigma_hh
+    block["correlationFunction", "Sigma_nfw"] = dSigma_nfw
     
     # Bias
     block["correlationFunction", "bias"] = Bias
@@ -152,7 +149,7 @@ def execute(block, config):
     # damped Pk
     block["correlationFunction", "scale_shift"] = scaleShift
     block["correlationFunction", "hubble_shift"] = hubbleShift
-    block["correlationFunction", "k"] = k
+    block["correlationFunction", "k"] = k_h
     block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
 
     # Debug
