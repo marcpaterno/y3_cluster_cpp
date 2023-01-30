@@ -15,7 +15,7 @@ import numpy as np
 # Likelihood = (dataVector - model) cov_inv (dataVector - model)^T
 #
 # In this version we implement:
-# - The data vector is (NC, GT, CRF)
+# - The data vector is (NC, GT, Wp)
 # - The covariance matrix is computed by Jackknife
 # - We use mock data build from the Buzzard Sims v1.9.8
 #
@@ -35,7 +35,7 @@ import numpy as np
 # ---------------------------------------------------------
 # NC stands for cluster number counts 
 # GT stands for gamma_t (shear)
-# CRF stands for cluster correlation function (3d or 2d)
+# Wp stands for cluster correlation function (3d or 2d)
 # ---------------------------------------------------------
 # Miscentering model codenames
 # _cen for centered models
@@ -50,70 +50,56 @@ import numpy as np
 cosmo = names.cosmological_parameters
 debug = True
 
+names = ['NC', 'Shear', 'Wp']
+
+import h5py
+def readHDF(fname, path):
+    master = h5py.File(fname,'r')
+    return master[path][:][:]
+
+def readDataVector(fname, path='data'):
+    mydict = dict().fromkeynames(names)
+    for name in names:
+        mydict[name] = readHDF(fname, name+'/'+path)
+    return mydict
+
 def setup(options):
     section = option_section
+    datavector_fname = 0
 
-    return 0
+    dataDict = readDataVector(datavector_fname, 'data')
+    invCovDict = readDataVector(datavector_fname, 'invcov')
+    return dataDict, invCovDict
+
 
 def execute(block, config):
-    # script based on y1_rerun/y1_analysis_mor_wmiscent_likelihood.py
-
     # read from the data
-    covmat, ncdata, Mdata, Om_corr, lnAS_corr = config
+    dataDict, invCovDict datavector_fname = config
     
     # pull predictions from the datablock; 
-    # arrays with shape (Nlbdins, Nzbins)
-    NC  = block["numberCounts", "vals"]
-    GT  = block["shear", "shear_cen"]
-    CRF = block["PkDamp", "vals"]
+    # arrays with shape (Nrbins x Nlbdins x Nzbins, )
+    # [(r0, l0, z0), (r1, l0, z0), (r2, l0, z0), ..., (r0, zn, lm), (r1, zn, lm), ...]
+    # For NC; Nrbins = 0 
+    NC  = block["numberCounts", "vals"].flatten()
+    GT  = block["shear", "shear_cen"].flatten()
+    WP = block["wp", "wp_cen"].flatten()
+    # Sum Operator: take the average by dividing Nc[1]
 
-    # lambda and redshift bins
-    # why are they not setup in a global variable?
-    l_low = [20.0, 30.0, 45.0, 60.0]
-    l_high = [30.0, 45.0, 60.0, 190.0]
-    z_low = [0.2, 0.35, 0.5]
-    z_high = [0.35, 0.5, 0.65]
-
-    # concatanates the datavector over lambda and redshift bins
-    # NC has shape of (N_lbins, N_zbins)
-    # put models as 1d array
-    theory_nc = concatenate(NC, lbins=len(l_low), zbins=len(z_low))
-    theory_gt = concatenate(GT, lbins=len(l_low), zbins=len(z_low))
-    theory_crf = concatenate(CRF, lbins=len(l_low), zbins=len(z_low))
-    
-    # Pk assumed a fiducial cosmology to compute k
-    # rescale quantities to the fiducial cosmology
-    # TODO: k_fid = (k * hubbleShift, k * scaleShift)
-    # TODO: P(k_fid) = (scaleShift**2)*(hubbleShift) * P(k)
-    # Where, hubbleShift(z_mean) = H_fid(z_mean)/H(z_mean)  for each redshift bin
-    # and scaleShift(z_mean) = Da(z_mean)/Da_fid(z_mean)
-
-    ## check this lines on the original code
-    # corr_jjii=Om_corr[roww]*(Omega_m-0.3)+lnAS_corr[roww]*(loge10As-2.98239371)
-    # corr=np.append(corr, corr_jjii)
-    # M_data=M_data+corr
-
-    # unfolds the data
-    # data vector 
-    data_nc = ncdata[:, 4]
-    # dummy variables; to check data structrue
-    data_gt = gtdata[:, 4]
-    data_crf = crfdata[:, 4]
-
-    # joint datavector
-    data = np.append(data_nc, data_gt)
-    data = np.append(data, data_crf)
-
-    # model predictions
-    theory = np.append(theory_nc, theory_gt)
-    theory = np.append(theory, theory_crf)
-
-    # covariance matrix
-    cov_inv =np.linalg.inv(covmat)
+    theoryDict = {'NC': NC, 'Shear': GT, 'Wp': WP}
 
     # logLikelihood
-    delta = data - theory
-    loglike = -0.5 * np.dot(delta, np.dot(cov_inv, delta))
+    # block-diagonal covariances with R
+    logLike = 0
+    for name in names:
+        data = dataDict[name]
+        theory = theoryDict[name]
+
+        # the current covariance is block-diagonal
+        # i.e. no covariance between redshift and lambda bins
+        invcov = invCovDict[name]
+
+        delta = data - theory
+        logLike += -0.5 * np.dot(delta, np.dot(invcov, delta))
 
     # put into the datablock
     block[section_names.likelihoods, 'log_like'] = loglike
