@@ -70,7 +70,7 @@ def execute(block, config):
 
     # load camb matter-matter power spectrums
     # linear is used for the bias
-    k = block["matter_power_lin", "k_h"]
+    k_h = block["matter_power_lin", "k_h"]
     P_k = block["matter_power_lin", "p_k"]
     z_k = block["matter_power_lin", "z"]
 
@@ -122,7 +122,7 @@ def execute(block, config):
 
     # Step 4) Compute the damped halo-halo power spectrum
     # Pk times sqrt(pi)*erf(sigma_photoz * k_nl)/(2*sigma_photoz*k_nl)
-    damped_Pk_nl = compute_damped_pk(sigma_photoz*(1+z), k_nl, P_k_nl)
+    # damped_Pk_nl = compute_damped_pk(sigma_photoz*(1+z), k_nl, P_k_nl)
 
     # Step 5) shift cosmological scale
     # ratio of the comoving distance dC(cosmo)/dC(cosmo_fid)
@@ -150,7 +150,7 @@ def execute(block, config):
     block["correlationFunction", "scale_shift"] = scaleShift
     block["correlationFunction", "hubble_shift"] = hubbleShift
     block["correlationFunction", "k"] = k_h
-    block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
+    # block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
 
     # Debug
     # pk_nl_in = P_k[25]
@@ -167,7 +167,7 @@ def compute_hankel(r, k, pk, mu=0):
     # Xi[i] = ct.xi.xi_mm_at_r(r, k, Pk[i])
     
     # Hankl
-    si, _res = hankl.P2Wp(k, pk[i], l=mu)
+    si, _res = hankl.P2Wp(k, pk, l=mu)
     res = interp1d(si, _res.real)(r)
 
     # Scipy
@@ -214,7 +214,7 @@ def pk_to_dSigma(r, z, k, pk):
     dS = np.zeros((len(z), r.size),dtype='d')
     for i in range(z.size):
         dS[i] = compute_hankel(r, k, pk[i], mu=2)
-    return dS*rho_m
+    return dS
 
 def compute_Xi_nfw(r, mass, c, omega_m=0.3):
     """ NFW Profile Correlation Function
@@ -494,9 +494,10 @@ def is_uniform_sampling(r):
     return np.allclose(ddr, 0, atol=1e-13)
 
 from scipy.special import sici
-def pk_nfw_profile(k_h, m200, rho_c=1., omega_m=0.3):
-    c = duffy_concentration_relation(m200, z_eff=0.4)
-    r_virial = convert_m200_to_r200(m200, rho_c)
+def pk_nfw_profile(k_h, m200, rho_c=1., omega_m=0.3, z_eff=0.4):
+    c = duffy_concentration_relation(m200, z_eff=z_eff)
+    rho_cz = rho_c*(omega_m*(1+z_eff)**3+(1-omega_m))
+    r_virial = convert_m200_to_r200(m200, rho_cz)
     rho_k = (m200/(rho_c*omega_m))*_normalized_halo_profile(k_h, r_virial, c)
     return rho_k
 
@@ -505,8 +506,8 @@ def duffy_concentration_relation(m_h, z_eff=0.4):
     m_h_pivot = 2e12
     return 7.85*np.power(m_h/m_h_pivot,-0.081)*pow(a_eff,0.71)
 
-def convert_m200_to_r200(m200,rhoM,odelta=200):
-    rv = np.power(m_h*3.0/(4.0*np.pi*rhoM*odelta),1.0/3.0)
+def convert_m200_to_r200(m200,rho,odelta=200):
+    rv = np.power(m200*3.0/(4.0*np.pi*rho*odelta),1.0/3.0)
     return rv
 
 def _normalized_halo_profile(k_h, r_virial, c):
