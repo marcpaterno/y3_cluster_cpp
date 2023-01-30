@@ -78,6 +78,9 @@ def execute(block, config):
     z_da = block['distances', 'z']
     da = block['distances', 'd_a'] # Mpc
 
+    # build average: <x> = N[x]/N[1]
+    NC  = block["numberCounts", "vals"]
+
     # number of radial bins
     Nrbins = r_xi.size
 
@@ -110,7 +113,9 @@ def execute(block, config):
             wp_ij = compute_abell_transform(r_xi, wp_cen_reshaped[ij], pimax)
         else:
             wp_ij = wp_cen_reshaped[ij]
-        wp_out[ij] = interp1d(r_xi, wp_ij, bounds_error=False)(Radii)
+        
+        wp_avg_ij = wp_ij/NC[ij]
+        wp_out[ij] = interp1d(r_xi, wp_avg_ij, bounds_error=False)(Radii)
     
     # convert R [Mpc/h] to theta [arcmin/h]
     # theta depends on redshift, because of angular distance
