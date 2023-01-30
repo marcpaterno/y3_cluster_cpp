@@ -75,6 +75,9 @@ def execute(block, config):
 
     # load auxialiary vectors
     # r_kappa = block["avgKappaCentBu", "radius"]
+    
+    # build average: <x> = N[x]/N[1]
+    NC  = block["numberCounts", "vals"]
 
     # number of radial bins
     Nrbins = r_kappa.size
@@ -108,8 +111,9 @@ def execute(block, config):
             shear_ij = compute_mean_profile(r_kappa, kappa_cen_reshaped[ij])
         else:
             shear_ij = kappa_cen_reshaped[ij]
-            
-        shear_cen[ij] = interp1d(r_kappa, shear_ij, bounds_error=False)(Radii)
+        
+        shear_avg_ij = shear_ij/NC[ij]
+        shear_cen[ij] = interp1d(r_kappa, shear_avg_ij, bounds_error=False)(Radii)
     
     # convert R [Mpc/h] to theta [arcmin/h]
     # theta depends on redshift, because of angular distance
