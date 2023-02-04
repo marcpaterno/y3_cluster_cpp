@@ -51,6 +51,9 @@ def execute(block, config):
         test_r=dat[:, 0]; test_test=dat[:, 1]
         ix, = np.where(test_r < 125) # mpc
         test_r = test_r[ix]
+        check(Radii,'Radii')
+        check(zz,'zz')
+        check(Xi_2,'Xi_2')
         test_interp=interp2d(Radii, zz, Xi_2, kind='cubic')
         test_values=test_interp(test_r, test_z)
         with open('%s/test/xi_mm_2halo.out' % basepath, 'w') as outf:
@@ -81,6 +84,9 @@ def execute(block, config):
 
         return 0
 
+def check(x,label):
+    print('Check Variable: %s'%label,x)
+    print('Shape of vector %s is: '%label, x.shape)
 
 def cleanup(config):
     pass
