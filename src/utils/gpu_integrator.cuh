@@ -3,7 +3,7 @@
 
 #include "cubacpp/arity.hh"
 #include "cuda/pagani/quad/GPUquad/Workspace.cuh"
-#include "cuda/pagani/quad/util/Volume.cuh"
+#include "common/cuda/Volume.cuh"
 #include "cuda/mcubes/vegasT.cuh"
 #include "cuda/mcubes/mcubes.cuh"
 

@@ -3,7 +3,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
-#include "cuda/pagani/quad/GPUquad/Interp2D.cuh"
+#include "common/cuda/Interp2D.cuh"
 #include "models/ez.hh"
 #include "utils/make_interp_2d.cuh"
 #include "utils/primitives.hh"

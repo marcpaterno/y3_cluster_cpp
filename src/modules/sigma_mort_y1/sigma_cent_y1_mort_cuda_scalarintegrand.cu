@@ -4,7 +4,7 @@
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cubacpp/integration_result.hh"
-#include "cuda/pagani/quad/util/Volume.cuh"
+#include "common/cuda/Volume.cuh"
 
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"

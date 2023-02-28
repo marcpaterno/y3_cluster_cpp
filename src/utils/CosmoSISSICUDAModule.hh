@@ -15,7 +15,7 @@
 #include "utils/mpi_support.hh"
 #include "utils/mem_tracking_sentry.hh"
 
-#include "cuda/pagani/quad/util/Volume.cuh"
+#include "common/cuda/Volume.cuh"
 
 #include <iostream>
 #include <fstream>
