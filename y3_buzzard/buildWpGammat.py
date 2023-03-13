@@ -73,10 +73,12 @@ def execute(block, config):
     k_h = block["matter_power_lin", "k_h"]
     P_k = block["matter_power_lin", "p_k"]
     z_k = block["matter_power_lin", "z"]
+    z = z_k
 
     # k_nl = block["matter_power_nl", "k_h"]
     # P_k_nl = block["matter_power_nl", "p_k"]
     # z_k_nl = block["matter_power_nl", "z"]
+    # z = z_k_nl
     
     # compute rho_m
     H0 = block[cosmo, "h0"]
@@ -84,7 +86,6 @@ def execute(block, config):
     rho_c = 3*H0**2/(8*np.pi*G) # Msun/Mpc^3
     rho_m = rho_c*omega_m
 
-    z = block["matter_power_nl", "z"]
     nz = len(z)
 
     # setup bins
@@ -93,7 +94,7 @@ def execute(block, config):
     M = np.logspace(np.log10(M_min), np.log10(M_max), M_bins)
     logM = np.log(M)
 
-    # compute NFW in fourrier space 
+    # compute NFW in fourier space 
     # using Duffy Mass-Concetration Relation
     # converting M200 to R200 wo the redshift evolution
     pk_nfw = np.array([pk_nfw_profile(k_h, mi, rho_c, omega_m) for mi in M])
@@ -102,12 +103,16 @@ def execute(block, config):
     #### Step 1) Wp
     # compute halo-halo projected correlation function Wp_hh(R)
     # uses hankl fftlog
+    # JTA: Wp_hh is the matter-matter correlation function, to be exact
     Wp_hh = pk_to_Wp(R_perp, z, k_h, P_k)
     Wp_nfw = pk_to_Wp(R_perp, z, k_h, pk_nfw)
 
     #### Step 2) deltaSigma
     # compute the halo-halo projected deltaSigma profile
     # just missing sigma_crit to be gamma_t
+    #   JTA: this is the matter-matter deltaSigma/bias, right?
+    #   JTA: one could call it the halo-halo deltaSigma, but is really deltaSigma/bias^2
+    #   JTA: it's a form of the two-halo term, again, without the bias
     dSigma_hh = pk_to_dSigma(R_perp, z, k_h, P_k)
     dSigma_hh*= rho_m
 
@@ -196,6 +201,7 @@ def pk_to_Wp(r, z, k, pk):
         Wp[i] = compute_hankel(r, k, pk[i], mu=0)
     return Wp
 
+# JTA: There should be a reference to the literature on this equation
 def pk_to_dSigma(r, z, k, pk):
     """ Compute the second-order Hankel transformation of P(k)
 
@@ -333,7 +339,7 @@ def compute_bias(mass, k, P_k, omega_m=0.3):
             Bias[:, j] = ct.bias.bias_at_M(mass, k, P_k[j], omega_m)
     return Bias
 
-def compute_conentration(z, mass, mstar, z_mstar, 
+def compute_concentration(z, mass, mstar, z_mstar, 
                          CosmoParams=(0.3, 0.05, 0.82, 0.7)):
     """Concetration-Mass Relation 
 
@@ -498,7 +504,7 @@ def pk_nfw_profile(k_h, m200, rho_c=1., omega_m=0.3, z_eff=0.4):
     c = duffy_concentration_relation(m200, z_eff=z_eff)
     rho_cz = rho_c*(omega_m*(1+z_eff)**3+(1-omega_m))
     r_virial = convert_m200_to_r200(m200, rho_cz)
-    rho_k = (m200/(rho_c*omega_m))*_normalized_halo_profile(k_h, r_virial, c)
+    rho_k = (m200/(rho_c*omega_m))*normalized_halo_profile(k_h, r_virial, c)
     return rho_k
 
 def duffy_concentration_relation(m_h, z_eff=0.4):
@@ -510,7 +516,7 @@ def convert_m200_to_r200(m200,rho,odelta=200):
     rv = np.power(m200*3.0/(4.0*np.pi*rho*odelta),1.0/3.0)
     return rv
 
-def _normalized_halo_profile(k_h, r_virial, c):
+def normalized_halo_profile(k_h, r_virial, c):
     """Compute the normalized halo profile function in Fourier space; :math:`u(k|m)`
 
     For details of the available profile parametrizations, see the class description.
