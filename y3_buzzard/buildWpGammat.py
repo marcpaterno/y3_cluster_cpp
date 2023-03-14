@@ -103,7 +103,7 @@ def execute(block, config):
     #### Step 1) Wp
     # compute halo-halo projected correlation function Wp_hh(R)
     # uses hankl fftlog
-    # JTA: Wp_hh is the matter-matter correlation function, to be exact
+    # JTA: Wp_hh is the matter-matter correlation function
     Wp_hh = pk_to_Wp(R_perp, z, k_h, P_k)
     Wp_nfw = pk_to_Wp(R_perp, z, k_h, pk_nfw)
 
@@ -169,7 +169,9 @@ def execute(block, config):
 
 def compute_hankel(r, k, pk, mu=0):
     # using cluster toolkit
-    # Xi[i] = ct.xi.xi_mm_at_r(r, k, Pk[i])
+    # Xi[i] = ct.xi.xi_mm_at_r(r, k, Pk[i])  # Think this is 3-d xi
+    # 3d transform uses spherical bessel function of order 0 (j_0)
+    # 2d transform uses (ordinarry)  bessel function of order 0 (J_0)
     
     # Hankl
     si, _res = hankl.P2Wp(k, pk, l=mu)
@@ -205,7 +207,7 @@ def pk_to_Wp(r, z, k, pk):
 def pk_to_dSigma(r, z, k, pk):
     """ Compute the second-order Hankel transformation of P(k)
 
-        The projected density profile dSigma(R)
+        The projected density profile dSigma(R)  (aka deltaSigma(R) )
 
     Args:
         r (array): radial vector
@@ -379,7 +381,8 @@ def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3):
         h0 (float, optional): small hubble constant. Defaults to 0.7.
 
     Returns:
-        scale_shift: scale shift factor
+        scale_shift: scale shift factor = ratio of comoving distances/H(z)
+        hubble_shift: the hubble flow is the shift on the parallel direction of the los
     """
     # cosmological quantities
     # h0 = block[cosmo, "h0"]
@@ -391,22 +394,22 @@ def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3):
     hz = block["growth_parameters","h"]
 
     # fiducical cosmology
-    H0_fid = cosmo_fid.H(z_dc).value
+    Hz_fid = cosmo_fid.H(z_dc).value
     dc_fid = cosmo_fid.comoving_distance(z_dc).value
 
     # scale shift
     scale_shift_vec = dc/dc_fid
     scale_shift_vec[0] = 1.
 
-    # the hubble flow is th shift on the parallel direction of the los
+    # the hubble flow is the shift on the parallel direction of the los
     H0_vec = np.interp(z_dc, z, hz)
-    hubble_shift_vec = H0_fid/H0_vec
+    hubble_shift_vec = Hz_fid/H0_vec
 
     # interpolate for the new redshift
     scale_shift_perp = interp1d(z_dc[1:], scale_shift_vec[1:], fill_value='extrapolate')(znew)
     # avoids dc = 0
 
-    hubble_shift = np.interp(znew, z_dc, hubble_shift_vec)
+    hubble_shift = interp1d(z_dc, hubble_shift_vec, fill_value='extrapolate')(znew)
     return scale_shift_perp, hubble_shift
 
 def xi_to_wp(r, xi, pimax=100):
