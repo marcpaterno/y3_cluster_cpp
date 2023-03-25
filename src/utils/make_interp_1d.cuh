@@ -2,7 +2,7 @@
 #define Y3_CLUSTER_MAKE_INTERP_1D_CUH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cuda/pagani/quad/GPUquad/Interp1D.cuh"
+#include "common/cuda/Interp1D.cuh"
 
 #include <vector>
 

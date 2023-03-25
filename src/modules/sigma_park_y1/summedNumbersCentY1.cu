@@ -6,7 +6,7 @@
 #include "cubacpp/integration_result.hh"
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/datablock_status.h"
-#include "cuda/pagani/quad/util/Volume.cuh"
+#include "common/cuda/Volume.cuh"
 
 #include "models/omega_z_des.cuh"
 #include "models/dv_do_dz_t.cuh"

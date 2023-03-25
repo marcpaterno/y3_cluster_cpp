@@ -4,7 +4,7 @@
 // jta conversion project to cuda Nov 2022
 
 #include "cosmosis/datablock/datablock.hh"
-#include "cuda/pagani/quad/GPUquad/Interp2D.cuh"
+#include "common/cuda/Interp2D.cuh"
 #include "utils/primitives.cuh"
 
 // Implementing Costanzi, Rozo, Rykoff et al 2018 equation 15

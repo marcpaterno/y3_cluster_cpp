@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
-project(y3_cluster_cpp VERSION 0.4.0 LANGUAGES CXX C)
+project(y3_cluster_cpp VERSION 0.5.0 LANGUAGES CXX C)
 
 if (USE_CUDA)
   enable_language(CUDA)
