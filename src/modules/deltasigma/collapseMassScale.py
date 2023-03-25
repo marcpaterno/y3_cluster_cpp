@@ -65,6 +65,8 @@ def execute(block, config):
     kmin = kmin_overall
     kmax = kmax_overall
 
+    sigma2r = 0
+
     sigma2r = np.zeros((np.size(R), np.size(z)))
     for i, rloop in enumerate(R):
 
