@@ -2,6 +2,7 @@
 #include "utils/datablock_reader.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
 #include "utils/make_grid_points.hh"
+#include "utils/spt_filer_loader.hh"
 
 #include "cubacpp/integration_result.hh"
 #include "cosmosis/datablock/datablock.hh"
@@ -10,11 +11,8 @@
 
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_scalar_rel_t.cuh"
-#include "models/int_zo_zt_des_t.cuh"
-#include "models/lo_lc_t.cuh"
-#include "models/mor_des_t.cuh"
+#include "models/mor_t_sz.cuh"
 #include "models/omega_z_des.cuh"
-#include "models/roffset_t.cuh"
 
 #include <iostream>
 #include <optional>
@@ -58,27 +56,7 @@ private:
   double zt_;      // the true redshift of the current cluster
   double x1_;
   double delta_x1_;
-
-
-
-
-
-  // Should we use cartesian grid? If not, we use a wall-of-numbers.
-  bool do_cartesian_product_of_bins_ = false;
-  
-  // In this integrand, the name "cartesian product" is a bit misleading; it
-  // is used in case later development introduces another grid dimenstion over
-  // which we'll operate.
-  //
-  // If we are using the cartesian grid, the relevant congifuration parameters
-  // are zo_bottom (an array of arbitrary length)  and zo_bin_width (a array of
-  // the same length as zo_bottom). These *two* parameters make a single axis
-  // for the grid (the "zo bins").
-  //
-  // If we are using the wall-of-numbers configuration, the relevant
-  // configuration parameters are zo_lo (an array of arbitrary length) and
-  // zo_high. These *two* parameters make a single axis for the grid (the "zo
-  // bins").
+  double x2_;
 
 public:
 
@@ -144,9 +122,9 @@ ScalingRelationIntegrand::set_sample(DataBlock& sample)
   // value using std::optional::emplace(...) here. emplace takes a set
   // of arguments that it passes to the constructor of X.
   mor.emplace(sample);
-  dv_do_dz.emplace(sample);
-  hmf.emplace(sample);
-  omega_z.emplace(sample);
+  // dv_do_dz.emplace(sample);
+  // hmf.emplace(sample);
+  // omega_z.emplace(sample);
 }
 
 void
@@ -154,8 +132,8 @@ ScalingRelationIntegrand::set_grid_point(grid_point_t grid_point)
 {
   zt_ = grid_point[0];
   x1_ = grid_point[1];
-  delta_x1_ = grid_point[3];
-  ... and so on...
+  delta_x1_ = grid_point[2];
+  x2_ = grid_point[2];
 }
 
 __host__ __device__ double
@@ -163,17 +141,24 @@ ScalingRelationIntegrand::operator()(double x1,
                                      double x2,
                                      double lnM) const
 {
+  double const hmf_value = hmf(lnM, zt_);
 
-  double const halo_mass = hmf(lnM, zt_);
-  double const px1 = y3_cuda::gaussian(x1, x1_, delta_x1_);
-  ... and so on ...
+  /* eq. 04 Grandis et al. 2021 */
+  double const px1_value = y3_cuda::gaussian(x1, x1_, delta_x1_);
 
+  /* eq. 03 Grandis et al. 2021 */
+  double const px2_value = y3_cuda::gaussian(sqrt(x2+3), x2_, 1);
 
+  /* eq. 01 Grandis et al. 2021 */
+  double const mor_value = mor(x1, x2, lnM, zt_);
+  
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
+
+  /* eq. 07 Grandis et al. 2021 */
   double common_term =
-    (*mor)(lo, lnM, zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * (*omega_z)(zt);
-  auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+    mor_value * hmf_value * (*omega_z)(zt) * (*dv_do_dz)(zt);
+  auto const val = px1_value * px2_value * common_term;
   return val;
 }
 
@@ -195,7 +180,7 @@ ScalingRelationIntegrand::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, ScalingRelationIntegrand::module_label(), "lo", "zt", "lnm");
+    cfg, ScalingRelationIntegrand::module_label(), "x1", "x2", "lnm");
 }
 
 ScalingRelationIntegrand::grid_t
@@ -204,33 +189,46 @@ ScalingRelationIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
   // read the filename from the datablock cfg
   // then open the file and read your cluster data
   // and fill in the grid_t object that this function returns.
+
+  // get filename from datablock
+  // read filename 
+  string redshift;
+  string lambda;
+  string lambda_error;
+  string sz_signal;
   
-  char const * const label =
-    ScalingRelationIntegrand::module_label();
-  bool do_cartesian_product_of_bins = false;
-  auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
+  ifstream current_file;
+  current_file.open(filename);
+  
+  if (!current_file.is_open()) {
+      cerr << "Error opening file";
+      exit(1);
+  }
 
-  if (do_cartesian_product_of_bins)
-  {
-    auto const bottoms = get_vector_double(cfg, label, "zo_bottom");
-    auto const widths= get_vector_double(cfg, label, "zo_bin_width");
-    if (bottoms.size() != widths.size()) {
-        throw std::runtime_error("zo_bottom and zo_bin_width must be the same length\n");
-    }
-
-    grid_t result;
-    result.set_names(std::vector<std::string>{"zo_bottom", "zo_bin_width"});
-    // This could probably be simplified by using the ranges library.
-    for (std::size_t i = 0; i != bottoms.size(); ++i) {
-      double bottom = bottoms[i];
-      double top = bottoms[i] + widths[i];
-      result.push_back({bottom, top});
-    }
-    return result;
-  };
-
-  return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, ScalingRelationIntegrand::module_label(), "zo_low", "zo_high");
+  // Resizing the 2D vector of values
+  result.resize(4);
+  
+  while (current_file) {
+      current_file >> redshift >> lambda >> lambda_error >> sz_signal;
+      for (int i = 0; i < 4; i++) {
+          switch(i) {
+              case 0:
+                  result[i].push_back(scientific_notation_to_double(redshift));
+                  break;
+              case 1:
+                  result[i].push_back(scientific_notation_to_double(lambda));
+                  break;
+              case 2:
+                  result[i].push_back(scientific_notation_to_double(lambda_error));
+                  break;
+              case 3:
+                  result[i].push_back(scientific_notation_to_double(sz_signal));
+                  break;
+          }
+      }
+  }    
+  current_file.close();
+  return result;
 }
 
 DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(ScalingRelationIntegrand)
