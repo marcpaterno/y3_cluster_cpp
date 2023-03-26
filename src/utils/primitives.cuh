@@ -56,7 +56,23 @@ namespace y3_cuda {
     double const z = (x - mu) / sigma;
     return exp(-z * z / 2.) * 0.3989422804014327 / sigma;
   }
+  
+  
+  // Bivariate Gaussian Implementation
+  // https://online.stat.psu.edu/stat505/lesson/4/4.2
+  inline __device__ __host__ double
+  gaussian2d(double x1, double x2, double mu1, double mu2, double sigma1, double sigma2, double corr12)
+  {
+    double const z1 = (x1 - mu1) / sigma1;
+    double const z2 = (x2 - mu2) / sigma2;
+    double const z12 = z1*z2
 
+    double const rhosqr = max(min(1. - corr12 * corr12, 0.), 1.)
+    double const arg = -(z1 * z1 + z2 * z2 + 2 * corr12 * z12)/2./rhosqr
+    double const sigma = sigma1 * sigma2 * sqrt(rhosqr)
+
+    return exp(arg) * 0.3989422804014327 / sigma;
+  }
   namespace {
     // Tail recursive helper for `integer_pow`
     constexpr double
