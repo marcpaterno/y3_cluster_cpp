@@ -14,19 +14,19 @@ namespace y3_cuda {
       : _lambda(lambda), _zeta(zeta), _sigma_intr1(sigma1), _sigma_intr2(sigma2), _corr12(corr12)
     {}
     explicit MOR_t_sz(cosmosis::DataBlock& sample)
-      : _lambda(sample.view<double>("scalingRelation", "A1"),
-                sample.view<double>("scalingRelation", "B1"),
-                sample.view<double>("scalingRelation", "C1"),
+      : _lambda(sample.view<double>("scaling_relation", "A1"),
+                sample.view<double>("scaling_relation", "B1"),
+                sample.view<double>("scaling_relation", "C1"),
                 sample.view<double>("cosmological_parameters", "omega_M"))
 
-      , _zeta(sample.view<double>("scalingRelation", "A2"),
-              sample.view<double>("scalingRelation", "B2"),
-              sample.view<double>("scalingRelation", "C2"),
+      , _zeta(sample.view<double>("scaling_relation", "A2"),
+              sample.view<double>("scaling_relation", "B2"),
+              sample.view<double>("scaling_relation", "C2"),
               sample.view<double>("cosmological_parameters", "omega_M"))
 
-      , _sigma_intr1(sample.view<double>("scalingRelation", "sigma1"))
-      , _sigma_intr2(sample.view<double>("scalingRelation", "sigma2"))
-      , _corr12(sample.view<double>("scalingRelation", "corr12"))
+      , _sigma_intr1(sample.view<double>("scaling_relation", "sigma1"))
+      , _sigma_intr2(sample.view<double>("scaling_relation", "sigma2"))
+      , _corr12(sample.view<double>("scaling_relation", "corr12"))
     {}
 
     __device__ __host__ double

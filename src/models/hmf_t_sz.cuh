@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_CPP_HMF_T_CUH
-#define Y3_CLUSTER_CPP_HMF_T_CUH
+#ifndef Y3_CLUSTER_CPP_HMF_T_SZ_CUH
+#define Y3_CLUSTER_CPP_HMF_T_SZ_CUH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "common/cuda/Interp2D.cuh"
@@ -30,9 +30,9 @@ namespace {
 }
 
 namespace y3_cuda {
-  class HMF_t {
+  class HMF_T_SZ {
   public:
-    HMF_t(quad::Interp2D const& nmz)
+    HMF_T_SZ(quad::Interp2D const& nmz)
       : _nmz(nmz)
     {}
 
@@ -44,7 +44,7 @@ namespace y3_cuda {
       return _nmz.get_device_mem_footprint();
     }
 
-    explicit HMF_t(cosmosis::DataBlock& sample)
+    explicit HMF_T_SZ(cosmosis::DataBlock& sample)
       : _nmz(
           _adjust_to_log(sample, sample.view<doubles>("mass_function", "m_h")),
           sample.view<doubles>("mass_function", "z"),

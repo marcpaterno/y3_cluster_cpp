@@ -10,7 +10,7 @@
 #include "common/cuda/Volume.cuh"
 
 #include "models/dv_do_dz_t.cuh"
-#include "models/hmf_scalar_rel_t.cuh"
+#include "models/hmf_t_sz.cuh"
 #include "models/mor_t_sz.cuh"
 #include "models/omega_z_des.cuh"
 
@@ -31,7 +31,7 @@ public:
   // Note we're slightly abusing the concept of the "grid" here. We are
   // really iterating over a single sequence of pairs, with the pairs
   // denoting the bottoms and tops of a set of zo bins.
-  using grid_t = y3_cluster::grid_t<3>;
+  using grid_t = y3_cluster::grid_t<4>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -48,7 +48,8 @@ private:
   // State obtained from each sample.
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
-  std::optional<y3_cuda::HMF_t> hmf;
+  std::optional<y3_cuda::HMF_T_SZ_CUH> hmf;
+  std::optional<y3_cuda::MOR_T_SZ> mor;
 
   // State set for current 'bin' to be integrated.
   // We will use one 'bin' for each cluster, because we want to do an
@@ -189,20 +190,27 @@ ScalingRelationIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
   // read the filename from the datablock cfg
   // then open the file and read your cluster data
   // and fill in the grid_t object that this function returns.
-
-  // get filename from datablock
   // read filename 
+  string filename;
   string redshift;
   string lambda;
   string lambda_error;
   string sz_signal;
+  grid_t result;
+  
+  // get filename from datablock
+  cfg.get_val(module_label(),
+                "infile",,
+                filename);
+
+  cout << "Check Filename";
+  cout << filename;
   
   ifstream current_file;
   current_file.open(filename);
   
   if (!current_file.is_open()) {
-      cerr << "Error opening file";
-      exit(1);
+      throw std::runtime_error("File nout found \n");
   }
 
   // Resizing the 2D vector of values
@@ -213,16 +221,16 @@ ScalingRelationIntegrand::make_grid_points(cosmosis::DataBlock& cfg)
       for (int i = 0; i < 4; i++) {
           switch(i) {
               case 0:
-                  result[i].push_back(scientific_notation_to_double(redshift));
+                  result[i].push_back(y3_cluster::scientific_notation_to_double(redshift));
                   break;
               case 1:
-                  result[i].push_back(scientific_notation_to_double(lambda));
+                  result[i].push_back(y3_cluster::scientific_notation_to_double(lambda));
                   break;
               case 2:
-                  result[i].push_back(scientific_notation_to_double(lambda_error));
+                  result[i].push_back(y3_cluster::scientific_notation_to_double(lambda_error));
                   break;
               case 3:
-                  result[i].push_back(scientific_notation_to_double(sz_signal));
+                  result[i].push_back(y3_cluster::scientific_notation_to_double(sz_signal));
                   break;
           }
       }

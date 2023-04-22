@@ -79,6 +79,22 @@ namespace y3_cluster {
     return do_integer_pow(1, n, pow);
   }
 
+  inline double
+  scientific_notation_to_double(const string& str) {
+    stringstream ss(str);
+    double d = 0;
+    ss >> d;
+
+    if (ss.fail()) {
+      string s = "Unable to format ";
+      s += str;
+      s += " as a number!";
+      throw (s);
+    }
+
+    return (d);
+  }
+
   /*
   double constexpr
   erf_approx(const double x)
