@@ -57,10 +57,10 @@ gsl_spline* spline_from_vectors(std::vector<double> &x, std::vector<double> &y) 
     return s;
   }
 template <class T>
-double gsl_integral(T &func, const double a, const double b, const double eps=1.0e-8)
+double gsl_integral(T &func, const double a, const double b, const double eps=1.0e-10)
 {
   double result, error;
-  size_t limit = 10000;
+  size_t limit = 1000000;
   int key = 1;
 
   gsl_integration_workspace * w
