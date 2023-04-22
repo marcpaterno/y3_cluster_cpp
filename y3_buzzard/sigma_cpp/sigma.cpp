@@ -60,7 +60,7 @@ template <class T>
 double gsl_integral(T &func, const double a, const double b, const double eps=1.0e-10)
 {
   double result, error;
-  size_t limit = 100;
+  size_t limit = 10000;
   int key = 1;
 
   gsl_integration_workspace * w
