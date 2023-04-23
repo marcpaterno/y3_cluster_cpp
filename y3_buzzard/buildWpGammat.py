@@ -356,7 +356,7 @@ def compute_concentration(z, mass, mstar, z_mstar,
     omega_m, omega_b, sigma8, h0 = CosmoParams
     conc = np.zeros(mass.size)
     for i in range(mass.size):
-        conc[i] = massconcen.c_from_m200 (mass[i], z, omega_m, omega_b, 
+        conc[i] = massconcen.c_from_m200(mass[i], z, omega_m, omega_b, 
                                           sigma8, h0, mstar, z_mstar)
     return conc
 
