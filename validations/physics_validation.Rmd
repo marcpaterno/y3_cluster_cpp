@@ -1127,6 +1127,9 @@ ggplot(sig_crit, aes(x = zs, y = fracerr, color = within.abs)) +
   facet_wrap(vars(zbin))
 ```
 
+# Mass Concentration Relation
+For this test, we are comparing the mass-concentration relation we get from the pipeline to the mass concentration relation from Colossus
+
 # Session information
 
 The following R package versions were used to prepare this document.
