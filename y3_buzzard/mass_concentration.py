@@ -46,7 +46,8 @@ def execute(block, config):
 
     crit_r_array = np.zeros(nz)
 
-    for iz, z_val in enumerate(range(nz)):
+    for iz, z_val in enumerate(z):
+
         sigma_r_at_z = sigma_r[:, iz]
 
         crit_density = 1.686**2
