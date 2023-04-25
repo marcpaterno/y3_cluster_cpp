@@ -8,6 +8,7 @@ cosmo = names.cosmological_parameters
 
 
 def setup(options):
+
     zmin = options[option_section, "zmin"]
     zmax = options[option_section, "zmax"]
     verbose = options[option_section, "verbose"]
@@ -32,9 +33,12 @@ def execute(block, config):
 
     verbose = config
 
-    r, z, sigma_r = block.get_grid("sigma_r", "R", "z", "sigma2")
+    R, z, sigma_r = block.get_grid("sigma_r", "R", "z", "sigma_r")
+    print(z)
     omega_m = block[cosmo, "omega_m"]
     rho_c = 2.775e11
+
+    print(sigma_r)
 
     def mass_given_r(r, omega_m):
         return 4.0 / 3.0 * np.pi * r**3 * omega_m * rho_c
@@ -42,7 +46,10 @@ def execute(block, config):
     # z, R, blockname, crop_klim = config
 
     nz = len(z)
-    nr = len(r)
+    nr = len(R)
+
+    print(nr, nz)
+    print(sigma_r.shape)
 
     crit_r_array = np.zeros(nz)
 
@@ -50,9 +57,9 @@ def execute(block, config):
 
         sigma_r_at_z = sigma_r[:, iz]
 
-        crit_density = 1.686**2
+        crit_density = 1.686
         sigma_r_reduced = sigma_r_at_z - crit_density
-        f = UnivariateSpline(r, sigma_r_reduced, s=0)
+        f = UnivariateSpline(R, sigma_r_reduced, s=0)
 
         if verbose:
             print("This is redshift", z_val)

@@ -248,10 +248,8 @@ Please use any these (separated by spaces): {}""".format(
     camb.set_feedback_level(level=options.get_int(opt, "feedback", default=0))
 
     # mstar vecs
-    z_vec = set_vector(options, "zmin", "zmax", "dz", "z")
     r_vec = set_vector(options, "rmin", "rmax", "dr", "r")
 
-    more_config["z_vec"] = z_vec
     more_config["r_vec"] = r_vec
 
     return [config, more_config]
@@ -730,15 +728,13 @@ def save_cls(r, p, block):
         block[names.cmb_cl, "PE"] = cl[2:, 2] * (ell * (ell + 1)) / (2 * np.pi)
 
 
-def save_mstar(more_config, r, p, block):
+def save_sigmaR(r, p, block, more_config):
     r_vec = more_config["r_vec"]
-    z_vec = more_config["z_vec"]
 
-    sigma_r = r.get_sigmaR(R=r_vec)
+    R, z, sigma_r = r.get_sigmaR(R=r_vec, return_R_z=True)
+    print(R)
 
-    print(sigma_r)
-
-    return sigma_r
+    block.put_grid("sigma_r", "z", z, "R", R, "sigma_r", sigma_r)
 
 
 def execute(block, config):
@@ -765,7 +761,7 @@ def execute(block, config):
     save_derived_parameters(r, p, block)
     save_distances(r, p, block, more_config)
 
-    save_mstar(more_config, r, p, block)
+    save_sigmaR(r, p, block, more_config)
 
     if p.WantTransfer:
         save_matter_power(r, p, block, more_config)
