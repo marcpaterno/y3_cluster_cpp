@@ -35,6 +35,19 @@ matter_power_section_names = {
     "v_baryon_cdm": "baryon_cdm_relative_velocity_power",
 }
 
+# mstar helper function
+def set_vector(options, vmin, vmax, dv, vec):
+    """Read a vector-valued parameter from the parameter file either directly or via min,max,n"""
+
+    if options.has_value(opt, vec):
+        return np.array(options[opt, vec])
+    else:
+        xmin = options[opt, vmin]
+        xmax = options[opt, vmax]
+        dx = options[opt, dv]
+
+        return np.arange(xmin, xmax, dx)
+
 
 def get_optional_params(block, section, names):
     params = {}
@@ -233,6 +246,11 @@ Please use any these (separated by spaces): {}""".format(
         )
 
     camb.set_feedback_level(level=options.get_int(opt, "feedback", default=0))
+
+    # mstar vecs
+    z_vec = set_vector(options, "zmin", "zmax", "dz", "z")
+    r_vec = set_vector(options, "rmin", "rmax", "dr", "r")
+
     return [config, more_config]
 
 
