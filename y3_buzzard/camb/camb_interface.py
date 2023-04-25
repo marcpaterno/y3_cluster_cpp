@@ -251,6 +251,9 @@ Please use any these (separated by spaces): {}""".format(
     z_vec = set_vector(options, "zmin", "zmax", "dz", "z")
     r_vec = set_vector(options, "rmin", "rmax", "dr", "r")
 
+    more_config["z_vec"] = z_vec
+    more_config["r_vec"] = r_vec
+
     return [config, more_config]
 
 
@@ -727,6 +730,17 @@ def save_cls(r, p, block):
         block[names.cmb_cl, "PE"] = cl[2:, 2] * (ell * (ell + 1)) / (2 * np.pi)
 
 
+def save_mstar(more_config, r, p, block):
+    r_vec = more_config["r_vec"]
+    z_vec = more_config["z_vec"]
+
+    sigma_r = r.get_sigmaR(R=r_vec)
+
+    print(sigma_r)
+
+    return sigma_r
+
+
 def execute(block, config):
     config, more_config = config
     p = extract_camb_params(block, config, more_config)
@@ -750,6 +764,8 @@ def execute(block, config):
 
     save_derived_parameters(r, p, block)
     save_distances(r, p, block, more_config)
+
+    save_mstar(more_config, r, p, block)
 
     if p.WantTransfer:
         save_matter_power(r, p, block, more_config)
