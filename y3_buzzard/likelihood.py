@@ -58,23 +58,21 @@ def readHDF(fname, path):
     return master[path][:][:]
 
 def readDataVector(fname, path='data'):
-    mydict = dict().fromkeynames(names)
+    mydict = dict().fromkeys(names)
     for name in names:
-        mydict[name] = readHDF(fname, name+'/'+path)
+        mydict[name] = readHDF(fname, path+'/'+name)
     return mydict
 
 def setup(options):
     section = option_section
-    datavector_fname = 0
-
+    datavector_fname = options[section,"filename"]
     dataDict = readDataVector(datavector_fname, 'data')
     invCovDict = readDataVector(datavector_fname, 'invcov')
     return dataDict, invCovDict
 
-
 def execute(block, config):
     # read from the data
-    dataDict, invCovDict datavector_fname = config
+    dataDict, invCovDict = config
     
     # pull predictions from the datablock; 
     # arrays with shape (Nrbins x Nlbdins x Nzbins, )
@@ -91,6 +89,7 @@ def execute(block, config):
     # block-diagonal covariances with R
     logLike = 0
     for name in names:
+        print('Name: %s'%name)
         data = dataDict[name]
         theory = theoryDict[name]
 
@@ -102,7 +101,7 @@ def execute(block, config):
         logLike += -0.5 * np.dot(delta, np.dot(invcov, delta))
 
     # put into the datablock
-    block[section_names.likelihoods, 'log_like'] = loglike
+    block["likelihoods", 'likelihoods_like'] = logLike
     return 0
 
 def concatenate_datavector(x, lbins=4, zbins=3):
