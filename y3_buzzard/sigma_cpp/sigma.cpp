@@ -60,8 +60,8 @@ template <class T>
 double gsl_integral(T &func, const double a, const double b, const double eps=1.0e-10)
 {
   double result, error;
-  size_t limit = 1000000;
-  int key = 1;
+  size_t limit = 100000000;
+  int key = 2;
 
   gsl_integration_workspace * w
     = gsl_integration_workspace_alloc(limit);
