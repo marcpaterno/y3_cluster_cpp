@@ -1,15 +1,25 @@
 ---
 title: "Physics Validation of Y3 Clusters Code"
 author: "Y3 Cluster Team (3ct)"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-      toc: true
-      toc_depth: 1
-      toc_float: true
-      number_sections: true
-  pdf_document: default
-  word_document: default
+format:
+  html:
+    theme: cerulean
+    css: styles.css
+    toc: true
+    toc-depth: 1
+    toc-float: true
+    toc-location: left
+    number-section: true
+    highlight-style: github
+  pdf:
+    documentclass: report
+    classoption: [twocolumn, landscape]
+    toc: true
+    toc-depth: 1
+    toc-float: true
+    toc-location: left
+    number-section: true
+    highlight-style: github
 ---
 
 ```{r setup, include=FALSE}
@@ -17,13 +27,8 @@ knitr::opts_chunk$set(echo = FALSE,
                       cache = FALSE,
                       fig.align = "center",
                       fig.asp = 1/3)
-# library(tidyverse)
+library(tidyverse)
 library(dplyr)
-library(readr)
-library(tidyr)
-library(stringr)
-library(ggplot2)
-
 truecolor = "black"
 trueshape = 1
 testcolor = "cyan"
@@ -78,7 +83,6 @@ Points that fail the test will be both red and outside of the allowable error bo
 a. For a test to pass, it is required that every calculated point pass.
 This condition is verified automatically and the result is noted in bold in each section.
 
-
 # Survey Area
 
 ## SDSS Survey footprint function
@@ -89,7 +93,8 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r, include = FALSE}
-omega_z <- read_tsv("../release-build/data/omega_z_sdss.out")
+omega_z <- read_tsv("../../release-build/data/omega_z_sdss.out")
+# omega_z <- read_tsv("/Users/jesteves/Cosmosis/y3_cluster_cpp/release-build/data/omega_z_sdss.out")
 omega_z <- mutate(omega_z,
                   resid = ytrue - ytest,
                   fracerr = resid/ytrue,
@@ -148,7 +153,8 @@ local.abs.errormargin = 1.0e-16
 ```
 
 ```{r include = FALSE}
-hmf <- read_tsv("../data/masses_test.out")
+# hmf <- read_tsv("/Users/jesteves/Cosmosis/y3_cluster_cpp/release-build//data/masses_test.out")
+hmf <- read_tsv("../../release-build//data/masses_test.out")
 hmf$zbin <- as.factor(hmf$z)
 hmf <- mutate(hmf,
                  resid = ytrue - ytest,
@@ -215,7 +221,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r, include = FALSE}
-dvdodz <- read_tsv("../release-build/data/dvdodz_test.out")
+dvdodz <- read_tsv("../../release-build/data/dvdodz_test.out")
 dvdodz <- mutate(dvdodz,
                   resid = ytrue - ytest,
                   fracerr = resid/ytrue,
@@ -273,7 +279,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-mor_t2 <- read_tsv("../release-build/data/mor_tt_test.out")
+mor_t2 <- read_tsv("../../release-build/data/mor_tt_test.out")
 mor_t2$mbin <- as.factor(mor_t2$log10m/log(10))
 mor_t2 <- mutate(mor_t2,
                  resid = probtrue - probtest,
@@ -285,7 +291,7 @@ mor_t2 <- mutate(mor_t2,
                  pass = within.frac | within.abs)
 ```
 
-$P(\lambda |M_{200m})$ describes the probabilistic distribution of the cluster observable richness ($\lambda$) at a given mass $M_200m$. 
+$P(\lambda |M_{200m})$ describes the probabilistic distribution of the cluster observable richness ($\lambda$) at a given mass $M_{200m}$. 
 Our calculation is implemented in the file `mor_t2.hh`.
 
 For this testing, we compare results from our implementation to the  independent function evaluations from Matteo Costanzi in the SDSS cluster cosmology analysis (Costanzi et al. 2019)
@@ -347,7 +353,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-lc_lt <- read_tsv("../release-build/data/lc_lt_test.out")
+lc_lt <- read_tsv("../../release-build/data/lc_lt_test.out")
 lc_lt$lbin <- as.factor(lc_lt$lambda_true)
 lc_lt <- mutate(lc_lt,
                  resid = probtrue - probtest,
@@ -421,7 +427,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-lo_lc <- read_tsv("../release-build/data/lo_lc_test.out")
+lo_lc <- read_tsv("../../release-build/data/lo_lc_test.out")
 lo_lc$Rbin <- as.factor(lo_lc$Rmis)
 lo_lc <- mutate(lo_lc,
                  resid = probtrue - probtest,
@@ -501,7 +507,7 @@ local.abs.errormargin = abs.errormargin
 In this section, we compare the stacked number counts and mass predictions in stacked richness/mass bins for a SDSS like analysis. These values are the integrated results using components listed above. For this testing, we compare results from our implementation to the implementations from Matteo Costanzi for the SDSS cosmology analysis (Costanzi et al. 2019). The test is conducted for the following set of cosmology and scaling relation parameters specified in **cosmosis_tests/values_comp.ini**.
 
 ```{r include = FALSE}
-inte <- read_tsv("../data/integrated_bin_test.out")
+inte <- read_tsv("../../release-build//data/integrated_bin_test.out")
 inte <- mutate(inte,
                lambda = (llo+lhi)/2.0,
                residn = yntrue - yntest,
@@ -584,7 +590,7 @@ local.abs.errormargin = abs.errormargin
 In this section, we compare the stacked number counts and mass predictions in stacked richness/mass bins for a y1 like analysis. These values are the integrated results using components listed above. For this testing, we compare results from our implementation to the implementations from Matteo Costanzi for the y1 cosmology analysis (DES 2019). The test is conducted for the following set of cosmology and scaling relation parameters specified in **cosmosis_tests/values_comp_y1.in**
 
 ```{r include = FALSE}
-inte <- read_tsv("../data/integrated_bin_y1_test.out")
+inte <- read_tsv("../../release-build/data/integrated_bin_y1_test.out")
 inte$zbin <- as.factor(inte$zlo)
 inte <- mutate(inte,
                lambda = (llo+lhi)/2.0,
@@ -676,7 +682,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-xi_nfw <- read_tsv("../deltasigma/test/xi_nfwonly.out")
+xi_nfw <- read_tsv("../../deltasigma/test/xi_nfwonly.out")
 print(xi_nfw)
 xi_nfw <- mutate(xi_nfw,
                  resid = ytrue - ytest,
@@ -742,7 +748,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-xi_2h <- read_tsv("../deltasigma/test/xi_mm_2halo.out")
+xi_2h <- read_tsv("../../deltasigma/test/xi_mm_2halo.out")
 # We limit the range of R in our plots to be only positive values of xi_mm. 
 # In the generation of the xi_mm_2halo.out file, we cut at < 125 Mpc, where the fiducial xi_mm goes negative
 print(xi_2h)
@@ -810,7 +816,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-sig_nfw <- read_tsv("../deltasigma/test/Sigma_nfwonly.out")
+sig_nfw <- read_tsv("../../deltasigma/test/Sigma_nfwonly.out")
 print(sig_nfw)
 sig_nfw <- mutate(sig_nfw,
                  resid = ytrue - ytest,
@@ -871,7 +877,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-sig_nfw <- read_tsv("../deltasigma/test/Sigma_mm_2halo.out")
+sig_nfw <- read_tsv("../../deltasigma/test/Sigma_mm_2halo.out")
 print(sig_nfw)
 # We cut off the range of R values at 30 Mpc. It would be better to do
 # this by controlling the generation of the Sigma_mm_2halo.out file.
@@ -933,7 +939,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r include = FALSE}
-bias <- read_tsv("../deltasigma/test/bias.out")
+bias <- read_tsv("../../deltasigma/test/bias.out")
 bias$zbin <- as.factor(bias$z)
 bias <- mutate(bias,
                  logmass  = log(M)/log(10),
@@ -1002,7 +1008,7 @@ local.abs.errormargin = abs.errormargin
 ```
 
 ```{r, include = FALSE}
-miscent <- read_tsv("../release-build/data/Rmis_gammadist_test.out")
+miscent <- read_tsv("../../release-build/data/Rmis_gammadist_test.out")
 miscent <- mutate(miscent,
                   resid = probtrue - probtest,
                   fracerr = resid/probtrue,
@@ -1061,7 +1067,7 @@ local.abs.errormargin = 1.0e-21
 ```
 
 ```{r include = FALSE}
-sig_crit <- read_tsv("../release-build/data/Sigma_crit_test.out")
+sig_crit <- read_tsv("../../release-build/data/Sigma_crit_test.out")
 sig_crit$zbin <- as.factor(sig_crit$zl)
 sig_crit <- mutate(sig_crit,
                  resid = ytrue - ytest,
@@ -1126,9 +1132,6 @@ ggplot(sig_crit, aes(x = zs, y = fracerr, color = within.abs)) +
   xlab("z_s") +
   facet_wrap(vars(zbin))
 ```
-
-# Mass Concentration Relation
-For this test, we are comparing the mass-concentration relation we get from the pipeline to the mass concentration relation from Colossus
 
 # Session information
 
