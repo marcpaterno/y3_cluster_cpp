@@ -172,8 +172,10 @@ avgKappaCentBu::operator()(   double lo,
   double const mor_v = (*mor)(lo, lnM, zt);
 
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*kappa)(radius_, lnM, zt) *
-                   (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+  double kappa_val = (*kappa)(radius_, lnM, zt);
+  double int_z0_zt_val = (*int_zo_zt)(zo_low_, zo_high_, zt);    
+  auto const val = kappa_val *
+                   int_z0_zt_val * common_term;
   return val;
 }
 
@@ -211,3 +213,25 @@ avgKappaCentBu::make_grid_points(cosmosis::DataBlock& cfg)
 }
 
 DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgKappaCentBu)
+
+// DEBUG LINES
+  // if (!isfinite(common_term)) {
+  //   printf("common_term inf and radius=%g, zt=%g and lnM=%g\n", radius_, zt, lnM);
+  // }
+  // if (common_term==0) {
+  //   printf("common_term 0 and radius=%g, zt=%g and lnM=%g\n", radius_, zt, lnM);
+  // }
+
+  // if (!isfinite(kappa_val)) {
+  //   printf("Kappa term inf and radius=%g, zt=%g and lnM=%g\n", radius_, zt, std::log10(std::exp(lnM)));
+  // }
+  // if (kappa_val==0) {
+  //   printf("Kappa term 0 and radius=%g, zt=%g and lnM=%g\n", radius_, zt, std::log10(std::exp(lnM)));
+  // }
+
+  // if (!isfinite(int_z0_zt_val)) {
+  //   printf("int_zo_zt_val inf and radius=%g, zt=%g and lnM=%g\n", radius_, zt, std::log10(std::exp(lnM)));
+  // }
+  // if (int_z0_zt_val==0) {
+  //   printf("int_zo_zt_val 0 and radius=%g, zt=%g and lnM=%g\n", radius_, zt, std::log10(std::exp(lnM)));
+  // }

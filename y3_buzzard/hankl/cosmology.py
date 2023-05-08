@@ -53,6 +53,7 @@ def P2xi(k, P, l, n=0, lowring=False, ext=0, range=None, return_ext=False):
     return r, f * (2.0 * np.pi) ** (-1.5) * r ** (-1.5) * (1j) ** l
 
 ## Added by Johnny on Dec 12th, 2022
+## Corrected by Johnny on May 3rd, 2022
 def P2Wp(k, P, l, n=0, lowring=False, ext=0, range=None, return_ext=False):
     r"""
     Hankel Transform Power Spectrum Multipole to Correlation Function Multipole In 2D
@@ -90,7 +91,7 @@ def P2Wp(k, P, l, n=0, lowring=False, ext=0, range=None, return_ext=False):
     -------
     r, xi : array, array
         Array of uniformly logarithmically spaced r values and respective array of xi_{l}^{(n)}(r) values.
-    """
+    """    
     r, f = FFTLog(
         k,
         P * k ,
@@ -101,7 +102,7 @@ def P2Wp(k, P, l, n=0, lowring=False, ext=0, range=None, return_ext=False):
         range=range,
         return_ext=return_ext,
     )
-    return r, f * (2.0 * np.pi) ** (-1) * r ** (-1.) * (1j) ** l
+    return r, f / (2.0*np.pi*r)
 
 
 def xi2P(r, xi, l, n=0, lowring=False, ext=0, range=None, return_ext=False):

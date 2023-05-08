@@ -104,17 +104,7 @@ def execute(block, config):
         print("Error: kappa shape was not output correctly.")
         print("Shape should (Nlbdbins, Nzbins*Nrbins")
 
-    # interpolate on the new bining scheme
-    ## Johnnny debug mode May 1st
-    Rmin_phys_mpc = 0.0323
-    Rmax_phys_mpc = 30
-    Radii_bins = 15
-
-    lnrp_bins_phys_mpc = np.linspace(np.log(Rmin_phys_mpc), np.log(Rmax_phys_mpc), Radii_bins+1)
-    rp_bins_phys_mpc = np.exp(lnrp_bins_phys_mpc)
-    Radii = np.sqrt(rp_bins_phys_mpc[:-1]*rp_bins_phys_mpc[1:])
-
-    #Radii = np.logspace(np.log10(Radii_min), np.log10(Radii_max), Radii_bins)
+    Radii = np.logspace(np.log10(Radii_min), np.log10(Radii_max), Radii_bins)
 
     # compute shear profile
     # \gamma(r) = <\kappa(<r)> - k(r)

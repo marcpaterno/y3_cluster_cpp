@@ -271,6 +271,9 @@ namespace y3_cluster {
       // value for z. We are not using z here.  Costanzi, Rozo, Simet, Zhang, et al 2019
       double const ltm = pow((std::exp(lnM) - _A) / (_B - _A), _C) *
                          pow((1.0 + zt) / (1.0 + _z_pivot), _epsilon);
+      // Notation A=M_min; B=M1 and \alpha = slope
+      // M1 is the charc. mass for halos with one satellite
+      // Mmin is the minimum halo mass to host a central galaxy
 
       // Computing sigma from the interpolation
       // ltm is lambda_true_given_M; _sigma_intr is sigma_intrisic

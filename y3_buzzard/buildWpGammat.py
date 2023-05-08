@@ -81,31 +81,28 @@ def execute(block, config):
     # z = z_k_nl
     
     # compute rho_m
-    H0 = block[cosmo, "h0"]
+    # to update this value
+    H0 = block[cosmo, "h0"]*100
     G = 4.301e-9 # Mpc km^2/s^2/Msun
     rho_c = 3*H0**2/(8*np.pi*G) # Msun/Mpc^3
     rho_m = rho_c*omega_m
 
     nz = len(z)
-
     # setup bins
     R_perp = np.logspace(np.log10(R_perp_min), np.log10(R_perp_max), R_perp_bins)
     Radii = np.logspace(np.log10(Radii_min), np.log10(Radii_max), Radii_bins)
     M = np.logspace(np.log10(M_min), np.log10(M_max), M_bins)
     logM = np.log(M)
 
-    # compute NFW in fourier space 
-    # using Duffy Mass-Concetration Relation
-    # converting M200 to R200 wo the redshift evolution
-    pk_nfw = np.array([pk_nfw_profile(k_h, mi, rho_c, omega_m) for mi in M])
-    print('pk_nfw shape:', pk_nfw.shape)
-
     #### Step 1) Wp
     # compute halo-halo projected correlation function Wp_hh(R)
     # uses hankl fftlog
     # JTA: Wp_hh is the matter-matter correlation function
     Wp_hh = pk_to_Wp(R_perp, z, k_h, P_k)
-    Wp_nfw = pk_to_Wp(R_perp, z, k_h, pk_nfw)
+
+    # there is no Wp_nf
+    # to be removed
+    Wp_nfw = Wp_hh #pk_to_Wp(R_perp, z, k_h, pk_nfw)
 
     #### Step 2) deltaSigma
     # compute the halo-halo projected deltaSigma profile
@@ -117,8 +114,12 @@ def execute(block, config):
     dSigma_hh*= rho_m
 
     # compute the NFW projected profile
-    dSigma_nfw = pk_to_dSigma(R_perp, z, k_h, pk_nfw)
-    dSigma_nfw*= rho_m
+    # compute NFW Analytical Formula (Wright & Brainerd 2000)
+    # using Duffy Mass-Concetration Relation
+    # converting M200 to R200 wo the redshift evolution
+    concvec = duffy_concentration_relation(M, z_eff=0.4)
+    mm, rr  = np.meshgrid(M, R_perp, indexing='ij')
+    dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_c)
 
     # Step 3) Compute Bias (M, Z)
     Bias = compute_bias(M, k_h, P_k, omega_m)
@@ -168,20 +169,10 @@ def execute(block, config):
     return 0
 
 def compute_hankel(r, k, pk, mu=0):
-    # using cluster toolkit
-    # Xi[i] = ct.xi.xi_mm_at_r(r, k, Pk[i])  # Think this is 3-d xi
-    # 3d transform uses spherical bessel function of order 0 (j_0)
-    # 2d transform uses (ordinarry)  bessel function of order 0 (J_0)
-    
-    # Hankl
-    si, _res = hankl.P2Wp(k, pk, l=mu)
+    # Hankl means J_l (Bessel 2D) not j_l (Bessel func. 3D)
+    si, _res = hankl.P2Wp(k, pk, mu, n=0)
     res = interp1d(si, _res.real)(r)
-
-    # Scipy
-    # dln = np.log10(np.diff(k))[0]
-    # res = ifht(pk, dln, mu)
     return res
-
 
 def pk_to_Wp(r, z, k, pk):
     """ Compute the Hankel transformation of P(k)
@@ -202,7 +193,6 @@ def pk_to_Wp(r, z, k, pk):
     for i in range(z.size):
         Wp[i] = compute_hankel(r, k, pk[i], mu=0)
     return Wp
-
 # JTA: There should be a reference to the literature on this equation
 def pk_to_dSigma(r, z, k, pk):
     """ Compute the second-order Hankel transformation of P(k)
@@ -513,7 +503,7 @@ def pk_nfw_profile(k_h, m200, rho_c=1., omega_m=0.3, z_eff=0.4):
 def duffy_concentration_relation(m_h, z_eff=0.4):
     a_eff = 1/(1+z_eff)
     m_h_pivot = 2e12
-    return 7.85*np.power(m_h/m_h_pivot,-0.081)*pow(a_eff,0.71)
+    return 7.85*np.power(m_h/m_h_pivot,-0.081)*np.power(a_eff,0.71)
 
 def convert_m200_to_r200(m200,rho,odelta=200):
     rv = np.power(m200*3.0/(4.0*np.pi*rho*odelta),1.0/3.0)
@@ -546,6 +536,69 @@ def normalized_halo_profile(k_h, r_virial, c):
     f3 = np.sin(c*ks)/(ks*(1.+c))
     fc = np.log(1.+c)-c/(1.+c)
     return (f1+f2-f3)/fc
+
+### Compute \Delta \Sigma Analyticaly
+def g_less_than(x,core=4e-3):
+    # below core the solution fails numereically
+    x = np.where(x<core, core, x)
+    term1 = 8.0*np.arctanh(np.sqrt((1.0-x)/(1.0+x)))/(x**2*np.sqrt(1.0-x**2))
+    term2 = 4.0/x**2 * np.log(x/2.0)
+    term3 = -2.0/(x**2-1.0)
+    term4 = 4.0*np.arctanh(np.sqrt((1.0-x)/(1.0+x)))/((x**2-1.0)*np.sqrt(1.0-x**2))
+    return term1 + term2 + term3 + term4
+
+def g_greater_than(x, xmax=1e9):
+    # above xmax the function achieves machine precision
+    x = np.where(x>xmax, xmax, x)
+    term1 = 8.0*np.arctan(np.sqrt((x-1.0)/(1.0+x)))/(x**2*np.sqrt(x**2-1.0))
+    term2 = 4.0/x**2 * np.log(x/2.0)
+    term3 = -2.0/(x**2-1.0)
+    term4 = 4.0*np.arctan(np.sqrt((x-1.0)/(1.0+x)))/((x**2-1.0)**(3.0/2.0))
+    return term1 + term2 + term3 + term4
+
+def g_nfw(x, eps=1e-9):
+    """gNFW Eqn 15 and 16 Wright & Brained 2000
+
+    Analytical normalized shear/deltaSigma profile
+
+    Args:
+        x (array): Rp/Rs where Rs is the scale radius, Rs = R200/c
+    """
+    res = np.zeros_like(x)
+    ix = np.where(np.abs(x-1) <= eps)[0]
+    res[ix] = 10./3. + 4*np.log(1/2.) 
+    
+    ix = np.where(x <= 1-eps)[0]
+    res[ix] = g_less_than(x[ix])
+    
+    ix = np.where(x>=1+eps)[0]
+    res[ix] = g_greater_than(x[ix])
+    return res
+
+def convert_m200_to_r200(m200,rho,odelta=200):
+    rv = np.power(m200*3.0/(4.0*np.pi*rho*odelta),1.0/3.0)
+    return rv
+
+def deltaSigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
+    """Analytical NFW Surface Mass Density  (Eqn 14, Wright & Brained 2000)
+
+    Args:
+        radii (array): projected radii
+        m200 (array): M200 critical mass in solar masses unit
+        z_eff (float): effective redshift to concentration and critical density values
+    """
+    r_virial = convert_m200_to_r200(m200, rho_c)
+    rs = r_virial/c
+
+    # eqn 3 
+    deltac = (200./3.) * c**3/(np.log(1+c)-c/(1+c))
+
+    # eqn 15 an 16
+    # interpolation avoid numerical issues
+    xvec = np.logspace(-3.,4.,1000)
+    gx = interp1d(xvec, g_nfw(xvec))(radii/rs)
+    return rs*deltac*rho_c*gx
+
 
 def cleanup(config):
     pass

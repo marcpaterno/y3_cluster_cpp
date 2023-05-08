@@ -69,6 +69,8 @@ def setup(options):
         z_src = betaTable['zEff'] # ndshape (zlens.size, rbins.size)
         beta_fid = betaTable["betaEff"] # ndshape (zbins.size, rbins.size)
         
+        is_delta_sigma = bool(options[section, "is_delta_sigma"])
+
         # fake data
         if fake_data:
             z_beta = np.linspace(0.1, 1.2, 64)
@@ -78,10 +80,10 @@ def setup(options):
             z_src = np.zeros((z_beta.size, r_beta.size))
             z_src = z_src + (1+0.2)*(z_beta[:,np.newaxis])
 
-        return z_beta, r_beta, z_src, beta_fid
+        return z_beta, r_beta, z_src, beta_fid, is_delta_sigma
 
 def execute(block, config):
-        z_beta, r_beta, z_src, beta_fid  = config
+        z_beta, r_beta, z_src, beta_fid, is_delta_sigma  = config
 
         # setup constants
         # 4piG/c^2
@@ -133,10 +135,14 @@ def execute(block, config):
                 # sigma_crit_inv_vec =  const * (dc_lenses[i]*1e6) * np.ones_like(r_beta)
                 
                 # interpolate with the new binning scheme 
-                sigma_crit_inv[i] = interp1d(r_beta, sigma_crit_inv_vec, bounds_error=False)(r_sigma)
+                # sigma_crit_inv[i] = interp1d(r_beta, sigma_crit_inv_vec, bounds_error=False)(r_sigma)
+                sigma_crit_inv[i] = np.interp(r_sigma, r_beta, sigma_crit_inv_vec)
 
         # JTA hack hack hack
-        #sigma_crit_inv = sigma_crit_inv/sigma_crit_inv
+        if is_delta_sigma:
+                sigma_crit_inv = sigma_crit_inv/sigma_crit_inv
+                # set sigma_crit_inv to unity
+                # then, shear is actually delta sigma 
         
         block["sigmaCritInv", "r_sigma"] = r_sigma
         block["sigmaCritInv", "z"] = z_lenses
