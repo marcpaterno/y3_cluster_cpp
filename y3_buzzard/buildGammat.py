@@ -108,7 +108,7 @@ def execute(block, config):
 
     # compute shear profile
     # \gamma(r) = <\kappa(<r)> - k(r)
-    shear_cen = np.zeros((Nlbins * Nzbins, Radii_bins))
+    shear_cen = np.zeros((Nlbins * Nzbins, Nrbins))
     for ij in range(Nlbins * Nzbins):
         if do_int:
             shear_ij = compute_mean_profile(r_kappa, kappa_cen_reshaped[ij])
@@ -117,19 +117,18 @@ def execute(block, config):
 
         shear_avg_ij = shear_ij / NC.flatten()[ij]
 
-        shear_cen[ij] = interp1d(r_kappa, shear_avg_ij,
-                                 bounds_error=False)(Radii)
+        shear_cen[ij] = shear_avg_ij
 
     # convert R [Mpc/h] to theta [arcmin/h]
     # theta depends on redshift, because of angular distance
     # for simplicity theta will have the same shape of shear
-    theta = np.zeros((Nlbins * Nzbins, Radii_bins))
+    theta = np.zeros((Nlbins * Nzbins, Nrbins))
     for ij, z in enumerate(zmeans_ij):
         # convert R to theta
-        theta[ij] = r_to_theta(Radii, z, z_da, da, sep_units)
+        theta[ij] = r_to_theta(r_kappa, z, z_da, da, sep_units)
 
     # put into the datablock
-    block["shear", "r"] = Radii / h0  # Mpc/h
+    block["shear", "r"] = r_kappa / h0  # Mpc/h
     block["shear", "theta"] = theta / h0  #sep_units/h
     block["shear", "shear_cen"] = shear_cen
     return 0

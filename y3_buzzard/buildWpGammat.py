@@ -98,7 +98,8 @@ def execute(block, config):
     # compute halo-halo projected correlation function Wp_hh(R)
     # uses hankl fftlog
     # JTA: Wp_hh is the matter-matter correlation function
-    Wp_hh = pk_to_Wp(R_perp, z, k_h, P_k)
+    # Wp_hh = pk_to_Wp(R_perp, z, k_h, P_k)
+    Wp_hh = np.zeros((len(z), R_perp.size),dtype='d')
 
     # there is no Wp_nf
     # to be removed
@@ -112,6 +113,7 @@ def execute(block, config):
     #   JTA: it's a form of the two-halo term, again, without the bias
     dSigma_hh = pk_to_dSigma(R_perp, z, k_h, P_k)
     dSigma_hh*= rho_m
+    # dSigma_hh = np.zeros((nz, Radii.size),dtype='d')
 
     # compute the NFW projected profile
     # compute NFW Analytical Formula (Wright & Brainerd 2000)
@@ -123,6 +125,7 @@ def execute(block, config):
 
     # Step 3) Compute Bias (M, Z)
     Bias = compute_bias(M, k_h, P_k, omega_m)
+    # Bias = np.zeros((M.size, z.size),dtype='d')
     # NOTE: P_k depends on z; mass is a vector
     # Bias has shape (mass.size, z.size)
 
@@ -144,10 +147,10 @@ def execute(block, config):
     block["correlationFunction", "Wp_hh"] = Wp_hh
     block["correlationFunction", "Wp_nfw"] = Wp_nfw
 
-    # deltaSigma
+    # deltaSigma [Msun/pc^2]
     block["correlationFunction", "r_sigma"] = R_perp
-    block["correlationFunction", "Sigma_hh"] = dSigma_hh
-    block["correlationFunction", "Sigma_nfw"] = dSigma_nfw
+    block["correlationFunction", "Sigma_hh"] = dSigma_hh/1e12
+    block["correlationFunction", "Sigma_nfw"] = dSigma_nfw/1e12
     
     # Bias
     block["correlationFunction", "bias"] = Bias
@@ -327,8 +330,11 @@ def compute_bias(mass, k, P_k, omega_m=0.3):
     """
     zsize = P_k.shape[0]
     Bias = np.zeros((mass.size, zsize))
-    for j in range(zsize):
-            Bias[:, j] = ct.bias.bias_at_M(mass, k, P_k[j], omega_m)
+    # double loop is faster
+    # I know it is weird
+    for i in range(mass.size):
+        for j in range(zsize):
+            Bias[i][j] = ct.bias.bias_at_M(mass[i], k, P_k[j], omega_m)
     return Bias
 
 def compute_concentration(z, mass, mstar, z_mstar, 
@@ -353,7 +359,7 @@ def compute_concentration(z, mass, mstar, z_mstar,
 from astropy.cosmology import FlatLambdaCDM
 cosmo_fid = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
 
-def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3):
+def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3, eps=1e-9):
     """Scale Shift Cosmology
 
     To adapt to a new cosmology we can re-scale the distances by taking
@@ -388,7 +394,7 @@ def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3):
     dc_fid = cosmo_fid.comoving_distance(z_dc).value
 
     # scale shift
-    scale_shift_vec = dc/dc_fid
+    scale_shift_vec = dc/(dc_fid+eps)
     scale_shift_vec[0] = 1.
 
     # the hubble flow is the shift on the parallel direction of the los

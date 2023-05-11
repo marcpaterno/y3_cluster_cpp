@@ -50,7 +50,17 @@ import numpy as np
 cosmo = names.cosmological_parameters
 debug = True
 
-names = ['NC', 'Shear', 'Wp']
+####### GLOBAL VARIABLES #######
+# Sets the data vector
+# names = ['NC', 'Shear','Wp']
+names = ['NC', 'Shear']
+
+### DO NO TOUCH
+theoryDict = dict().fromkeys(names)
+pipe_names = {'NC':'numberCounts','Shear':'shear','Wp':'wp'}
+vals_names = {'NC':'vals','Shear':'shear_cen','Wp':'wp_cen'}
+### DO NO TOUCH
+####### GLOBAL VARIABLES #######
 
 import h5py
 def readHDF(fname, path):
@@ -78,12 +88,17 @@ def execute(block, config):
     # arrays with shape (Nrbins x Nlbdins x Nzbins, )
     # [(r0, l0, z0), (r1, l0, z0), (r2, l0, z0), ..., (r0, zn, lm), (r1, zn, lm), ...]
     # For NC; Nrbins = 0 
-    NC  = block["numberCounts", "vals"].flatten()
-    GT  = block["shear", "shear_cen"].flatten()
-    WP = block["wp", "wp_cen"].flatten()
+    for name in names:
+        db_section = pipe_names[name]
+        db_vals = vals_names[name]
+        theoryDict[name] = block[db_section, db_vals].flatten()
+
+    # NC  = block["numberCounts", "vals"].flatten()
+    # GT  = block["shear", "shear_cen"].flatten()
+    # # WP = block["wp", "wp_cen"].flatten()
     # Sum Operator: take the average by dividing Nc[1]
 
-    theoryDict = {'NC': NC, 'Shear': GT, 'Wp': WP}
+    # theoryDict = {'NC': NC, 'Shear': GT, 'Wp': WP}
 
     # logLikelihood
     # block-diagonal covariances with R
@@ -100,6 +115,7 @@ def execute(block, config):
         delta = data - theory
         logLike += -0.5 * np.dot(delta, np.dot(invcov, delta))
 
+    print('Log Like',logLike)
     # put into the datablock
     block["likelihoods", 'likelihoods_like'] = logLike
     return 0
