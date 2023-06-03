@@ -76,16 +76,12 @@ def execute(block, config):
     k_h = block["matter_power_lin", "k_h"]
     P_k = block["matter_power_lin", "p_k"]
     z_k = block["matter_power_lin", "z"]
-
-    sigma_r = block["matter_power_lin", "sigma_r"]
-    sigma_r = block["matter_power_lin", "sigma_r"]
-
     z = z_k
 
     # get peak-height values
     rnu = block["sigma_r", "r"]
     znu = block["sigma_r", "z"]
-    nu = 1.686/block["sigma_r", "sigma_r"]
+    nu = 1.686/block["sigma_r", "sigma"]
     
     # compute rho_m
     hz = h0*np.sqrt(omega_m*(1+z**3)+(1-omega_m))
