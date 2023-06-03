@@ -97,7 +97,7 @@ def execute(block, config):
     # get the number of redshift bins
     Nzbins = int(Nzr / Nrbins)
     print("Number of redshift bins: %i" % Nzbins)
-
+# 
     # reshape: wp is one profile (i.e. radial bins) for each row
     # each row is one (lambda, redshift) bin
     try:

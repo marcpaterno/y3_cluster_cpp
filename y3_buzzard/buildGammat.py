@@ -94,7 +94,7 @@ def execute(block, config):
 
     # get the number of redshift bins
     Nzbins = int(Nzr / Nrbins)
-    print("Number of redshift bins: %i" % Nzbins)
+    # print("Number of redshift bins: %i" % Nzbins)
 
     # reshape: kappa is one profile (i.e. radial bins) for each row
     # each row is one (lambda, redshift) bin

@@ -62,15 +62,22 @@ vals_names = {'NC':'vals','Shear':'shear_cen','Wp':'wp_cen'}
 ### DO NO TOUCH
 ####### GLOBAL VARIABLES #######
 
-import h5py
-def readHDF(fname, path):
-    master = h5py.File(fname,'r')
-    return master[path][:][:]
+# import h5py
+# def readHDF(fname, path):
+#     master = h5py.File(fname,'r')
+#     return master[path][:][:]
+
+# def readDataVector(fname, path='data'):
+#     mydict = dict().fromkeys(names)
+#     for name in names:
+#         mydict[name] = readHDF(fname, path+'/'+name)
+#     return mydict
 
 def readDataVector(fname, path='data'):
     mydict = dict().fromkeys(names)
+    vec = np.load(fname)
     for name in names:
-        mydict[name] = readHDF(fname, path+'/'+name)
+        mydict[name] = vec['%s_%s'%(path,name)]
     return mydict
 
 def setup(options):
@@ -104,7 +111,7 @@ def execute(block, config):
     # block-diagonal covariances with R
     logLike = 0
     for name in names:
-        print('Name: %s'%name)
+        # print('Name: %s'%name)
         data = dataDict[name]
         theory = theoryDict[name]
 

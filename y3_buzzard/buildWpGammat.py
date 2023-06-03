@@ -6,6 +6,9 @@ from scipy.interpolate import interp1d
 from scipy.special import erf
 import cluster_toolkit as ct
 import massconcen
+import bias
+
+from astropy.constants import G
 
 import hankl
 from scipy.fft import ifht
@@ -65,7 +68,7 @@ def execute(block, config):
     # cosmo parameters
     omega_m = block[cosmo, "omega_m"]
     omega_b = block[cosmo, "omega_b"]
-    sigma8 = block[cosmo, "sigma8_input"]
+    # sigma8 = block[cosmo, "sigma8_input"]
     h0 = block[cosmo, "h0"]
 
     # load camb matter-matter power spectrums
@@ -73,19 +76,23 @@ def execute(block, config):
     k_h = block["matter_power_lin", "k_h"]
     P_k = block["matter_power_lin", "p_k"]
     z_k = block["matter_power_lin", "z"]
+
+    sigma_r = block["matter_power_lin", "sigma_r"]
+    sigma_r = block["matter_power_lin", "sigma_r"]
+
     z = z_k
 
-    # k_nl = block["matter_power_nl", "k_h"]
-    # P_k_nl = block["matter_power_nl", "p_k"]
-    # z_k_nl = block["matter_power_nl", "z"]
-    # z = z_k_nl
+    # get peak-height values
+    rnu = block["sigma_r", "r"]
+    znu = block["sigma_r", "z"]
+    nu = 1.686/block["sigma_r", "sigma_r"]
     
     # compute rho_m
-    # to update this value
-    H0 = block[cosmo, "h0"]*100
-    G = 4.301e-9 # Mpc km^2/s^2/Msun
-    rho_c = 3*H0**2/(8*np.pi*G) # Msun/Mpc^3
-    rho_m = rho_c*omega_m
+    hz = h0*np.sqrt(omega_m*(1+z**3)+(1-omega_m))
+    Gv = G.to('Mpc km^2 s-2 Msun-1').value
+    rho_c = 3*100**2/(8*np.pi*Gv) # Msun h^2/Mpc^3
+    rho_cz = rho_c*hz**2
+    rho_m  = rho_c*omega_m
 
     nz = len(z)
     # setup bins
@@ -121,11 +128,16 @@ def execute(block, config):
     # converting M200 to R200 wo the redshift evolution
     concvec = duffy_concentration_relation(M, z_eff=0.4)
     mm, rr  = np.meshgrid(M, R_perp, indexing='ij')
-    dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_c)
+    dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_c*h0**2)
 
     # Step 3) Compute Bias (M, Z)
-    Bias = compute_bias(M, k_h, P_k, omega_m)
-    # Bias = np.zeros((M.size, z.size),dtype='d')
+    # Bias = compute_bias(M, k_h, P_k, omega_m)
+    import time
+    t0 = time.time()
+    Bias = compute_bias_camb(rnu, znu, nu, M, z, rho_cz*omega_m)
+    tf = time.time()-t0
+    print('Bias took: %.3f sec'%tf)
+
     # NOTE: P_k depends on z; mass is a vector
     # Bias has shape (mass.size, z.size)
 
@@ -334,7 +346,11 @@ def compute_bias(mass, k, P_k, omega_m=0.3):
     # I know it is weird
     for i in range(mass.size):
         for j in range(zsize):
-            Bias[i][j] = ct.bias.bias_at_M(mass[i], k, P_k[j], omega_m)
+            try:
+                Bias[i][j] = ct.bias.bias_at_M(mass[i], k, P_k[j], omega_m)
+            except:
+                print('Bias error')
+                Bias[i][j] = 0.
     return Bias
 
 def compute_concentration(z, mass, mstar, z_mstar, 
@@ -582,7 +598,7 @@ def g_nfw(x, eps=1e-9):
     return res
 
 def convert_m200_to_r200(m200,rho,odelta=200):
-    rv = np.power(m200*3.0/(4.0*np.pi*rho*odelta),1.0/3.0)
+    rv = np.power(3*m200/(4.0*np.pi*rho*odelta),1.0/3.0)
     return rv
 
 def deltaSigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
@@ -605,6 +621,25 @@ def deltaSigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
     gx = interp1d(xvec, g_nfw(xvec))(radii/rs)
     return rs*deltac*rho_c*gx
 
+def compute_bias_camb(rnu, znu, nu, massvec, zvec, rhocz, omega_m=0.3):
+    # loop over redshift
+    # coult it be improved; but it is fast enough
+    
+    Bias = np.zeros((massvec.size, zvec.size))
+    for i,z in enumerate(zvec):
+        # slice nu(radii,z)
+        iz = np.interp(z,znu,np.arange(znu.size)).astype(int)
+        nui = nu[iz]
+
+        # convert mass to radii_lagrangian
+        # Child et al. 2018 Eqn 13
+        rhom = rhocz[i]*omega_m*(1+z)**3
+        rvec = convert_m200_to_r200(massvec, rhom, odelta=1)
+        
+        # interpolate with the new radii vector
+        _nui = np.exp(interp1d(rnu, np.log(nui), fill_value='extrapolate')(rvec))
+        Bias[:,i] = bias.bias_at_nu(_nui, odelta=200)
+    return Bias
 
 def cleanup(config):
     pass
