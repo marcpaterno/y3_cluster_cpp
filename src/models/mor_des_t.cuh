@@ -280,9 +280,12 @@ namespace y3_cuda {
       // Matteo's paper, i.e., lambda_sat_given_M. 1. is a dummy
       // value for z. We are not using z here.   Costanzi, Rozo, Simet, Zhang, et al 2019
       // fix the case when ltm is negative
-      double const M = std::exp(lnM) < _A ? _A : std::exp(lnM);
-      double const ltm = pow((exp(lnM) - _A) / (_B - _A), _C) *
+      // double const M = std::exp(lnM) < _A ? _A : std::exp(lnM);
+      double const _ltm = pow((exp(lnM) - _A) / (_B - _A), _C) *
                          pow((1.0 + zt) / (1.0 + _z_pivot), _epsilon);
+      // Make sure richness is always positive
+      double const ltm = std::max(1.0, _ltm);
+      
       // Notation A=M_min; B=M1 and \alpha = slope
       // M1 is the charc. mass for halos with one satellite
       // Mmin is the minimum halo mass to host a central galaxy
