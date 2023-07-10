@@ -9,6 +9,7 @@ import massconcen
 import bias
 
 from astropy.constants import G
+import astropy.cosmology
 
 import hankl
 from scipy.fft import ifht
@@ -37,7 +38,7 @@ from setup_bins import zmeans_ij
 #############################################
 
 cosmo = names.cosmological_parameters
-
+cosmo_fid = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
 
 def setup(options):
     section = option_section
@@ -68,8 +69,8 @@ def execute(block, config):
     # cosmo parameters
     omega_m = block[cosmo, "omega_m"]
     omega_b = block[cosmo, "omega_b"]
-    # sigma8 = block[cosmo, "sigma8_input"]
-    h0 = block[cosmo, "h0"]
+    H0 = block[cosmo, "H0"]
+    cosmology = astropy.cosmology.FlatLambdaCDM(H0,omega_m, Ob0=omega_b, Tcmb0=2.725)
 
     # load camb matter-matter power spectrums
     # linear is used for the bias
@@ -82,13 +83,12 @@ def execute(block, config):
     rnu = block["sigma_r", "r"]
     znu = block["sigma_r", "z"]
     nu = 1.686/block["sigma_r", "sigma"]
-    
-    # compute rho_m
-    hz = h0*np.sqrt(omega_m*(1+z**3)+(1-omega_m))
-    Gv = G.to('Mpc km^2 s-2 Msun-1').value
-    rho_c = 3*100**2/(8*np.pi*Gv) # Msun h^2/Mpc^3
-    rho_cz = rho_c*hz**2
-    rho_m  = rho_c*omega_m
+
+    # compute overdensities; physical not comoving
+    rho_c0 = cosmology.critical_density0
+    rho_cz = cosmology.critical_density(z)
+    rho_m = cosmology.Om0*rho_c0
+    rho_mz = rho_m*(1.+z)**3
 
     nz = len(z)
     # setup bins
@@ -130,7 +130,7 @@ def execute(block, config):
     # Bias = compute_bias(M, k_h, P_k, omega_m)
     import time
     t0 = time.time()
-    Bias = compute_bias_camb(rnu, znu, nu, M, z, rho_cz*omega_m)
+    Bias = compute_bias_camb(rnu, znu, nu, M, z, rho_mz)
     tf = time.time()-t0
     print('Bias took: %.3f sec'%tf)
 
@@ -143,12 +143,13 @@ def execute(block, config):
 
     # Step 5) shift cosmological scale
     # ratio of the comoving distance dC(cosmo)/dC(cosmo_fid)
-    scaleShift, hubbleShift = scaleShiftCosmo(z, block, h0=h0, omega_m=omega_m)
+    scaleShift, hubbleShift = scaleShiftCosmo(z, cosmology)
 
     # put into the datablock
     block["correlationFunction", "m_h"] = M
     block["correlationFunction", "lnM"] = logM
     block["correlationFunction", "z"] = z
+    block["correlationFunction", "rhoc"] = rho_cz
 
     # Wp
     block["correlationFunction", "Rp"] = Radii
@@ -368,10 +369,7 @@ def compute_concentration(z, mass, mstar, z_mstar,
                                           sigma8, h0, mstar, z_mstar)
     return conc
 
-from astropy.cosmology import FlatLambdaCDM
-cosmo_fid = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
-
-def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3, eps=1e-9):
+def scaleShiftCosmo(znew, cosmo, eps=1e-9):
     """Scale Shift Cosmology
 
     To adapt to a new cosmology we can re-scale the distances by taking
@@ -385,8 +383,7 @@ def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3, eps=1e-9):
 
     Args:
         znew (array): redshift vector
-        block (dict): data block
-        h0 (float, optional): small hubble constant. Defaults to 0.7.
+        cosmo (astropy.cosmology): astropy cosmology
 
     Returns:
         scale_shift: scale shift factor = ratio of comoving distances/H(z)
@@ -395,29 +392,21 @@ def scaleShiftCosmo(znew, block, h0=0.7, omega_m=0.3, eps=1e-9):
     # cosmological quantities
     # h0 = block[cosmo, "h0"]
 
-    z_dc = block["distances",'z']
-    dc = block["distances",'d_a']*(1+z_dc) # comoving distance Mpc
-
-    z = block["growth_parameters","z"]
-    hz = block["growth_parameters","h"]
-
     # fiducical cosmology
-    Hz_fid = cosmo_fid.H(z_dc).value
-    dc_fid = cosmo_fid.comoving_distance(z_dc).value
+    Hz_fid = cosmo_fid.H(znew).value
+    dc_fid = cosmo_fid.comoving_distance(znew).value
+
+    # current cosmology
+    Hz = cosmo.H(znew).value
+    dc = cosmo.comoving_distance(znew).value
 
     # scale shift
-    scale_shift_vec = dc/(dc_fid+eps)
-    scale_shift_vec[0] = 1.
+    scale_shift = dc/(dc_fid+eps)
+    scale_shift[0] = 1.
 
-    # the hubble flow is the shift on the parallel direction of the los
-    H0_vec = np.interp(z_dc, z, hz)
-    hubble_shift_vec = Hz_fid/H0_vec
+    # hubble shift
+    hubble_shit = Hz/Hz_fid
 
-    # interpolate for the new redshift
-    scale_shift_perp = interp1d(z_dc[1:], scale_shift_vec[1:], fill_value='extrapolate')(znew)
-    # avoids dc = 0
-
-    hubble_shift = interp1d(z_dc, hubble_shift_vec, fill_value='extrapolate')(znew)
     return scale_shift_perp, hubble_shift
 
 def xi_to_wp(r, xi, pimax=100):
@@ -511,12 +500,12 @@ def is_uniform_sampling(r):
     return np.allclose(ddr, 0, atol=1e-13)
 
 from scipy.special import sici
-def pk_nfw_profile(k_h, m200, rho_c=1., omega_m=0.3, z_eff=0.4):
-    c = duffy_concentration_relation(m200, z_eff=z_eff)
-    rho_cz = rho_c*(omega_m*(1+z_eff)**3+(1-omega_m))
-    r_virial = convert_m200_to_r200(m200, rho_cz)
-    rho_k = (m200/(rho_c*omega_m))*normalized_halo_profile(k_h, r_virial, c)
-    return rho_k
+# def pk_nfw_profile(k_h, m200, rho_c=1., omega_m=0.3, z_eff=0.4):
+#     c = duffy_concentration_relation(m200, z_eff=z_eff)
+#     rho_cz = rho_c*(omega_m*(1+z_eff)**3+(1-omega_m))
+#     r_virial = convert_m200_to_r200(m200, rho_cz)
+#     rho_k = (m200/(rho_c*omega_m))*normalized_halo_profile(k_h, r_virial, c)
+#     return rho_k
 
 def duffy_concentration_relation(m_h, z_eff=0.4):
     a_eff = 1/(1+z_eff)
@@ -617,7 +606,7 @@ def deltaSigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
     gx = interp1d(xvec, g_nfw(xvec))(radii/rs)
     return rs*deltac*rho_c*gx
 
-def compute_bias_camb(rnu, znu, nu, massvec, zvec, rhocz, omega_m=0.3):
+def compute_bias_camb(rnu, znu, nu, massvec, zvec, rhomz, omega_m=0.3):
     # loop over redshift
     # coult it be improved; but it is fast enough
     
@@ -629,7 +618,7 @@ def compute_bias_camb(rnu, znu, nu, massvec, zvec, rhocz, omega_m=0.3):
 
         # convert mass to radii_lagrangian
         # Child et al. 2018 Eqn 13
-        rhom = rhocz[i]*omega_m*(1+z)**3
+        rhom = rhomz[i]
         rvec = convert_m200_to_r200(massvec, rhom, odelta=1)
         
         # interpolate with the new radii vector
