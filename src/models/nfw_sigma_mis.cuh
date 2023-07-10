@@ -81,3 +81,30 @@ namespace y3_cuda {
 
 // /global/common/software/des/jesteves/y3_cluster_cpp/data/nfw_off_center
 // 'offset_nfw_table_1000_1e-02_1e+04_log_sigma_single'
+
+// Based on ChatGPT
+void testNFW_SIGMA_MIS() {
+  // Create an instance of NFW_SIGMA_MIS with test parameters
+  double c = 4.0;
+  double rhoc = 2.77533742639e+11;
+  std::string kernel = "gamma";
+  y3_cuda::NFW_SIGMA_MIS nfw(c, rhoc, kernel);
+
+  // Define test inputs and expected output
+  double r = 1.0;
+  double rmis = 0.5;
+  double lnM = 10.0;
+  double expected = /* Expected output value */;
+
+  // Evaluate the NFW_SIGMA_MIS operator and compare with expected output
+  double result = nfw(r, rmis, lnM);
+  assert(result == expected);
+
+  // Print test result
+  std::cout << "Test Passed!" << std::endl;
+}
+
+int main() {
+  testNFW_SIGMA_MIS();
+  return 0;
+}
