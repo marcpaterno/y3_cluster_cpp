@@ -24,10 +24,10 @@ namespace y3_cuda {
     double const RHOC = 2.77533742639e+11;
 
     // selects the miscentering kernel ('single','gamma')
-    char const* const GAMMA = "gamma";
+    std::string GAMMA = "gamma";
 
   public:
-    NFW_SIGMA_MIS(double c, double rhoc, char const* kernel)
+    NFW_SIGMA_MIS(double c, double rhoc, std::string kernel)
       : _c(c), _rhoc(rhoc), _kernel(kernel)
     {
       std::string xfile = "data/nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
@@ -72,9 +72,9 @@ namespace y3_cuda {
     }
 
   private:
-    char const* _kernel;
-    char const* _c;
-    char const* _rhoc;
+    std::string _kernel;
+    double const _c;
+    double const _rhoc;
   };
 }
 #endif
