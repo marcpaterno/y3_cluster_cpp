@@ -14,25 +14,26 @@
 #include <algorithm>
 
 namespace y3_cuda {
+  // Default concentration value
+  double const CONC = 4.0;
+
+  // Critical density in Msun/Mpc^3
+  double const RHOC = 2.77533742639e+11;
+
+  // selects the miscentering kernel ('single','gamma')
+  std::string cost GAMMA = "gamma";
+
+
   class NFW_DSIGMA_MIS {
-    std::vector<y3_cluster::Interp2D> nfwProfile;
+    quad::Interp2D nfwProfile;
 
-    // Default concentration value
-    double const CONC = 4.0;
-
-    // Critical density in Msun/Mpc^3
-    double const RHOC = 2.77533742639e+11;
-
-    // selects the miscentering kernel ('single','gamma')
-    std::string GAMMA = "gamma";
-
-  public:
+    public:
     NFW_DSIGMA_MIS(double c, double rhoc, std::string kernel)
       : _c(c), _rhoc(rhoc), _kernel(kernel)
     {
-      std::string xfile = "data/nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
-      std::string yfile = "data/nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
-      std::string zfile = "data/nfw_off_center/table_1000_1e-02_1e+04_log_deltasigma_" + std::string(_kernel) + ".txt";
+      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
+      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_deltasigma_" + std::string(_kernel) + ".txt";
 		
       auto const xs = read_vector(xfile);
       auto const ys = read_vector(yfile);
@@ -41,12 +42,32 @@ namespace y3_cuda {
     }
     using doubles = std::vector<double>;
 
+
     explicit NFW_DSIGMA_MIS()
     : _c(CONC), _rhoc(RHOC), _kernel(GAMMA)
     {
-      std::string xfile = "data/nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
-      std::string yfile = "data/nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
-      std::string zfile = "data/nfw_off_center/table_1000_1e-02_1e+04_log_deltasigma_" + std::string(_kernel) + ".txt";
+      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
+      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_deltasigma_" + std::string(_kernel) + ".txt";
+		
+      auto const xs = read_vector(xfile);
+      auto const ys = read_vector(yfile);
+      auto const zs = read_vector(zfile);
+      nfwProfile = y3_cluster::Interp2D(xs, ys, zs);
+    }
+
+    // In case, we envolve the NFW profile with redshift
+    // TODO: Implement Mass-Concentration Relation
+    // TODO: Implement different operator in case of rhocz(zt)
+    // Ask Marc How to make _c and _rhoc be functional forms in any case
+    NFW_DSIGMA_MIS(cosmosis::DataBlock& sample)
+    : _c(make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
+    , _rhoc(make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
+    , _kernel(GAMMA)
+    {
+      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
+      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_sigma_" + std::string(_kernel) + ".txt";
 		
       auto const xs = read_vector(xfile);
       auto const ys = read_vector(yfile);
@@ -81,3 +102,30 @@ namespace y3_cuda {
 
 // /global/common/software/des/jesteves/y3_cluster_cpp/data/nfw_off_center
 // 'offset_nfw_table_1000_1e-02_1e+04_log_sigma_single'
+
+// // Based on ChatGPT
+// void testNFW_DSIGMA_MIS() {
+//   // Create an instance of NFW_DSIGMA_MIS with test parameters
+//   double c = 4.0;
+//   double rhoc = 2.77533742639e+11;
+//   std::string kernel = "gamma";
+//   y3_cuda::NFW_DSIGMA_MIS nfw(c, rhoc, kernel);
+
+//   // Define test inputs and expected output
+//   double r = 1.0;
+//   double rmis = 0.5;
+//   double lnM = 10.0;
+//   double expected = /* Expected output value */;
+
+//   // Evaluate the NFW_DSIGMA_MIS operator and compare with expected output
+//   double result = nfw(r, rmis, lnM);
+//   assert(result == expected);
+
+//   // Print test result
+//   std::cout << "Test Passed!" << std::endl;
+// }
+
+// int main() {
+//   testNFW_DSIGMA_MIS();
+//   return 0;
+// }

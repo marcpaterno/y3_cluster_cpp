@@ -9,12 +9,12 @@
 #include <string>
 #include "cosmosis/datablock/ndarray.hh"
 #include "common/cuda/Interp2D.cuh"
+#include "utils/make_interp_1d.cuh"
 #include "utils/primitives.hh"
 
 #include <algorithm>
 
 namespace y3_cuda {
-
   // Default concentration value
   double const CONC = 4.0;
 
@@ -23,7 +23,6 @@ namespace y3_cuda {
 
   // selects the miscentering kernel ('single','gamma')
   std::string cost GAMMA = "gamma";
-
 
   class NFW_SIGMA_MIS {
     quad::Interp2D nfwProfile;
@@ -46,6 +45,25 @@ namespace y3_cuda {
 
     explicit NFW_SIGMA_MIS()
     : _c(CONC), _rhoc(RHOC), _kernel(GAMMA)
+    {
+      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
+      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_sigma_" + std::string(_kernel) + ".txt";
+		
+      auto const xs = read_vector(xfile);
+      auto const ys = read_vector(yfile);
+      auto const zs = read_vector(zfile);
+      nfwProfile = y3_cluster::Interp2D(xs, ys, zs);
+    }
+
+    // In case, we envolve the NFW profile with redshift
+    // TODO: Implement Mass-Concentration Relation
+    // TODO: Implement different operator in case of rhocz(zt)
+    // Ask Marc How to make _c and _rhoc be functional forms in any case
+    NFW_SIGMA_MIS(cosmosis::DataBlock& sample)
+    : _c(make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
+    , _rhoc(make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
+    , _kernel(GAMMA)
     {
       std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
       std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
