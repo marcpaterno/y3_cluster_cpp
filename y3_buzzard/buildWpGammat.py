@@ -38,7 +38,7 @@ from setup_bins import zmeans_ij
 #############################################
 
 cosmo = names.cosmological_parameters
-cosmo_fid = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
+cosmo_fid = astropy.cosmology.FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
 
 def setup(options):
     section = option_section
@@ -160,6 +160,7 @@ def execute(block, config):
     block["correlationFunction", "r_sigma"] = R_perp
     block["correlationFunction", "Sigma_hh"] = dSigma_hh/1e12
     block["correlationFunction", "Sigma_nfw"] = dSigma_nfw/1e12
+    block["correlationFunction", "concentration"] = concvec
     
     # Bias
     block["correlationFunction", "bias"] = Bias
