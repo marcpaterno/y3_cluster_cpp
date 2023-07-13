@@ -14,6 +14,11 @@ target_link_libraries(mpi_testmain PRIVATE MPI::MPI_CXX)
 # Use of CUDA is optional
 
 if (USE_CUDA)
+  add_executable(nfw_sigma_mis_test nfw_sigma_mis.test.cu)
+  target_link_libraries(nfw_sigma_mis_test PRIVATE utils testmain)
+  target_include_directories(nfw_sigma_mis_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals ${PAGANI_DIR})
+  add_test(nfw_sigma_mis_test nfw_sigma_mis_test)
+
 add_executable(
   timing_sentry_cuda_test timing_sentry_test.cu
   )
