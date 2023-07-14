@@ -85,8 +85,8 @@ def execute(block, config):
     nu = 1.686/block["sigma_r", "sigma"]
 
     # compute overdensities; physical not comoving
-    rho_c0 = cosmology.critical_density0
-    rho_cz = cosmology.critical_density(z)
+    rho_c0 = float(cosmology.critical_density0.to('Msun/Mpc^3').value)
+    rho_cz = cosmology.critical_density(z).to('Msun/Mpc^3').value
     rho_m = cosmology.Om0*rho_c0
     rho_mz = rho_m*(1.+z)**3
 
@@ -124,7 +124,7 @@ def execute(block, config):
     # converting M200 to R200 wo the redshift evolution
     concvec = duffy_concentration_relation(M, z_eff=0.4)
     mm, rr  = np.meshgrid(M, R_perp, indexing='ij')
-    dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_c*h0**2)
+    dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_c0)
 
     # Step 3) Compute Bias (M, Z)
     # Bias = compute_bias(M, k_h, P_k, omega_m)
@@ -406,9 +406,9 @@ def scaleShiftCosmo(znew, cosmo, eps=1e-9):
     scale_shift[0] = 1.
 
     # hubble shift
-    hubble_shit = Hz/Hz_fid
+    hubble_shift = Hz/Hz_fid
 
-    return scale_shift_perp, hubble_shift
+    return scale_shift, hubble_shift
 
 def xi_to_wp(r, xi, pimax=100):
     """ Convert Xi(r) to Wp(R)
