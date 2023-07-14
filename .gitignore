@@ -909,3 +909,13 @@ data/nfw_off_center/offset_nfw_table_1000_1e-02_1e+04_log_sigma_gamma.txt
 data/nfw_off_center/offset_nfw_table_1000_1e-02_1e+04_log_sigma_single.txt
 data/nfw_off_center/offset_nfw_table_1000_1e-02_1e+04_single_logx.txt
 data/nfw_off_center/offset_nfw_table_1000_1e-02_1e+04_single_logxmis.txt
+y1_mock/output/gammafull/errors.txt
+y1_mock/output/gammafull/gridpoints.txt
+y1_mock/output/gammafull/ivol.txt
+y1_mock/output/gammafull/nregions.txt
+y1_mock/output/gammafull/probs.txt
+y1_mock/output/gammafull/status.txt
+y1_mock/output/gammafull/vals.txt
+y1_mock/mock_misc.ini
+y1_mock/mock.ini
+y1_mock/values_misc.ini
