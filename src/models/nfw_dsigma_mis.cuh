@@ -4,14 +4,15 @@
 #ifndef Y3_CLUSTER_NFW_DSIGMA_MIS
 #define Y3_CLUSTER_NFW_DSIGMA_MIS
 
+#include <algorithm>
 #include <iostream>
 #include <math.h>
 #include <string>
 #include "cosmosis/datablock/ndarray.hh"
 #include "common/cuda/Interp2D.cuh"
+#include "utils/make_interp_1d.cuh"
 #include "utils/primitives.hh"
-
-#include <algorithm>
+#include "utils/read_vector.hh"
 
 namespace y3_cuda {
   // Default concentration value
@@ -21,39 +22,41 @@ namespace y3_cuda {
   double const RHOC = 2.77533742639e+11;
 
   // selects the miscentering kernel ('single','gamma')
-  std::string cost GAMMA = "gamma";
-
-
+  std::string const GAMMA = "gamma";
+  
   class NFW_DSIGMA_MIS {
-    quad::Interp2D nfwProfile;
 
     public:
-    NFW_DSIGMA_MIS(double c, double rhoc, std::string kernel)
-      : _c(c), _rhoc(rhoc), _kernel(kernel)
+    NFW_DSIGMA_MIS(double c, double rhoc, std::string const& kernel)
+      : _c(c),
+        _rhoc(rhoc)
     {
-      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
-      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_deltasigma_" + std::string(_kernel) + ".txt";
+      std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_" + kernel + "_logx.txt";
+      std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_" + kernel + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + kernel + ".txt";
 		
       auto const xs = read_vector(xfile);
       auto const ys = read_vector(yfile);
       auto const zs = read_vector(zfile);
-      nfwProfile = y3_cluster::Interp2D(xs, ys, zs);
-    }
-    using doubles = std::vector<double>;
+      quad::Interp2D temp(xs, ys, zs);
 
+      _nfwProfile = temp;
+    }
 
     explicit NFW_DSIGMA_MIS()
-    : _c(CONC), _rhoc(RHOC), _kernel(GAMMA)
+    : _c(CONC),
+      _rhoc(RHOC)
     {
-      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
-      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_deltasigma_" + std::string(_kernel) + ".txt";
+      std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logx.txt";
+      std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
 		
       auto const xs = read_vector(xfile);
       auto const ys = read_vector(yfile);
       auto const zs = read_vector(zfile);
-      nfwProfile = y3_cluster::Interp2D(xs, ys, zs);
+
+      quad::Interp2D temp(xs, ys, zs);
+      _nfwProfile = temp;
     }
 
     // In case, we envolve the NFW profile with redshift
@@ -63,16 +66,16 @@ namespace y3_cuda {
     NFW_DSIGMA_MIS(cosmosis::DataBlock& sample)
     : _c(make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
     , _rhoc(make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
-    , _kernel(GAMMA)
     {
-      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logx.txt";
-      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ std::string(_kernel) + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_sigma_" + std::string(_kernel) + ".txt";
+      std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logx.txt";
+      std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
 		
       auto const xs = read_vector(xfile);
       auto const ys = read_vector(yfile);
       auto const zs = read_vector(zfile);
-      nfwProfile = y3_cluster::Interp2D(xs, ys, zs);
+      quad::Interp2D temp = quad::Interp2D(xs, ys, zs);
+      _nfwProfile = temp;
     }
 
     __device__ __host__ double
@@ -87,45 +90,29 @@ namespace y3_cuda {
       double const x = r / r_s;
       double const xmis = rmis / r_s;
 
-      double const log_unfw = nfwProfile.clamp(std::log(x), std::log(xmis));
+      double log_unfw = 0;
+#ifdef __CUDA_ARCH__
+        log_unfw = _nfwProfile.clamp(std::log(x), std::log(xmis));
+#else
+        // THIS IS DUMMY CODE. IT WILL BE REPLACED.
+        log_unfw = 3;
+#endif
+      
       double const nfw = norm * std::exp(log_unfw);
       return nfw;
     }
 
+    size_t
+    get_device_mem_footprint()
+    {
+      return _nfwProfile.get_device_mem_footprint();
+    }
+
+
   private:
-    std::string _kernel;
     double const _c;
     double const _rhoc;
+    quad::Interp2D _nfwProfile;
   };
 }
 #endif
-
-// /global/common/software/des/jesteves/y3_cluster_cpp/data/nfw_off_center
-// 'offset_nfw_table_1000_1e-02_1e+04_log_sigma_single'
-
-// // Based on ChatGPT
-// void testNFW_DSIGMA_MIS() {
-//   // Create an instance of NFW_DSIGMA_MIS with test parameters
-//   double c = 4.0;
-//   double rhoc = 2.77533742639e+11;
-//   std::string kernel = "gamma";
-//   y3_cuda::NFW_DSIGMA_MIS nfw(c, rhoc, kernel);
-
-//   // Define test inputs and expected output
-//   double r = 1.0;
-//   double rmis = 0.5;
-//   double lnM = 10.0;
-//   double expected = /* Expected output value */;
-
-//   // Evaluate the NFW_DSIGMA_MIS operator and compare with expected output
-//   double result = nfw(r, rmis, lnM);
-//   assert(result == expected);
-
-//   // Print test result
-//   std::cout << "Test Passed!" << std::endl;
-// }
-
-// int main() {
-//   testNFW_DSIGMA_MIS();
-//   return 0;
-// }

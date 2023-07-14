@@ -20,6 +20,38 @@ if (USE_CUDA)
                                                                              CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
   target_compile_options(avgKappaCentBu  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
+  # avgGammaFullBu.cu
+  add_library(avgGammaFullBu   MODULE avgGammaFullBu.cu)
+  target_link_libraries(avgGammaFullBu  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  target_include_directories(avgGammaFullBu  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  set_target_properties(avgGammaFullBu  PROPERTIES POSITION_INDEPENDENT_CODE ON 
+                                                                             CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  target_compile_options(avgGammaFullBu  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+
+  # # avgGammaCentBu.cu
+  # add_library(avgGammaCentBu   MODULE avgGammaCentBu.cu)
+  # target_link_libraries(avgGammaCentBu  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  # target_include_directories(avgGammaCentBu  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  # set_target_properties(avgGammaCentBu  PROPERTIES POSITION_INDEPENDENT_CODE ON 
+  #                                                                            CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  # target_compile_options(avgGammaCentBu  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+
+  # # avgGammaMiscBu.cu
+  # add_library(avgGammaMiscBu   MODULE avgGammaMiscBu.cu)
+  # target_link_libraries(avgGammaMiscBu  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  # target_include_directories(avgGammaMiscBu  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  # set_target_properties(avgGammaMiscBu  PROPERTIES POSITION_INDEPENDENT_CODE ON 
+  #                                                                            CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  # target_compile_options(avgGammaMiscBu  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+
+  # # avgGammaProjBu.cu
+  # add_library(avgGammaProjBu   MODULE avgGammaProjBu.cu)
+  # target_link_libraries(avgGammaProjBu  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  # target_include_directories(avgGammaProjBu  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  # set_target_properties(avgGammaProjBu  PROPERTIES POSITION_INDEPENDENT_CODE ON 
+  #                                                                            CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  # target_compile_options(avgGammaProjBu  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+
   # avgSigmaCentBu.cu
   add_library(avgSigmaCentBu   MODULE avgSigmaCentBu.cu)
   target_link_libraries(avgSigmaCentBu  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)

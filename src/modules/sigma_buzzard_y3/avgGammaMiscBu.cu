@@ -15,7 +15,7 @@
 #include "models/int_lc_lt_des_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/dsigma_mis_joint.cuh"
+#include "models/dsigma_mis.cuh"
 
 #include <iostream>
 #include <optional>
@@ -29,7 +29,7 @@ using cubacpp::integration_result;
 // "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class avgDSigmaJointBu {
+class avgGammaMiscBu {
 public:
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
@@ -61,7 +61,7 @@ private:
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the sigma profile
-  std::optional<y3_cuda::DSIGMA_MIS_JOINT> sigma;
+  std::optional<y3_cuda::DSIGMA_MIS> sigma_mis;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -72,7 +72,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit avgDSigmaJointBu(cosmosis::DataBlock& config);
+  explicit avgGammaMiscBu(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -89,7 +89,7 @@ public:
     if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
     if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)sigma == true) dev_size += (*sigma).get_device_mem_footprint();
+    if ((bool)gamma_mis == true) dev_size += (*gamma_mis).get_device_mem_footprint();
     return dev_size;
   }
 
@@ -128,7 +128,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgDSigmaJointBu::avgDSigmaJointBu( DataBlock& cfg)
+avgGammaMiscBu::avgGammaMiscBu( DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -141,7 +141,7 @@ avgDSigmaJointBu::avgDSigmaJointBu( DataBlock& cfg)
 }
 
 void
-avgDSigmaJointBu::set_sample(DataBlock& sample)
+avgGammaMiscBu::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -150,11 +150,11 @@ avgDSigmaJointBu::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  sigma.emplace(sample);
+  gamma_mis.emplace(sample);
 }
 
 void
-avgDSigmaJointBu::set_grid_point(
+avgGammaMiscBu::set_grid_point(
   grid_point_t const& grid_point)
 {
   radius_ = grid_point[2];
@@ -163,25 +163,24 @@ avgDSigmaJointBu::set_grid_point(
 }
 
 __host__ __device__ double
-avgDSigmaJointBu::operator()(  double lo,
+avgGammaMiscBu::operator()(   double lo,
                               double zt,
                               double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double const mor_v = (*mor)(lo, lnM, zt);
-
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*sigma)(radius_, lnM, zt) *
+  auto const val = (*gamma_mis)(radius_, lnM, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
 
 // string must match section block in pipeline.ini file
 char const*
-avgDSigmaJointBu::module_label()
+avgGammaMiscBu::module_label()
 {
-  return "sigma_joint";
+  return "gammaMisc";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -191,23 +190,23 @@ avgDSigmaJointBu::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<avgDSigmaJointBu::volume_t>
-avgDSigmaJointBu::make_integration_volumes(
+std::vector<avgGammaMiscBu::volume_t>
+avgGammaMiscBu::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgDSigmaJointBu::module_label(), "lo", "zt", "lnm");
+    cfg, avgGammaMiscBu::module_label(), "lo", "zt", "lnm");
 }
 
-avgDSigmaJointBu::grid_t
-avgDSigmaJointBu::make_grid_points(cosmosis::DataBlock& cfg)
+avgGammaMiscBu::grid_t
+avgGammaMiscBu::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    avgDSigmaJointBu::module_label(),
+    avgGammaMiscBu::module_label(),
     "zo_low",
     "zo_high",
     "radii");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgDSigmaJointBu)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgGammaMiscBu)
