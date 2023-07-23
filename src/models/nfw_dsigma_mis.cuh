@@ -63,20 +63,20 @@ namespace y3_cuda {
     // TODO: Implement Mass-Concentration Relation
     // TODO: Implement different operator in case of rhocz(zt)
     // Ask Marc How to make _c and _rhoc be functional forms in any case
-    NFW_DSIGMA_MIS(cosmosis::DataBlock& sample)
-    : _c(make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
-    , _rhoc(make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
-    {
-      std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logx.txt";
-      std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
+    // NFW_DSIGMA_MIS(cosmosis::DataBlock& sample)
+    // : _c(make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
+    // , _rhoc(make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
+    // {
+    //   std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logx.txt";
+    //   std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
+    //   std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
 		
-      auto const xs = read_vector(xfile);
-      auto const ys = read_vector(yfile);
-      auto const zs = read_vector(zfile);
-      quad::Interp2D temp = quad::Interp2D(xs, ys, zs);
-      _nfwProfile = temp;
-    }
+    //   auto const xs = read_vector(xfile);
+    //   auto const ys = read_vector(yfile);
+    //   auto const zs = read_vector(zfile);
+    //   quad::Interp2D temp = quad::Interp2D(xs, ys, zs);
+    //   _nfwProfile = temp;
+    // }
 
     __device__ __host__ double
     operator()(double r, double rmis, double lnM) const 

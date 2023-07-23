@@ -75,7 +75,8 @@ namespace y3_cuda {
                               "r_sigma",
                               "sigmaCritInv",
                               "sigma_crit_inv"))
-      , _nfw_dsigma_mis(y3_cuda::NFW_DSIGMA_MIS(sample))
+      // , _nfw_dsigma_mis(y3_cuda::NFW_DSIGMA_MIS(sample))
+      , _nfw_dsigma_mis()
       , _fcen(sample.view<double>("cluster_abundance", "fcen"))
       , _tau(sample.view<double>("cluster_abundance", "roffset_tau"))
     {}
