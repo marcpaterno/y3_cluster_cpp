@@ -24,3 +24,13 @@ target_include_directories(
   utils PRIVATE ${COSMOSIS_BASE_DIR} ${CUBA_INCLUDE_DIR} ${GSL_INCLUDE_DIRS}
                 ${CUBACPP_DIR} ${VEGAS_DIR}
   )
+ 
+
+if (USE_CUDA)
+  add_library(cuda_utils SHARED cuda_interp_1d.cu cuda_interp_2d.cu)
+  target_link_libraries(cuda_utils PRIVATE utils cosmosis)
+  target_include_directories(cuda_utils PRIVATE ${CMAKE_SRC_DIR}/src ${PAGANI_DIR} ${COSMOSIS_BASE_DIR})
+  set_target_properties(cuda_utils PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURE ${Y3GCC_TARGET_ARCH})
+  target_compile_options(cuda_utils PRIVATE "--expt-relaxed-constexpr" "-lineinfo")
+endif()
+

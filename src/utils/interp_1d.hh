@@ -1,6 +1,7 @@
 #ifndef Y3_CLUSTER_INTERP_1D_HH
 #define Y3_CLUSTER_INTERP_1D_HH
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <vector>
@@ -45,6 +46,13 @@ namespace y3_cluster {
     {
       return this->operator()(x);
     };
+
+    double
+    clamp(double x) const
+    {
+      double const xx = std::clamp(x, xs_.front(), xs_.back());
+      return (*this)(xx);
+    }
 
   private:
     std::vector<double> xs_;

@@ -10,10 +10,14 @@ using namespace quad;
 
 namespace jack {
 
+  // mfp: Both zt_max and lt_max are unused. They should be deleted
+  // (not merely commented out, as I have done) to get rid of warnings
+  // about unused variables.
+
   // Define zt_max and l_max large enough to be safe.
-    // were used at end of zt_bins and lt_bis, as if to extrapolate
-  double constexpr zt_max = 2.0;
-  double constexpr lt_max = 300.0;
+  // were used at end of zt_bins and lt_bis, as if to extrapolate
+  // double constexpr zt_max = 2.0;
+  // double constexpr lt_max = 300.0;
 
   std::array<double, 5> const zt_bins = {0.1, 0.15, 0.2, 0.25, 0.3};
 

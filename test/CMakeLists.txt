@@ -14,25 +14,31 @@ target_link_libraries(mpi_testmain PRIVATE MPI::MPI_CXX)
 # Use of CUDA is optional
 
 if (USE_CUDA)
+  add_executable(cuda_interp_1d_test cuda_interp_1d.test.cu)
+  target_link_libraries(cuda_interp_1d_test PRIVATE cuda_utils utils testmain)
+  target_include_directories(cuda_interp_1d_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals ${PAGANI_DIR})
+  set_target_properties(cuda_interp_1d_test PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  add_test(cuda_interp_1d_test cuda_interp_1d_test)
+
+  add_executable(cuda_interp_2d_test cuda_interp_2d.test.cu)
+  target_link_libraries(cuda_interp_2d_test PRIVATE cuda_utils utils testmain)
+  target_include_directories(cuda_interp_2d_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals ${PAGANI_DIR})
+  set_target_properties(cuda_interp_2d_test PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  add_test(cuda_interp_2d_test cuda_interp_2d_test)
+
   add_executable(nfw_sigma_mis_test nfw_sigma_mis.test.cu)
-  target_link_libraries(nfw_sigma_mis_test PRIVATE utils testmain)
+  target_link_libraries(nfw_sigma_mis_test PRIVATE cuda_utils utils testmain)
   target_include_directories(nfw_sigma_mis_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals ${PAGANI_DIR})
+  set_target_properties(nfw_sigma_mis_test PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
   add_test(nfw_sigma_mis_test nfw_sigma_mis_test)
 
-add_executable(
-  timing_sentry_cuda_test timing_sentry_test.cu
-  )
-target_link_libraries(
-  timing_sentry_cuda_test PRIVATE testmain
-  )
-target_include_directories(
-  timing_sentry_cuda_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals
-  )
-set_target_properties(timing_sentry_cuda_test
-  PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH}
-  )
-target_compile_options(timing_sentry_cuda_test PRIVATE "--expt-relaxed-constexpr")
-add_test(timing_sentry_cuda_test timing_sentry_cuda_test)
+  add_executable(timing_sentry_cuda_test timing_sentry_test.cu)
+  target_link_libraries(timing_sentry_cuda_test PRIVATE testmain)
+  target_include_directories(timing_sentry_cuda_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals)
+  set_target_properties(timing_sentry_cuda_test PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  target_compile_options(timing_sentry_cuda_test PRIVATE "--expt-relaxed-constexpr")
+  add_test(timing_sentry_cuda_test timing_sentry_cuda_test)
+
 endif()
 
 add_executable(
