@@ -8,10 +8,11 @@
 #include <iostream>
 #include <math.h>
 #include <string>
-#include "cosmosis/datablock/ndarray.hh"
-#include "common/cuda/Interp2D.cuh"
-#include "utils/make_interp_1d.cuh"
-#include "utils/primitives.hh"
+
+#include "cosmosis/datablock/datablock.hh"
+
+#include "utils/make_interp_1d.hh"
+#include "utils/cuda_interp_2d.cuh"
 
 
 namespace y3_cuda {
@@ -24,59 +25,56 @@ namespace y3_cuda {
   // selects the miscentering kernel ('single','gamma')
   std::string const GAMMA = "gamma";
 
+
+  // Helper functions to construct filenames needed to read the interpolation
+  // table information.
+  inline std::string logx_file(std::string const& kernel)
+  {
+    return fmt::format("nfw_off_center/table_1000_1e-02_1e+04_{}_logx.txt", kernel);
+  }
+
+  inline std::string logxmis_file(std::string const& kernel)
+  {
+    return fmt::format("nfw_off_center/table_1000_1e-02_1e+04_{}_logxmis.txt", kernel);
+  }
+
+  inline std::string log_sigma_file(std::string const& kernel)
+  {
+    return fmt::format("nfw_off_center/table_1000_1e-02_1e+04_log_sigma_{}.txt", kernel);
+  }
+
+
   class NFW_SIGMA_MIS {
 
     public:
     NFW_SIGMA_MIS(double c, double rhoc, std::string const& kernel)
       : _c(c),
-        _rhoc(rhoc)
-    {
-      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_" + kernel + "_logx.txt";
-      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_" + kernel + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_sigma_" + kernel + ".txt";
-		
-      auto const xs = read_vector(xfile);
-      auto const ys = read_vector(yfile);
-      auto const zs = read_vector(zfile);
-      quad::Interp2D temp(xs, ys, zs);
+        _rhoc(rhoc),
+        _nfwProfile(read_vector(logx_file(kernel)),
+                    read_vector(logxmis_file(kernel)),
+                    read_vector(log_sigma_file(kernel)))
+    { }
 
-      _nfwProfile = temp;
-    }
-
-    explicit NFW_SIGMA_MIS()
+    NFW_SIGMA_MIS()
     : _c(CONC),
-      _rhoc(RHOC)
-    {
-      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ GAMMA + "_logx.txt";
-      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_sigma_" + GAMMA + ".txt";
-		
-      auto const xs = read_vector(xfile);
-      auto const ys = read_vector(yfile);
-      auto const zs = read_vector(zfile);
+      _rhoc(RHOC),
+      _nfwProfile(read_vector(logx_file(GAMMA)),
+                  read_vector(logxmis_file(GAMMA)),
+                  read_vector(log_sigma_file(GAMMA)))
 
-      quad::Interp2D temp(xs, ys, zs);
-      _nfwProfile = temp;
-    }
+    { }
 
     // In case, we envolve the NFW profile with redshift
     // TODO: Implement Mass-Concentration Relation
     // TODO: Implement different operator in case of rhocz(zt)
     // Ask Marc How to make _c and _rhoc be functional forms in any case
     NFW_SIGMA_MIS(cosmosis::DataBlock& sample)
-    : _c(make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
-    , _rhoc(make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
-    {
-      std::string xfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ GAMMA + "_logx.txt";
-      std::string yfile = "nfw_off_center/table_1000_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/table_1000_1e-02_1e+04_log_sigma_" + GAMMA + ".txt";
-		
-      auto const xs = read_vector(xfile);
-      auto const ys = read_vector(yfile);
-      auto const zs = read_vector(zfile);
-      quad::Interp2D temp = quad::Interp2D(xs, ys, zs);
-      _nfwProfile = temp;
-    }
+    : _c(y3_cluster::make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
+    , _rhoc(y3_cluster::make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
+    , _nfwProfile(read_vector(logx_file(GAMMA)),
+                  read_vector(logxmis_file(GAMMA)),
+                  read_vector(log_sigma_file(GAMMA)))
+    { }
 
     __device__ __host__ double
     operator()(double r, double rmis, double lnM) const 
@@ -90,13 +88,7 @@ namespace y3_cuda {
       double const x = r / r_s;
       double const xmis = rmis / r_s;
 
-      double log_unfw = 0;
-#ifdef __CUDA_ARCH__
-        log_unfw = _nfwProfile.clamp(std::log(x), std::log(xmis));
-#else
-        // THIS IS DUMMY CODE. IT WILL BE REPLACED.
-        log_unfw = 3;
-#endif
+      double const log_unfw = _nfwProfile.clamp(std::log(x), std::log(xmis));
       
       double const nfw = norm * std::exp(log_unfw);
       return nfw;
@@ -105,7 +97,7 @@ namespace y3_cuda {
   private:
     double const _c;
     double const _rhoc;
-    quad::Interp2D _nfwProfile;
+    gpu_support::Interp2D _nfwProfile;
   };
 }
 #endif

@@ -11,7 +11,6 @@
 #include <vector>
 
 using y3_cuda::NFW_SIGMA_MIS;
-using quad::Interp2D;
 
 // This test case (see https://github.com/catchorg/Catch2 for an introduction
 // to the testing framework we are using for C++).
@@ -24,9 +23,11 @@ using quad::Interp2D;
 //
 
 
-TEST_CASE("NFW profile function works")
+// This test case exercises a default-constructed model object.
+// Maybe there is also a need to test ones made through other
+// constructors.
+TEST_CASE("Default constructed NFW_SIGMA_MIS works")
 {
-  NFW_SIGMA_MIS model;
   auto out = y3_cluster::make_ofstream("data/nfw_sigma_mis_test.out");
   REQUIRE(out.good());
   out << std::setw(16);
@@ -41,6 +42,7 @@ TEST_CASE("NFW profile function works")
   std::vector<double> lnMs{10.0};
   std::vector<double> answers{1.0};
     
+  NFW_SIGMA_MIS model;
   double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
