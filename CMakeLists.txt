@@ -65,6 +65,17 @@ endif ()
 set(MPI_CXX_SKIP_MPICXX)
 find_package(MPI REQUIRED COMPONENTS C CXX)
 
+Include(FetchContent)
+message(STATUS "Fetching fmt library")
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 10.0.0
+    GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(fmt)
+message(STATUS "fmt library available")
+
+
 # Make sure we know where CosmoSIS is found
 if ("{COSMOSIS_SRC_DIR}" STREQUAL "")
   message(FATAL_ERROR "You must set up CosmoSIS before configuring the build of y3_cluster_cpp")
