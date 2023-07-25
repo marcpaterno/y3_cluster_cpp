@@ -27,7 +27,7 @@ if (USE_CUDA)
   add_test(cuda_interp_2d_test cuda_interp_2d_test)
 
   add_executable(nfw_sigma_mis_test nfw_sigma_mis.test.cu)
-  target_link_libraries(nfw_sigma_mis_test PRIVATE cuda_utils utils testmain)
+  target_link_libraries(nfw_sigma_mis_test PRIVATE cuda_utils utils testmain fmt::fmt)
   target_include_directories(nfw_sigma_mis_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals ${PAGANI_DIR})
   set_target_properties(nfw_sigma_mis_test PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
   add_test(nfw_sigma_mis_test nfw_sigma_mis_test)
