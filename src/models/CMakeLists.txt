@@ -6,7 +6,7 @@ add_library(
   )
 
 target_link_libraries(
-  models PRIVATE utils cosmosis ${GSL_LIBRARIES} ${CUBA_LIBRARIES}
+  models PRIVATE utils cosmosis ${GSL_LIBRARIES} ${CUBA_LIBRARIES} fmt::fmt
   )
 
 target_include_directories(
