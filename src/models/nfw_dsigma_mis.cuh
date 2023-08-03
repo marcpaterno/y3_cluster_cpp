@@ -31,9 +31,9 @@ namespace y3_cuda {
       : _c(c),
         _rhoc(rhoc)
     {
-      std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_" + kernel + "_logx.txt";
-      std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_" + kernel + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + kernel + ".txt";
+      std::string xfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_" + kernel + "_logx.txt";
+      std::string yfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_" + kernel + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_log_deltasigma_" + kernel + ".txt";
 		
       auto const xs = read_vector(xfile);
       auto const ys = read_vector(yfile);
@@ -47,9 +47,9 @@ namespace y3_cuda {
     : _c(CONC),
       _rhoc(RHOC)
     {
-      std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logx.txt";
-      std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
-      std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
+      std::string xfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_"+ GAMMA + "_logx.txt";
+      std::string yfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
+      std::string zfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
 		
       auto const xs = read_vector(xfile);
       auto const ys = read_vector(yfile);
@@ -67,9 +67,9 @@ namespace y3_cuda {
     // : _c(make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
     // , _rhoc(make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
     // {
-    //   std::string xfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logx.txt";
-    //   std::string yfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
-    //   std::string zfile = "nfw_off_center/offset_nfw_table_200_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
+    //   std::string xfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_"+ GAMMA + "_logx.txt";
+    //   std::string yfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_"+ GAMMA + "_logxmis.txt";
+    //   std::string zfile = "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_log_deltasigma_" + GAMMA + ".txt";
 		
     //   auto const xs = read_vector(xfile);
     //   auto const ys = read_vector(yfile);
@@ -91,11 +91,12 @@ namespace y3_cuda {
       double const xmis = rmis / r_s;
 
       double log_unfw = 0;
+      
 #ifdef __CUDA_ARCH__
         log_unfw = _nfwProfile.clamp(std::log(x), std::log(xmis));
 #else
         // THIS IS DUMMY CODE. IT WILL BE REPLACED.
-        log_unfw = 3;
+        log_unfw = 0.;
 #endif
       
       double const nfw = norm * std::exp(log_unfw);
