@@ -1,4 +1,5 @@
 #include "catch2/catch.hpp"
+#include "models/hmf_t.hh"
 #include "utils/interp_2d.hh"
 #include "utils/make_ifstream.hh"
 #include "utils/read_vector.hh"
