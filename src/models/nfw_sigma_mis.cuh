@@ -37,14 +37,14 @@ namespace y3_cuda {
     static inline std::string
     logx_file(std::string const& kernel)
     {
-      return fmt::format("nfw_off_center/table_1000_1e-02_1e+04_{}_logx.txt",
+      return fmt::format("nfw_off_center/offset_nfw_table_500_1e-02_1e+04_{}_logx.txt",
                          kernel);
     }
 
     static inline std::string
     logxmis_file(std::string const& kernel)
     {
-      return fmt::format("nfw_off_center/table_1000_1e-02_1e+04_{}_logxmis.txt",
+      return fmt::format("nfw_off_center/offset_nfw_table_500_1e-02_1e+04_{}_logxmis.txt",
                          kernel);
     }
 
@@ -52,7 +52,7 @@ namespace y3_cuda {
     log_sigma_file(std::string const& kernel)
     {
       return fmt::format(
-        "nfw_off_center/table_1000_1e-02_1e+04_log_sigma_{}.txt", kernel);
+        "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_log_sigma_{}.txt", kernel);
     }
 
   public:
