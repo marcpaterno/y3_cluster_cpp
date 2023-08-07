@@ -10,6 +10,7 @@
 #include "models/nfw_dsigma_mis.cuh"
 
 #include <algorithm>
+#include <fstream>
 // Joint Means Centered plus Mis-Centered 
 // f_cen x Sigma + (1-f_cen) x Sigma_mis
 
@@ -30,7 +31,7 @@ namespace y3_cuda {
     {
       size_t size = 0;
       size += _sigma1.get_device_mem_footprint();
-      size += _nfw_dsigma_mis.get_device_mem_footprint();
+      // size += _nfw_dsigma_mis.get_device_mem_footprint();
       size += _sigma2.get_device_mem_footprint();
       size += _bias.get_device_mem_footprint();
       size += _sigma_crit_inv.get_device_mem_footprint();
