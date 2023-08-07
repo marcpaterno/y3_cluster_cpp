@@ -16,10 +16,13 @@
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/dsigma_full.cuh"
+#include "utils/read_vector.hh"
 
 #include <iostream>
 #include <optional>
 #include <vector>
+#include <fstream>
+// #include "fmt/core.h"
 
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
@@ -89,7 +92,7 @@ public:
     if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
     if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)gamma == true) dev_size += (*gamma).get_device_mem_footprint();
+    // if ((bool)gamma == true) dev_size += (*gamma).get_device_mem_footprint();
     return dev_size;
   }
 
