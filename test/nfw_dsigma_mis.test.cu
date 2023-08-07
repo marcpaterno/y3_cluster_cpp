@@ -1,17 +1,18 @@
 #include "catch2/catch.hpp"
 #include "models/hmf_t.hh"
-#include "utils/interp_2d.hh"
 #include "utils/make_ifstream.hh"
 #include "utils/read_vector.hh"
 
 // This is the code we're actually testing
 #include "models/nfw_dsigma_mis.cuh"
+#include "utils/cuda_interp_2d.cuh"
 
 #include <fstream>
 #include <iomanip>
+#include <fmt/format.h>
 
 using y3_cluster::HMF_t;
-using y3_cluster::Interp2D;
+// using y3_cluster::Interp2D;
 using y3_cuda::NFW_DSIGMA_MIS;
 
 TEST_CASE("Test NFW Misc Implementation")
