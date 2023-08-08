@@ -32,14 +32,14 @@ namespace y3_cuda {
     static inline std::string
     logx_file(std::string const& kernel)
     {
-      return fmt::format("nfw_off_center/offset_nfw_table_500_1e-02_1e+04_{}_logx.txt",
+      return fmt::format("nfw_off_center/table_1000_1e-03_5e+03_{}_logx.txt",
                          kernel);
     }
 
     static inline std::string
     logxmis_file(std::string const& kernel)
     {
-      return fmt::format("nfw_off_center/offset_nfw_table_500_1e-02_1e+04_{}_logxmis.txt",
+      return fmt::format("nfw_off_center/table_1000_1e-03_5e+03_{}_logxmis.txt",
                          kernel);
     }
 
@@ -47,7 +47,7 @@ namespace y3_cuda {
     log_dsigma_file(std::string const& kernel)
     {
       return fmt::format(
-        "nfw_off_center/offset_nfw_table_500_1e-02_1e+04_log_deltasigma_{}.txt", kernel);
+        "nfw_off_center/table_1000_1e-03_5e+03_log_deltasigma_{}.txt", kernel);
     }
 
   class NFW_DSIGMA_MIS {
@@ -85,19 +85,22 @@ namespace y3_cuda {
     __device__ __host__ double
     operator()(double r, double rmis, double lnM) const 
     {
-      double const delta_c = 200.0 * _c * _c * _c / 3.0 * (std::log(1.0 + _c) - _c / (1.0 + _c));
       double const rho_crit = _rhoc;
+      double const delta_c = (200.0 * _c * _c * _c / 3.0) / (std::log(1.0 + _c) - _c / (1.0 + _c));
       double const r_200 = std::cbrt(3.0 * std::exp(lnM) / (800.0 * M_PI * rho_crit));
       double const r_s = r_200 / _c;
-      double const norm = r_s * delta_c * rho_crit;
 
       double const x = r / r_s;
       double const xmis = rmis / r_s;
 
       double const log_unfw = _nfwProfile.clamp(std::log(x), std::log(xmis));
       
+      // normalization term defined in Wright & Brainerd 2000
+      double const norm = 2 * r_s * delta_c * rho_crit ;
       double const nfw = norm * std::exp(log_unfw);
-      return nfw;
+
+      // Conversion from Msun/Mpc^2 to Msun/h pc^2
+      return nfw*1e-12;
     }
 
   private:
@@ -107,3 +110,10 @@ namespace y3_cuda {
   };
 }
 #endif
+
+// USED FOR DEBUGGING
+// using printf debugs r200 and r_s
+// printf("r200: %f, r_s: %f\n", r_200, r_s);
+// printf("delta_c: %f, rho_crit: %f\n", delta_c, rho_crit);
+// printf("norm: %f\n", norm);
+// printf("conc: %f\n", _c);
