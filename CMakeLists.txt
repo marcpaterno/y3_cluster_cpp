@@ -43,6 +43,8 @@ set(CMAKE_SHARED_MODULE_PREFIX "") # We don't need the leading lib
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN ON) # for relocatable builds
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
 include(MPITest)
 
 find_package(CUBA REQUIRED)
@@ -74,7 +76,6 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(fmt)
 message(STATUS "fmt library available")
-
 
 # Make sure we know where CosmoSIS is found
 if ("{COSMOSIS_SRC_DIR}" STREQUAL "")
