@@ -15,7 +15,8 @@
 #include "models/int_lc_lt_des_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/dsigma_mis.cuh"
+#include "models/dsigma_misc.cuh"
+#include "utils/read_vector.hh"
 
 #include <iostream>
 #include <optional>
@@ -61,7 +62,7 @@ private:
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the sigma profile
-  std::optional<y3_cuda::DSIGMA_MIS> sigma_mis;
+  std::optional<y3_cuda::DSIGMA_MISC> gamma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -89,7 +90,7 @@ public:
     if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
     if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)gamma_mis == true) dev_size += (*gamma_mis).get_device_mem_footprint();
+    // if ((bool)gamma == true) dev_size += (*gamma).get_device_mem_footprint();
     return dev_size;
   }
 
@@ -150,7 +151,7 @@ avgGammaMiscBu::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  gamma_mis.emplace(sample);
+  gamma.emplace(sample);
 }
 
 void
@@ -163,15 +164,16 @@ avgGammaMiscBu::set_grid_point(
 }
 
 __host__ __device__ double
-avgGammaMiscBu::operator()(   double lo,
+avgGammaMiscBu::operator()(  double lo,
                               double zt,
                               double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
   double const mor_v = (*mor)(lo, lnM, zt);
+
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*gamma_mis)(radius_, lnM, zt) *
+  auto const val = (*gamma)(radius_, lnM, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
