@@ -151,7 +151,7 @@ avgGammaFullBu::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  // gamma.emplace(sample);
+  gamma.emplace(sample);
 }
 
 void

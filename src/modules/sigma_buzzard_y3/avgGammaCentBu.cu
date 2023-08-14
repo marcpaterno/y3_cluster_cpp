@@ -151,7 +151,7 @@ avgGammaCentBu::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  // sigma_mis.emplace(sample);
+  sigma_mis.emplace(sample);
 }
 
 void

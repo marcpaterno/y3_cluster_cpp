@@ -9,7 +9,7 @@
 
 // ask Marc the new way to do this
 #include "common/cuda/Interp2D.cuh"
-#include "utils/cuda_interp_2d.cuh"
+// #include "utils/cuda_interp_2d.cuh"
 #include "utils/make_interp_2d.cuh"
 
 #include <algorithm>
