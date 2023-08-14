@@ -2,6 +2,7 @@
 #include "utils/datablock_reader.hh"
 #include "utils/cuda_module_macros.cuh"
 #include "utils/make_grid_points.hh"
+#include "utils/read_vector.hh"
 
 #include "cubacpp/integration_result.hh"
 #include "cosmosis/datablock/datablock.hh"
@@ -11,11 +12,11 @@
 #include "models/omega_z_des.cuh"
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
-#include "models/mor_des_t.cuh"
+#include "models/mor_des_log_t.cuh"
 #include "models/int_lc_lt_des_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/kappa_max.cuh"
+#include "models/dsigma_proj.cuh"
 
 #include <iostream>
 #include <optional>
@@ -55,13 +56,13 @@ private:
   // the mass function
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
-  std::optional<y3_cuda::MOR_DES_t> mor;
+  std::optional<y3_cuda::MOR_DES_LOG_t> mor;
   // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
   // none
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  // and the gamma_t profile
-  std::optional<y3_cuda::KAPPA_MAX> gamma;
+  // and the sigma profile
+  std::optional<y3_cuda::DSIGMA_PROJ> sigma_mis;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -89,7 +90,7 @@ public:
     if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
     if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)gamma == true) dev_size += (*gamma).get_device_mem_footprint();
+    // if ((bool)sigma_mis == true) dev_size += (*sigma_mis).get_device_mem_footprint();
     return dev_size;
   }
 
@@ -150,7 +151,7 @@ avgGammaCentBu::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  gamma.emplace(sample);
+  // sigma_mis.emplace(sample);
 }
 
 void
@@ -163,16 +164,17 @@ avgGammaCentBu::set_grid_point(
 }
 
 __host__ __device__ double
-avgGammaCentBu::operator()(  double lo,
+avgGammaCentBu::operator()(   double lo,
                               double zt,
                               double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double const mor_v = (*mor)(lo, lnM, zt);
+  double const rmis_ = 0.001;
 
+  double const mor_v = (*mor)(lo, lnM, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*gamma)(radius_, lnM, zt) *
+  auto const val = (*sigma_mis)(radius_, rmis_, lnM, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }

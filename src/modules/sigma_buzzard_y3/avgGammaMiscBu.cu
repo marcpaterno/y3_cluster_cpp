@@ -2,6 +2,7 @@
 #include "utils/datablock_reader.hh"
 #include "utils/cuda_module_macros.cuh"
 #include "utils/make_grid_points.hh"
+#include "utils/read_vector.hh"
 
 #include "cubacpp/integration_result.hh"
 #include "cosmosis/datablock/datablock.hh"
@@ -11,12 +12,11 @@
 #include "models/omega_z_des.cuh"
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
-#include "models/mor_des_t.cuh"
+#include "models/mor_des_log_t.cuh"
 #include "models/int_lc_lt_des_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/dsigma_misc.cuh"
-#include "utils/read_vector.hh"
 
 #include <iostream>
 #include <optional>
@@ -56,7 +56,7 @@ private:
   // the mass function
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
-  std::optional<y3_cuda::MOR_DES_t> mor;
+  std::optional<y3_cuda::MOR_DES_LOG_t> mor;
   // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
   // none
   // z model

@@ -21,8 +21,6 @@
 #include <iostream>
 #include <optional>
 #include <vector>
-#include <fstream>
-// #include "fmt/core.h"
 
 using cosmosis::DataBlock;
 using cosmosis::ndarray;
@@ -153,7 +151,7 @@ avgGammaFullBu::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  gamma.emplace(sample);
+  // gamma.emplace(sample);
 }
 
 void
