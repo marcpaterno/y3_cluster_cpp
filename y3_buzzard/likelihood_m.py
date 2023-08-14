@@ -1,0 +1,127 @@
+import os
+from cosmosis.datablock import option_section, names
+import numpy as np
+
+###########################################################
+################### Likelihood: Prototype #################
+# First likelihood version of the DES Y1 Park model project
+#
+# Likelihood = (dataVector - model) cov_inv (dataVector - model)^T
+#
+# In this version we implement:
+# - The data vector is (NC, GT, Wp)
+# - The covariance matrix is computed by Jackknife
+# - We use mock data build from the Buzzard Sims v1.9.8
+#
+###########################################################
+###########################################################
+##### Useful Nomeclature
+###########################################################
+# Datavector codenames
+# ---------------------------------------------------------
+# NC stands for cluster number counts 
+# GT stands for gamma_t (shear)
+# Wp stands for cluster correlation function (3d or 2d)
+# ---------------------------------------------------------
+# Miscentering model codenames
+# _cen for centered models
+# _mis for mis-centered models
+# fcen is the centered fraction
+# ---------------------------------------------------------
+###########################################################
+# Author: Johnny Esteves
+# Created: 17th Nov, 2022
+###########################################################
+
+cosmo = names.cosmological_parameters
+debug = True
+
+####### GLOBAL VARIABLES #######
+# Sets the data vector
+# names = ['NC', 'Shear','Wp']
+names = ['NC', 'Shear']
+
+### DO NO TOUCH
+theoryDict = dict().fromkeys(names)
+pipe_names = {'NC':'numberCounts','Shear':'shear','Wp':'wp'}
+vals_names = {'NC':'vals','Shear':'shear_full','Wp':'wp_cen'}
+### DO NO TOUCH
+####### GLOBAL VARIABLES #######
+
+# import h5py
+# def readHDF(fname, path):
+#     master = h5py.File(fname,'r')
+#     return master[path][:][:]
+
+# def readDataVector(fname, path='data'):
+#     mydict = dict().fromkeys(names)
+#     for name in names:
+#         mydict[name] = readHDF(fname, path+'/'+name)
+#     return mydict
+
+def readDataVector(fname, path='data'):
+    mydict = dict().fromkeys(names)
+    vec = np.load(fname)
+    for name in names:
+        mydict[name] = vec['%s_%s'%(path,name)]
+    return mydict
+
+def setup(options):
+    section = option_section
+    datavector_fname = options[section,"filename"]
+    dataDict = readDataVector(datavector_fname, 'data')
+    invCovDict = readDataVector(datavector_fname, 'invcov')
+    return dataDict, invCovDict
+
+def execute(block, config):
+    # read from the data
+    dataDict, invCovDict = config
+    
+    # pull predictions from the datablock; 
+    # arrays with shape (Nrbins x Nlbdins x Nzbins, )
+    # [(r0, l0, z0), (r1, l0, z0), (r2, l0, z0), ..., (r0, zn, lm), (r1, zn, lm), ...]
+    # For NC; Nrbins = 0 
+    for name in names:
+        db_section = pipe_names[name]
+        db_vals = vals_names[name]
+        theoryDict[name] = block[db_section, db_vals].flatten()
+
+    # NC  = block["numberCounts", "vals"].flatten()
+    # GT  = block["shear", "shear_cen"].flatten()
+    # # WP = block["wp", "wp_cen"].flatten()
+    # Sum Operator: take the average by dividing Nc[1]
+
+    # theoryDict = {'NC': NC, 'Shear': GT, 'Wp': WP}
+
+    # logLikelihood
+    # block-diagonal covariances with R
+    logLike = 0
+    for name in names:
+        # print('Name: %s'%name)
+        data = dataDict[name]
+        theory = theoryDict[name]
+
+        # the current covariance is block-diagonal
+        # i.e. no covariance between redshift and lambda bins
+        invcov = invCovDict[name]
+
+        delta = data - theory
+        logLike += -0.5 * np.dot(delta, np.dot(invcov, delta))
+
+    print('Log Like',logLike)
+    # put into the datablock
+    block["likelihoods", 'likelihoods_like'] = logLike
+    return 0
+
+def concatenate_datavector(x, lbins=4, zbins=3):
+    # concatanates the datavector over lambda and redshift bins
+    # x has shape of (N_lbins, N_zbins)
+    # returns 1d array 
+    y = np.array([])
+    for jj in range(len(N_zbins)):
+        for ii in range(len(N_lbins)):
+            y = np.append(y, x[ii, jj])
+    return y
+    
+def cleanup(config):
+    pass
