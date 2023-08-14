@@ -70,24 +70,34 @@ def execute(block, config):
     omega_m = block[cosmo, "omega_m"]
     omega_b = block[cosmo, "omega_b"]
     H0 = block[cosmo, "H0"]
-    cosmology = astropy.cosmology.FlatLambdaCDM(H0,omega_m, Ob0=omega_b, Tcmb0=2.725)
+    cosmology = astropy.cosmology.FlatLambdaCDM(H0*100, omega_m, Ob0=omega_b, Tcmb0=2.725)
 
     # load camb matter-matter power spectrums
     # linear is used for the bias
     k_h = block["matter_power_lin", "k_h"]
     P_k = block["matter_power_lin", "p_k"]
     z_k = block["matter_power_lin", "z"]
+
+    P_k_nl = block["matter_power_nl", "p_k"]
+    k_nl = block["matter_power_nl", "k_h"]
+    z_nl = block["matter_power_nl", "z"]
+
     z = z_k
 
-    # get peak-height values
-    rnu = block["sigma_r", "r"]
-    znu = block["sigma_r", "z"]
-    nu = 1.686/block["sigma_r", "sigma"]
+    z_az = block["growth_parameters", "z"]
+    daz = block["growth_parameters", "d_z"]
+    daz = np.interp(z, z_az, daz)
+
+    # get peak-height values; needs fine-tuning of the k params
+    # does not agree with Colossus nor Cluster tool-kit
+    # rnu = block["sigma_r", "r"]
+    # znu = block["sigma_r", "z"]
+    # nu = 1.686/block["sigma_r", "sigma"]
 
     # compute overdensities; physical not comoving
     rho_c0 = float(cosmology.critical_density0.to('Msun/Mpc^3').value)
     rho_cz = cosmology.critical_density(z).to('Msun/Mpc^3').value
-    rho_m = cosmology.Om0*rho_c0
+    rho_m = omega_m*rho_c0
     rho_mz = rho_m*(1.+z)**3
 
     nz = len(z)
@@ -96,6 +106,18 @@ def execute(block, config):
     Radii = np.logspace(np.log10(Radii_min), np.log10(Radii_max), Radii_bins)
     M = np.logspace(np.log10(M_min), np.log10(M_max), M_bins)
     logM = np.log(M)
+
+    # Step 3) Compute Bias (M, Z)
+    import time
+    t0 = time.time()
+    #### Compute peak-height
+    Nu0 = ct.peak_height.nu_at_M(M, k_h, P_k[0], omega_m)
+    # Involves with 1/da(z)
+    # shape (z, mbins)
+    nu = np.array([Nu0/daz[i] for i in range(nz)])
+    Bias = np.array([bias.bias_at_nu(nui, odelta=200) for nui in nu])
+    tf = time.time()-t0
+    print('Bias took: %.3f sec'%tf)
 
     #### Step 1) Wp
     # compute halo-halo projected correlation function Wp_hh(R)
@@ -114,25 +136,26 @@ def execute(block, config):
     #   JTA: this is the matter-matter deltaSigma/bias, right?
     #   JTA: one could call it the halo-halo deltaSigma, but is really deltaSigma/bias^2
     #   JTA: it's a form of the two-halo term, again, without the bias
-    dSigma_hh = pk_to_dSigma(R_perp, z, k_h, P_k)
-    dSigma_hh*= rho_m
+    # dSigma_hh = pk_to_dSigma(R_perp, z, k_h, P_k)
+    # dSigma_hh*= rho_m
+    
+    ## Cluster Toolkit 2h term computation
+    p2h = ct_2hTerm(omega_m, Md=1e14, cd=5, bias=1.0)
+    p2h.pk_to_dsigma(R_perp,k_nl,P_k_nl,z_nl)
+    sigma_hh = p2h.Sigma
+    dSigma_hh = p2h.dSigma
+
     # dSigma_hh = np.zeros((nz, Radii.size),dtype='d')
 
     # compute the NFW projected profile
     # compute NFW Analytical Formula (Wright & Brainerd 2000)
     # using Duffy Mass-Concetration Relation
     # converting M200 to R200 wo the redshift evolution
-    concvec = duffy_concentration_relation(M, z_eff=0.4)
-    mm, rr  = np.meshgrid(M, R_perp, indexing='ij')
-    dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_c0)
+    # concvec = duffy_concentration_relation(M, z_eff=0.4)
+    concvec = child18_mass_concentration(M, 0.4, halo_sample = 'stacked_nfw')
 
-    # Step 3) Compute Bias (M, Z)
-    # Bias = compute_bias(M, k_h, P_k, omega_m)
-    import time
-    t0 = time.time()
-    Bias = compute_bias_camb(rnu, znu, nu, M, z, rho_mz)
-    tf = time.time()-t0
-    print('Bias took: %.3f sec'%tf)
+    mm, rr  = np.meshgrid(M, R_perp, indexing='ij')
+    dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_m)
 
     # NOTE: P_k depends on z; mass is a vector
     # Bias has shape (mass.size, z.size)
@@ -149,7 +172,7 @@ def execute(block, config):
     block["correlationFunction", "m_h"] = M
     block["correlationFunction", "lnM"] = logM
     block["correlationFunction", "z"] = z
-    block["correlationFunction", "rhoc"] = rho_cz
+    block["correlationFunction", "rhoc"] = rho_mz
 
     # Wp
     block["correlationFunction", "Rp"] = Radii
@@ -158,7 +181,7 @@ def execute(block, config):
 
     # deltaSigma [Msun/pc^2]
     block["correlationFunction", "r_sigma"] = R_perp
-    block["correlationFunction", "Sigma_hh"] = dSigma_hh/1e12
+    block["correlationFunction", "Sigma_hh"] = dSigma_hh # already on Msun/pc^2
     block["correlationFunction", "Sigma_nfw"] = dSigma_nfw/1e12
     block["correlationFunction", "concentration"] = concvec
     
@@ -206,26 +229,97 @@ def pk_to_Wp(r, z, k, pk):
     for i in range(z.size):
         Wp[i] = compute_hankel(r, k, pk[i], mu=0)
     return Wp
+
+## Using Cluster Tool-kit
+# The NSIZE of 50 is fast and has an accuracy of 0.1%
+# TODO: make sure the dummy variables doesn't affect the result
+class ct_2hTerm(object):
+    ## following cluster toolkit definition
+    RHO_C = 2.77533742639e+11 # Msun/Mpc^3/h^2 (critical density)
+
+    def __init__(self,omega_m=0.3,exclusion=True,NSIZE=50, Md=1e13, cd=4.,bias=1.00):
+        self.omega_m = omega_m
+        self.NSIZE = NSIZE
+        self.Rfix = np.logspace(-3., 3., NSIZE, base=10) #Xi_hm MUST be evaluated to higher than BAO
+        self.Md, self.cd = Md, cd # dummy values
+        self.bias = bias
+        self.exclusion = exclusion
+    
+    def _pk_to_sigma(self,Rp,k,pk):
+        ## TODO: add NFW profile
+        xi_mm    = ct.xi.xi_mm_at_r(self.Rfix, k, pk)
+        xi_2halo = ct.xi.xi_2halo(self.bias, xi_mm)
+        Sigma_mm = ct.deltasigma.Sigma_at_R(Rp, self.Rfix, xi_2halo, self.Md, self.cd, self.omega_m)
+        return Sigma_mm
+    
+    def _to_dsigma(self,Rp,sigma):
+        dSigma_mm = ct.deltasigma.DeltaSigma_at_R(Rp, Rp, sigma, self.Md, self.cd, self.omega_m)
+        return dSigma_mm
+
+    def pk_to_sigma(self,Rp,k,pk,zvec):
+        self.zvec = zvec
+        self.Sigma = np.zeros((zvec.size,Rp.size))
+        for i in range(zvec.size):
+            self.Sigma[i] = self._pk_to_sigma(Rp,k,pk[i])
+        pass
+
+    def pk_to_dsigma(self,Rp,k,pk,zvec):
+        self.R = Rp
+        
+        # check if Sigma is computed
+        if not hasattr(self,'Sigma'):
+            self.pk_to_sigma(Rp,k,pk,zvec)
+        
+        # convert to delta sigma
+        self.dSigma = np.zeros((self.zvec.size,Rp.size))
+        for i in range(self.zvec.size):
+            sigma = self.Sigma[i]
+            if self.exclusion:
+                ## ADD NFW
+                sigma+= sigmaNFW_Analytical(Rp, self.Md, self.cd, rho_c=self.RHO_C*self.omega_m)/1e12
+
+            self.dSigma[i] = self._to_dsigma(Rp, sigma)
+            if self.exclusion:
+                ## Subtract NFW
+                self.dSigma[i] -= deltaSigmaNFW_Analytical(Rp, self.Md, self.cd, rho_c=self.RHO_C*self.omega_m)/1e12
+            
+            self.dSigma = np.where(self.dSigma<0.,np.nan,self.dSigma)
+        pass
+
+# def _pk_to_dSigma(Rp,k,pk,zvec,omega_m=0.3,NSIZE=50):
+#     Md, cd = 1e13, 4. # dummy values
+#     Rfix = np.logspace(-3., 3., NSIZE, base=10) #Xi_hm MUST be evaluated to higher than BAO
+#     Sigma = np.zeros((zvec.size,Rp.size))
+#     dSigma = np.zeros((zvec.size,Rp.size))
+#     for i in range(zvec.size):
+#         xi_mm    = ct.xi.xi_mm_at_r(Rfix, k, pk[i])
+#         xi_2halo = ct.xi.xi_2halo(1.0, xi_mm)
+#         Sigma_mm = ct.deltasigma.Sigma_at_R(Rp, Rfix, xi_2halo, Md, cd, omega_m)
+#         dSigma_mm = ct.deltasigma.DeltaSigma_at_R(Rp, Rp, Sigma_mm, Md, cd, omega_m)
+#         Sigma[i] = Sigma_mm
+#         dSigma[i] = dSigma_mm
+#     return Sigma, dSigma
+
 # JTA: There should be a reference to the literature on this equation
-def pk_to_dSigma(r, z, k, pk):
-    """ Compute the second-order Hankel transformation of P(k)
+# def pk_to_dSigma(r, z, k, pk):
+#     """ Compute the second-order Hankel transformation of P(k)
 
-        The projected density profile dSigma(R)  (aka deltaSigma(R) )
+#         The projected density profile dSigma(R)  (aka deltaSigma(R) )
 
-    Args:
-        r (array): radial vector
-        z (array): redshift vector
-        k (array): wave number
-        pk (array): power spectrum, shape like (z.size, k.size)
+#     Args:
+#         r (array): radial vector
+#         z (array): redshift vector
+#         k (array): wave number
+#         pk (array): power spectrum, shape like (z.size, k.size)
 
-    Returns:
-        dSigma(R): projected density profile
-    """
-    # start the integration
-    dS = np.zeros((len(z), r.size),dtype='d')
-    for i in range(z.size):
-        dS[i] = compute_hankel(r, k, pk[i], mu=2)
-    return dS
+#     Returns:
+#         dSigma(R): projected density profile
+#     """
+#     # start the integration
+#     dS = np.zeros((len(z), r.size),dtype='d')
+#     for i in range(z.size):
+#         dS[i] = compute_hankel(r, k, pk[i], mu=2)
+#     return dS
 
 def compute_Xi_nfw(r, mass, c, omega_m=0.3):
     """ NFW Profile Correlation Function
@@ -545,6 +639,57 @@ def normalized_halo_profile(k_h, r_virial, c):
     fc = np.log(1.+c)-c/(1.+c)
     return (f1+f2-f3)/fc
 
+### Compute \Sigma Analyticaly
+def f_greater_than(x):
+    res = 1. / (x**2 - 1.0)
+    res *=(1- 2.0 / np.sqrt(x**2 - 1.0) * np.arctan(np.sqrt((x - 1.0) / (1.0 + x))))
+    return res
+
+def f_less_than(x):
+    res = 1. / (x**2 - 1.0)
+    res *=(1- 2.0 / np.sqrt(1.0 - x**2) * np.arctanh(np.sqrt((1.0 - x) / (1.0 + x))))
+    return res
+        
+def f_nfw(x, eps=1e-9):
+    """
+    Analytical normalized Sigma profile
+    Wright & Brained 2000
+
+    Args:
+        x (array): Rp/Rs where Rs is the scale radius, Rs = R200/c
+    """
+    if (isinstance(x,float))or(isinstance(x,int)): 
+        x = np.array([x])
+        
+    res = 1/3.*np.ones_like(x)
+
+    ix = np.where(x <= 1-eps)[0]
+    res[ix] = f_less_than(x[ix])
+    
+    ix = np.where(x>=1+eps)[0]
+    res[ix] = f_greater_than(x[ix])
+    return res
+
+def sigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
+    """Analytical NFW Surface Mass Density  (Eqn 14, Wright & Brained 2000)
+
+    Args:
+        radii (array): projected radii
+        m200 (array): M200 critical mass in solar masses unit
+        z_eff (float): effective redshift to concentration and critical density values
+    """
+    r_virial = convert_m200_to_r200(m200, rho_c)
+    rs = r_virial/c
+
+    # eqn 3 
+    deltac = (200./3.) * c**3/(np.log(1+c)-c/(1+c))
+
+    # eqn 15 an 16
+    # interpolation avoid numerical issues
+    xvec = np.logspace(-3.,4.,1000)
+    fx = interp1d(xvec, f_nfw(xvec))(radii/rs)
+    return 2*rs*deltac*rho_c*fx
+
 ### Compute \Delta \Sigma Analyticaly
 def g_less_than(x,core=4e-3):
     # below core the solution fails numereically
@@ -607,7 +752,7 @@ def deltaSigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
     gx = interp1d(xvec, g_nfw(xvec))(radii/rs)
     return rs*deltac*rho_c*gx
 
-def compute_bias_camb(rnu, znu, nu, massvec, zvec, rhomz, omega_m=0.3):
+def compute_bias_camb(rnu, znu, nu, massvec, zvec, rhomz):
     # loop over redshift
     # coult it be improved; but it is fast enough
     
@@ -623,9 +768,75 @@ def compute_bias_camb(rnu, znu, nu, massvec, zvec, rhomz, omega_m=0.3):
         rvec = convert_m200_to_r200(massvec, rhom, odelta=1)
         
         # interpolate with the new radii vector
-        _nui = np.exp(interp1d(rnu, np.log(nui), fill_value='extrapolate')(rvec))
+        _nui = np.exp(interp1d(np.log(rnu), np.log(nui))(np.log(rvec)))
         Bias[:,i] = bias.bias_at_nu(_nui, odelta=200)
     return Bias
+
+def child18_mass_concentration(M200c, z, halo_sample = 'stacked_nfw'):
+	"""
+	The concentration mass relation model of Child et al 2018.
+
+	Parameters
+	-----------------------------------------------------------------------------------------------
+	M200c: array_like
+		Halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+	z: float
+		Redshift
+	halo_sample: str
+		Can be ``individual_all`` (default), ``individual_relaxed`` (the mean concentration of 
+		individual, relaxed halos), ``stacked_nfw`` (the stacked profile with with an NFW profile), 
+		and ``stacked_einasto`` (the stacked profile with with an Einasto profile).
+		
+	Returns
+	-----------------------------------------------------------------------------------------------
+	c: array_like
+		Halo concentration; has the same dimensions as ``M``.
+	"""
+
+	if halo_sample == 'individual_all':
+		m = -0.10
+		A = 3.44
+		b = 430.49
+		c0 = 3.19
+	elif halo_sample == 'individual_relaxed':
+		m = -0.09
+		A = 2.88
+		b = 1644.53
+		c0 = 3.54
+	elif halo_sample == 'stacked_nfw':
+		m = -0.07
+		A = 4.61
+		b = 638.65
+		c0 = 3.59
+	elif halo_sample == 'stacked_einasto':
+		m = -0.01
+		A = 63.2
+		b = 431.48
+		c0 = 3.36
+	else:
+		raise Exception('Unknown halo sample for child18 concentration model, %s.' % (halo_sample))
+
+	Mstar = peakHeight_nonLinearMass(z)
+	M_MT = M200c / (Mstar * b)	
+	c200c = c0 + A * (M_MT**m * (1.0 + M_MT)**-m - 1.0)
+	return c200c
+
+def peakHeight_nonLinearMass(z):
+    """peakHeight_nonLinearMass 
+    The non-linear mass. E.g. eqaution 13 in Child et al. 2018
+    Mstar is log-linear with redshift. 
+    log(Mstar) = 12.5 - 1.5*z
+
+    You can check with Colossus
+    How to generate the data:
+    from colossus.cosmology import cosmology
+    from colossus.lss.peaks import nonLinearMass
+    cosmology.setCosmology('WMAP7-only')
+    z = np.linspace(0, 2, 100)
+    Mstar = nonLinearMass(z)
+    """
+    return 10**(12.5-1.5*z)
+
 
 def cleanup(config):
     pass
