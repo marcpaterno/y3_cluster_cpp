@@ -117,7 +117,7 @@ def execute(block, config):
     nu = np.array([Nu0/daz[i] for i in range(nz)])
     Bias = np.array([bias.bias_at_nu(nui, odelta=200) for nui in nu])
     tf = time.time()-t0
-    print('Bias took: %.3f sec'%tf)
+    # print('Bias took: %.3f sec'%tf)
 
     #### Step 1) Wp
     # compute halo-halo projected correlation function Wp_hh(R)
