@@ -55,7 +55,15 @@ if (USE_CUDA)
                                                                         CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
   target_include_directories(avgSigmaCentBu  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
   target_compile_options(avgSigmaCentBu  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
-
+  
+  # avgSigmaMiscBu.cu
+  add_library(avgSigmaMiscBu   MODULE avgSigmaMiscBu.cu)
+  target_link_libraries(avgSigmaMiscBu  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  set_target_properties(avgSigmaMiscBu  PROPERTIES POSITION_INDEPENDENT_CODE ON 
+                                                                        CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  target_include_directories(avgSigmaMiscBu  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  target_compile_options(avgSigmaMiscBu  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+  
   # avgPkDampCentBU
   add_library(avgPkDampCentBU   MODULE avgPkDampCentBU.cu)
   target_link_libraries(avgPkDampCentBU  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
