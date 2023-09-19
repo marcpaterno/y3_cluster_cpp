@@ -13,6 +13,6 @@ add_library(avgMiscApprox1ScalarIntegrand MODULE avgMiscApprox1.cc)
 target_link_libraries(avgMiscApprox1ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
 target_include_directories(avgMiscApprox1ScalarIntegrand PRIVATE ${PAGANI_DIR} ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS})
 
-add_library(avgMiscApprox2ScalarIntegrand MODULE avgMiscApprox1.cc)
-target_link_libraries(avgMiscApprox2ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES})
+add_library(avgMiscApprox2ScalarIntegrand MODULE avgMiscApprox2.cc)
+target_link_libraries(avgMiscApprox2ScalarIntegrand PRIVATE cosmosis utils models ${GSL_LIBRARIES} ${CUBA_LIBRARIES} fmt::fmt)
 target_include_directories(avgMiscApprox2ScalarIntegrand PRIVATE ${PAGANI_DIR} ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${GSL_INCLUDE_DIRS})

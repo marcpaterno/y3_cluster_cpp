@@ -30,7 +30,7 @@ using cubacpp::integration_result;
 // "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class avgMiscApprox1 {
+class avgMiscApprox1Mock {
 public:
   using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
@@ -74,7 +74,7 @@ private:
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit avgMiscApprox1(cosmosis::DataBlock& config);
+  explicit avgMiscApprox1Mock(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -131,7 +131,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgMiscApprox1::avgMiscApprox1( DataBlock& cfg)
+avgMiscApprox1Mock::avgMiscApprox1Mock( DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -144,7 +144,7 @@ avgMiscApprox1::avgMiscApprox1( DataBlock& cfg)
 }
 
 void
-avgMiscApprox1::set_sample(DataBlock& sample)
+avgMiscApprox1Mock::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -158,7 +158,7 @@ avgMiscApprox1::set_sample(DataBlock& sample)
 }
 
 void
-avgMiscApprox1::set_grid_point(
+avgMiscApprox1Mock::set_grid_point(
   grid_point_t const& grid_point)
 {
   radius_ = grid_point[2];
@@ -167,7 +167,7 @@ avgMiscApprox1::set_grid_point(
 }
 
 __host__ __device__ double
-avgMiscApprox1::operator()(double lo,
+avgMiscApprox1Mock::operator()(double lo,
                            double zt,
                            double lnM,
                            double rmis,
@@ -188,7 +188,7 @@ avgMiscApprox1::operator()(double lo,
 
 // string must match section block in pipeline.ini file
 char const*
-avgMiscApprox1::module_label()
+avgMiscApprox1Mock::module_label()
 {
   return "gammaMisc";
 }
@@ -200,12 +200,12 @@ avgMiscApprox1::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<avgMiscApprox1::volume_t>
-avgMiscApprox1::make_integration_volumes(
+std::vector<avgMiscApprox1Mock::volume_t>
+avgMiscApprox1Mock::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgMiscApprox1::module_label(),     
+    cfg, avgMiscApprox1Mock::module_label(),     
     "lo",
     "zt",
     "lnm",
@@ -213,15 +213,15 @@ avgMiscApprox1::make_integration_volumes(
     "theta");
 }
 
-avgMiscApprox1::grid_t
-avgMiscApprox1::make_grid_points(cosmosis::DataBlock& cfg)
+avgMiscApprox1Mock::grid_t
+avgMiscApprox1Mock::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    avgMiscApprox1::module_label(),
+    avgMiscApprox1Mock::module_label(),
     "zo_low",
     "zo_high",
     "radii");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgMiscApprox1)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgMiscApprox1Mock)

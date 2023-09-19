@@ -154,11 +154,11 @@ avgMiscFullScalarIntegrand::set_grid_point(
 
 double
 avgMiscFullScalarIntegrand::operator()(double lo,
-                        double lc,
-                        double zt,
-                        double lnM,
-                        double rmis,
-                        double theta) const
+                                       double lc,
+                                       double zt,
+                                       double lnM,
+                                       double rmis,
+                                       double theta) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).

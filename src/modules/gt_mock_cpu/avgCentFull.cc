@@ -11,7 +11,7 @@
 #include "models/int_lc_lt_des_t.hh"
 #include "models/int_zo_zt_des_t.hh"
 #include "models/lo_lc_t.hh"
-#include "models/mor_des_t.hh"
+#include "models/mor_des_log_t.hh"
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
 #include "models/kappa_max.hh"
@@ -50,7 +50,7 @@ private:
   //
   // the volume
   // std::optional<y3_cluster::MOR_t> mor;
-  std::optional<y3_cluster::MOR_DES_t> mor;
+  std::optional<y3_cluster::MOR_DES_LOG_t> mor;
   std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
   std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cluster::HMF_t> hmf;
