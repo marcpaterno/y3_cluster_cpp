@@ -46,21 +46,21 @@ namespace y3_cluster {
                               "Sigma_hh"))
       , _bias(make_Interp2D(sample,
                             "correlationFunction",
-                            "z",
                             "lnM",
+                            "z",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
                               "correlationFunction",
-                              "z",
-                              "correlationFunction",
                               "r_sigma",
+                              "correlationFunction",
+                              "z",
                               "sigmaCritInv",
                               "sigma_crit_inv"))
       // , _nfw_dsigma_mis(y3_cuda::NFW_DSIGMA_MIS(sample))
       , _tau(sample.view<double>("cluster_abundance", "roffset_tau"))
     {}
 
-    __device__ __host__ double
+    double
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     {
