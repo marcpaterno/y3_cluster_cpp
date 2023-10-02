@@ -1,4 +1,7 @@
 
+#Add triaxialit
+add_subdirectory(gt_card_triax_gpu)
+
 # sigma_park_y1 is the Oct 2022 work of Jim and Johnny
 # currently broken awaiting lc_lt.cuh debugging
 add_subdirectory(sigma_park_y1)
