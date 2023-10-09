@@ -51,7 +51,7 @@ namespace y3_cuda {
       double const lnl = _lnA+ _B * (lnM - std::log(_m_pivot)) + _C*std::log((1+zt)/(1+_z_pivot)); 
       
       //Boosting from triaxiality. TODO: think about polynomial solution. 
-      double const delta_lnA_cosi = dlnA_cosi(mu);
+      double const delta_lnA_cosi = (*dlnA_cosi)(mu);
       double const lnl_tot = lnl + delta_lnA_cosi;
       
       double const x = lt - lnl_tot;
