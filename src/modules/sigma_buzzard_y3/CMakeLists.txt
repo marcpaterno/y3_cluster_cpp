@@ -4,6 +4,15 @@ link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 if (USE_CUDA)
   find_library(NVTX_LIBRARY nvToolsExt PATHS ENV LD_LIBRARY_PATH)
 
+
+  # dummy.cu
+  add_library(dummy   MODULE dummy.cu)
+  target_link_libraries(dummy  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
+  target_include_directories(dummy  PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  set_target_properties(dummy  PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  target_compile_options(dummy  PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+
+
   # summedNumbersCentBu.cu
   add_library(summedNumbersCentBu   MODULE summedNumbersCentBu.cu)
   target_link_libraries(summedNumbersCentBu  PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models)
