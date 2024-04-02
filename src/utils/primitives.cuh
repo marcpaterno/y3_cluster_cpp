@@ -57,6 +57,18 @@ namespace y3_cuda {
     return exp(-z * z / 2.) * 0.3989422804014327 / sigma;
   }
 
+  inline __device__ __host__ double
+  park_pi_func(double x, double R0, double P0, double c)
+  {
+    // Case where R is less than or equal to R_0
+    if (R <= R_0) {
+        double const result = Pi_0 * (R / R_0);
+    } else {
+        double const result = Pi_0 + c * std::log(R / R_0);
+    }
+    return 1+result;
+  }
+
   namespace {
     // Tail recursive helper for `integer_pow`
     constexpr double

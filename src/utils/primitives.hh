@@ -59,6 +59,20 @@ namespace y3_cluster {
     return std::exp(-z * z / 2.) * 0.3989422804014327 / sigma;
   }
 
+  inline double
+  park_pi_func(double x, double R0, double P0, double c)
+  {
+    double const result = 0.0;
+    if (R <= R_0) {
+        // If R is less than or equal to R_0, use the first formula
+        result = Pi_0 * (R / R_0);
+    } else {
+        // If R is greater than R_0, use the second formula
+        result = Pi_0 + c * std::log(R / R_0);
+    }
+    return 1+result;
+  }
+
   namespace {
     // Tail recursive helper for `integer_pow`
     constexpr double
