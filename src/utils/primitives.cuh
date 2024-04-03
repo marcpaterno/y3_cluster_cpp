@@ -58,15 +58,15 @@ namespace y3_cuda {
   }
 
   inline __device__ __host__ double
-  park_pi_func(double x, double R0, double P0, double c)
+  park_pi_func(double R, double R0, double P0, double c)
   {
-    // Case where R is less than or equal to R_0
-    if (R <= R_0) {
-        double const result = Pi_0 * (R / R_0);
+    double result;
+    if (R <= R0) {
+        result = P0 * (R / R0);
     } else {
-        double const result = Pi_0 + c * std::log(R / R_0);
+        result = P0 + c * std::log(R / R0); 
     }
-    return 1+result;
+    return 1 + result; 
   }
 
   namespace {
