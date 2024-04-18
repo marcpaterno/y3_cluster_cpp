@@ -78,18 +78,7 @@ public:
   // Set the data for the current bin.
   void set_grid_point(grid_point_t const& pt);
 
-  size_t
-  get_device_mem_footprint()
-  {
-    size_t dev_size = 0;
-    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
-    if ((bool)dv_do_dz == true)
-      dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)sigma == true) dev_size += (*sigma).get_device_mem_footprint();
-    return dev_size;
-  }
-
+  
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
   // integration routine does not work for functions of one variable). The
@@ -171,7 +160,7 @@ avgCentSigmaPark::operator()(double lo,
   // to access the X object (as if we were dereferencing a pointer).
   double const lc = lo; 
   double const mor_v = (*mor)(lo, lnM, zt);
-  auto const boost = (*op_sel_park_pi_func)(radius_, lo, zo);
+  auto const boost = (*op_sel_park_pi_func)(radius_, lo, zt);
 
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
   auto const val = (*sigma)(radius_, lnM, zt) * (*lc_lt)(lc, lt, zt) *

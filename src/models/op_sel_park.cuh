@@ -5,6 +5,8 @@
 #include "common/cuda/Interp2D.cuh"
 #include <vector>
 
+#include "utils/par_power_law.cuh"
+
 namespace y3_cuda {
   // Function to calculate the Park et al. (2023) pi function 
   class OP_SEL_PARK {

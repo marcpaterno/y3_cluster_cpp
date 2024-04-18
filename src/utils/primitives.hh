@@ -63,12 +63,12 @@ namespace y3_cluster {
   park_pi_func(double x, double R0, double P0, double c)
   {
     double const result = 0.0;
-    if (R <= R_0) {
+    if (x <= R0) {
         // If R is less than or equal to R_0, use the first formula
-        result = Pi_0 * (R / R_0);
+        double const result = P0 * (x / R0);
     } else {
         // If R is greater than R_0, use the second formula
-        result = Pi_0 + c * std::log(R / R_0);
+        double const result = P0 + c * std::log(x / R0);
     }
     return 1+result;
   }

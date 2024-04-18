@@ -17,7 +17,7 @@
 // #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 // mis-centered delta sigma interpolation table
-#include "models/dsigma_misc.cuh"
+#include "models/sigma_misc.cuh"
 #include "models/op_sel_park.cuh"
 
 #include <iostream>
@@ -62,7 +62,7 @@ private:
   std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the delta sigma miscentered profile
-  std::optional<y3_cuda::DSIGMA_MISC> gamma_misc;
+  std::optional<y3_cuda::SIGMA_MISC> gamma_misc;
   std::optional<y3_cuda::OP_SEL_PARK> op_sel_park_pi_func;
 
   // State set for current 'bin' to be integrated.
@@ -82,18 +82,6 @@ public:
 
   // Set the data for the current bin.
   void set_grid_point(grid_point_t const& pt);
-
-  size_t
-  get_device_mem_footprint()
-  {
-    size_t dev_size = 0;
-    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
-    if ((bool)dv_do_dz == true)
-      dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    // if ((bool)gamma_misc == true) dev_size += (*gamma_misc).get_device_mem_footprint();
-    return dev_size;
-  }
 
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
@@ -177,14 +165,14 @@ avgMiscApprox2SigmaPark::operator()(double lo,
   // to access the X object (as if we were dereferencing a pointer).
   double const lc = lo;
   double const mor_v = (*mor)(lo, lnM, zt);
-  auto const boost = (*op_sel_park_pi_func)(radius_, lo, zo);
+  auto const boost = (*op_sel_park_pi_func)(radius_, lo, zt);
 
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
   auto const val = (*gamma_misc)(radius_, lnM, zt) * (*lc_lt)(lc, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   
   auto const sigma = val * boost;
-  return val;
+  return sigma;
 }
 
 // string must match section block in pipeline.ini file

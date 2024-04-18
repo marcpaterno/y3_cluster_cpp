@@ -33,7 +33,7 @@ using cubacpp::integration_result;
 //
 class avgCentSigmaCumPark {
 public:
-  using grid_t = y3_cluster::grid_t<3>;
+  using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -76,18 +76,6 @@ public:
 
   // Set the data for the current bin.
   void set_grid_point(grid_point_t const& pt);
-
-  size_t
-  get_device_mem_footprint()
-  {
-    size_t dev_size = 0;
-    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
-    if ((bool)dv_do_dz == true)
-      dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)sigma == true) dev_size += (*sigma).get_device_mem_footprint();
-    return dev_size;
-  }
 
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
@@ -173,9 +161,9 @@ avgCentSigmaCumPark::operator()(double lo,
   auto const val = (*sigma)(Rp, lnM, zt) * (*lc_lt)(lc, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   // APPLY BOOST ON SIGMA
-  double const boost = (*op_sel_park_pi_func)(Rp, lo, zo);
+  double const boost = (*op_sel_park_pi_func)(Rp, lo, zt);
   // Integrates over \Sigma_cum = 2/R^2  \int_0^R r \Sigma(r) dr
-  auto const rp_sigma = Rp * boost * res;
+  auto const rp_sigma = Rp * boost * val;
   return rp_sigma;
 }
 

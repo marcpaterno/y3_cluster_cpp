@@ -239,11 +239,6 @@ y3_cluster::CosmoSISSICUDAModule<I>::execute(cosmosis::DataBlock& sample)
   auto rc = cudaSetDevice(device_.id);
   if (rc != 0) throw std::runtime_error("Failed to allocate GPU!\n");
 
-  y3_cluster::MemTrackSentry mem_sentry(mem_track_data_stream_(),
-                                        IntegrandType::module_label(),
-                                        "module",
-                                        integrand_.get_device_mem_footprint());
-
   integrand_.set_sample(sample);
   auto results = use_cartesian_product_of_volumes_and_gridpoints_ ?
                    integrate_cartesian_product_of_volumes_and_gridpoints() :
@@ -272,33 +267,11 @@ y3_cluster::CosmoSISSICUDAModule<
   for (auto& volume : volumes_) {
 
     num_vols++;
-    y3_cluster::MemTrackSentry mem_sentry_vol(
-      mem_track_data_stream_(),
-      IntegrandType::module_label(),
-      "volume",
-      integrand_.get_device_mem_footprint(),
-      num_vols);
     size_t num_grid_points = 0;
 
     for (auto const& grid_point : grid_points_.points) {
       num_grid_points++;
-      y3_cluster::MemTrackSentry mem_sentry_grid_point(
-        mem_track_data_stream_(),
-        IntegrandType::module_label(),
-        "grid-point",
-        integrand_.get_device_mem_footprint(),
-        num_vols,
-        num_grid_points);
-
       integrand_.set_grid_point(grid_point);
-
-      y3_cluster::MemTrackSentry mem_sentry(
-        mem_track_data_stream_(),
-        IntegrandType::module_label(),
-        "integrate",
-        integrand_.get_device_mem_footprint(),
-        num_vols,
-        num_grid_points);
 
       numint::integration_result res =
         algorithm_.integrate(integrand_, eps_abs_, eps_rel_, volume);

@@ -17,6 +17,9 @@ add_subdirectory(gt_mock_cpu)
 add_subdirectory(gt_card_gpu)
 add_subdirectory(gt_card_cpu)
 
+# gt_park_sel_gpu is April 18 cardinal validation modules
+add_subdirectory(gt_park_sel_gpu)
+
 # sigma_mort_y1 is the primary working code of 2021 and 2022
 add_subdirectory(sigma_mort_y1)
 #
