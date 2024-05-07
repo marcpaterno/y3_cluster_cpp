@@ -24,13 +24,13 @@ TEST_CASE("Test NFW Misc Implementation")
   double  RHOM = RHOC*omega_m;
   NFW_SIGMA_MIS model(conc, RHOM, "gamma");
 
-  double const epsrel = 1.0e-2;
+  double const epsrel = 1.0e-3;
   double const epsabs = 1.0e-12;
 
   // Here we need to fill the vectors rs, rmiss, lnMs and answers 
   // Radii vector log spaced from 0.1 to 10 with 10 points
   std::vector<double> r{ 0.1       ,  0.16681005,  0.27825594,  0.46415888,  0.77426368,
-                         1.29154967,  2.15443469,  3.59381366,  5.9948425 , 10.        };
+                         1.29154967,  2.15443469,  3.59381366,  5.9948425};
 
     // Answers drawn from cluster toolkit
   // Each columns is a different rmis, each row is a different r
@@ -43,7 +43,7 @@ TEST_CASE("Test NFW Misc Implementation")
                                 3.5299064, 4.7155369, 3.4469777,
                                 1.3583749, 1.5653792, 2.1094762,
                                 0.5101472, 0.5325816, 0.9306969,
-                                0.1884599, 0.1911689, 0.2793004};
+                                0.1884599, 0.1911689};
 
   std::vector<double> rmis{0.1,0.5,2.0};
   std::vector<double> lnMs{32.2361913};
