@@ -152,9 +152,9 @@ avgCentSigmaPark::set_grid_point(
 
 __host__ __device__ double
 avgCentSigmaPark::operator()(double lo,
-                        double lt,
-                        double zt,
-                        double lnM) const
+                            double lt,
+                            double zt,
+                            double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
