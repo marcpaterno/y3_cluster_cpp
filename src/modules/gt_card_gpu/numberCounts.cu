@@ -79,16 +79,6 @@ private:
   // bins").
 
 public:
-  size_t
-  get_device_mem_footprint()
-  {
-    size_t dev_size = 0;
-    if (mor) dev_size += (*mor).get_device_mem_footprint();
-    if (dv_do_dz) dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if (hmf) dev_size += (*hmf).get_device_mem_footprint();
-    return dev_size;
-  }
-
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
   explicit numberCountsCard(cosmosis::DataBlock& config);

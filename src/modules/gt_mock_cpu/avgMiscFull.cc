@@ -14,7 +14,7 @@
 #include "models/mor_des_t.hh"
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
-#include "models/GAMMA_max.hh"
+#include "models/gamma_max.hh"
 
 #include <iostream>
 #include <optional>
