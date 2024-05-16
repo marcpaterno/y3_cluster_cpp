@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from cosmosis.datablock import option_section, names
+from cosmosis.datablock import names
 
 from scipy.interpolate import interp1d
 from scipy.special import erf
@@ -26,8 +26,9 @@ from setup_bins import zmeans_ij
 # 
 # Returns: 
 # WpGammat/
-# | Wp_hh/nfw.txt
-# | Shear_hh/nfw.txt
+# | Sigma_{hh/nfw}.txt
+# | DSigma_{hh/nfw}.txt
+# | Bias.tx
 # | r.txt
 # | z.txt
 # | m_h.txt
@@ -41,21 +42,21 @@ cosmo = names.cosmological_parameters
 cosmo_fid = astropy.cosmology.FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
 
 def setup(options):
-    section = option_section
+    section_name = "halo_model"
     #Mpc/h comoving distance, distance on the sky
-    R_perp_min = options[section,"R_perp_min"]
-    R_perp_max = options[section,"R_perp_max"]
-    R_perp_bins = int(options[section,"R_perp_bins"])
+    R_perp_min = options[section_name,"R_perp_min"]
+    R_perp_max = options[section_name,"R_perp_max"]
+    R_perp_bins = int(options[section_name,"R_perp_bins"])
 
     # radii of xi_hm, in Mpc/h
-    Radii_min = options[section,"Radii_min"]
-    Radii_max = options[section,"Radii_max"]
-    Radii_bins = int(options[section,"Radii_bins"])
+    Radii_min = options[section_name,"Radii_min"]
+    Radii_max = options[section_name,"Radii_max"]
+    Radii_bins = int(options[section_name,"Radii_bins"])
 
     #mass (float): Halo mass Msun/h.
-    M_min = options[section,"M_min"]
-    M_max = options[section,"M_max"]
-    M_bins = int(options[section,"M_bins"])
+    M_min = options[section_name,"M_min"]
+    M_max = options[section_name,"M_max"]
+    M_bins = int(options[section_name,"M_bins"])
 
     params_out = R_perp_min, R_perp_max, R_perp_bins, \
     Radii_min, Radii_max, Radii_bins, M_min, M_max, M_bins
@@ -63,6 +64,7 @@ def setup(options):
     
 
 def execute(block, config):
+    section_name = "halo_model"
     R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max,\
     Radii_bins, M_min, M_max, M_bins  = config
 
@@ -103,6 +105,7 @@ def execute(block, config):
     nz = len(z)
     # setup bins
     R_perp = np.logspace(np.log10(R_perp_min), np.log10(R_perp_max), R_perp_bins)
+    R_perp = np.append(0, R_perp)
     Radii = np.logspace(np.log10(Radii_min), np.log10(Radii_max), Radii_bins)
     M = np.logspace(np.log10(M_min), np.log10(M_max), M_bins)
     logM = np.log(M)
@@ -131,18 +134,10 @@ def execute(block, config):
     Wp_nfw = Wp_hh #pk_to_Wp(R_perp, z, k_h, pk_nfw)
 
     #### Step 2) deltaSigma
-    # compute the halo-halo projected deltaSigma profile
-    # just missing sigma_crit to be gamma_t
-    #   JTA: this is the matter-matter deltaSigma/bias, right?
-    #   JTA: one could call it the halo-halo deltaSigma, but is really deltaSigma/bias^2
-    #   JTA: it's a form of the two-halo term, again, without the bias
-    # dSigma_hh = pk_to_dSigma(R_perp, z, k_h, P_k)
-    # dSigma_hh*= rho_m
-    
     ## Cluster Toolkit 2h term computation
     p2h = ct_2hTerm(omega_m, Md=1e14, cd=5, bias=1.0)
-    p2h.pk_to_dsigma(R_perp,k_nl,P_k_nl,z_nl)
-    sigma_hh = p2h.Sigma
+    p2h.pk_to_dsigma(R_perp[1:],k_nl,P_k_nl,z_nl)
+    Sigma_hh = p2h.Sigma
     dSigma_hh = p2h.dSigma
 
     # dSigma_hh = np.zeros((nz, Radii.size),dtype='d')
@@ -156,6 +151,7 @@ def execute(block, config):
 
     mm, rr  = np.meshgrid(M, R_perp, indexing='ij')
     dSigma_nfw = deltaSigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_m)
+    Sigma_nfw = sigmaNFW_Analytical(rr, mm, concvec[:,np.newaxis], rho_c=rho_m)
 
     # NOTE: P_k depends on z; mass is a vector
     # Bias has shape (mass.size, z.size)
@@ -169,38 +165,32 @@ def execute(block, config):
     scaleShift, hubbleShift = scaleShiftCosmo(z, cosmology)
 
     # put into the datablock
-    block["correlationFunction", "m_h"] = M
-    block["correlationFunction", "lnM"] = logM
-    block["correlationFunction", "z"] = z
-    block["correlationFunction", "rhoc"] = rho_mz
+    block[section_name, "m_h"] = M
+    block[section_name, "lnM"] = logM
+    block[section_name, "z"] = z
+    block[section_name, "rhoc"] = rho_mz
 
     # Wp
-    block["correlationFunction", "Rp"] = Radii
-    block["correlationFunction", "Wp_hh"] = Wp_hh
-    block["correlationFunction", "Wp_nfw"] = Wp_nfw
+    block[section_name, "Rp"] = Radii
+    block[section_name, "Wp_hh"] = Wp_hh
+    block[section_name, "Wp_nfw"] = Wp_nfw
 
-    # deltaSigma [Msun/pc^2]
-    block["correlationFunction", "r_sigma"] = R_perp
-    block["correlationFunction", "Sigma_hh"] = dSigma_hh # already on Msun/pc^2
-    block["correlationFunction", "Sigma_nfw"] = dSigma_nfw/1e12
-    block["correlationFunction", "concentration"] = concvec
+    # deltaSigma and Sigma [Msun/pc^2]
+    block[section_name, "r_sigma"] = R_perp
+    block[section_name, "DSigma_hh"] = dSigma_hh # already on Msun/pc^2
+    block[section_name, "DSigma_nfw"] = dSigma_nfw/1e12
+    block[section_name, "Sigma_hh"] = Sigma_hh # already on Msun/pc^2
+    block[section_name, "Sigma_nfw"] = Sigma_nfw/1e12
+    block[section_name, "concentration"] = concvec
     
     # Bias
-    block["correlationFunction", "bias"] = Bias
+    block[section_name, "bias"] = Bias
 
     # damped Pk
-    block["correlationFunction", "scale_shift"] = scaleShift
-    block["correlationFunction", "hubble_shift"] = hubbleShift
-    block["correlationFunction", "k"] = k_h
-    # block["correlationFunction", "Damped_Pk_hh"] = damped_Pk_nl
-
-    # Debug
-    # pk_nl_in = P_k[25]
-    # s, xi_nl = hankl.P2xi(k_nl, pk_nl_in, l=0)
-    # xi_nl_ct = ct.xi.xi_mm_at_r(s, k_nl, pk_nl_in)
-    # np.savez('./pk_nl.npz', k=k_nl, pk=pk_nl_in)
-    # np.savez('./xi_hankl_nl.npz', r=s, pk=xi_nl)
-    # np.savez('./xi_ct_nl.npz', r=s, pk=xi_nl_ct)
+    block[section_name, "scale_shift"] = scaleShift
+    block[section_name, "hubble_shift"] = hubbleShift
+    block[section_name, "k"] = k_h
+    # block[section_name, "Damped_Pk_hh"] = damped_Pk_nl
     
     return 0
 
@@ -687,6 +677,7 @@ def sigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
     # eqn 15 an 16
     # interpolation avoid numerical issues
     xvec = np.logspace(-3.,4.,1000)
+    xvec = np.append(0, xvec)
     fx = interp1d(xvec, f_nfw(xvec))(radii/rs)
     return 2*rs*deltac*rho_c*fx
 
@@ -749,6 +740,7 @@ def deltaSigmaNFW_Analytical(radii, m200, c, rho_c=0.0):
     # eqn 15 an 16
     # interpolation avoid numerical issues
     xvec = np.logspace(-3.,4.,1000)
+    xvec = np.append(0, xvec)
     gx = interp1d(xvec, g_nfw(xvec))(radii/rs)
     return rs*deltac*rho_c*gx
 
