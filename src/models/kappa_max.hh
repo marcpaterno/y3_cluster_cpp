@@ -30,24 +30,24 @@ namespace y3_cluster {
 
     explicit KAPPA_MAX(cosmosis::DataBlock& sample)
       : _sigma1(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "lnM",
                               "Sigma_nfw"))
       , _sigma2(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "Sigma_hh"))
       , _bias(make_Interp2D(sample,
-                            "correlationFunction",
+                            "haloModel",
                             "lnM",
                             "z",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
-                              "correlationFunction",
+                              "haloModel",
                               "z",
                               "sigmaCritInv",
                               "sigma_crit_inv"))                        

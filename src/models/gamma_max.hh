@@ -1,70 +1,59 @@
-#ifndef Y3_CLUSTER_KAPPA_MAX_CUH
-#define Y3_CLUSTER_KAPPA_MAX_CUH
+#ifndef Y3_CLUSTER_GAMMA_MAX_HH
+#define Y3_CLUSTER_GAMMA_MAX_HH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
-#include "common/cuda/Interp2D.cuh"
 #include "models/ez.hh"
-#include "utils/make_interp_2d.cuh"
+#include "utils/interp_2d.hh"
+#include "utils/make_interp_2d.hh"
 #include "utils/primitives.hh"
 
 #include <algorithm>
 
-namespace y3_cuda {
-  class KAPPA_MAX {
+namespace y3_cluster {
+  class GAMMA_MAX {
   private:
-    quad::Interp2D _sigma1;
-    quad::Interp2D _sigma2;
-    quad::Interp2D _bias;
-    quad::Interp2D _sigma_crit_inv;
+    Interp2D _sigma1;
+    Interp2D _sigma2;
+    Interp2D _bias;
+    Interp2D _sigma_crit_inv;
 
   public:
-    size_t
-    get_device_mem_footprint()
-    {
-      size_t size = 0;
-      size += _sigma1.get_device_mem_footprint();
-      size += _sigma2.get_device_mem_footprint();
-      size += _bias.get_device_mem_footprint();
-      size += _sigma_crit_inv.get_device_mem_footprint();
-      return size;
-    }
-
-    KAPPA_MAX(quad::Interp2D const& sigma1,
-              quad::Interp2D const& sigma2,
-              quad::Interp2D const& bias,
-              quad::Interp2D const& sigma_crit_inv)
+    GAMMA_MAX(Interp2D const& sigma1,
+              Interp2D const& sigma2,
+              Interp2D const& bias,
+              Interp2D const& sigma_crit_inv)
       : _sigma1(sigma1), _sigma2(sigma2), _bias(bias), _sigma_crit_inv(sigma_crit_inv)
     {}
-
+    
     using doubles = std::vector<double>;
 
-    explicit KAPPA_MAX(cosmosis::DataBlock& sample)
+    explicit GAMMA_MAX(cosmosis::DataBlock& sample)
       : _sigma1(make_Interp2D(sample,
                               "haloModel",
                               "r_sigma",
                               "lnM",
-                              "Sigma_nfw"))
+                              "DSigma_nfw"))
       , _sigma2(make_Interp2D(sample,
                               "haloModel",
                               "r_sigma",
                               "z",
-                              "Sigma_hh"))
+                              "DSigma_hh"))
       , _bias(make_Interp2D(sample,
                             "haloModel",
-                            "z",
                             "lnM",
+                            "z",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
                               "haloModel",
-                              "z",
-                              "haloModel",
                               "r_sigma",
+                              "haloModel",
+                              "z",
                               "sigmaCritInv",
                               "sigma_crit_inv"))                        
     {}
 
-    __device__ __host__ double
+    double
     operator()(double r, double lnM, double zt) const
     /*r in h^-1 Mpc */ /* M in h^-1 M_solar, represents M_{200} */
     {

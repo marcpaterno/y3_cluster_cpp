@@ -1,5 +1,5 @@
-#ifndef Y3_CLUSTER_KAPPA_MAX_CUH
-#define Y3_CLUSTER_KAPPA_MAX_CUH
+#ifndef Y3_CLUSTER_GAMMA_MAX_CUH
+#define Y3_CLUSTER_GAMMA_MAX_CUH
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
@@ -11,7 +11,7 @@
 #include <algorithm>
 
 namespace y3_cuda {
-  class KAPPA_MAX {
+  class GAMMA_MAX {
   private:
     quad::Interp2D _sigma1;
     quad::Interp2D _sigma2;
@@ -19,18 +19,7 @@ namespace y3_cuda {
     quad::Interp2D _sigma_crit_inv;
 
   public:
-    size_t
-    get_device_mem_footprint()
-    {
-      size_t size = 0;
-      size += _sigma1.get_device_mem_footprint();
-      size += _sigma2.get_device_mem_footprint();
-      size += _bias.get_device_mem_footprint();
-      size += _sigma_crit_inv.get_device_mem_footprint();
-      return size;
-    }
-
-    KAPPA_MAX(quad::Interp2D const& sigma1,
+    GAMMA_MAX(quad::Interp2D const& sigma1,
               quad::Interp2D const& sigma2,
               quad::Interp2D const& bias,
               quad::Interp2D const& sigma_crit_inv)
@@ -39,17 +28,17 @@ namespace y3_cuda {
 
     using doubles = std::vector<double>;
 
-    explicit KAPPA_MAX(cosmosis::DataBlock& sample)
+    explicit GAMMA_MAX(cosmosis::DataBlock& sample)
       : _sigma1(make_Interp2D(sample,
                               "haloModel",
                               "r_sigma",
                               "lnM",
-                              "Sigma_nfw"))
+                              "DSigma_nfw"))
       , _sigma2(make_Interp2D(sample,
                               "haloModel",
                               "r_sigma",
                               "z",
-                              "Sigma_hh"))
+                              "DSigma_hh"))
       , _bias(make_Interp2D(sample,
                             "haloModel",
                             "z",

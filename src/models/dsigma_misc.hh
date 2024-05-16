@@ -43,7 +43,7 @@ namespace y3_cluster {
                               "correlationFunction",
                               "r_sigma",
                               "z",
-                              "Sigma_hh"))
+                              "DSigma_hh"))
       , _bias(make_Interp2D(sample,
                             "correlationFunction",
                             "lnM",

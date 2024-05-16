@@ -56,7 +56,7 @@ namespace y3_cuda {
                               "correlationFunction",
                               "r_sigma",
                               "z",
-                              "Sigma_hh"))
+                              "DSigma_hh"))
       , _bias(make_Interp2D(sample,
                             "correlationFunction",
                             "z",
