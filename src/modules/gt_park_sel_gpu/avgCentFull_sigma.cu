@@ -13,7 +13,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-#include "models/int_lc_lt_des_t.cuh"
+#include "models/lc_lt_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/kappa_max.cuh"
@@ -55,7 +55,7 @@ private:
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cuda::LC_LT_t> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<y3_cuda::KAPPA_MAX> sigma;
   std::optional<y3_cuda::OP_SEL_PARK> op_sel_park_pi_func;
@@ -156,10 +156,8 @@ avgCentSigmaPark::operator()(double lo,
                             double zt,
                             double lnM) const
 {
-  // For any data members of type std::optional<X>, we have to use operator*
-  // to access the X object (as if we were dereferencing a pointer).
   double const lc = lo; 
-  double const mor_v = (*mor)(lo, lnM, zt);
+  double const mor_v = (*mor)(lt, lnM, zt);
   auto const boost = (*op_sel_park_pi_func)(radius_, lo, zt);
 
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;

@@ -14,7 +14,6 @@
 #include "models/mor_des_log_t.hh"
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
-#include "models/kappa_max.hh"
 
 #include <iostream>
 #include <optional>

@@ -14,7 +14,7 @@
 #include "models/mor_des_log_t.hh"
 #include "models/omega_z_des.hh"
 #include "models/roffset_t.hh"
-#include "models/kappa_max.hh"
+#include "models/gamma_max.hh"
 
 #include <iostream>
 #include <optional>
@@ -58,7 +58,7 @@ private:
   std::optional<y3_cluster::HMF_t> hmf;
   std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<y3_cluster::ROFFSET_t> roffset;
-  std::optional<y3_cluster::KAPPA_MAX> gamma;
+  std::optional<y3_cluster::GAMMA_MAX> gamma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;

@@ -17,7 +17,7 @@
 #include "models/lo_lc_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/kappa_max.cuh"
+#include "models/gamma_max.cuh"
 
 #include <iostream>
 #include <optional>
@@ -66,7 +66,7 @@ private:
   // z model
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the sigma profile
-  std::optional<y3_cuda::KAPPA_MAX> gamma;
+  std::optional<y3_cuda::GAMMA_MAX> gamma;
   std::optional<y3_cuda::ROFFSET_t> roffset;
 
   // State set for current 'bin' to be integrated.

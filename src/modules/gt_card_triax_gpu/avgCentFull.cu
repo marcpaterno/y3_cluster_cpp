@@ -16,7 +16,7 @@
 #include "models/int_lc_lt_des_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/kappa_max.cuh"
+#include "models/gamma_max.cuh"
 
 #include <iostream>
 #include <optional>
@@ -56,7 +56,7 @@ private:
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
   std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  std::optional<y3_cuda::KAPPA_MAX> sigma;
+  std::optional<y3_cuda::GAMMA_MAX> gamma;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
@@ -84,7 +84,7 @@ public:
     if ((bool)dv_do_dz == true)
       dev_size += (*dv_do_dz).get_device_mem_footprint();
     if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)sigma == true) dev_size += (*sigma).get_device_mem_footprint();
+    if ((bool)gamma == true) dev_size += (*gamma).get_device_mem_footprint();
     return dev_size;
   }
 
@@ -146,7 +146,7 @@ avgCentCard::set_sample(DataBlock& sample)
   hmf.emplace(sample);
   mor.emplace(sample);
   lc_lt.emplace(sample);
-  sigma.emplace(sample);
+  gamma.emplace(sample);
 }
 
 void
@@ -169,7 +169,7 @@ avgCentCard::operator()(double lo,
   double const lc = lo; 
   double const mor_v = (*mor)(lo, lnM, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*sigma)(radius_, lnM, zt) * (*lc_lt)(lc, lt, zt) *
+  auto const val = (*gamma)(radius_, lnM, zt) * (*lc_lt)(lc, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }

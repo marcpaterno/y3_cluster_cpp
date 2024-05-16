@@ -150,13 +150,13 @@ avgCentSigmaCumPark::set_grid_point(
 
 __host__ __device__ double
 avgCentSigmaCumPark::operator()(double lo,
-                        double lt,
-                        double zt,
-                        double lnM,
-                        double Rp) const
+                                double lt,
+                                double zt,
+                                double lnM,
+                                double Rp) const
 {
   double const lc = lo; 
-  double const mor_v = (*mor)(lo, lnM, zt);
+  double const mor_v = (*mor)(lt, lnM, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
   auto const val = (*sigma)(Rp, lnM, zt) * (*lc_lt)(lc, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
