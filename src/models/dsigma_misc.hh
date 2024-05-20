@@ -40,19 +40,19 @@ namespace y3_cluster {
     explicit DSIGMA_MISC(cosmosis::DataBlock& sample)
       : _nfw_dsigma_mis()
       , _sigma2(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "DSigma_hh"))
       , _bias(make_Interp2D(sample,
-                            "correlationFunction",
+                            "haloModel",
                             "lnM",
                             "z",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
-                              "correlationFunction",
+                              "haloModel",
                               "z",
                               "sigmaCritInv",
                               "sigma_crit_inv"))

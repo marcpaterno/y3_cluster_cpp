@@ -25,18 +25,6 @@ namespace y3_cuda {
     double const _tau;
 
   public:
-    size_t
-    get_device_mem_footprint()
-    {
-      size_t size = 0;
-      size += _sigma1.get_device_mem_footprint();
-      size += _nfw_sigma_mis.get_device_mem_footprint();
-      size += _sigma2.get_device_mem_footprint();
-      size += _bias.get_device_mem_footprint();
-      size += _sigma_crit_inv.get_device_mem_footprint();
-      return size;
-    }
-
     SIGMA_MIS_JOINT(quad::Interp2D const& sigma1,
               y3_cuda::NFW_SIGMA_MIS const& sigma2,
               quad::Interp2D const& sigma2,
@@ -52,24 +40,24 @@ namespace y3_cuda {
 
     explicit SIGMA_MIS_JOINT(cosmosis::DataBlock& sample)
       : _sigma1(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "Sigma_nfw"))
       , _sigma2(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "Sigma_hh"))
       , _bias(make_Interp2D(sample,
-                            "correlationFunction",
+                            "haloModel",
                             "z",
                             "lnM",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "z",
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "sigmaCritInv",
                               "sigma_crit_inv"))

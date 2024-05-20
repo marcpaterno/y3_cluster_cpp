@@ -33,19 +33,19 @@ namespace y3_cuda {
 
     explicit SIGMA_MISC(cosmosis::DataBlock& sample)
       : _sigma2(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "Sigma_hh"))
       , _bias(make_Interp2D(sample,
-                            "correlationFunction",
+                            "haloModel",
                             "z",
                             "lnM",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "z",
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "sigmaCritInv",
                               "sigma_crit_inv"))

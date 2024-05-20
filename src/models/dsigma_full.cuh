@@ -26,18 +26,6 @@ namespace y3_cuda {
     double const _tau;
 
   public:
-    size_t
-    get_device_mem_footprint()
-    {
-      size_t size = 0;
-      size += _sigma1.get_device_mem_footprint();
-      // size += _nfw_dsigma_mis.get_device_mem_footprint();
-      size += _sigma2.get_device_mem_footprint();
-      size += _bias.get_device_mem_footprint();
-      size += _sigma_crit_inv.get_device_mem_footprint();
-      return size;
-    }
-
     DSIGMA_FULL(
               quad::Interp2D const& sigma1,
               quad::Interp2D const& sigma2,
@@ -55,24 +43,24 @@ namespace y3_cuda {
 
     explicit DSIGMA_FULL(cosmosis::DataBlock& sample)
       : _sigma1(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "DSigma_nfw"))
       , _sigma2(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "DSigma_hh"))
       , _bias(make_Interp2D(sample,
-                            "correlationFunction",
+                            "haloModel",
                             "z",
                             "lnM",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "z",
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "sigmaCritInv",
                               "sigma_crit_inv"))

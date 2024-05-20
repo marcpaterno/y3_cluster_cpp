@@ -9,6 +9,8 @@
 
 // Computes the Average 3D 2PCF: \xi(r)
 // Wp is obtained after by projecting \xi(r) onto the plane of the sky
+// TODO 
+// CHECK THE MODEL DEFINITION
 
 namespace y3_cuda {
   class WP_CLUSTER {
@@ -38,17 +40,17 @@ namespace y3_cuda {
 
     explicit WP_CLUSTER(cosmosis::DataBlock& sample)
       : _wp1(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "Rp",
                               "lnM",
                               "Wp_nfw"))
       , _wp2(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "Rp",
                               "z",
                               "Wp_hh"))
       , _bias(make_Interp2D(sample,
-                            "correlationFunction",
+                            "haloModel",
                             "z",
                             "lnM",
                             "bias"))

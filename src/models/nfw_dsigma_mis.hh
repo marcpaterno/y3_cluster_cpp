@@ -76,8 +76,8 @@ namespace y3_cluster {
     // TODO: Implement different operator in case of rhocz(zt)
     // Ask Marc How to make _c and _rhoc be functional forms in any case
     // NFW_DSIGMA_MIS(cosmosis::DataBlock& sample)
-    // : _c(y3_cluster::make_Interp1D(sample,"correlationFunction","lnM","concentration").clamp(14.0))
-    // , _rhoc(y3_cluster::make_Interp1D(sample,"correlationFunction","z","rhoc").clamp(0.0))
+    // : _c(y3_cluster::make_Interp1D(sample,"haloModel","lnM","concentration").clamp(14.0))
+    // , _rhoc(y3_cluster::make_Interp1D(sample,"haloModel","z","rhoc").clamp(0.0))
     // , _nfwProfile(read_vector(logx_file(GAMMA)),
     //               read_vector(logxmis_file(GAMMA)),
     //               read_vector(log_dsigma_file(GAMMA)))

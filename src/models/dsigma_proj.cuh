@@ -26,17 +26,6 @@ namespace y3_cuda {
     quad::Interp2D _sigma_crit_inv;
 
   public:
-    size_t
-    get_device_mem_footprint()
-    {
-      size_t size = 0;
-      // size += _nfw_dsigma_mis.get_device_mem_footprint();
-      size += _sigma2.get_device_mem_footprint();
-      size += _bias.get_device_mem_footprint();
-      size += _sigma_crit_inv.get_device_mem_footprint();
-      return size;
-    }
-
     DSIGMA_PROJ(y3_cuda::NFW_DSIGMA_MIS const& nfw_dsigma_mis,
                 quad::Interp2D const& sigma2,
                 quad::Interp2D const& bias,
@@ -51,19 +40,19 @@ namespace y3_cuda {
     explicit DSIGMA_PROJ(cosmosis::DataBlock& sample)
       : _nfw_dsigma_mis()
       , _sigma2(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "z",
                               "DSigma_hh"))
       , _bias(make_Interp2D(sample,
-                            "correlationFunction",
+                            "haloModel",
                             "z",
                             "lnM",
                             "bias"))
       , _sigma_crit_inv(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "z",
-                              "correlationFunction",
+                              "haloModel",
                               "r_sigma",
                               "sigmaCritInv",
                               "sigma_crit_inv"))

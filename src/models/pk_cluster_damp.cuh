@@ -14,15 +14,6 @@ namespace y3_cuda {
     quad::Interp2D _bias;
 
   public:
-    size_t
-    get_device_mem_footprint()
-    {
-      size_t size = 0;
-      size += _pk_damp.get_device_mem_footprint();
-      size += _bias.get_device_mem_footprint();
-      return size;
-    }
-
     PK_CLUSTER_DAMP(quad::Interp2D const& pk_damp,
             quad::Interp2D const& bias)
       :  _pk_damp(pk_damp), _bias(bias)
@@ -32,12 +23,12 @@ namespace y3_cuda {
 
     explicit PK_CLUSTER_DAMP(cosmosis::DataBlock& sample)
       : _pk_damp(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "k",
                               "z",
                               "Damped_Pk_hh"))
       , _bias(make_Interp2D(sample,
-                              "correlationFunction",
+                              "haloModel",
                               "z",
                               "lnM",
                               "bias"))
