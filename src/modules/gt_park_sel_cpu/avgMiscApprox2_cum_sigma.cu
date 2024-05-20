@@ -1,7 +1,8 @@
-#include "utils/cuda_module_macros.cuh"
-#include "utils/datablock_reader.hh"
 #include "utils/make_cuda_integration_volumes.cuh"
+#include "utils/datablock_reader.hh"
+#include "utils/cuda_module_macros.cuh"
 #include "utils/make_grid_points.hh"
+#include "utils/read_vector.hh"
 
 #include "cubacpp/integration_result.hh"
 #include "cosmosis/datablock/datablock.hh"
@@ -12,8 +13,12 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
+#include "models/int_lc_lt_des_t2.cuh"
+// #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
-#include "models/roffset_t.cuh"
+// mis-centered delta sigma interpolation table
+#include "models/sigma_misc.cuh"
+#include "models/op_sel_park.cuh"
 
 #include <iostream>
 #include <optional>
@@ -23,16 +28,13 @@ using cosmosis::DataBlock;
 using cosmosis::ndarray;
 using cubacpp::integration_result;
 
-// numberCountsMock is a class that models the concept of
-// "CosmoSISScalarIntegrand", and is thus suitable for use as the template
+// This is a class that models the concept of
+// "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class numberCountsMock {
+class avgMiscApprox2SigmaCumPark {
 public:
-  // Note we're slightly abusing the concept of the "grid" here. We are
-  // really iterating over a single sequence of pairs, with the pairs
-  // denoting the bottoms and tops of a set of zo bins.
-  using grid_t = y3_cluster::grid_t<2>;
+  using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -40,13 +42,16 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 3>;
+  using volume_t = quad::Volume<double, 5>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
   // <none in this example>
 
   // State obtained from each sample.
+  // If there were a type X that did not have a default constructor,
+  // we would use std::optional<X> as our data member.
+  //
   // the volume
   std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
@@ -54,51 +59,40 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
-  // none
-  // z model
+  std::optional<y3_cuda::INT_LC_LT_DES_t2> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
+  // and the delta sigma miscentered profile
+  std::optional<y3_cuda::SIGMA_MISC> sigma_misc;
+  std::optional<y3_cuda::OP_SEL_PARK> op_sel_park_pi_func;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
 
-
-  // Should we use cartesian grid? If not, we use a wall-of-numbers.
-  bool do_cartesian_product_of_bins_ = false;
-  
-  // In this integrand, the name "cartesian product" is a bit misleading; it
-  // is used in case later development introduces another grid dimenstion over
-  // which we'll operate.
-  //
-  // If we are using the cartesian grid, the relevant congifuration parameters
-  // are zo_bottom (an array of arbitrary length)  and zo_bin_width (a array of
-  // the same length as zo_bottom). These *two* parameters make a single axis
-  // for the grid (the "zo bins").
-  //
-  // If we are using the wall-of-numbers configuration, the relevant
-  // configuration parameters are zo_lo (an array of arbitrary length) and
-  // zo_high. These *two* parameters make a single axis for the grid (the "zo
-  // bins").
-
+  bool do_cartesian_product_of_bins_;
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit numberCountsMock(cosmosis::DataBlock& config);
+  explicit avgMiscApprox2SigmaCumPark(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
   void set_sample(cosmosis::DataBlock& sample);
 
   // Set the data for the current bin.
-  void set_grid_point(grid_point_t pt);
+  void set_grid_point(grid_point_t const& pt);
 
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(double lo, double zt, double lnM) const;
+  __host__ __device__ double operator()(
+                                        double lo,
+                                        double lt, 
+                                        double zt, 
+                                        double lnM,
+                                        double Rp) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -112,7 +106,7 @@ public:
   // volumes (the type alias defined above) based on the parameters read from
   // the configuration block for the module.
   static std::vector<volume_t> make_integration_volumes(
-          cosmosis::DataBlock& cfg);
+    cosmosis::DataBlock& cfg);
 
   // The following non-member (static) function creates a vector of grid points
   // on which the integration results are to be evaluated, based on parameters
@@ -125,7 +119,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-numberCountsMock::numberCountsMock(DataBlock& cfg)
+avgMiscApprox2SigmaCumPark::avgMiscApprox2SigmaCumPark( DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -133,12 +127,12 @@ numberCountsMock::numberCountsMock(DataBlock& cfg)
                 false,
                 do_cartesian_product_of_bins_);
   if (rc != DBS_SUCCESS) {
-    throw std::runtime_error("numberCountsMock failed to find do_cartesian_product_of_bins\n");
+    throw std::runtime_error("summedNumbersCentY1 failed to find do_cartesian_product_of_bins\n");
   }
 }
 
 void
-numberCountsMock::set_sample(DataBlock& sample)
+avgMiscApprox2SigmaCumPark::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -147,33 +141,45 @@ numberCountsMock::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
+  // lc_lt.emplace(sample);
+  sigma_misc.emplace(sample);
+  op_sel_park_pi_func.emplace(sample);
 }
 
 void
-numberCountsMock::set_grid_point(grid_point_t grid_point)
+avgMiscApprox2SigmaCumPark::set_grid_point(
+  grid_point_t const& grid_point)
 {
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
 
 __host__ __device__ double
-numberCountsMock::operator()(double lo,
-                                double zt,
-                                double lnM) const
+avgMiscApprox2SigmaCumPark::operator()(double lo,
+                               double lt,
+                               double zt,
+                               double lnM,
+                               double Rp) const
 {
-  // For any data members of type std::optional<X>, we have to use operator*
-  // to access the X object (as if we were dereferencing a pointer).
+  double const lc = lo;
   double const mor_v = (*mor)(lo, lnM, zt);
+
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
-  return val;
+  auto const res = (*sigma_misc)(Rp, lnM, zt) * (*lc_lt)(lc, lt, zt) *
+                   (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+  
+  // APPLY BOOST ON SIGMA
+  double const boost = (*op_sel_park_pi_func)(Rp, lo, zt);
+  // Integrates over \Sigma_cum = 2/R^2  \int_0^R r \Sigma(r) dr
+  auto const rp_sigma = Rp * boost * res;
+  return rp_sigma;
 }
 
 // string must match section block in pipeline.ini file
 char const*
-numberCountsMock::module_label()
+avgMiscApprox2SigmaCumPark::module_label()
 {
-  return "numberCountsMock";
+  return "cumSigmaMiscPark";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -183,50 +189,23 @@ numberCountsMock::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<numberCountsMock::volume_t>
-numberCountsMock::make_integration_volumes(
+std::vector<avgMiscApprox2SigmaCumPark::volume_t>
+avgMiscApprox2SigmaCumPark::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, 
-    numberCountsMock::module_label(), 
-    "lo",
-    "zt", 
-    "lnm");
+    cfg, avgMiscApprox2SigmaCumPark::module_label(), "lo", "lt", "zt", "lnm","Rp");
 }
 
-numberCountsMock::grid_t
-numberCountsMock::make_grid_points(cosmosis::DataBlock& cfg)
+avgMiscApprox2SigmaCumPark::grid_t
+avgMiscApprox2SigmaCumPark::make_grid_points(cosmosis::DataBlock& cfg)
 {
-  char const * const label =
-    numberCountsMock::module_label();
-  bool do_cartesian_product_of_bins = false;
-  auto rc = cfg.get_val(label, "do_cartesian_product_of_bins", false, do_cartesian_product_of_bins);
-
-  if (do_cartesian_product_of_bins)
-  {
-    auto const bottoms = get_vector_double(cfg, label, "zo_bottom");
-    auto const widths= get_vector_double(cfg, label, "zo_bin_width");
-    if (bottoms.size() != widths.size()) {
-        throw std::runtime_error("zo_bottom and zo_bin_width must be the same length\n");
-    }
-
-    grid_t result;
-    result.set_names(std::vector<std::string>{"zo_bottom", "zo_bin_width"});
-    // This could probably be simplified by using the ranges library.
-    for (std::size_t i = 0; i != bottoms.size(); ++i) {
-      double bottom = bottoms[i];
-      double top = bottoms[i] + widths[i];
-      result.push_back({bottom, top});
-    }
-    return result;
-  };
-
   return y3_cluster::make_grid_points_wall_of_numbers(
-    cfg, 
-    numberCountsMock::module_label(), 
-    "zo_low", 
-    "zo_high");
+    cfg,
+    avgMiscApprox2SigmaCumPark::module_label(),
+    "zo_low",
+    "zo_high",
+    "radii");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(numberCountsMock)
+DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgMiscApprox2SigmaCumPark)

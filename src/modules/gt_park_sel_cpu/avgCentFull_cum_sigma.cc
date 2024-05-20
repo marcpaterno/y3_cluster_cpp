@@ -1,21 +1,21 @@
-#include "utils/make_cuda_integration_volumes.cuh"
-#include "utils/datablock_reader.hh"
-#include "utils/cuda_module_macros.cuh"
 #include "utils/make_grid_points.hh"
+#include "utils/make_integration_volumes.hh"
+#include "utils/module_macros.hh"
 
-#include "cubacpp/integration_result.hh"
 #include "cosmosis/datablock/datablock.hh"
-#include "cosmosis/datablock/datablock_status.h"
-#include "common/cuda/Volume.cuh"
+#include "cubacpp/integration_result.hh"
+#include "cubacpp/integration_volume.hh"
 
-#include "models/omega_z_des.cuh"
-#include "models/dv_do_dz_t.cuh"
-#include "models/hmf_t.cuh"
-#include "models/mor_des_t.cuh"
-#include "models/int_lc_lt_des_t.cuh"
-#include "models/roffset_t.cuh"
-#include "models/int_zo_zt_des_t.cuh"
-#include "models/pk_cluster_damp.cuh"
+#include "models/dv_do_dz_t.hh"
+#include "models/hmf_t.hh"
+#include "models/int_lc_lt_des_t2.hh"
+#include "models/int_zo_zt_des_t.hh"
+#include "models/lo_lc_t.hh"
+#include "models/mor_des_log_t.hh"
+#include "models/omega_z_des.hh"
+#include "models/roffset_t.hh"
+#include "models/gamma_max.hh"
+#include "models/op_sel_park.hh"
 
 #include <iostream>
 #include <optional>
@@ -29,9 +29,9 @@ using cubacpp::integration_result;
 // "CosmoSISCUDAScalarIntegrand", and is thus suitable for use as the template
 // parameter for the class template CosmoSISScalarIntegrationModule.
 //
-class avgPkDampCentBU {
+class avgCentSigmaCumParkCPU {
 public:
-  using grid_t = y3_cluster::grid_t<3>;
+  using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -39,7 +39,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 3>;
+  using volume_t = cubacpp::IntegrationVolume<5>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -49,45 +49,24 @@ private:
   // If there were a type X that did not have a default constructor,
   // we would use std::optional<X> as our data member.
   //
-  // the volume
-  std::optional<y3_cuda::OMEGA_Z_DES> omega_z;
-  std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
-  // the mass function
-  std::optional<y3_cuda::HMF_t> hmf;
-  // mass-observable relation
-  std::optional<y3_cuda::MOR_DES_t> mor;
-  // projection model  Note that in centered, lo_lc = \delta(lo,lc) so can be skipped
-  // none
-  // z model
-  std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
-  // and the cluster-cluster correlation function
-  std::optional<y3_cuda::PK_CLUSTER_DAMP> pk_cc;
+  std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
+  std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
+  std::optional<y3_cluster::HMF_t> hmf;
+  std::optional<y3_cluster::MOR_DES_LOG_t> mor;
+  std::optional<y3_cluster::INT_LC_LT_DES_t2> lc_lt;
+  std::optional<y3_cluster::INT_ZO_ZT_DES_t> int_zo_zt;
+  std::optional<y3_cluster::GAMMA_MAX> sigma;
+  std::optional<y3_cluster::OP_SEL_PARK> op_sel_park_pi_func;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
-  double k_;
 
   bool do_cartesian_product_of_bins_;
-
-  // In this integrand, the name "cartesian product" is a bit misleading; it
-  // is used in case later development introduces another grid dimenstion over
-  // which we'll operate.
-  //
-  // If we are using the cartesian grid, the relevant congifuration parameters
-  // are zo_bottom (an array of arbitrary length)  and zo_bin_width (a array of
-  // the same length as zo_bottom). These *two* parameters make a single axis
-  // for the grid (the "zo bins").
-  //
-  // If we are using the wall-of-numbers configuration, the relevant
-  // configuration parameters are zo_lo (an array of arbitrary length) and
-  // zo_high. These *two* parameters make a single axis for the grid (the "zo
-  // bins").
-
 public:
   // Initialize my integrand object from the parameters read
   // from the relevant block in the CosmoSIS ini file.
-  explicit avgPkDampCentBU(cosmosis::DataBlock& config);
+  explicit avgCentSigmaCumParkCPU(cosmosis::DataBlock& config);
 
   // Set any data members from values read from the current sample.
   // Do not attempt to copy the sample!.
@@ -96,27 +75,16 @@ public:
   // Set the data for the current bin.
   void set_grid_point(grid_point_t const& pt);
 
-  size_t
-  get_device_mem_footprint()
-  {
-    size_t dev_size = 0;
-    if ((bool)mor == true) dev_size += (*mor).get_device_mem_footprint();
-    if ((bool)dv_do_dz == true)
-      dev_size += (*dv_do_dz).get_device_mem_footprint();
-    if ((bool)hmf == true) dev_size += (*hmf).get_device_mem_footprint();
-    if ((bool)pk_cc == true) dev_size += (*pk_cc).get_device_mem_footprint();
-    return dev_size;
-  }
-
   // The function to be integrated. All arguments to this function must be of
   // type double, and there must be at least two of them (because our
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(
-          double lo, 
-          double zt, 
-          double lnM) const;
+  double operator()(double lo, 
+                    double lt, 
+                    double zt, 
+                    double lnM,
+                    double Rp) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -143,7 +111,7 @@ public:
 using cosmosis::DataBlock;
 using cubacpp::integration_result;
 
-avgPkDampCentBU::avgPkDampCentBU( DataBlock& cfg)
+avgCentSigmaCumParkCPU::avgCentSigmaCumParkCPU( DataBlock& cfg)
 {
   auto rc = 
     cfg.get_val(module_label(),
@@ -151,12 +119,12 @@ avgPkDampCentBU::avgPkDampCentBU( DataBlock& cfg)
                 false,
                 do_cartesian_product_of_bins_);
   if (rc != DBS_SUCCESS) {
-    throw std::runtime_error("summedNumbersCentY1GPU failed to find do_cartesian_product_of_bins\n");
+    throw std::runtime_error("summedNumbersCentY1 failed to find do_cartesian_product_of_bins\n");
   }
 }
 
 void
-avgPkDampCentBU::set_sample(DataBlock& sample)
+avgCentSigmaCumParkCPU::set_sample(DataBlock& sample)
 {
   // If we had a data member of type std::optional<X>, we would set the
   // value using std::optional::emplace(...) here. emplace takes a set
@@ -165,38 +133,44 @@ avgPkDampCentBU::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  pk_cc.emplace(sample);
+  // lc_lt.emplace(sample);
+  sigma.emplace(sample);
+  op_sel_park_pi_func.emplace(sample);
 }
 
 void
-avgPkDampCentBU::set_grid_point(
+avgCentSigmaCumParkCPU::set_grid_point(
   grid_point_t const& grid_point)
 {
-  k_ = grid_point[2];
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
 }
 
-__host__ __device__ double
-avgPkDampCentBU::operator()(double lo,
-                      double zt,
-                      double lnM) const
+double
+avgCentSigmaCumParkCPU::operator()(double lo,
+                                double lt,
+                                double zt,
+                                double lnM,
+                                double Rp) const
 {
-  // For any data members of type std::optional<X>, we have to use operator*
-  // to access the X object (as if we were dereferencing a pointer).
-  double const mor_v = (*mor)(lo, lnM, zt);
-
+  double const lc = lo; 
+  double const mor_v = (*mor)(lt, lnM, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*pk_cc)(k_, lnM, zt) *
+  auto const val = (*sigma)(Rp, lnM, zt) * (*lc_lt)(lc, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
-  return val;
+  // APPLY BOOST ON SIGMA
+  double const boost = (*op_sel_park_pi_func)(Rp, lo, zt);
+  // Integrates over \Sigma_cum = 2/R^2  \int_0^R r \Sigma(r) dr
+  auto const rp_sigma = Rp * boost * val;
+  return rp_sigma;
 }
+
 
 // string must match section block in pipeline.ini file
 char const*
-avgPkDampCentBU::module_label()
+avgCentSigmaCumParkCPU::module_label()
 {
-  return "PkDamp";
+  return "cumSigmaCentPark";
 }
 
 // The implementation of make_integration_volumes can be almost the same for
@@ -206,23 +180,22 @@ avgPkDampCentBU::module_label()
 // operator. While the compiler can verify the number of arguments provided is
 // correct, it can not verify that their order matches the order of arguments in
 // the function call operator.
-std::vector<avgPkDampCentBU::volume_t>
-avgPkDampCentBU::make_integration_volumes(
+std::vector<avgCentSigmaCumParkCPU::volume_t>
+avgCentSigmaCumParkCPU::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
-  return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgPkDampCentBU::module_label(), "lo", "zt", "lnm");
+  return y3_cluster::make_integration_volumes_wall_of_numbers(
+    cfg, avgCentSigmaCumParkCPU::module_label(), "lo", "lt", "zt", "lnm","rp");
 }
 
-avgPkDampCentBU::grid_t
-avgPkDampCentBU::make_grid_points(cosmosis::DataBlock& cfg)
+avgCentSigmaCumParkCPU::grid_t
+avgCentSigmaCumParkCPU::make_grid_points(cosmosis::DataBlock& cfg)
 {
   return y3_cluster::make_grid_points_wall_of_numbers(
     cfg,
-    avgPkDampCentBU::module_label(),
+    avgCentSigmaCumParkCPU::module_label(),
     "zo_low",
-    "zo_high",
-    "k");
+    "zo_high");
 }
 
-DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgPkDampCentBU)
+DEFINE_COSMOSIS_SCALAR_INTEGRATION_MODULE(avgCentSigmaCumParkCPU)

@@ -8,7 +8,7 @@
 
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
-#include "models/int_lc_lt_des_t.hh"
+#include "models/int_lc_lt_des_t2.hh"
 #include "models/int_zo_zt_des_t.hh"
 #include "models/lo_lc_t.hh"
 #include "models/mor_des_log_t.hh"
@@ -48,7 +48,7 @@ private:
 
   // State obtained from each sample.
   // the volume
-  std::optional<y3_cluster::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cluster::INT_LC_LT_DES_t2> lc_lt;
   std::optional<y3_cluster::MOR_DES_LOG_t> mor;
   std::optional<y3_cluster::OMEGA_Z_DES> omega_z;
   std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz;
@@ -143,7 +143,7 @@ numberCountsCardCPU::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  lc_lt.emplace(sample);
+  // lc_lt.emplace(sample);
 }
 
 void
@@ -155,9 +155,9 @@ numberCountsCardCPU::set_grid_point(grid_point_t grid_point)
 
 double
 numberCountsCardCPU::operator()(double lo,
-                                        double lt, 
-                                        double zt,
-                                        double lnM) const
+                                double lt, 
+                                double zt,
+                                double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
@@ -174,7 +174,7 @@ numberCountsCardCPU::operator()(double lo,
 char const*
 numberCountsCardCPU::module_label()
 {
-  return "numberCounts";
+  return "numberCountsCard";
 }
 
 // The implementation of make_integration_volumes can be almost the same for

@@ -31,6 +31,6 @@ private:
   double const xp_;
 };
 
-} // namespace y3_cuda
+} // namespace y3_cluster
 
 #endif // Y3_CLUSTER_PAR_POWER_LAW_HH

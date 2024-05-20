@@ -1,8 +1,8 @@
 #ifndef Y3_CLUSTER_OP_SEL_PARK_HH
-#define Y3_CLUSTER_OP_SEL_PARK_UH
+#define Y3_CLUSTER_OP_SEL_PARK_HH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "common/cuda/Interp2D.cuh"
+#include "utils/par_power_law.hh"
 #include <vector>
 
 namespace y3_cluster {
@@ -43,8 +43,8 @@ namespace y3_cluster {
   private:
     double const _PI0_val;
     double const _R0_val;
-    y3_cuda::par_power_law _PI0;
-    y3_cuda::par_power_law _R0;
+    y3_cluster::par_power_law _PI0;
+    y3_cluster::par_power_law _R0;
     double const _c;
   };
 }

@@ -1,13 +1,13 @@
-#ifndef Y3_CLUSTER_INT_LC_LT_DES_T2_CUH
-#define Y3_CLUSTER_INT_LC_LT_DES_T2_CUH
+#ifndef Y3_CLUSTER_INT_LC_LT_DES_T2_HH
+#define Y3_CLUSTER_INT_LC_LT_DES_T2_HH
 
 #include "cosmosis/datablock/datablock.hh"
-// #include "common/cuda/Interp2D.cuh"
-#include "utils/cuda_interp_2d.cuh"
 #include "utils/read_vector.hh"
 #include "fmt/core.h"
 
-namespace y3_cuda {
+using y3_cluster::Interp2D;
+
+namespace y3_cluster {
   // Define the interpolator values for the LC_LT_DES_t model
   // zt_bins, lt_bins, lambda{bin}_arr
     static inline std::string
@@ -34,7 +34,7 @@ namespace y3_cuda {
                        read_vector(lambda_file("bin3")))
                        { }
     
-    __device__ __host__ double
+    double
     operator()(double lc, double lt, double zt) const
     {
       double val = 0;
@@ -51,11 +51,10 @@ namespace y3_cuda {
     }
   private:
     // CUDA/C++ does not support static data members of classes or structs
-    gpu_support::Interp2D lambda0_interp;
-    gpu_support::Interp2D lambda1_interp;
-    gpu_support::Interp2D lambda2_interp;
-    gpu_support::Interp2D lambda3_interp;
+    Interp2D const lambda0_interp;
+    Interp2D const lambda1_interp;
+    Interp2D const lambda2_interp;
+    Interp2D const lambda3_interp;
   };
 }
-
 #endif
