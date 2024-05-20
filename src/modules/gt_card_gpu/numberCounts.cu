@@ -12,7 +12,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-#include "models/lc_lt_t.cuh"
+#include "models/int_lc_lt_des_t2.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/roffset_t.cuh"
 
@@ -53,7 +53,7 @@ private:
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::LC_LT_t> lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_t2> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
 
   // State set for current 'bin' to be integrated.
@@ -144,7 +144,7 @@ numberCountsCard::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  lc_lt.emplace(sample);
+  // lc_lt.emplace(sample);
 }
 
 void

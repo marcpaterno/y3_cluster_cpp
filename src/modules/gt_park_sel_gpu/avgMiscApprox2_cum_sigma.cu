@@ -13,7 +13,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-#include "models/int_lc_lt_des_t.cuh"
+#include "models/int_lc_lt_des_t2.cuh"
 // #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 // mis-centered delta sigma interpolation table
@@ -59,7 +59,7 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_t2> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the delta sigma miscentered profile
   std::optional<y3_cuda::SIGMA_MISC> sigma_misc;
@@ -141,7 +141,7 @@ avgMiscApprox2SigmaCumPark::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  lc_lt.emplace(sample);
+  // lc_lt.emplace(sample);
   sigma_misc.emplace(sample);
   op_sel_park_pi_func.emplace(sample);
 }
