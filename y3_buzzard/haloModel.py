@@ -48,7 +48,7 @@ class lensingModel(object):
     
     def first_halo_term(self, M, z=0.0, conc_model_name='Child18'):
         if not hasattr(self,'c'):
-             self.concentration_at_M(M, z, model_name=conc_model_name)
+             self.concentration_at_M(M, z=z, model_name=conc_model_name)
         
         if isinstance(M, (int, float)):
             M = np.array([M])
@@ -72,13 +72,13 @@ class lensingModel(object):
         self.dSigma['2h'] = p2h.dSigma
         self.Wp = p2h.Xi
 
-    def concentration_at_M(self, M, z=0.0, model_name='Child18', **kwargs):
+    def concentration_at_M(self, M, z=0.0, model_name="Child18", **kwargs):
         """ Set the mass-concentration model
-        """
-        if model_name=='Child18':
+        """     
+        if model_name=="Child18":
             self.c = child18_mass_concentration(M, z, halo_sample = 'stacked_nfw')
         
-        if model_name=='Duffy08':
+        elif model_name=='Duffy08':
             self.c = duffy_concentration_relation(M, z_eff=z)
         else:
             raise Exception('Unknown mass-concentration model, %s.' % (model_name))
@@ -182,7 +182,7 @@ class ct_2hTerm(object):
         xi_mm    = ct.xi.xi_mm_at_r(self.Rfix, k, pk)
         xi_2halo = ct.xi.xi_2halo(self.bias, xi_mm)
         Sigma_mm = ct.deltasigma.Sigma_at_R(Rp, self.Rfix, xi_2halo, self.Md, self.cd, self.omega_m)
-        return Sigma_mm, xi_2halo
+        return Sigma_mm, np.interp(np.log(Rp), np.log(self.Rfix), xi_2halo)
     
     def _to_dsigma(self,Rp,sigma):
         dSigma_mm = ct.deltasigma.DeltaSigma_at_R(Rp, Rp, sigma, self.Md, self.cd, self.omega_m)

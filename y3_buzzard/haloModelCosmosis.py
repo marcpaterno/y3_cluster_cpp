@@ -5,8 +5,6 @@ from cosmosis.datablock import option_section, names
 from scipy.interpolate import interp1d
 from scipy.special import erf
 import cluster_toolkit as ct
-import massconcen
-import bias
 
 from astropy.constants import G
 
@@ -93,9 +91,9 @@ def execute(block, config):
     # The bias is computed at the peak height (z=0) from cluster toolkit
     # The peak-height evolution is computed from the growth function D(z)
     # The vector Bias has shape (z.size, M.size)
-    bM = biasModel(k_h, P_k[0], omega_m)
+    bM = biasModel(k_h, P_k[0], omega_m, odelta=200)
     nu = bM.nu_at_M(M)
-    Bias = np.array([bM.bias_at_nu(nu/dazi, odelta=200) for dazi in daz])
+    Bias = np.array([bM.bias_at_nu(nu/dazi) for dazi in daz])
 
     #### Step 2) Sigma, deltaSigma
     # Initialize the lensing module
@@ -103,7 +101,7 @@ def execute(block, config):
 
     # First halo term is a NFW profile with mass M and concentration based on relation Child18
     # Second halo term is the halo-halo correlation function projected along the line of sight (i.e. missing the halo bias)
-    lensModel.first_halo_term(M, z=0, conc_model_name='Child18')
+    lensModel.first_halo_term(M, z=0, conc_model_name="Child18")
     lensModel.second_halo_term(z, k_nl, P_k_nl)
 
     # Step 5) shift cosmological scale

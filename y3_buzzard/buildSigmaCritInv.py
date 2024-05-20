@@ -95,9 +95,10 @@ def execute(block, config):
         da = block["distances",'d_a'] # Mpc
 
         # lenses redshift is equal to the cluster mean redshifts
-        z_lenses = block["correlationFunction", "z"]
-        r_sigma = block["correlationFunction", "r_sigma"]
-        shift = block['correlationFunction', 'scale_shift']
+        section_name = "haloModel"
+        z_lenses = block[section_name, "z"]
+        r_sigma = block[section_name, "r_sigma"]
+        shift = block[section_name, 'scale_shift']
         z_shift = z_lenses
         
         # lens comoving distance
