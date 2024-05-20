@@ -40,7 +40,7 @@ TEST_CASE("mor_sdss works")
 
   MOR_sdss mor_t(pow(10, 11.2), pow(10, 12.42), alpha, sigma_intr);
 
-  std::ofstream out = y3_cluster::make_ofstream("data/mor_tt_test.out");
+  std::ofstream out = y3_cluster::make_ofstream("validation-data/mor_tt_test.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);

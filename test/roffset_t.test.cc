@@ -40,7 +40,7 @@ TEST_CASE("roffset_t works")
   const double tau = 0.150000;
   ROFFSET_t roffset(tau);
 
-  std::ofstream out = y3_cluster::make_ofstream("data/Rmis_gammadist_test.out");
+  std::ofstream out = y3_cluster::make_ofstream("validation-data/Rmis_gammadist_test.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);

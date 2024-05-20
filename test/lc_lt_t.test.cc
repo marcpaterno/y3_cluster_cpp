@@ -37,7 +37,7 @@ TEST_CASE("Lc_Lt_t works")
 
   LC_LT_t lc_lt;
 
-  std::ofstream out = y3_cluster::make_ofstream("data/lc_lt_test.out");
+  std::ofstream out = y3_cluster::make_ofstream("validation-data/lc_lt_test.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);

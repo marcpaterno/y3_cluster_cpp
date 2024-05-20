@@ -26,7 +26,7 @@ TEST_CASE("Compare sigma_crit_inv against astropy", "[sigma_crit_inverse]")
              zs = read_vector(path + "zs.txt");
 
   const size_t NCOSMO = 1;
-  std::ofstream out = y3_cluster::make_ofstream("data/Sigma_crit_test.out");
+  std::ofstream out = y3_cluster::make_ofstream("validation-data/Sigma_crit_test.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);

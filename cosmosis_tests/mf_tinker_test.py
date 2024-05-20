@@ -23,7 +23,7 @@ def execute(block, config):
         test_test = dat[:, 2]*(10.0**test_m) # space density
 
         test_interp = interp2d(masses, zz, nm, kind='quintic') # this is to interpolate the mass function to a given z and mass
-        outfile = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/data/masses_test.out')
+        outfile = os.path.expandvars('${Y3_CLUSTER_CPP_DIR}/validation-data/masses_test.out')
         with open(outfile, 'w') as outf:
             outf.write('z\t mass\t ytrue\t ytest\n')
             # for each of Matteo's masses,

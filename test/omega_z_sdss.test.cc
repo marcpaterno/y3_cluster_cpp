@@ -29,7 +29,7 @@ TEST_CASE("omega_z_sdss works")
 
   OMEGA_Z_SDSS omega;
 
-  std::ofstream out = y3_cluster::make_ofstream("data/omega_z_sdss.out");
+  std::ofstream out = y3_cluster::make_ofstream("validation-data/omega_z_sdss.out");
   REQUIRE(out.good());
   out << std::setw(16);
   out << std::setprecision(16);
