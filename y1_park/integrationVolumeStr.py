@@ -1,16 +1,18 @@
 import numpy as np
 
 ## set the grid for Rp values
-nradii = 3
-radius = np.round(np.logspace(np.log10(0.05), np.log10(10), nradii+1),2)
+r0, rend, nradii = 0.05, 5, 10
+rp = np.logspace(np.log10(r0), np.log10(rend), nradii)
+# rp = np.append(0.001, rp)
+radius = np.round(np.append(np.array([0.001]), rp),3)
 
 l_low = [20.0, 30.0, 45.0, 60.0]
 l_hig = [30.0, 45.0, 60.0, 250]
 
-lt_low = [5.0]*len(l_low)
-lt_hig = [500]*len(l_low)
+# lt_low = [5.0]*len(l_low)
+# lt_hig = [500]*len(l_low)
 
-# lt_low = [int(l/5.) for l in l_low]
+lt_low = [int(l/4.) for l in l_low]
 lt_hig = [int(l*4.) for l in l_hig]
 
 z_low = [0.15]*len(l_low)
