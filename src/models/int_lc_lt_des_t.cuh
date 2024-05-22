@@ -2,16 +2,18 @@
 #define Y3_CLUSTER_INT_LC_LT_DES_T_CUH
 
 #include "cosmosis/datablock/datablock.hh"
-#include "common/cuda/Interp2D.cuh"
+// #include "common/cuda/Interp2D.cuh"
+#include "utils/cuda_interp_2d.cuh"
 
 namespace y3_cuda {
-  struct INT_LC_LT_DES_t {
-
+  class INT_LC_LT_DES_t {
+  public:
+    // private:
     // CUDA/C++ does not support static data members of classes or structs
-    quad::Interp2D lambda0_interp;
-    quad::Interp2D lambda1_interp;
-    quad::Interp2D lambda2_interp;
-    quad::Interp2D lambda3_interp;
+    gpu_support::Interp2D lambda0_interp;
+    gpu_support::Interp2D lambda1_interp;
+    gpu_support::Interp2D lambda2_interp;
+    gpu_support::Interp2D lambda3_interp;
 
     // The default constructor is implemented in the .cu file.
     INT_LC_LT_DES_t();
@@ -36,6 +38,14 @@ namespace y3_cuda {
       }
       return val;
     }
+
+    // private:
+    //   // CUDA/C++ does not support static data members of classes or structs
+    //   gpu_support::Interp2D lambda0_interp;
+    //   gpu_support::Interp2D lambda1_interp;
+    //   gpu_support::Interp2D lambda2_interp;
+    //   gpu_support::Interp2D lambda3_interp;
+
   };
 }
 

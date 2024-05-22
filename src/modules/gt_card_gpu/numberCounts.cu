@@ -12,7 +12,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-#include "models/int_lc_lt_des_t2.cuh"
+#include "models/int_lc_lt_des_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/roffset_t.cuh"
 
@@ -33,7 +33,7 @@ public:
   // Note we're slightly abusing the concept of the "grid" here. We are
   // really iterating over a single sequence of pairs, with the pairs
   // denoting the bottoms and tops of a set of zo bins.
-  using grid_t = y3_cluster::grid_t<2>;
+  using grid_t = y3_cluster::grid_t<3>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -41,7 +41,7 @@ private:
   // of integration volume for our integrand. If we were to change the
   // number of arguments required by the function call operator (below),
   // we would need to also modify this type alias to keep consistent.
-  using volume_t = quad::Volume<double, 4>;
+  using volume_t = quad::Volume<double, 3>;
 
   // State obtained from configuration. These things should be set in the
   // constructor.
@@ -53,12 +53,13 @@ private:
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::INT_LC_LT_DES_t2> lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_t> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
 
   // State set for current 'bin' to be integrated.
   double zo_low_;
   double zo_high_;
+  double lbd_bin_;
 
 
   // Should we use cartesian grid? If not, we use a wall-of-numbers.
@@ -95,7 +96,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(double lo, double lt, double zt, double lnM) const;
+  __host__ __device__ double operator()(double lt, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -144,7 +145,7 @@ numberCountsCard::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  // lc_lt.emplace(sample);
+  lc_lt.emplace(sample);
 }
 
 void
@@ -152,20 +153,20 @@ numberCountsCard::set_grid_point(grid_point_t grid_point)
 {
   zo_low_ = grid_point[0];
   zo_high_ = grid_point[1];
+  lbd_bin_ = grid_point[2];
 }
 
 __host__ __device__ double
-numberCountsCard::operator()(double lo,
-                         double lt,
-                         double zt,
-                         double lnM) const
+numberCountsCard::operator()(double lt,
+                             double zt,
+                             double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double const lc = lo;
-  double const mor_v = (*mor)(lo, lnM, zt);
+  // double const lc = lo;
+  double const mor_v = (*mor)(lt, lnM, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*lc_lt)(lc, lt, zt) * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
+  auto const val = (*lc_lt)(lbd_bin_, lt, zt) * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   return val;
 }
 
@@ -190,7 +191,6 @@ numberCountsCard::make_integration_volumes(
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg, 
     numberCountsCard::module_label(), 
-    "lo",
     "lt",
     "zt", 
     "lnm");
@@ -227,7 +227,8 @@ numberCountsCard::make_grid_points(cosmosis::DataBlock& cfg)
     cfg, 
     numberCountsCard::module_label(), 
     "zo_low", 
-    "zo_high");
+    "zo_high",
+    "lbd_bin");
 }
 
 DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(numberCountsCard)

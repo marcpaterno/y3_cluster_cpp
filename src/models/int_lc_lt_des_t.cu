@@ -615,17 +615,17 @@ namespace {
   // Create an Interp2D from an x-axis, y-axis, and z "matrix", with the matrix
   // unrolled into a one-dimenstional array.
   template <size_t M, std::size_t N>
-  Interp2D
+  gpu_support::Interp2D
   make_Interp2D_aux(std::array<double, M> const& xs,
                     std::array<double, N> const& ys,
                     std::array<double, (N) * (M)> const& zs)
   {
     // printf("Creating static interpolation table of size %lu x %lu\n", M, N);
-    return {xs, ys, zs};
+    return {make_vec(xs), make_vec(ys), make_vec(zs)};
   }
 
   template <size_t MN>
-  Interp2D
+  gpu_support::Interp2D
   make_Interp2D(std::array<double, MN> const& zs)
   {
     return make_Interp2D_aux(lt_bins, zt_bins, zs);
