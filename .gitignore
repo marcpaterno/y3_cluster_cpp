@@ -1,6 +1,8 @@
 .DS_Store
 CMakeFiles/
 Testing/
+validation-data/
+validations/ipython_to_be_imported/
 cosmosis_test_output/
 cosmosis_run_dump.txt
 covariance_test_output/

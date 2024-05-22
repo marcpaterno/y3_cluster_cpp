@@ -3,7 +3,7 @@
 #include "utils/read_vector.hh"
 
 // This is the code we're actually testing
-#include "models/int_lc_lt_des_t.cuh"
+#include "models/int_lc_lt_des_t2.cuh"
 #include "utils/cuda_interp_2d.cuh"
 
 #include <fstream>
@@ -11,12 +11,12 @@
 #include <fmt/format.h>
 
 // using y3_cluster::Interp2D;
-using y3_cuda::INT_LC_LT_DES_t;
+using y3_cuda::INT_LC_LT_DES_t2;
 
-TEST_CASE("Test Int Lc Lt DES t Implementation")
+TEST_CASE("Test Int Lc Lt DES t2 Implementation")
 {
   // Setup the initial conditions properly
-  INT_LC_LT_DES_t lc_lt;
+  INT_LC_LT_DES_t2 lc_lt;
 
   double const epsrel = 1.0e-5;
   double const epsabs = 1.0e-12;
@@ -28,7 +28,7 @@ TEST_CASE("Test Int Lc Lt DES t Implementation")
 
   // Answers drawn from cluster toolkit
   // Each columns is a different rmis, each row is a different r
-  std::vector<double> answers{0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
+  std::vector<double> answers{0.58784, 0.548563, 0.518381, 0.65423, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
 
   std::size_t const n_lc = lc.size();
   std::size_t const n_zt = zt.size();
