@@ -89,18 +89,18 @@ def execute(block, config):
         # 4piG/c^2
         const = 6.01e-19 # Mpc/M_sol
         const*= 1e6 # pc/M_sol
-        
+
         # cosmological quantities
         z_da = block["distances",'z']
         da = block["distances",'d_a'] # Mpc
 
         # lenses redshift is equal to the cluster mean redshifts
         section_name = "haloModel"
-        z_lenses = block[section_name, "z"]
+        z_lenses = block["haloModel", "z"]
         r_sigma = block[section_name, "r_sigma"]
-        shift = block[section_name, 'scale_shift']
+        shift = block[section_name, "scale_shift"]
         z_shift = z_lenses
-        
+
         # lens comoving distance
         dc_lenses = interp1d(z_da, da*(1+z_da))(z_lenses)
 
@@ -144,7 +144,7 @@ def execute(block, config):
                 sigma_crit_inv = sigma_crit_inv/sigma_crit_inv
                 # set sigma_crit_inv to unity
                 # then, shear is actually delta sigma 
-        
+
         block["sigmaCritInv", "r_sigma"] = r_sigma
         block["sigmaCritInv", "z"] = z_lenses
         block["sigmaCritInv", "sigma_crit_inv"] = sigma_crit_inv

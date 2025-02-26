@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 from scipy.special import erf
 import cluster_toolkit as ct
 import massconcen
-import bias
+from haloModel import biasModel
 
 from astropy.constants import G
 import astropy.cosmology
@@ -64,7 +64,7 @@ def setup(options):
     
 
 def execute(block, config):
-    section_name = "halo_model"
+    section_name = "haloModel"
     R_perp_min, R_perp_max, R_perp_bins, Radii_min, Radii_max,\
     Radii_bins, M_min, M_max, M_bins  = config
 
@@ -111,15 +111,19 @@ def execute(block, config):
     logM = np.log(M)
 
     # Step 3) Compute Bias (M, Z)
-    import time
-    t0 = time.time()
-    #### Compute peak-height
-    Nu0 = ct.peak_height.nu_at_M(M, k_h, P_k[0], omega_m)
-    # Involves with 1/da(z)
-    # shape (z, mbins)
-    nu = np.array([Nu0/daz[i] for i in range(nz)])
-    Bias = np.array([bias.bias_at_nu(nui, odelta=200) for nui in nu])
-    tf = time.time()-t0
+    bM = biasModel(k_h, P_k[0], omega_m, odelta=200)
+    nu = bM.nu_at_M(M)
+    Bias = np.array([bM.bias_at_nu(nu/dazi) for dazi in daz])
+
+    # import time
+    # t0 = time.time()
+    # #### Compute peak-height
+    # Nu0 = ct.peak_height.nu_at_M(M, k_h, P_k[0], omega_m)
+    # # Involves with 1/da(z)
+    # # shape (z, mbins)
+    # nu = np.array([Nu0/daz[i] for i in range(nz)])
+    # Bias = np.array([biasModel.bias_at_nu(nui, odelta=200) for nui in nu])
+    # tf = time.time()-t0
     # print('Bias took: %.3f sec'%tf)
 
     #### Step 1) Wp
@@ -177,8 +181,8 @@ def execute(block, config):
 
     # deltaSigma and Sigma [Msun/pc^2]
     block[section_name, "r_sigma"] = R_perp
-    block[section_name, "DSigma_hh"] = dSigma_hh # already on Msun/pc^2
-    block[section_name, "DSigma_nfw"] = dSigma_nfw/1e12
+    block[section_name, "dSigma_hh"] = dSigma_hh # already on Msun/pc^2
+    block[section_name, "dSigma_nfw"] = dSigma_nfw/1e12
     block[section_name, "Sigma_hh"] = Sigma_hh # already on Msun/pc^2
     block[section_name, "Sigma_nfw"] = Sigma_nfw/1e12
     block[section_name, "concentration"] = concvec

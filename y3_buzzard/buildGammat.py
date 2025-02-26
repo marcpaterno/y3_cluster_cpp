@@ -4,6 +4,8 @@ from scipy.interpolate import interp1d
 from cosmosis.datablock import option_section, names
 from scipy import integrate
 
+from utils import find_cosmosis_sections
+
 # redshift mean with format [z0, z1, z2, z0, z1, z2, ...]
 from setup_bins import zmeans_ij
 
@@ -61,7 +63,8 @@ def setup(options):
     sep_units = str(options[option_section, "sep_units"])
 
     # grab radius bins
-    r_kappa = options["kappa", "radius"]
+    kappa_section = find_cosmosis_sections(options, "gamma")[0]
+    r_kappa = options[kappa_section, "radius"]
 
     # do the integral over kappa
     do_int = int(options[section, "do_int"])
@@ -81,7 +84,8 @@ def execute(block, config):
     # r_kappa = block["avgKappaCentBu", "radius"]
 
     # build average: <x> = N[x]/N[1]
-    NC = block["numberCounts", "vals"]
+    nc_section = find_cosmosis_sections(block, "numbercounts")[0]
+    NC = block[nc_section, "vals"]
 
     # number of radial bins
     Nrbins = r_kappa.size
@@ -89,7 +93,8 @@ def execute(block, config):
     # the kappa shape from the datablock is
     # (number lambda bins, number redshift bins times number radial bins)
     # the radial bins were stride Nzbins
-    kappa_cen = block["kappa", "vals"]
+    kappa_section = find_cosmosis_sections(block, "gamma")[0]
+    kappa_cen = block[kappa_section, "vals"]
     Nlbins, Nzr = kappa_cen.shape
 
     # get the number of redshift bins
@@ -184,7 +189,6 @@ def r_to_theta(r, z, z_interp, da_interp, sep_units="arcmin"):
     theta = theta_rad * conv_factor[sep_units]
 
     return theta
-
 
 def cleanup(config):
     pass

@@ -2,6 +2,8 @@ import os
 from cosmosis.datablock import option_section, names
 import numpy as np
 
+from utils import find_cosmosis_sections
+
 ###########################################################
 ################### UNDER CONSTRUCTION #################
 # ToDos:
@@ -90,6 +92,10 @@ def setup(options):
 def execute(block, config):
     # read from the data
     dataDict, invCovDict = config
+
+    # Update the pipe_names and vals_names
+    pipe_names['NC'] = find_cosmosis_sections(block, "numbercounts")[0]
+    pipe_names['Shear'] = find_cosmosis_sections(block, "shear")[0]
     
     # pull predictions from the datablock; 
     # arrays with shape (Nrbins x Nlbdins x Nzbins, )
