@@ -13,8 +13,8 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-// #include "models/int_lc_lt_des_t.cuh"
-#include "models/lc_lt_t.cuh"
+#include "models/int_lc_lt_des_f.cuh"
+// #include "models/lc_lt_t.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 // mis-centered delta sigma interpolation table
@@ -60,7 +60,7 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::LC_LT_t> lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_f> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the delta sigma miscentered profile
   std::optional<y3_cuda::SIGMA_MISC> gamma_misc;
@@ -90,8 +90,8 @@ public:
   // function is const because calling it does not change the state of the
   // object.
   __host__ __device__ double operator()(
-          double lo,
-          double lt, 
+          double lnLo,
+          double lnLt, 
           double zt, 
           double lnM) const;
 
@@ -157,19 +157,20 @@ avgMiscApprox2SigmaPark::set_grid_point(
 }
 
 __host__ __device__ double
-avgMiscApprox2SigmaPark::operator()(double lo,
-                           double lt,
+avgMiscApprox2SigmaPark::operator()(double lnLo,
+                           double lnLt,
                            double zt,
                            double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double const lc = lo;
-  double const mor_v = (*mor)(lo, lnM, zt);
-  auto const boost = (*op_sel_park_pi_func)(radius_, lo, zt);
+  double const lo = std::exp(lnLo); 
+  double const lt = std::exp(lnLt);
+  double const mor_v = (*mor)(lt, lnM, zt);
+  auto const boost = (*op_sel_park_pi_func)(radius_, lt, zt);
 
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*gamma_misc)(radius_, lnM, zt) * (*lc_lt)(lc, lt, zt) *
+  auto const val = (*gamma_misc)(radius_, lnM, zt) * (*lc_lt)(lo, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   
   auto const sigma = val * boost;
@@ -195,7 +196,7 @@ avgMiscApprox2SigmaPark::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgMiscApprox2SigmaPark::module_label(), "lo", "lt", "zt", "lnm");
+    cfg, avgMiscApprox2SigmaPark::module_label(), "lnLo", "lnLt", "zt", "lnm");
 }
 
 avgMiscApprox2SigmaPark::grid_t

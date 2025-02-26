@@ -13,7 +13,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-#include "models/int_lc_lt_des_t2.cuh"
+#include "models/int_lc_lt_des_f.cuh"
 // #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 // mis-centered delta sigma interpolation table
@@ -34,7 +34,7 @@ using cubacpp::integration_result;
 //
 class avgMiscApprox2SigmaCumPark {
 public:
-  using grid_t = y3_cluster::grid_t<3>;
+  using grid_t = y3_cluster::grid_t<2>;
   using grid_point_t = grid_t::value_type;
 
 private:
@@ -59,7 +59,7 @@ private:
   std::optional<y3_cuda::HMF_t> hmf;
   // mass-observable relation
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::INT_LC_LT_DES_t2> lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_f> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   // and the delta sigma miscentered profile
   std::optional<y3_cuda::SIGMA_MISC> sigma_misc;
@@ -87,12 +87,11 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(
-                                        double lo,
-                                        double lt, 
+  __host__ __device__ double operator()(double lnLo,
+                                        double lnLt, 
                                         double zt, 
                                         double lnM,
-                                        double Rp) const;
+                                        double lnRp) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -155,21 +154,23 @@ avgMiscApprox2SigmaCumPark::set_grid_point(
 }
 
 __host__ __device__ double
-avgMiscApprox2SigmaCumPark::operator()(double lo,
-                               double lt,
-                               double zt,
-                               double lnM,
-                               double Rp) const
+avgMiscApprox2SigmaCumPark::operator()(double lnLo,
+                                      double lnLt,
+                                      double zt,
+                                      double lnM,
+                                      double lnRp) const
 {
-  double const lc = lo;
-  double const mor_v = (*mor)(lo, lnM, zt);
+  double const lo = std::exp(lnLo); 
+  double const lt = std::exp(lnLt);
+  double const Rp = std::exp(lnRp);
+  double const mor_v = (*mor)(lt, lnM, zt);
 
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const res = (*sigma_misc)(Rp, lnM, zt) * (*lc_lt)(lc, lt, zt) *
+  auto const res = (*sigma_misc)(Rp, lnM, zt) * (*lc_lt)(lo, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   
   // APPLY BOOST ON SIGMA
-  double const boost = (*op_sel_park_pi_func)(Rp, lo, zt);
+  double const boost = (*op_sel_park_pi_func)(Rp, lt, zt);
   // Integrates over \Sigma_cum = 2/R^2  \int_0^R r \Sigma(r) dr
   auto const rp_sigma = Rp * boost * res;
   return rp_sigma;
@@ -194,7 +195,7 @@ avgMiscApprox2SigmaCumPark::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgMiscApprox2SigmaCumPark::module_label(), "lo", "lt", "zt", "lnm","Rp");
+    cfg, avgMiscApprox2SigmaCumPark::module_label(), "lnLo", "lnLt", "zt", "lnm","lnRp");
 }
 
 avgMiscApprox2SigmaCumPark::grid_t
@@ -204,8 +205,7 @@ avgMiscApprox2SigmaCumPark::make_grid_points(cosmosis::DataBlock& cfg)
     cfg,
     avgMiscApprox2SigmaCumPark::module_label(),
     "zo_low",
-    "zo_high",
-    "radii");
+    "zo_high");
 }
 
 DEFINE_COSMOSIS_CUDA_INTEGRATION_MODULE(avgMiscApprox2SigmaCumPark)

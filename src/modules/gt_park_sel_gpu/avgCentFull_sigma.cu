@@ -13,7 +13,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-#include "models/int_lc_lt_des_t2.cuh"
+#include "models/int_lc_lt_des_f.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/kappa_max.cuh"
@@ -55,7 +55,7 @@ private:
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::INT_LC_LT_DES_t2> lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_f> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<y3_cuda::KAPPA_MAX> sigma;
   std::optional<y3_cuda::OP_SEL_PARK> op_sel_park_pi_func;
@@ -84,8 +84,8 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(double lo, 
-                                        double lt, 
+  __host__ __device__ double operator()(double lnLo, 
+                                        double lnLt, 
                                         double zt, 
                                         double lnM) const;
 
@@ -136,7 +136,7 @@ avgCentSigmaPark::set_sample(DataBlock& sample)
   dv_do_dz.emplace(sample);
   hmf.emplace(sample);
   mor.emplace(sample);
-  // lc_lt.emplace(sample);
+  lc_lt.emplace(sample);
   sigma.emplace(sample);
   op_sel_park_pi_func.emplace(sample);
 }
@@ -151,17 +151,17 @@ avgCentSigmaPark::set_grid_point(
 }
 
 __host__ __device__ double
-avgCentSigmaPark::operator()(double lo,
-                            double lt,
-                            double zt,
-                            double lnM) const
+avgCentSigmaPark::operator()(double lnLo,
+                             double lnLt,
+                             double zt,
+                             double lnM) const
 {
-  double const lc = lo; 
+  double const lo = std::exp(lnLo); 
+  double const lt = std::exp(lnLt);
   double const mor_v = (*mor)(lt, lnM, zt);
-  auto const boost = (*op_sel_park_pi_func)(radius_, lo, zt);
-
+  auto const boost = (*op_sel_park_pi_func)(radius_, lt, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
-  auto const val = (*sigma)(radius_, lnM, zt) * (*lc_lt)(lc, lt, zt) *
+  auto const val = (*sigma)(radius_, lnM, zt) * (*lc_lt)(lo, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
   auto const sigma = val * boost;
   return sigma;
@@ -186,7 +186,7 @@ avgCentSigmaPark::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgCentSigmaPark::module_label(), "lo", "lt", "zt", "lnm");
+    cfg, avgCentSigmaPark::module_label(), "lnLo", "lnLt", "zt", "lnm");
 }
 
 avgCentSigmaPark::grid_t

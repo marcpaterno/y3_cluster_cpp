@@ -13,7 +13,7 @@
 #include "models/dv_do_dz_t.cuh"
 #include "models/hmf_t.cuh"
 #include "models/mor_des_log_t.cuh"
-#include "models/int_lc_lt_des_t2.cuh"
+#include "models/int_lc_lt_des_f.cuh"
 #include "models/roffset_t.cuh"
 #include "models/int_zo_zt_des_t.cuh"
 #include "models/kappa_max.cuh"
@@ -55,7 +55,7 @@ private:
   std::optional<y3_cuda::DV_DO_DZ_t> dv_do_dz;
   std::optional<y3_cuda::HMF_t> hmf;
   std::optional<y3_cuda::MOR_DES_LOG_t> mor;
-  std::optional<y3_cuda::INT_LC_LT_DES_t2> lc_lt;
+  std::optional<y3_cuda::INT_LC_LT_DES_f> lc_lt;
   std::optional<y3_cuda::INT_ZO_ZT_DES_t> int_zo_zt;
   std::optional<y3_cuda::KAPPA_MAX> sigma;
   std::optional<y3_cuda::OP_SEL_PARK> op_sel_park_pi_func;
@@ -83,11 +83,11 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(double logLo,
-                                        double logLt, 
+  __host__ __device__ double operator()(double lnLo,
+                                        double lnLt, 
                                         double zt, 
                                         double lnM,
-                                        double Rp) const;
+                                        double lnRp) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -151,15 +151,18 @@ avgCentSigmaCumPark::set_grid_point(
 }
 
 __host__ __device__ double
-avgCentSigmaCumPark::operator()(double logLo,
-                                double logLt,
+avgCentSigmaCumPark::operator()(double lnLo,
+                                double lnLt,
                                 double zt,
                                 double lnM,
-                                double Rp) const
+                                double lnRp) const
 {
-  double const lo = std::exp(logLo); 
-  double const lt = std::exp(logLt); 
+  double const lo = std::exp(lnLo); 
+  double const lt = std::exp(lnLt);
+  double const Rp = std::exp(lnRp); 
   double const mor_v = (*mor)(lt, lnM, zt);
+  // int const index = 0;
+
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
   auto const val = (*sigma)(Rp, lnM, zt) * (*lc_lt)(lo, lt, zt) *
                    (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
@@ -190,7 +193,7 @@ avgCentSigmaCumPark::make_integration_volumes(
   cosmosis::DataBlock& cfg)
 {
   return y3_cuda::make_integration_volumes_wall_of_numbers(
-    cfg, avgCentSigmaCumPark::module_label(), "logLo", "logLt", "zt", "lnm","rp");
+    cfg, avgCentSigmaCumPark::module_label(), "lnLo", "lnLt", "zt", "lnm","lnRp");
 }
 
 avgCentSigmaCumPark::grid_t

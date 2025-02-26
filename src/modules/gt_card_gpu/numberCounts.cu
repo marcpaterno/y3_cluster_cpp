@@ -96,7 +96,7 @@ public:
   // integration routine does not work for functions of one variable). The
   // function is const because calling it does not change the state of the
   // object.
-  __host__ __device__ double operator()(double logLo, double logLt, double zt, double lnM) const;
+  __host__ __device__ double operator()(double lnLo, double lnLt, double zt, double lnM) const;
 
   // module_label() is a non-member (static) function that returns the label for
   // this module. The name this returns
@@ -157,15 +157,16 @@ numberCountsCard::set_grid_point(grid_point_t grid_point)
 }
 
 __host__ __device__ double
-numberCountsCard::operator()(double logLo,
-                             double logLt,
+numberCountsCard::operator()(double lnLo,
+                             double lnLt,
                              double zt,
                              double lnM) const
 {
   // For any data members of type std::optional<X>, we have to use operator*
   // to access the X object (as if we were dereferencing a pointer).
-  double const lt = std::exp(logLt);
-  double const lo = std::exp(logLo);
+  double const lt = std::exp(lnLt);
+  double const lo = std::exp(lnLo);
+  
   double const mor_v = (*mor)(lt, lnM, zt);
   double common_term = (*omega_z)(zt) * (*dv_do_dz)(zt) * (*hmf)(lnM, zt) * mor_v ;
   auto const val = (*lc_lt)(lo, lt, zt) * (*int_zo_zt)(zo_low_, zo_high_, zt) * common_term;
@@ -193,8 +194,8 @@ numberCountsCard::make_integration_volumes(
   return y3_cuda::make_integration_volumes_wall_of_numbers(
     cfg, 
     numberCountsCard::module_label(), 
-    "logLo",
-    "logLt",
+    "lnLo",
+    "lnLt",
     "zt", 
     "lnm");
 }
