@@ -44,6 +44,13 @@ if (USE_CUDA)
   set_target_properties(int_lc_lt_des_t_test PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
   add_test(int_lc_lt_des_t_test int_lc_lt_des_t_test)
 
+  add_executable(int_lc_lt_des_f_test int_lc_lt_des_f_test.test.cu)
+  target_link_libraries(int_lc_lt_des_f_test PRIVATE cuda_utils utils testmain fmt::fmt)
+  target_include_directories(int_lc_lt_des_f_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals ${PAGANI_DIR})
+  set_target_properties(int_lc_lt_des_f_test PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH} )
+  target_compile_options(int_lc_lt_des_f_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)  
+  add_test(int_lc_lt_des_f_test int_lc_lt_des_f_test)
+  
   add_executable(timing_sentry_cuda_test timing_sentry_test.cu)
   target_link_libraries(timing_sentry_cuda_test PRIVATE testmain)
   target_include_directories(timing_sentry_cuda_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/externals)
