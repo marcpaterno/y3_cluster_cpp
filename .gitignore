@@ -1,7 +1,7 @@
 .DS_Store
 CMakeFiles/
 Testing/
-validation-data/
+#validation-data/
 validations_gpu/
 validations/ipython_to_be_imported/
 cosmosis_test_output/
