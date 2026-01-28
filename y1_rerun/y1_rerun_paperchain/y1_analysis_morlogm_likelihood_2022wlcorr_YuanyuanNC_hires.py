@@ -15,9 +15,10 @@ from scipy.stats import multivariate_normal
 
 def setup(options):
     section = option_section
-    cov=np.genfromtxt('y1_data/Cov_ij_bestfit_DESY1_105.txt')
-    NCdata=np.genfromtxt('y1_data/NC_DESY1A1_REDMAPPER_3zbin_4lbin_Mcut1.e13_LM_v6.4.17_MISCCorr.dat')
-    Mdata=np.genfromtxt('y1_data/LogWLMass_4lbin_3zbin_redmapper_desy1_v3.dat')
+    data_file_path = options["Y1AnalysisLike", "datafile_path"]
+    cov=np.genfromtxt(data_file_path+'Cov_ij_bestfit_DESY1_105.txt')
+    NCdata=np.genfromtxt(data_file_path+'NC_DESY1A1_REDMAPPER_3zbin_4lbin_Mcut1.e13_LM_v6.4.17_MISCCorr.dat')
+    Mdata=np.genfromtxt(data_file_path+'LogWLMass_4lbin_3zbin_redmapper_desy1_v3.dat')
 
     #NCdata=np.genfromtxt('y1_data/Yuanyuan_DESY1_NC_MOCK_NO_PRJ_HOD_l_m_PltrM_Skewnormal.dat')
     #Mdata=np.genfromtxt('y1_data/DESY1_logM_MOCK_NO_PRJ_HOD_l_m_PltrM_Skewnormal.dat')
@@ -25,8 +26,8 @@ def setup(options):
     #row1:  z_1 lambda_1
     #row2:  z_1 lambda_2
     #row3:  z_1 lambda_3
-    Om_corr = np.genfromtxt('y1_data/logMdOm_DESY1.dat')
-    lnAS_corr = np.genfromtxt('y1_data/logMdlnAs_DESY1.dat')
+    Om_corr = np.genfromtxt(data_file_path+'logMdOm_DESY1.dat')
+    lnAS_corr = np.genfromtxt(data_file_path+'logMdlnAs_DESY1.dat')
     return cov, NCdata, Mdata, Om_corr, lnAS_corr
 
 
@@ -62,7 +63,7 @@ def execute(block, config):
                 roww=jj*4+ii
                 corr_jjii=Om_corr[roww]*(Omega_m-0.3)+lnAS_corr[roww]*(loge10As-2.98239371)
                 corr=np.append(corr, corr_jjii)
-                print(jj, ii, logM[ii, jj], corr_jjii)
+                #print(jj, ii, logM[ii, jj], corr_jjii)
         richnesses=ncdata[:, 2]
         redshifts=ncdata[:, 0]
         nc_data=ncdata[:, 4]
@@ -74,10 +75,10 @@ def execute(block, config):
         delta = data - theory
         weight = np.linalg.inv(covmat)
         loglike1 = -0.5 * np.dot(delta, np.dot(weight, delta))  + lnlike_hmf  ### added the likelihood of hmf
-        print("theory vector M and NC:", theory_M, theory_nc)
-        print("Data vector M and Corr:", M_data, corr)
-        print("Data vector NC:", nc_data)
-        print("hmf likelihood:", prob_hmf, lnlike_hmf) 
+        #print("theory vector M and NC:", theory_M, theory_nc)
+        #print("Data vector M and Corr:", M_data, corr)
+        #print("Data vector NC:", nc_data)
+        #print("hmf likelihood:", prob_hmf, lnlike_hmf) 
         '''
         delta2 = mass_data - theory_M
         weight2 = np.linalg.inv(covmat2)
