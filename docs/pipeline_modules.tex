@@ -843,6 +843,176 @@ implementation:
 \end{itemize}
 
 % ============================================================================
+\section{Miscentering selection on $\Delta\Sigma$}
+\label{sec:miscentering_selection}
+
+The full DES~Y3 cluster-lensing model treats the central galaxy of each
+cluster as \emph{not} guaranteed to coincide with the dark-matter halo
+centre.  A fraction $f_{\rm mis}$ of clusters in the redMaPPer sample are
+``miscentred'': their identified centre is offset from the true halo
+centre by a 2-D radial distance $R_{\rm mis}$ drawn from a kernel
+$P(R_{\rm mis} \,|\, \tau_{\rm mis}, R_\lambda)$.  The lensing observable
+$\Delta\Sigma(R)$ is therefore a two-component mixture of the
+well-centred NFW profile and the miscentred convolution.
+
+\subsection{Mathematical form}
+
+For a cluster of mass $M$ at lens redshift $z$, the modelled lensing
+profile decomposes as
+\begin{equation}
+\label{eq:dsigma_cl}
+  \Delta\Sigma_{\rm cl}(R \,|\, M, z, \theta_{\rm mis})
+  \;=\; (1 - f_{\rm mis})\, \Delta\Sigma_{\rm NFW}(R, M)
+       \;+\; f_{\rm mis}\, \Delta\Sigma_{\rm mis}(R, M; \tau_{\rm mis}),
+\end{equation}
+where $\theta_{\rm mis} = \{f_{\rm mis}, \tau_{\rm mis}\}$ are the
+miscentering nuisance parameters.  $\Delta\Sigma_{\rm NFW}$ is the
+analytic Wright \& Brainerd (2000) projected differential surface
+density at the halo centre; $\Delta\Sigma_{\rm mis}$ is the same NFW
+profile averaged over an azimuthal-and-radial offset distribution
+\begin{equation}
+\label{eq:dsigma_mis_avg}
+  \Delta\Sigma_{\rm mis}(R, M; \tau_{\rm mis})
+  \;=\; \int_0^\infty dR_{\rm mis}\,
+        P(R_{\rm mis} \,|\, \tau_{\rm mis}, R_\lambda(M))\,
+        \widetilde{\Delta\Sigma}_{\rm NFW}(R \,|\, R_{\rm mis}, M),
+\end{equation}
+with $\widetilde{\Delta\Sigma}_{\rm NFW}(R \,|\, R_{\rm mis}, M)$ the
+azimuthal average at fixed offset $R_{\rm mis}$,
+\begin{equation}
+  \widetilde{\Delta\Sigma}_{\rm NFW}(R \,|\, R_{\rm mis}, M)
+  \;=\; \frac{1}{2\pi}\int_0^{2\pi}\! d\varphi\
+        \Delta\Sigma_{\rm NFW}\!\left(\sqrt{R^2 + R_{\rm mis}^2 + 2 R R_{\rm mis}\cos\varphi}, M\right).
+\end{equation}
+
+Two offset kernels are supported in the code (selected at module
+construction by the \texttt{kernel} string, see
+\pyfile{src/models/nfw\_dsigma\_mis.hh}):
+\begin{itemize}
+  \setlength\itemsep{2pt}
+  \item \textbf{single} (delta-function at fixed $R_{\rm mis} = \tau_{\rm mis} \cdot R_\lambda$):
+    \begin{equation}
+      P_{\rm single}(R_{\rm mis} \,|\, \tau_{\rm mis}, R_\lambda)
+        \;=\; \delta_D(R_{\rm mis} - \tau_{\rm mis}\,R_\lambda).
+    \end{equation}
+    Used by \modname{red\_shear\_prj} for the projection-effect
+    integrand because it factors cleanly into the
+    $\theta = R_{\rm mis}/D_A(\zob)$ angular integral.
+  \item \textbf{gamma} (Kelly et~al.\ 2023 / Costanzi-2026 fit):
+    \begin{equation}
+      P_\gamma(R_{\rm mis} \,|\, \tau_{\rm mis}, R_\lambda)
+        \;=\; \frac{R_{\rm mis}}{(\tau_{\rm mis} R_\lambda)^2}\,
+              \exp\!\left[-\frac{R_{\rm mis}}{\tau_{\rm mis}\,R_\lambda}\right].
+    \end{equation}
+    The Rayleigh-shaped kernel calibrated against DES~Y3 redMaPPer
+    centring on Buzzard mocks; this is the kernel used for the
+    \emph{lensing} branch (i.e.\ the convolution that enters the
+    \modname{Shear1hSel} weight in the full model).
+\end{itemize}
+
+The DES~Y3 fiducial values, calibrated jointly against X-ray and
+SZ-derived true centres, are
+$f_{\rm mis} \simeq 0.22 \pm 0.06$ and
+$\tau_{\rm mis} \simeq 0.17 \pm 0.04$ (in units of $R_\lambda$), with
+$R_\lambda(\lambda) = (\lambda/100)^{0.2}\,\hMpc$.
+
+\subsection{Pre-computed convolution tables}
+
+Equation~\eqref{eq:dsigma_mis_avg} is non-trivially expensive: for each
+$(R, M, R_{\rm mis})$ one azimuthal integral, plus an outer
+$R_{\rm mis}$ integral against $P(R_{\rm mis})$.  Inlining this in the
+inner integration loop of \modname{Shear1hSel} (called at every
+$(R, \ln M, z)$ Cuhre node, $\sim 10^5$ nodes / sample) is prohibitive.
+
+Instead we read the same look-up tables already used by
+\modname{red\_shear\_prj} (\S\ref{sec:shear_prj}):
+\begin{verbatim}
+  data/nfw_off_center/table_1000_1e-03_5e+03_<kernel>_logx.txt
+  data/nfw_off_center/table_1000_1e-03_5e+03_<kernel>_logxmis.txt
+  data/nfw_off_center/table_1000_1e-03_5e+03_log_deltasigma_<kernel>.txt
+  data/nfw_off_center/table_1000_1e-03_5e+03_log_sigma_<kernel>.txt
+\end{verbatim}
+with \texttt{<kernel> $\in$ \{single, gamma\}}.  Each table is a
+$1000\!\times\!1000$ log-log grid in
+$(x = R/r_s,\, x_{\rm mis} = R_{\rm mis}/r_s)$ that returns
+$\log[\Delta\Sigma_{\rm mis} / (2 r_s \delta_c \rho_{\rm crit})]$
+(units $\hMsun\,\mathrm{pc}^{-2}$ after the $10^{-12}$ Mpc$\to$pc
+conversion in \texttt{NFW\_DSIGMA\_MIS::operator()}).  At evaluation
+time the cluster's $r_s = r_{200}/c$ is computed from $M, c, \rho_{\rm crit}$
+and the stored profile is rescaled.  No on-the-fly convolution is
+performed.
+
+\subsection{Wiring into \texttt{Shear1hSel}}
+
+Adding miscentering to the $\Delta\Sigma$ branch is a swap of the
+weight functor in the \texttt{NOperatorSelRadial<F>} template
+(\S\ref{sec:shear_deliverables}).  The current
+\texttt{Shear1hWeight}
+(\pyfile{src/modules/num\_counts\_sel/lensing\_weights.hh}~$\sim$line
+156) reads the \emph{centred}
+\blk{haloModel/dSigma\_nfw} table; the full-model variant reads the
+\emph{miscentred} convolution as well and assembles
+Eq.~\eqref{eq:dsigma_cl}:
+
+\begin{algorithm}[H]
+\caption{\texttt{Shear1hMisWeight::operator()(R, lnM, zt)}}
+\KwData{\blk{haloModel/dSigma\_nfw} (centred NFW),
+ \blk{haloModel/dSigma\_mis\_gamma} (gamma-kernel miscentred NFW),
+ \blk{average\_sigma\_crit\_inv}, \blk{cluster\_mor/f\_mis}, \blk{cluster\_mor/tau\_mis}}
+\KwResult{$\gamma_t^{1h, {\rm full}}(R; M, z)$ at one Cuhre node}
+
+$\Delta\Sigma_{\rm cen} \leftarrow$ \blk{dSigma\_nfw}\texttt{.clamp}$(R, \ln M)$\;
+$R_\lambda \leftarrow (\lob/100)^{0.2}$\;
+$\Delta\Sigma_{\rm mis} \leftarrow$ \blk{dSigma\_mis\_gamma}\texttt{.clamp}$(R, R_{\rm mis} = \tau_{\rm mis} R_\lambda, \ln M)$\;
+$\Delta\Sigma_{\rm cl} \leftarrow (1 - f_{\rm mis})\,\Delta\Sigma_{\rm cen} + f_{\rm mis}\,\Delta\Sigma_{\rm mis}$\;
+\Return $\Delta\Sigma_{\rm cl} \cdot \Sigma_{\rm crit}^{-1}(z)$\;
+\end{algorithm}
+
+\paragraph{Per-bin closure.}  Because $f_{\rm mis}$ and $\tau_{\rm mis}$
+are scalars (no $M$ or $z$ dependence in the fiducial parameterisation),
+the $N_i[\Delta\Sigma_{\rm cl}\,\Sigma_{\rm crit}^{-1}](R)$ integral
+remains linear in the two pieces:
+\begin{equation}
+  N_i[\gamma_t^{1h, {\rm full}}](R)
+  \;=\; (1 - f_{\rm mis})\, N_i[\gamma_t^{1h, {\rm cen}}](R)
+       \;+\; f_{\rm mis}\, N_i[\gamma_t^{1h, {\rm mis}}](R),
+\end{equation}
+which means a chain that wants to vary $f_{\rm mis}$ at fixed cosmology
+can cache the two $N_i$ vectors once and re-mix them at each MCMC step
+without re-running \modname{NumCountsSel}.  This is the recommended
+implementation pattern; the current single-component \modname{Shear1hSel}
+will be replaced by a two-call wrapper that emits both
+\blk{shear1h\_cen/vals} and \blk{shear1h\_mis/vals}.
+
+\paragraph{Consistency with \texttt{red\_shear\_prj}.}  The projection
+module already integrates $\Sigma_{\rm mis}$ with the
+\emph{single}-offset kernel weighted by the photo-$z$ kernel
+$w_z(z, \zob)$ (\S\ref{sec:shear_prj}, Eq.~\eqref{eq:sigma_prj}).  The
+full-model 1-halo branch uses the \emph{gamma} kernel.  This split is
+deliberate: in the projection integrand the offset \emph{is} the
+$\theta$-integration variable, so a $\delta$-kernel at
+$R_{\rm mis} = \theta D_A(\zob)$ recovers the right physics and avoids
+double-integration over $R_{\rm mis}$; in the 1-halo branch the offset
+is a marginalised nuisance and the full $P_\gamma$ kernel is needed.
+
+\paragraph{Mass-axis convention.}  The miscentred lookup tables are
+keyed on $(\ln(R/r_s), \ln(R_{\rm mis}/r_s))$ with $r_s$ derived from
+$\ln M_{\rm phys}$ and $c = 4$.  The
+\texttt{ln\_mass\_shift\_ = 0.0} rule from \S\ref{sec:conventions}
+applies here too --- \texttt{HMF\_t} already rescales the spline axis
+internally, so the weight functor must query
+\texttt{dSigma\_mis\_gamma\_table.clamp(R, R\_mis, lnM)} with raw
+$\ln M_{\rm phys}$.
+
+\paragraph{Validation hook.}  When implemented, the closure check is
+that at $f_{\rm mis} = 0$ the new \modname{Shear1hMisSel} reproduces
+the centred \modname{Shear1hSel} bit-identically across the wall, and
+that at $f_{\rm mis} = 0.22, \tau_{\rm mis} = 0.17$ the small-$R$
+$\langle\gamma_t^{1h}\rangle$ is suppressed by $\sim 30\%$ at
+$R \lesssim 0.3\,\hMpc$ relative to the centred profile (Costanzi-2026
+Fig.~6 reference).
+
+% ============================================================================
 \section{Timing \& precision optimisation audit}
 \label{sec:timing}
 
