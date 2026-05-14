@@ -51,12 +51,16 @@ namespace y3_cluster {
         "nfw_off_center/table_1000_1e-03_5e+03_log_deltasigma_{}.txt", kernel);
     }
 
+  // Available miscentering kernels for NFW_DSIGMA_MIS.
+  std::string const SINGLE = "single";
+
   class NFW_DSIGMA_MIS {
 
     public:
     NFW_DSIGMA_MIS(double c, double rhoc, std::string const& kernel)
       : _c(c),
         _rhoc(rhoc),
+        _rho_mult(1.0),
         _nfwProfile(read_vector(logx_file(kernel)),
                     read_vector(logxmis_file(kernel)),
                     read_vector(log_dsigma_file(kernel)))
@@ -65,26 +69,19 @@ namespace y3_cluster {
     NFW_DSIGMA_MIS()
     : _c(CONC),
       _rhoc(RHOC),
+      _rho_mult(1.0),
       _nfwProfile(read_vector(logx_file(GAMMA)),
                   read_vector(logxmis_file(GAMMA)),
                   read_vector(log_dsigma_file(GAMMA)))
 
     { }
 
-    // In case, we envolve the NFW profile with redshift
-    // TODO: Implement Mass-Concentration Relation
-    // TODO: Implement different operator in case of rhocz(zt)
-    // Ask Marc How to make _c and _rhoc be functional forms in any case
-    // NFW_DSIGMA_MIS(cosmosis::DataBlock& sample)
-    // : _c(y3_cluster::make_Interp1D(sample,"haloModel","lnM","concentration").clamp(14.0))
-    // , _rhoc(y3_cluster::make_Interp1D(sample,"haloModel","z","rhoc").clamp(0.0))
-    // , _nfwProfile(read_vector(logx_file(GAMMA)),
-    //               read_vector(logxmis_file(GAMMA)),
-    //               read_vector(log_dsigma_file(GAMMA)))
-    // { }
+    // See NFW_SIGMA_MIS::set_rho_mult.  Set to Omega_m per sample to
+    // use rho_mean instead of rho_crit in the rho_s normalisation.
+    void set_rho_mult(double m) { _rho_mult = m; }
 
     double
-    operator()(double r, double rmis, double lnM) const 
+    operator()(double r, double rmis, double lnM) const
     {
       double const rho_crit = _rhoc;
       double const delta_c = (200.0 * _c * _c * _c / 3.0) / (std::log(1.0 + _c) - _c / (1.0 + _c));
@@ -95,9 +92,9 @@ namespace y3_cluster {
       double const xmis = rmis / r_s;
 
       double const log_unfw = _nfwProfile.clamp(std::log(x), std::log(xmis));
-      
+
       // normalization term defined in Wright & Brainerd 2000
-      double const norm = 2 * r_s * delta_c * rho_crit ;
+      double const norm = 2 * r_s * delta_c * rho_crit * _rho_mult;
       double const nfw = norm * std::exp(log_unfw);
 
       // Conversion from Msun/Mpc^2 to Msun/h pc^2
@@ -107,6 +104,7 @@ namespace y3_cluster {
   private:
     double const _c;
     double const _rhoc;
+    double       _rho_mult;
     Interp2D _nfwProfile;
   };
 }

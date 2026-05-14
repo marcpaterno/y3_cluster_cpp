@@ -62,7 +62,7 @@
 #include "models/hmf_t.hh"
 #include "models/mor_hod_t.hh"
 
-#include "models/p_operator_pagani_t.hh"  // p_op_detail:: helpers
+#include "models/p_operator_cuhre_t.hh"  // p_op_detail:: helpers
 
 #include <algorithm>
 #include <array>

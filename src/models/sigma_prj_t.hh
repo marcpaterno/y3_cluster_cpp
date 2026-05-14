@@ -42,7 +42,7 @@
 #include "utils/datablock_reader.hh"
 
 // For p_op_detail::gl_nodes (shared with P_operator).
-#include "models/p_operator_pagani_t.hh"
+#include "models/p_operator_cuhre_t.hh"
 
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_math.h>
