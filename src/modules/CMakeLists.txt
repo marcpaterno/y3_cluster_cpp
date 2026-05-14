@@ -31,6 +31,15 @@ add_subdirectory(sdss_analysis)
 add_subdirectory(snapshotsim)
 add_subdirectory(buzzard_test)
 add_subdirectory(cluster_abundance_covariance)
+
+# Closed-form richness selection N-operator (counts, M/b effective,
+# Sigma/DSigma/Shear in 1h and total variants).
+add_subdirectory(num_counts_sel)
+
+# Costanzi-2026 P[X] selection-bias operators.  PAGANI variants kept as
+# benchmarks; the fixed-GL evaluator (BSelMargIntegrand) is the default.
+add_subdirectory(b_sel_marg_cpu)
+add_subdirectory(sigma_prj_cpu)
 # Many of these are historical
 # add_subdirectory(DESxSPTModule)
 # add_subdirectory(sigma_kappa_y1)
