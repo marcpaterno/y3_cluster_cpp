@@ -7,8 +7,8 @@ link_directories(${COSMOSIS_BASE_DIR}/cosmosis/datablock)
 # Lensing weights live in lensing_weights.hh (header-only).
 
 set(_NC_SEL_SCALAR_MODULES NumCounts MassWeighted BiasWeighted)
-set(_NC_SEL_RADIAL_MODULES Sigma1h SigmaTot DSigma1h DSigmaTot
-                            Shear1h ShearTot)
+set(_NC_SEL_RADIAL_MODULES Sigma1h SigmaTot DSigma1h DSigmaTot DSigma1hMis
+                            Shear1h ShearTot Shear1hMis)
 
 foreach(_mod IN LISTS _NC_SEL_SCALAR_MODULES _NC_SEL_RADIAL_MODULES)
   add_library(${_mod}Sel MODULE ${_mod}.cc)

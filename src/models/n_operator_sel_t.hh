@@ -35,6 +35,8 @@
 #include "models/sel_function_t.hh"
 
 #include <optional>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace y3_cluster {
@@ -48,6 +50,32 @@ namespace y3_cluster {
         "sel_function", "S_stack");
       return static_cast<int>(nd.extents()[0]);
     }
+
+    // SFINAE: does the weight functor advertise a set_bin(int) hook?
+    // Weights that need the current lambda-bin index (e.g. miscentering
+    // weights that depend on R_lambda(lambda_ob)) opt in by defining
+    //   void set_bin(int lob_bin);
+    // Weights that do not advertise the hook compile to the no-op
+    // overload below, so existing weight functors are undisturbed.
+    template <typename W, typename = void>
+    struct has_set_bin : std::false_type {};
+
+    template <typename W>
+    struct has_set_bin<
+        W, std::void_t<decltype(std::declval<W&>().set_bin(0))>>
+      : std::true_type {};
+
+    template <typename W>
+    inline void
+    maybe_set_bin(W& w, int b, std::true_type)
+    {
+      w.set_bin(b);
+    }
+
+    template <typename W>
+    inline void
+    maybe_set_bin(W&, int, std::false_type)
+    {}
   } // namespace nosel_detail
 
 
@@ -95,6 +123,8 @@ namespace y3_cluster {
     set_grid_point(grid_point_t const& pt)
     {
       current_bin_ = static_cast<int>(pt[0]);
+      nosel_detail::maybe_set_bin(weight_, current_bin_,
+                                  nosel_detail::has_set_bin<F>{});
     }
 
     double
@@ -168,6 +198,8 @@ namespace y3_cluster {
     {
       current_bin_ = static_cast<int>(pt[0]);
       R_ = pt[1];
+      nosel_detail::maybe_set_bin(weight_, current_bin_,
+                                  nosel_detail::has_set_bin<F>{});
     }
 
     double
