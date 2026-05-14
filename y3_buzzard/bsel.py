@@ -221,9 +221,16 @@ def setup(options):
         plob_npz_path = os.environ.get("RICHNESS_SELECTION_PLOB_NPZ",
                                         _DEFAULT_PLOB_NPZ)
     plob_params = _load_plob_params_npz(plob_npz_path)
-    print(f"[bsel.py] plob_ltr_params: "
-          f"{'loaded ' + plob_npz_path if plob_params else 'NOT FOUND -> use_plob_ltr=False'}",
-          flush=True)
+
+    # Verbose mode: per-sample timing line + bias-asymptote tables.
+    # Off by default so MCMC chains do not flood stdout; set
+    # [bsel] verbose = T (ini) to re-enable for smoke runs.
+    verbose = options.get_bool(option_section, "verbose", default=False)
+
+    if verbose:
+        print(f"[bsel.py] plob_ltr_params: "
+              f"{'loaded ' + plob_npz_path if plob_params else 'NOT FOUND -> use_plob_ltr=False'}",
+              flush=True)
 
     return dict(
         theta=theta, zob=zob, lob=lob,
@@ -235,6 +242,7 @@ def setup(options):
         ln_M_max_log10=ln_M_max_log10,
         n_m_beff=n_m_beff,
         plob_params=plob_params,
+        verbose=verbose,
     )
 
 
@@ -316,6 +324,7 @@ def execute(block, config):
     ltr_hi_factor = config["ltr_hi_factor"]
     ltr_hi_fixed  = config["ltr_hi_fixed"]
     n_ltr         = config["n_ltr"]
+    verbose       = config.get("verbose", False)
 
     N_zob = zob.size
     N_lam = lob.size
@@ -509,27 +518,29 @@ def execute(block, config):
     block["b_sel_marginalised", "b_small"] = B_small_grid
     block["b_sel_marginalised", "b_large"] = B_large_grid
 
-    status = "use_plob_ltr=True" if plob_params is not None else "use_plob_ltr=False"
-    print(f"[bsel.py] b_sel_marginalised ({N_lam}x{N_zob}x{N_theta}, "
-          f"{status}): {(time.perf_counter() - t_start)*1000:.1f} ms",
-          flush=True)
+    if verbose:
+        status = ("use_plob_ltr=True" if plob_params is not None
+                  else "use_plob_ltr=False")
+        print(f"[bsel.py] b_sel_marginalised ({N_lam}x{N_zob}x{N_theta}, "
+              f"{status}): {(time.perf_counter() - t_start)*1000:.1f} ms",
+              flush=True)
 
-    # Report the ltr-marginalised small-/large-scale bias asymptotes,
-    # plus b_eff.  These are the physically meaningful summary
-    # numbers per (lob, zob) bin; the full b_sel(theta) is recovered
-    # downstream by the Costanzi-2026 sigmoid
-    #   b_sel(theta) = B_small + (B_large - B_small) * sigmoid(theta).
-    print("[bsel.py] marginalised bias asymptotes (rows: zob, cols: lob)")
-    lob_header = "  zob \\ lob " + "  ".join(f"{x:>8.1f}" for x in lob)
-    def _show(name, grid):
-        print(f"  {name}:")
-        print(f"    {lob_header}")
-        for j, zo in enumerate(zob):
-            row = "  ".join(f"{grid[j, i]:>+8.3f}" for i in range(N_lam))
-            print(f"    zob={zo:.3f}  {row}")
-    _show("b_eff   (= b_halo at M[lob])",     b_eff_grid)
-    _show("B_small (small-scale asymptote)",  B_small_grid)
-    _show("B_large (large-scale asymptote)",  B_large_grid)
+        # Report the ltr-marginalised small-/large-scale bias asymptotes,
+        # plus b_eff.  These are the physically meaningful summary
+        # numbers per (lob, zob) bin; the full b_sel(theta) is recovered
+        # downstream by the Costanzi-2026 sigmoid
+        #   b_sel(theta) = B_small + (B_large - B_small) * sigmoid(theta).
+        print("[bsel.py] marginalised bias asymptotes (rows: zob, cols: lob)")
+        lob_header = "  zob \\ lob " + "  ".join(f"{x:>8.1f}" for x in lob)
+        def _show(name, grid):
+            print(f"  {name}:")
+            print(f"    {lob_header}")
+            for j, zo in enumerate(zob):
+                row = "  ".join(f"{grid[j, i]:>+8.3f}" for i in range(N_lam))
+                print(f"    zob={zo:.3f}  {row}")
+        _show("b_eff   (= b_halo at M[lob])",     b_eff_grid)
+        _show("B_small (small-scale asymptote)",  B_small_grid)
+        _show("B_large (large-scale asymptote)",  B_large_grid)
     return 0
 
 
