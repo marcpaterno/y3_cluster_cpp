@@ -88,7 +88,7 @@ def _shear_theory(block) -> np.ndarray:
     projection piece.
     """
     NC = np.asarray(block["numcountssel", "vals"]).ravel()
-    S1h_Ni = np.asarray(block["shear1hsel", "vals"]).ravel()
+    S1h_Ni = np.asarray(block["shear1hmissel", "vals"]).ravel()
     Sprj = np.asarray(block["shear_prj", "vals"]).ravel()
     if NC.size != _NC_N_BINS:
         raise ValueError(
@@ -96,7 +96,7 @@ def _shear_theory(block) -> np.ndarray:
             f"{_NC_N_BINS}")
     if S1h_Ni.size != _SHEAR_N:
         raise ValueError(
-            f"likelihood_cp: shear1hsel/vals size {S1h_Ni.size} != "
+            f"likelihood_cp: shear1hmissel/vals size {S1h_Ni.size} != "
             f"{_SHEAR_N}")
     if Sprj.size != _SHEAR_N:
         raise ValueError(
