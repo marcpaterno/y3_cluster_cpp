@@ -104,7 +104,7 @@ The module sequence in \modname{cosmosis-models/mock\_mcmc\_cp\_camb.ini} is:
 \modname{consistency} $\to$ \modname{growth} $\to$ \modname{cp\_camb} $\to$
 \modname{mf\_tinker} $\to$ \modname{halo\_model} $\to$
 \modname{average\_sigma\_crit\_inv} $\to$ \modname{sel\_function} $\to$
-\modname{NumCountsSel} $\to$ \modname{Shear1hSel} $\to$
+\modname{NumCountsSel} $\to$ \modname{Shear1hMisSel} $\to$
 \modname{b\_sel\_marg} $\to$ \modname{bsel} $\to$
 \modname{red\_shear\_prj} $\to$ \modname{likelihoods}}}
 \end{center}
@@ -134,26 +134,27 @@ the role of each.
 Module & Type & Timing & Role \\
 \midrule
 \modname{consistency}            & Py (CSL)   & $3$\,ms  & normalise cosmology \\
-\modname{growth}                 & Fortran (CSL) & $2$\,ms & $D(z)$, $f(z)$ \\
-\modname{cp\_camb}               & Py (local)   & $8$\,ms & emulator $P(k,z)$ \\
-\modname{mf\_tinker}             & Fortran (CSL) & $190$\,ms & Tinker 2008 HMF \\
-\modname{halo\_model}            & Py (local)   & $155$\,ms & $b(M,z)$, $\xinl(r,z)$, optional lensing \\
+\modname{growth}                 & Fortran (CSL) & $<1$\,ms & $D(z)$, $f(z)$ \\
+\modname{cp\_camb}               & Py (local)   & $22$\,ms & emulator $P(k,z)$ \\
+\modname{mf\_tinker}             & Fortran (CSL) & $175$\,ms & Tinker 2008 HMF \\
+\modname{halo\_model}            & Py (local)   & $158$\,ms & $b(M,z)$, $\xinl(r,z)$, optional lensing \\
 \modname{average\_sigma\_crit\_inv} & Py (local) & $5$\,ms & $\langle\Sigma_{\rm crit}^{-1}\rangle(z_l)$ \\
-\modname{sel\_function}          & Py (local)   & $225$\,ms & $S_{ij}(\ln M, z)$ tabulation \\
-\modname{NumCountsSel}           & C++ (CUBA)   & $117$\,ms & $N_i$ cluster counts \\
-\modname{Shear1hSel}      & C++ (CUBA)   & $90$\,ms & $N_i[g_t^{1h}](R)$ (see \S\ref{sec:shear_deliverables}) \\
-\modname{b\_sel\_marg}           & C++          & $76$\,ms & $(P_1, I_1, J)$ operators \\
+\modname{sel\_function}          & Py (local)   & $215$\,ms & $S_{ij}(\ln M, z)$ tabulation \\
+\modname{NumCountsSel}           & C++ (CUBA)   & $106$\,ms & $N_i$ cluster counts \\
+\modname{Shear1hMisSel}          & C++ (CUBA)   & $131$\,ms & $N_i[g_t^{1h,{\rm full}}](R)$ with miscentering (see \S\ref{sec:miscentering_selection}) \\
+\modname{b\_sel\_marg}           & C++          & $74$\,ms & $(P_1, I_1, J)$ operators \\
 \modname{bsel}                   & Py (local)   & $18$\,ms & $\Bsmall, \Blarge$ close-form \\
-\modname{red\_shear\_prj}        & C++          & $247$\,ms & projection $\Sprj, \DSprj, g_t^{\rm prj}$ \\
+\modname{red\_shear\_prj}        & C++          & $231$\,ms & projection $\Sprj, \DSprj, g_t^{\rm prj}$ \\
 \modname{likelihoods}            & Py (local)   & $<1$\,ms & Gaussian $(d-m)^{\!\top}\!C^{-1}\!(d-m)$ \\
 \midrule
-\multicolumn{2}{r}{\textbf{total per sample:}} & \multicolumn{2}{l}{\textbf{$\sim 1.15$\,s} (login node, single thread)} \\
+\multicolumn{2}{r}{\textbf{total per sample:}} & \multicolumn{2}{l}{\textbf{$\sim 1.14$\,s} (login node, single thread)} \\
 \bottomrule
 \end{tabular}
 \caption{Module inventory with roles and wall-time contributions at
-the post-audit defaults (see \S\ref{sec:timing}). ``CSL'' means the
-CosmoSIS standard-library module; ``local'' is shipped with this
-repo.}
+the post-audit defaults (see \S\ref{sec:timing}; numbers re-measured
+on \texttt{mock\_mcmc\_cp\_camb.ini} with \modname{Shear1hMisSel} as
+the 1-halo branch). ``CSL'' means the CosmoSIS standard-library
+module; ``local'' is shipped with this repo.}
 \label{tab:module-roles}
 \end{table}
 
@@ -248,7 +249,7 @@ form and makes Eq.~\eqref{eq:gt_sum} exact.
 
 \subsection{The $N_i[f]$ operator}
 
-\modname{NumCountsSel}, \modname{Shear1hSel},
+\modname{NumCountsSel}, \modname{Shear1hMisSel},
 \modname{MassWeightedSel}, \modname{BiasWeightedSel} all share the
 same template \texttt{NOperatorSelRadial<F>} /
 \texttt{NOperatorSelScalar<F>}
@@ -273,30 +274,36 @@ Weight $f$                     & Module                       & Observable built
 $1$                            & \modname{NumCountsSel}       & $N_i$ cluster number count                        \\
 $M$                            & \modname{MassWeightedSel}    & $\langle M\rangle_i = N_i[M]/N_i$                 \\
 $b(M, z)$                      & \modname{BiasWeightedSel}    & $\langle b\rangle_i = N_i[b]/N_i$                 \\
-$\gamma_t^{1h}(R; M, z)$       & \modname{Shear1hSel}         & $N_i[\gamma_t^{1h}](R)$ (see below)               \\
+$\gamma_t^{1h, {\rm full}}(R; M, z)$ & \modname{Shear1hMisSel} & $N_i[\gamma_t^{1h, {\rm full}}](R)$ (centred + miscentered, see \S\ref{sec:miscentering_selection}) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\subsection{\texttt{Shear1hSel} is $N_i$-weighted; divide by \texttt{NumCountsSel}}
+\subsection{\texttt{Shear1hMisSel} is $N_i$-weighted; divide by \texttt{NumCountsSel}}
 \label{sec:shear1h_vs_prj}
 
-Key point: \modname{Shear1hSel} is \emph{not} the per-cluster 1-halo
-shear $\gamma_t^{1h}(R)$.  It is the \emph{integral of the 1-halo
-shear over the cluster population in the bin}, weighted by
+Key point: \modname{Shear1hMisSel} is \emph{not} the per-cluster
+1-halo shear $\gamma_t^{1h, {\rm full}}(R)$.  It is the
+\emph{integral of the 1-halo shear over the cluster population in
+the bin}, weighted by
 $\Omega(z)\,dV/d\Omega/dz\,n(M, z)\,S_{ij}$.  Inside the template,
-the weight is
+the weight is the centred + miscentered $\Delta\Sigma$ mixture
 \begin{equation}
-  \gamma_t^{1h}(R; M, z) \;=\; \Delta\Sigma_{\rm NFW}(R, M)\,
-                               \Sigma_{\rm crit}^{-1}(z),
+  \gamma_t^{1h, {\rm full}}(R; M, z) \;=\;
+    \Big[(1 - f_{\rm mis})\,\Delta\Sigma_{\rm NFW}(R, M) +
+         f_{\rm mis}\,\Delta\Sigma_{\rm mis}(R, M; \tau_{\rm mis} R_\lambda)\Big]\,
+    \Sigma_{\rm crit}^{-1}(z),
 \end{equation}
-built from the \emph{centred} NFW profile
-\blk{haloModel/dSigma\_nfw}.  To recover the per-cluster average one
-divides by the number-count integral on the same wall point:
+built from the centred NFW profile \blk{haloModel/dSigma\_nfw}
+plus the gamma-kernel miscentered table read directly from
+\pyfile{data/nfw\_off\_center/} (see \S\ref{sec:miscentering_selection}
+for the kernel and parameter conventions).  To recover the
+per-cluster average one divides by the number-count integral on the
+same wall point:
 \begin{equation}
-  \langle\gamma_t^{1h}\rangle_i(R)
-  \;=\; \frac{N_i[\gamma_t^{1h}](R)}{N_i[1]}
-  \;=\; \frac{\blk{shear1hsel/vals}}{\blk{numcountssel/vals}}.
+  \langle\gamma_t^{1h, {\rm full}}\rangle_i(R)
+  \;=\; \frac{N_i[\gamma_t^{1h, {\rm full}}](R)}{N_i[1]}
+  \;=\; \frac{\blk{shear1hmissel/vals}}{\blk{numcountssel/vals}}.
 \end{equation}
 This division lives in the likelihood
 (\pyfile{y3\_buzzard/likelihood\_cp.py}), not inside a single module.
@@ -325,10 +332,16 @@ with three structural differences vs Eq.~\eqref{eq:n_op}:
   \item \textbf{No $\Omega(z)$.}  The survey-area factor cancels between
     $\Sigma^{\rm prj}$ and its normalisation, so it is not applied
     here.
-  \item \textbf{Off-centred NFW $\Sigma_{\rm mis}$.}  The 1-halo
-    density uses a \texttt{single}-offset miscentered NFW (offset by
+  \item \textbf{Off-centred NFW $\Sigma_{\rm mis}$ with the
+    \texttt{single} kernel.}  The 1-halo density uses a
+    \texttt{single}-offset miscentered NFW (offset by
     $R_{\rm mis} = \theta D_A(z_{\rm ob})$), \emph{not} the centred
-    $\Sigma_{\rm NFW}$ used by \modname{Shear1hSel}.
+    $\Sigma_{\rm NFW}$ nor the gamma-kernel mixture that
+    \modname{Shear1hMisSel} uses for the 1-halo branch
+    (\S\ref{sec:miscentering_selection}); here the offset
+    \emph{is} the $\theta$-integration variable, so a $\delta$-kernel
+    in $R_{\rm mis}$ is the right physics and a gamma kernel would
+    double-integrate.
 \end{itemize}
 
 Both the $[1]$ term (\texttt{rnd}) and the $[b\,b_{\rm sel}\,\xi_{\rm NL}]$
@@ -452,7 +465,8 @@ module) does \emph{not} read the 2h outputs; only the legacy
 \modname{ShearTotSel} family does.
 
 \paragraph{Fix.}  Split the flag into \texttt{compute\_lensing\_1h}
-(Shear1hSel needs it) and \texttt{compute\_lensing\_2h}
+(\modname{Shear1hMisSel} needs it for the centred branch of the
+mixture) and \texttt{compute\_lensing\_2h}
 (nothing in \modname{smoke\_full\_sel\_cp\_camb.ini} reads it).  For this
 pipeline:
 \begin{verbatim}
@@ -475,7 +489,7 @@ $D(0)$ before the scale.
 \modname{Path}\,\pyfile{src/modules/sel\_function/sel\_function.py}.
 Pre-tabulates the richness-selection function on a shared
 $(\ln M, z)$ grid that the C++ \modname{NumCountsSel} and
-\modname{Shear1hSel} downstream modules serve via \texttt{Interp2D}.
+\modname{Shear1hMisSel} downstream modules serve via \texttt{Interp2D}.
 
 \subsection{Mathematical form}
 
@@ -907,7 +921,7 @@ construction by the \texttt{kernel} string, see
     The Rayleigh-shaped kernel calibrated against DES~Y3 redMaPPer
     centring on Buzzard mocks; this is the kernel used for the
     \emph{lensing} branch (i.e.\ the convolution that enters the
-    \modname{Shear1hSel} weight in the full model).
+    \modname{Shear1hMisSel} weight in the production pipeline).
 \end{itemize}
 
 The DES~Y3 fiducial values, calibrated jointly against X-ray and
@@ -921,7 +935,7 @@ $R_\lambda(\lambda) = (\lambda/100)^{0.2}\,\hMpc$.
 Equation~\eqref{eq:dsigma_mis_avg} is non-trivially expensive: for each
 $(R, M, R_{\rm mis})$ one azimuthal integral, plus an outer
 $R_{\rm mis}$ integral against $P(R_{\rm mis})$.  Inlining this in the
-inner integration loop of \modname{Shear1hSel} (called at every
+inner integration loop of \modname{Shear1hMisSel} (called at every
 $(R, \ln M, z)$ Cuhre node, $\sim 10^5$ nodes / sample) is prohibitive.
 
 Instead we read the same look-up tables already used by
@@ -942,47 +956,61 @@ time the cluster's $r_s = r_{200}/c$ is computed from $M, c, \rho_{\rm crit}$
 and the stored profile is rescaled.  No on-the-fly convolution is
 performed.
 
-\subsection{Wiring into \texttt{Shear1hSel}}
+\subsection{\texttt{Shear1hMisSel} module}
+\label{sec:shear1hmissel}
 
-Adding miscentering to the $\Delta\Sigma$ branch is a swap of the
-weight functor in the \texttt{NOperatorSelRadial<F>} template
-(\S\ref{sec:shear_deliverables}).  The current
-\texttt{Shear1hWeight}
-(\pyfile{src/modules/num\_counts\_sel/lensing\_weights.hh}~$\sim$line
-156) reads the \emph{centred}
-\blk{haloModel/dSigma\_nfw} table; the full-model variant reads the
-\emph{miscentred} convolution as well and assembles
-Eq.~\eqref{eq:dsigma_cl}:
+The production 1-halo shear branch is \modname{Shear1hMisSel}, a
+new instantiation of the \texttt{NOperatorSelRadial<F>} template
+(\S\ref{sec:shear_deliverables}) using the
+\texttt{Shear1hMisWeight} functor in
+\pyfile{src/modules/num\_counts\_sel/lensing\_weights.hh}.  The weight
+constructs a per-module \texttt{NFW\_DSIGMA\_MIS} object pointed at
+the \texttt{gamma}-kernel look-up tables under
+\pyfile{data/nfw\_off\_center/} once at module load (no reload per
+sample), reads the centred \blk{haloModel/dSigma\_nfw} spline at
+\texttt{set\_sample}, refreshes the
+$\rho_{\rm mean}$ multiplier from
+\blk{cosmological\_parameters/omega\_M} and the mixture parameters
+$(f_{\rm mis}, \tau_{\rm mis})$ from the \blk{miscentering}
+datablock section (with \texttt{has\_val} fallback to the in-code
+defaults $0.22$, $0.17$), and finally consults the per-$\lob$-bin
+$R_\lambda$ via the optional \texttt{set\_bin(int)} hook the operator
+template forwards from its grid-point cursor.
 
 \begin{algorithm}[H]
 \caption{\texttt{Shear1hMisWeight::operator()(R, lnM, zt)}}
-\KwData{\blk{haloModel/dSigma\_nfw} (centred NFW),
- \blk{haloModel/dSigma\_mis\_gamma} (gamma-kernel miscentred NFW),
- \blk{average\_sigma\_crit\_inv}, \blk{cluster\_mor/f\_mis}, \blk{cluster\_mor/tau\_mis}}
+\KwData{\blk{haloModel/dSigma\_nfw} (centred NFW spline),
+ disk-resident \texttt{NFW\_DSIGMA\_MIS} table (gamma kernel),
+ \blk{average\_sigma\_crit\_inv}, \blk{miscentering/f\_mis},
+ \blk{miscentering/tau\_mis}, current $R_\lambda$ from
+ \texttt{set\_bin}}
 \KwResult{$\gamma_t^{1h, {\rm full}}(R; M, z)$ at one Cuhre node}
 
 $\Delta\Sigma_{\rm cen} \leftarrow$ \blk{dSigma\_nfw}\texttt{.clamp}$(R, \ln M)$\;
-$R_\lambda \leftarrow (\lob/100)^{0.2}$\;
-$\Delta\Sigma_{\rm mis} \leftarrow$ \blk{dSigma\_mis\_gamma}\texttt{.clamp}$(R, R_{\rm mis} = \tau_{\rm mis} R_\lambda, \ln M)$\;
-$\Delta\Sigma_{\rm cl} \leftarrow (1 - f_{\rm mis})\,\Delta\Sigma_{\rm cen} + f_{\rm mis}\,\Delta\Sigma_{\rm mis}$\;
+$R_{\rm mis}             \leftarrow \tau_{\rm mis}\, R_\lambda$\;
+$\Delta\Sigma_{\rm mis}  \leftarrow$ \texttt{NFW\_DSIGMA\_MIS}$(R, R_{\rm mis}, \ln M)$\;
+$\Delta\Sigma_{\rm cl}   \leftarrow (1 - f_{\rm mis})\,\Delta\Sigma_{\rm cen} + f_{\rm mis}\,\Delta\Sigma_{\rm mis}$\;
 \Return $\Delta\Sigma_{\rm cl} \cdot \Sigma_{\rm crit}^{-1}(z)$\;
 \end{algorithm}
 
-\paragraph{Per-bin closure.}  Because $f_{\rm mis}$ and $\tau_{\rm mis}$
-are scalars (no $M$ or $z$ dependence in the fiducial parameterisation),
-the $N_i[\Delta\Sigma_{\rm cl}\,\Sigma_{\rm crit}^{-1}](R)$ integral
+\paragraph{Per-bin linearity.}  Because $f_{\rm mis}$ and
+$\tau_{\rm mis}$ are scalars (no $M$ or $z$ dependence in the
+fiducial parameterisation), the
+$N_i[\Delta\Sigma_{\rm cl}\,\Sigma_{\rm crit}^{-1}](R)$ integral
 remains linear in the two pieces:
 \begin{equation}
   N_i[\gamma_t^{1h, {\rm full}}](R)
   \;=\; (1 - f_{\rm mis})\, N_i[\gamma_t^{1h, {\rm cen}}](R)
        \;+\; f_{\rm mis}\, N_i[\gamma_t^{1h, {\rm mis}}](R),
 \end{equation}
-which means a chain that wants to vary $f_{\rm mis}$ at fixed cosmology
-can cache the two $N_i$ vectors once and re-mix them at each MCMC step
-without re-running \modname{NumCountsSel}.  This is the recommended
-implementation pattern; the current single-component \modname{Shear1hSel}
-will be replaced by a two-call wrapper that emits both
-\blk{shear1h\_cen/vals} and \blk{shear1h\_mis/vals}.
+so a chain that varies only $(f_{\rm mis}, \tau_{\rm mis})$ at
+fixed cosmology can in principle cache the two $N_i$ vectors and
+re-mix at each MCMC step without re-running the operator.  The
+current \modname{Shear1hMisSel} computes the mixture inside its
+inner loop; the cache-and-remix optimisation is left as a
+follow-up (\modname{DSigma1hMisSel} in the same family already
+publishes the corresponding $\Delta\Sigma$ wall and would feed
+that pattern naturally).
 
 \paragraph{Consistency with \texttt{red\_shear\_prj}.}  The projection
 module already integrates $\Sigma_{\rm mis}$ with the
@@ -1000,17 +1028,23 @@ keyed on $(\ln(R/r_s), \ln(R_{\rm mis}/r_s))$ with $r_s$ derived from
 $\ln M_{\rm phys}$ and $c = 4$.  The
 \texttt{ln\_mass\_shift\_ = 0.0} rule from \S\ref{sec:conventions}
 applies here too --- \texttt{HMF\_t} already rescales the spline axis
-internally, so the weight functor must query
-\texttt{dSigma\_mis\_gamma\_table.clamp(R, R\_mis, lnM)} with raw
-$\ln M_{\rm phys}$.
+internally, so the weight functor queries the
+\texttt{NFW\_DSIGMA\_MIS} object with raw $\ln M_{\rm phys}$.
 
-\paragraph{Validation hook.}  When implemented, the closure check is
-that at $f_{\rm mis} = 0$ the new \modname{Shear1hMisSel} reproduces
-the centred \modname{Shear1hSel} bit-identically across the wall, and
-that at $f_{\rm mis} = 0.22, \tau_{\rm mis} = 0.17$ the small-$R$
-$\langle\gamma_t^{1h}\rangle$ is suppressed by $\sim 30\%$ at
-$R \lesssim 0.3\,\hMpc$ relative to the centred profile (Costanzi-2026
-Fig.~6 reference).
+\paragraph{Per-sample cost and likelihood impact.}  The extra
+\texttt{Interp2D::clamp} call into the gamma-kernel table per
+integrand evaluation costs $\sim 32\,$ms per sample relative to the
+previous centred \modname{Shear1hSel} ($131\,$ms vs $99\,$ms; see
+Tab.~\ref{tab:module-roles}), with the rest of the pipeline
+unchanged.  At the production fiducial $f_{\rm mis} = 0.22,
+\tau_{\rm mis} = 0.17$, the small-$R$ $\langle\gamma_t^{1h}\rangle$
+is suppressed by $\sim 30\%$ at $R \lesssim 0.3\,\hMpc$ relative to
+the centred profile (Costanzi-2026 Fig.~6 reference); since the
+pre-baked \pyfile{data/mock/mock\_dv\_cp\_camb.npz} was generated
+against the centred branch, the \texttt{sampler = test} likelihood at
+the fiducial moves from $0$ to $\simeq -110$ until the mock data
+vector is regenerated.  Bit-identical closure with the centred
+branch is recovered by setting \blk{miscentering/f\_mis} $= 0$.
 
 % ============================================================================
 \section{Timing \& precision optimisation audit}
@@ -1121,15 +1155,19 @@ $\sim 1\%$.
 Module & Knob & Value & Why \\
 \midrule
 \modname{cp\_camb}            & \texttt{linear\_nonu\_pk\_path} & v2c nonu emu & proper nonu P(k) \\
-\modname{halo\_model}         & \texttt{compute\_lensing\_1h}   & T for Shear1hSel & publishes Sigma\_nfw \\
+\modname{halo\_model}         & \texttt{compute\_lensing\_1h}   & T for Shear1hMisSel & centred-NFW spline read by the mixture \\
 \modname{halo\_model}         & \texttt{compute\_lensing\_2h}   & \textbf{F} here          & saves 180--200\,ms \\
 \modname{sel\_function}       & \texttt{n\_lnm}                 & \textbf{192}             & whole-pipeline optimum (\S\ref{sec:timing}) \\
 \modname{sel\_function}       & \texttt{N\_q}                   & 32                      & GL bracket nodes in ltr \\
 \modname{sel\_function}       & \texttt{n\_z\_shared}           & 64                      & shared z grid size \\
+\modname{Shear1hMisSel}       & \blk{miscentering/f\_mis}       & 0.22                    & DES-Y3 fiducial; in-code default if absent \\
+\modname{Shear1hMisSel}       & \blk{miscentering/tau\_mis}     & 0.17                    & DES-Y3 fiducial (units of $R_\lambda$) \\
+\modname{Shear1hMisSel}       & \texttt{lob\_centers}           & \{25, 37.5, 52.5, 130\} & DES Y3 arithmetic centres (drives $R_\lambda$) \\
 \modname{b\_sel\_marg}        & \texttt{n\_theta}               & 10 (split at $\theta_\lambda$) & sufficient with split \\
 \modname{b\_sel\_marg}        & \texttt{n\_lt}                  & 60                      & already converged at 16 \\
 \modname{bsel}                & \texttt{n\_ltr}                 & 128                     & matches Python ref \\
 \modname{bsel}                & \texttt{ltr\_hi\_factor}        & 3.0                     & matches Python $[1, 3\lob]$ \\
+\modname{bsel}                & \texttt{verbose}                & F                       & T to re-enable per-sample tables \\
 \modname{red\_shear\_prj}     & \texttt{n\_per\_seg}            & 30                      & per-segment GL nodes \\
 \modname{red\_shear\_prj}     & \texttt{R\_max\_cMpch}          & 30.0                    & upper $\theta$ boundary \\
 \modname{red\_shear\_prj}     & \texttt{lob\_centers}           & \{25, 37.5, 52.5, 130\} & DES Y3 arithmetic centres \\
