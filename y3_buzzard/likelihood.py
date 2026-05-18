@@ -28,7 +28,8 @@ from utils import find_cosmosis_sections
 # 2) We compute shear from the radial kappa excess (see buildShear.py)
 # 4) We use Sigma_crit computed from the effective source redshift (see buildShear.py)
 # 5) tbd
-# Note: We don't model boost-factor. 
+# Note from Arwa: Boost-factor correction applied via applyBoostFactor.py (followingY1 paper)
+# gamma_t_effective = gamma_t_model / B(R) before likelihood comparison 
 ###########################################################
 ###########################################################
 ##### Useful Nomeclature
