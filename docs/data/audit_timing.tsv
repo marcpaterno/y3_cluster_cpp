@@ -1,7 +1,0 @@
-item	bug	where	downstream_residual_pct	notes
-1	mf_tinker mass-axis double-shift	HMF_t consumers (b_sel_marg, sigma_prj, dsigma_prj evaluators)	~60	m_h stored in Omega_m * Msun/h units, not Msun/h; HMF_t::_adjust_to_log already rescales, so a second ln_mass_shift_ shift was double-counting. Fixed by setting ln_mass_shift_ = 0.0 in all C++ evaluators.
-2	Growth-factor normalisation	halo_model_cosmosis.py (Tinker bias nu-scale)	~30	used un-normalised D(z); inflated nu by 1.32x. Fixed by dividing out D(0) explicitly before computing nu.
-3	cp_camb nonu_fallback	src/modules/cp_camb/cp_camb.py	~5	stub copied total-matter P(k) into cdm_baryon_power_lin even when the real nonu emulator was available. Fixed by plugging linear_nonu_pk_path with the v2c nonu emu.
-4	Python HMF z-evolution	richness_selection.HMF	~8	Tinker 2008 z=0 constants used at every z; CosmoSIS mf_tinker applies Table 4 (1+z) scaling on A, a, b. Fixed by enabling z_evolution=True in the Python HMF.
-5	Stale lob_center	sp_detail::lob_center, b_sel_marg / red_shear_prj defaults	~10	hardcoded bin-3 centre was 100 (legacy SDSS), not 130 (DES Y3). Fixed and made configurable via the lob_centers ini knob.
-6	Spurious M in bsel.py prior	src/modules/bsel/bsel.py	~50	passed dn/dlnM into a helper that multiplies by M internally; dragged B_small(lob=25, zob=0.425) from +35 to +17 and pushed small-R cl piece of dsigma_prj by ~2x. Fixed by dividing by M on datablock read.

@@ -49,7 +49,6 @@ release-build.bak/
 _deps/
 *.tsv
 *.csv
-!docs/data/*.tsv
 *_test_out/
 
 y1_rerun/*.txt
