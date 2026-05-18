@@ -31,7 +31,7 @@
 #include "utils/interp_2d.hh"
 #include "utils/make_interp_1d.hh"
 #include "utils/make_interp_2d.hh"
-#include "utils/read_vector.hh"
+#include "models/z_kernel_data.hh"
 
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
@@ -373,10 +373,10 @@ namespace y3_cluster {
       } else {
         sci_.reset();
       }
-      // Photo-z sigma(z) read from data/z_kernel/ (same convention as
+      // Photo-z sigma(z) from models/z_kernel_data.hh (same convention as
       // p_operator).  Used for the w_z(z, zob) parabolic kernel.
-      sigma_z_.emplace(Interp1D(read_vector("z_kernel/z.txt"),
-                                 read_vector("z_kernel/sigma.txt")));
+      sigma_z_.emplace(Interp1D(y3_cluster::z_kernel_z(),
+                                y3_cluster::z_kernel_sigma()));
 
       double const omm =
           sample.view<double>("cosmological_parameters", "omega_M");
@@ -1551,8 +1551,8 @@ namespace y3_cluster {
       } else {
         sci_.reset();
       }
-      sigma_z_.emplace(Interp1D(read_vector("z_kernel/z.txt"),
-                                 read_vector("z_kernel/sigma.txt")));
+      sigma_z_.emplace(Interp1D(y3_cluster::z_kernel_z(),
+                                y3_cluster::z_kernel_sigma()));
 
       double const omm =
           sample.view<double>("cosmological_parameters", "omega_M");

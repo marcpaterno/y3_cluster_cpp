@@ -39,7 +39,7 @@
 #include "utils/interp_2d.hh"
 #include "utils/make_interp_1d.hh"
 #include "utils/make_interp_2d.hh"
-#include "utils/read_vector.hh"
+#include "models/z_kernel_data.hh"
 
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
@@ -164,7 +164,7 @@ namespace y3_cluster {
 
     // Direct datablock reads for geometry (chi(z)) and photo-z sigma(z).
     std::optional<Interp1D> chi_;       // from distances section
-    std::optional<Interp1D> sigma_z_;   // from data/z_kernel/
+    std::optional<Interp1D> sigma_z_;   // from models/z_kernel_data.hh
 
     // Current grid point
     double zob_low_  = 0.0;
@@ -203,9 +203,9 @@ namespace y3_cluster {
       xi_nl_.emplace(make_Interp2D(sample, "xi_nl", "r", "z", "xi_nl"));
       // Geometry: chi(z) from distances (used for Delta_chi and theta_excl).
       chi_.emplace(make_Interp1D(sample, "distances", "z", "d_c"));
-      // Photo-z sigma(z) spline (inline-load from data/z_kernel/*.txt)
-      sigma_z_.emplace(Interp1D(read_vector("z_kernel/z.txt"),
-                                 read_vector("z_kernel/sigma.txt")));
+      // Photo-z sigma(z) spline (in-code data, see models/z_kernel_data.hh)
+      sigma_z_.emplace(Interp1D(y3_cluster::z_kernel_z(),
+                                y3_cluster::z_kernel_sigma()));
       // HMF_t x-axis is ln(m_h * (omega_m-omega_nu)), so we must pass
       // lnM + ln_mass_shift_ to recover dn/dlnM at the intended mass.
       double const omm =

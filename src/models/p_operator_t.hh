@@ -56,7 +56,7 @@
 #include "utils/interp_2d.hh"
 #include "utils/make_interp_1d.hh"
 #include "utils/make_interp_2d.hh"
-#include "utils/read_vector.hh"
+#include "models/z_kernel_data.hh"
 
 #include "models/dv_do_dz_t.hh"
 #include "models/hmf_t.hh"
@@ -136,8 +136,8 @@ namespace y3_cluster {
       dv_do_dz_.emplace(sample);
       mor_.emplace(sample);
       chi_.emplace(make_Interp1D(sample, "distances", "z", "d_c"));
-      sigma_z_.emplace(Interp1D(read_vector("z_kernel/z.txt"),
-                                read_vector("z_kernel/sigma.txt")));
+      sigma_z_.emplace(Interp1D(y3_cluster::z_kernel_z(),
+                                y3_cluster::z_kernel_sigma()));
 
       double const omm =
           sample.view<double>("cosmological_parameters", "omega_M");

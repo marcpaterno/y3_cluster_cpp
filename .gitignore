@@ -45,6 +45,8 @@ rules.ninja
 *.gz
 debug-build/
 release-build/
+release-build.bak/
+_deps/
 *.tsv
 *.csv
 *_test_out/
@@ -1010,3 +1012,6 @@ y1_mock/datablock_0/sigma_r/z.txt
 y1_mock/datablock_0/sigmacritinv/r_sigma.txt
 y1_mock/datablock_0/sigmacritinv/sigma_crit_inv.txt
 y1_mock/datablock_0/sigmacritinv/z.txt
+
+# Local scratch / archived stuff
+archive/
