@@ -1,0 +1,6 @@
+step	halo_model_s	sel_function_s	num_counts_s	red_shear_prj_s	total_s
+Baseline	0.365	0.392	0.083	0.270	1.71
+compute_lensing_2h = F	0.178	0.385	0.083	0.270	1.31
+_plob_params 1-D path	0.178	0.301	0.083	0.270	1.25
+_cdf_lob in-place	0.178	0.280	0.083	0.270	1.22
+n_lnm = 192	0.154	0.225	0.117	0.247	1.15
