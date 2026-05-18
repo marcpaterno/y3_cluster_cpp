@@ -164,7 +164,6 @@ class biasModel:
 
 ## Using Cluster Tool-kit
 # The NSIZE of 50 is fast and has an accuracy of 0.1%
-# TODO: make sure the dummy variables doesn't affect the result
 class ct_2hTerm(object):
     ## following cluster toolkit definition
     RHO_C = 2.77533742639e+11 # Msun/Mpc^3/h^2 (critical density)
@@ -185,7 +184,7 @@ class ct_2hTerm(object):
         return Sigma_mm, np.interp(np.log(Rp), np.log(self.Rfix), xi_2halo)
     
     def _to_dsigma(self,Rp,sigma):
-        dSigma_mm = ct.deltasigma.DeltaSigma_at_R(Rp, Rp, sigma, self.Md, self.cd, self.omega_m)
+        dSigma_mm = ct.deltasigma.DeltaSigma_at_R(Rp, Rp, sigma, self.Md/10., self.cd, self.omega_m)
         return dSigma_mm
 
     def pk_to_sigma(self,Rp,k,pk,zvec):
@@ -197,11 +196,28 @@ class ct_2hTerm(object):
             s, xi = self._pk_to_sigma(Rp,k,pk)
             self.Sigma[i] = s
             self.Xi[i] = xi
-        pass
+        return 
 
-    def pk_to_dsigma(self,Rp,k,pk,zvec):
+    def pk_to_dsigma(self,Rp,k,pk,zvec=None):
         self.R = Rp
         
+        if zvec is None:
+            self.dSigma = np.zeros((Rp.size,))
+            sigma = self._pk_to_sigma(Rp, k, pk)
+            if self.exclusion:
+                ## ADD NFW
+                sigma+= sigmaNFW_Analytical(Rp, self.Md, self.cd, rho_c=self.RHO_C*self.omega_m)/1e12
+
+            self.dSigma = self._to_dsigma(Rp, sigma)
+            # if self.exclusion:
+                ## Subtract NFW
+                # self.dSigma -= 0.993*deltaSigmaNFW_Analytical(Rp, self.Md, self.cd, rho_c=self.RHO_C*self.omega_m)/1e12
+            self.dSigma -= deltaSigmaNFW_Analytical(Rp, self.Md, self.cd, rho_c=self.RHO_C*self.omega_m)/1e12
+            
+            self.dSigma = np.where(self.dSigma<0.,np.nan,self.dSigma)
+            return
+
+
         # check if Sigma is computed
         if not hasattr(self,'Sigma'):
             self.pk_to_sigma(Rp,k,pk,zvec)
@@ -220,6 +236,7 @@ class ct_2hTerm(object):
                 self.dSigma[i] -= deltaSigmaNFW_Analytical(Rp, self.Md, self.cd, rho_c=self.RHO_C*self.omega_m)/1e12
             
             self.dSigma = np.where(self.dSigma<0.,np.nan,self.dSigma)
+    
         pass
 
 def child18_mass_concentration(M200c, z, halo_sample = 'stacked_nfw'):

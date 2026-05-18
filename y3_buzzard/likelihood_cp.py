@@ -4,7 +4,7 @@ Compares fiducial (data, invcov) against two observables from the
 Costanzi-2026 pipeline:
 
     Number counts         numcountssel/vals          -> 12
-    Tangential shear      gamma_t^theory(R)          -> 120
+    Tangential shear      gamma_t^theory(R)          -> 180
         = <gamma_t^1h>(R) + gamma_t^prj(R)
         = (shear1hsel/vals / numcountssel/vals) + shear_prj/vals
 
@@ -32,8 +32,8 @@ import numpy as np
 from cosmosis.datablock import option_section
 
 _NC_N_BINS = 12
-_SHEAR_N_R = 10         # radii per bin
-_SHEAR_N = _NC_N_BINS * _SHEAR_N_R   # 120
+_SHEAR_N_R = 15         # radii per bin (Y1 radial binning)
+_SHEAR_N = _NC_N_BINS * _SHEAR_N_R   # 180
 
 OBS = [
     ("NC",    _NC_N_BINS),
@@ -82,7 +82,7 @@ def _shear_theory(block) -> np.ndarray:
 
     gamma_t^theory(R | i,j) = <gamma_t^1h>_i(R) + gamma_t^prj(R | i,j)
 
-    shear1hsel/vals is N_i-weighted (shape 120); divide entry-wise by
+    shear1hsel/vals is N_i-weighted (shape 180); divide entry-wise by
     the NumCountsSel integral (shape 12, broadcast across the 10 R
     points per bin) to get the per-cluster average, then add the
     projection piece.
