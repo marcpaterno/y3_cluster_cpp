@@ -11,7 +11,7 @@
 //
 // For the last bin (U_i = ∞) the second exponential vanishes.
 //
-// Matches `kernels/projection.py:111-154` in the LambdaSelectionEmulator repo.
+// Matches `kernels/projection.py:111-154` in the RichnessSelection repo.
 #ifndef Y3_CLUSTER_PROJECTION_Y3_B_I_T_HH
 #define Y3_CLUSTER_PROJECTION_Y3_B_I_T_HH
 

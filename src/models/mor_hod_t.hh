@@ -28,10 +28,7 @@
 // use this convention (see y1_mock_values.ini: mor_logMmin + mor_logRatio).
 //
 // Mass convention: operator() treats lnM as raw natural log of the halo
-// mass in h^-1 M_sun (i.e. M = exp(lnM)). This matches the convention
-// used by the p_dlambda_emulator Python feeder, which writes
-// `p_dlambda/ln_mass_h = np.log(emu.M_grid)` directly from the emulator's
-// M grid (1e13..9e15 h^-1 M_sun).
+// mass in h^-1 M_sun (i.e. M = exp(lnM)).
 //
 // Note: HMF_t uses a different convention internally — it multiplies the
 // `mass_function/m_h` array by `(Ω_M - Ω_ν)` before taking log, so when
