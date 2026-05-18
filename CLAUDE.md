@@ -10,6 +10,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   is for *retiring* things, not staging new ones. If a script needs an
   output dir, write under `<ini_basename>_output/` (gitignored) or an
   explicit path the user gives you, not `archive/`.
+- **Commit messages must not include `Co-Authored-By: Claude` (or any other
+  Claude/Anthropic co-author trailer).** Match the existing repo style: a
+  short imperative subject, a paragraph or two of context in the body, no
+  AI-attribution trailer. The session that authored a change is irrelevant
+  to future readers; the diff and the message are the record.
 
 ## Project
 
