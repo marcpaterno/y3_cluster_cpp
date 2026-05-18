@@ -40,6 +40,10 @@ add_subdirectory(num_counts_sel)
 # benchmarks; the fixed-GL evaluator (BSelMargIntegrand) is the default.
 add_subdirectory(b_sel_marg_cpu)
 add_subdirectory(sigma_prj_cpu)
+
+# Brute-force triple-integral N_i[1] reference (no miscentering, no photo-z)
+# used to validate the n_operator_sel family on the same datablock layout.
+add_subdirectory(num_counts_full)
 # Many of these are historical
 # add_subdirectory(DESxSPTModule)
 # add_subdirectory(sigma_kappa_y1)
