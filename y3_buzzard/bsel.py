@@ -15,15 +15,10 @@ Matches the Python reference in ``richness_selection.sel_bias.SelBias``:
     HMF read from datablock section ``mass_function/dndlnmh``; bias from
     ``halomodel/bias``.
   * ltr marginalisation weighted by the EMG plob_ltr kernel
-    P(lob | ltr, z), with coefficients loaded once from
-    ``data/prj_params/plob_ltr_params.npz`` (pre-baked from the
-    DES Y3 fit), multiplied by the HOD prior
+    P(lob | ltr, z), with coefficients sourced from
+    :class:`y3_buzzard.prj_params.PrjParams` (the canonical Y3 fit baked
+    into Python so no file I/O is needed), multiplied by the HOD prior
       prior(ltr, z) = int dM n(M, z) P(ltr | M, z) * M
-    Loading from an npz avoids the per-sample overhead of the old
-    ``plob_ltr_loader`` cosmosis module.  Path override via the
-    ``plob_ltr_params_npz`` ini option or the
-    ``RICHNESS_SELECTION_PLOB_NPZ`` env var.  If the file is absent
-    the code falls back to a flat ltr weight (``use_plob_ltr=False``).
 
 Datablock reads:
     b_sel_marg_P1/vals       -- shape (1, N_zob * N_lambda_bin)
@@ -55,31 +50,13 @@ Marginalisation over ltr is a single GL quadrature with weight
 P(lob | ltr, zob) * prior(ltr, zob), exactly like the Python
 SelBias.b_sel_marginalised.
 """
-import os
 import time
 
 import numpy as np
 from cosmosis.datablock import option_section
 from scipy.special import erfc, gammaln
 
-
-_DEFAULT_PLOB_NPZ = os.path.join(
-    os.environ.get("Y3_CLUSTER_CPP_DIR",
-                   "/pscratch/sd/j/jesteves/y3_cluster_cpp"),
-    "data", "prj_params", "plob_ltr_params.npz",
-)
-
-
-def _load_plob_params_npz(path):
-    """Return a dict with z + the 8 EMG coefficient arrays, or None if
-    the npz is missing (in which case bsel marginalises with a flat
-    ltr prior, equivalent to use_plob_ltr=False)."""
-    if not path or not os.path.exists(path):
-        return None
-    data = np.load(path)
-    keys = ("z", "a_tau", "b_tau", "a_mu", "b_mu",
-            "a_sig", "b_sig", "a_fprj", "b_fprj")
-    return {k: np.asarray(data[k], dtype=float) for k in keys}
+from y3_buzzard.prj_params import PrjParams
 
 
 # -- fixed bin-centre tables (match PROJ_Y3_B_i_t bin_edges in C++) --------
@@ -213,14 +190,8 @@ def setup(options):
     n_m_beff          = options.get_int(option_section, "n_m_beff",
                                         default=100)
 
-    # plob_ltr EMG coefficients loaded once from a pre-baked npz.
-    try:
-        plob_npz_path = options.get_string(option_section,
-                                           "plob_ltr_params_npz")
-    except Exception:
-        plob_npz_path = os.environ.get("RICHNESS_SELECTION_PLOB_NPZ",
-                                        _DEFAULT_PLOB_NPZ)
-    plob_params = _load_plob_params_npz(plob_npz_path)
+    # plob_ltr EMG coefficients come from the in-code PrjParams table.
+    plob_params = PrjParams.default().as_dict()
 
     # Verbose mode: per-sample timing line + bias-asymptote tables.
     # Off by default so MCMC chains do not flood stdout; set
@@ -228,9 +199,7 @@ def setup(options):
     verbose = options.get_bool(option_section, "verbose", default=False)
 
     if verbose:
-        print(f"[bsel.py] plob_ltr_params: "
-              f"{'loaded ' + plob_npz_path if plob_params else 'NOT FOUND -> use_plob_ltr=False'}",
-              flush=True)
+        print("[bsel.py] plob_ltr_params: PrjParams.default()", flush=True)
 
     return dict(
         theta=theta, zob=zob, lob=lob,

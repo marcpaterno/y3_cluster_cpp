@@ -39,7 +39,6 @@ Writes to datablock (section "sel_function"):
     S_stack   (n_bins, n_z, n_lnm) S_ij for every bin in one tensor
 """
 from __future__ import annotations
-import os
 import numpy as np
 from cosmosis.datablock import option_section
 from scipy.special import erf, erfcx, gammaln
@@ -475,35 +474,20 @@ def setup(options):
 
 # --- Plob spline helpers (linear in z, flat extrapolation past edges) ------
 
-_PLOB_NPZ_DEFAULT = os.path.join(
-    os.environ.get("Y3_CLUSTER_CPP_DIR",
-                   "/pscratch/sd/j/jesteves/y3_cluster_cpp"),
-    "data", "prj_params", "plob_ltr_params.npz",
-)
-
-
 def _make_plob_splines(block):
     """Return a dict of splines over z for the 8 EMG coefficients.
 
-    Prefers the datablock section ``plob_ltr_params/*`` (populated
-    by the legacy plob_ltr_loader module); falls back to the
-    pre-baked npz at ``data/prj_params/plob_ltr_params.npz`` (the
-    source of truth after plob_ltr_loader was retired 2026-05-06).
+    Prefers the datablock section ``plob_ltr_params/*`` if a publisher
+    populated it (e.g. the ``prj_params`` cosmosis shim); otherwise
+    falls back to the canonical in-code table from
+    :class:`y3_buzzard.prj_params.PrjParams`.
     """
-    from scipy.interpolate import InterpolatedUnivariateSpline as ius
-    keys = ('a_tau', 'b_tau', 'a_mu', 'b_mu', 'a_sig', 'b_sig',
-            'a_fprj', 'b_fprj')
+    from y3_buzzard.prj_params import PrjParams
     try:
-        z = np.asarray(block['plob_ltr_params', 'z'], dtype=float)
-        src = {k: np.asarray(block['plob_ltr_params', k], dtype=float)
-               for k in keys}
+        params = PrjParams.from_datablock(block)
     except Exception:
-        path = os.environ.get("RICHNESS_SELECTION_PLOB_NPZ",
-                              _PLOB_NPZ_DEFAULT)
-        data = np.load(path)
-        z = np.asarray(data['z'], dtype=float)
-        src = {k: np.asarray(data[k], dtype=float) for k in keys}
-    return {k: ius(z, src[k], k=1, ext=3) for k in keys}
+        params = PrjParams.default()
+    return params.splines()
 
 
 def _read_mor(block):
