@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output:
   html_document:
       toc: true
-      toc_depth: 1
+      toc_depth: 2
       toc_float: true
       number_sections: true
   pdf_document: default
@@ -79,9 +79,247 @@ a. For a test to pass, it is required that every calculated point pass.
 This condition is verified automatically and the result is noted in bold in each section.
 
 
-# Survey Area
+# Part I — Costanzi-2026 pipeline (observable validation)
 
-## SDSS Survey footprint function
+```{r partI-setup, include=FALSE}
+COSTANZI_DIR <- "../validation-data/costanzi2026"
+
+# Source the hand-curated audit / timing tables.  audit_data.R is
+# gitignored; if it's missing the audit subsection just shows a stub.
+audit_loaded <- tryCatch({ source("audit_data.R"); TRUE },
+                        error = function(e) FALSE)
+
+read_observable <- function(name) {
+  p <- file.path(COSTANZI_DIR, paste0(name, ".tsv"))
+  if (!file.exists(p)) return(NULL)
+  readr::read_tsv(p, show_col_types = FALSE)
+}
+
+partI_status <- function(df, frac_tol = 0.014, abs_tol = 1e-12) {
+  # Costanzi-2026 sections use a looser fractional tolerance (~1.4%
+  # for sigma_prj, ~1% for the operators) than the Y1 1e-6 baseline.
+  if (is.null(df) || nrow(df) == 0L) {
+    return("**Validation TSV not found — run `make data` after a fresh `cosmosis cosmosis-models/smoke_full_sel_cp_camb.ini`.**")
+  }
+  npts <- nrow(df)
+  pass <- abs(df$fracerr) < frac_tol | abs(df$resid) < abs_tol
+  npass <- sum(pass, na.rm = TRUE)
+  stringr::str_interp("**${npass} of ${npts} points pass at frac < ${frac_tol}.**")
+}
+
+partI_residual_plot <- function(df, frac_tol = 0.014,
+                                facet_col = "label") {
+  if (is.null(df) || nrow(df) == 0L) return(invisible(NULL))
+  ggplot(df, aes(x = x_value, y = fracerr,
+                 color = factor(.data[[facet_col]]))) +
+    geom_smallpoint() +
+    geom_hline(yintercept = c(-frac_tol, frac_tol),
+               linetype = "dashed", alpha = 0.5) +
+    facet_wrap(vars(.data[[facet_col]]), scales = "free_y") +
+    labs(x = "wall-grid index", y = "(ytrue - ytest)/ytrue",
+         color = facet_col) +
+    theme_bw() +
+    theme(legend.position = "none")
+}
+
+partI_tbd <- function(why) {
+  cat("> *Validation script TBD.* ", why, "\n",
+      "> See `emit_validation_tsv.py` stub for the implementation hook.\n",
+      sep = "")
+}
+```
+
+This part validates the **production Costanzi-2026 pipeline** end-to-end.
+Algorithms and numerical recipes live in
+[`docs/pipeline_modules.tex`](../docs/pipeline_modules.tex); the source-tree
+catalog is in [`docs/code_reference.md`](../docs/code_reference.md). Each
+subsection compares one pipeline output against an independent reference
+(Python `richness_selection`, `cluster_toolkit`, or full CAMB).
+
+Headline budgets (after the six fixes audited in
+`pipeline_modules.tex` §12):
+
+```{r partI-headlines, results='asis'}
+if (audit_loaded) {
+  cat("- $\\Sigma_{\\rm prj} / \\Delta\\Sigma_{\\rm prj}$ agreement:",
+      "≤", audit_headlines$sigma_prj_max_pct, "% over",
+      "$R \\in [", audit_headlines$R_range_hMpc[1], ", ",
+      audit_headlines$R_range_hMpc[2], "]\\,h^{-1}\\,$Mpc\n")
+  cat("- $(P_1, I_1, J)$ per-operator: ≤",
+      audit_headlines$p_operator_max_pct, "%\n")
+  cat("- $(B_{\\rm small}, B_{\\rm large})$ finisher: ~",
+      audit_headlines$bsel_finisher_max_pct, "%\n")
+  cat("- `cp_camb` $P(k)$: ≤",
+      audit_headlines$cp_camb_pk_max_pct, "% across the prior box\n")
+  cat("- Per-sample wall: ", audit_headlines$per_sample_baseline_s, "s → ",
+      audit_headlines$per_sample_optimum_s, "s ($-",
+      audit_headlines$per_sample_speedup_pct, "$%)\n", sep = "")
+} else {
+  cat("*audit_data.R not found — headline numbers omitted; see `pipeline_modules.tex` §12.*\n")
+}
+```
+
+## Linear matter power spectrum P(k, z) — `cp_camb`
+
+CosmoPower emulator vs full CAMB.
+
+```{r cp-camb-pk, results='asis'}
+partI_tbd("Drive a CAMB run from cosmological_parameters/values.txt and compare against cdm_baryon_power_lin/* in the smoke output. Headline: ≤0.7% across the prior box (see docs/emulator_validation.tex).")
+```
+
+## Halo mass function $n(M, z)$ — `mf_tinker`
+
+```{r hmf-tinker, results='asis'}
+partI_tbd("Use richness_selection.HMF on a (lnM, z) grid as truth; ytest = mass_function/dndlnmh from the smoke datablock. Includes the (1+z) Tinker-08 z-evolution fix (audit item 4).")
+```
+
+## Halo bias $b(M, z)$ — `halo_model`
+
+```{r halo-bias, results='asis'}
+partI_tbd("richness_selection.Bias on a (lnM, z) grid as truth; ytest = halomodel/bias from the smoke datablock. Includes the growth-factor normalisation fix (audit item 2).")
+```
+
+## Number counts $N_i(\\lambda, z)$ — `NumCountsSel` end-to-end
+
+```{r num-counts, results='asis'}
+partI_tbd("Use the brute-force triple-integral NumCountsFull module as truth; compare against NumCountsSel on the DES-Y3 4×3 (λ, z) grid. Pass criterion: ≤0.3%.")
+```
+
+## Mass- and bias-weighted $N_i$ — effective mass and bias
+
+```{r mass-bias-weighted, results='asis'}
+partI_tbd("MassWeightedSel and BiasWeightedSel against analytic M_eff = ⟨M⟩_S, b_eff = ⟨b⟩_S on the same 4×3 grid (modules need to be added to smoke_full_sel_cp_camb.ini).")
+```
+
+## $(P_1, I_1, J)$ operators — selection-bias scalars
+
+`BSelMargIntegrand` (fixed-GL) vs Python `SelBias._P_operator`.
+Pointer: `pipeline_modules.tex` §8 (line 582).
+
+```{r p-operator-load, include=FALSE}
+df_pop <- read_observable("p_operator")
+```
+
+```{r p-operator-status, results='asis'}
+cat(partI_status(df_pop, frac_tol = 0.01))
+```
+
+```{r p-operator-plot, fig.asp=0.5}
+partI_residual_plot(df_pop, frac_tol = 0.01, facet_col = "label")
+```
+
+## $b_{\\rm sel,marg}(\\theta)$ closure — `bsel`
+
+```{r bsel-load, include=FALSE}
+df_bsel <- read_observable("bsel_theta")
+```
+
+```{r bsel-status, results='asis'}
+cat(partI_status(df_bsel, frac_tol = 0.015))
+```
+
+```{r bsel-plot, fig.asp=0.45}
+if (!is.null(df_bsel)) {
+  ggplot(df_bsel, aes(x = theta_over_lam, y = fracerr)) +
+    geom_smallpoint() +
+    geom_hline(yintercept = c(-0.015, 0.015),
+               linetype = "dashed", alpha = 0.5) +
+    scale_x_log10() +
+    labs(x = expression(theta / theta[lambda]),
+         y = "(ytrue - ytest)/ytrue, b_sel,marg") +
+    theme_bw()
+}
+```
+
+Pointer: `pipeline_modules.tex` §9 (line 684). Includes the
+spurious-$M$-in-prior fix (audit item 6).
+
+## $\\Delta\\Sigma^{1h}(R)$ — 1-halo lensing
+
+```{r dsigma-1h, results='asis'}
+partI_tbd("DSigma1hSel.so vs cluster_toolkit ΔΣ_NFW projected through the same MOR + sel_function. Use the same 50-point R grid as the Part II Σ NFW section.")
+```
+
+## $\\Delta\\Sigma^{1h,{\\rm mis}}(R)$ — miscentred lensing
+
+```{r dsigma-1h-mis, results='asis'}
+partI_tbd("DSigma1hMisSel.so + Shear1hMisSel.so against the gamma-kernel convolution table (pipeline_modules.tex §11.2). Headline: per-R linearity in (f_mis, τ_mis) preserved.")
+```
+
+## $\\Sigma_{\\rm prj}$ — two-halo projection
+
+```{r sigma-prj-load, include=FALSE}
+df_sp <- read_observable("sigma_prj")
+```
+
+```{r sigma-prj-status, results='asis'}
+cat(partI_status(df_sp, frac_tol = 0.014))
+```
+
+```{r sigma-prj-plot, fig.asp=0.5}
+partI_residual_plot(df_sp, frac_tol = 0.014, facet_col = "label")
+```
+
+## $\\Delta\\Sigma_{\\rm prj}$ — two-halo $\\Delta\\Sigma$
+
+```{r dsigma-prj-load, include=FALSE}
+df_dsp <- read_observable("dsigma_prj")
+```
+
+```{r dsigma-prj-status, results='asis'}
+cat(partI_status(df_dsp, frac_tol = 0.014))
+```
+
+```{r dsigma-prj-plot, fig.asp=0.5}
+partI_residual_plot(df_dsp, frac_tol = 0.014, facet_col = "label")
+```
+
+## $\\gamma_t^{\\rm prj}$ — two-halo tangential shear
+
+```{r shear-prj-load, include=FALSE}
+df_shp <- read_observable("shear_prj")
+```
+
+```{r shear-prj-status, results='asis'}
+cat(partI_status(df_shp, frac_tol = 0.014))
+```
+
+```{r shear-prj-plot, fig.asp=0.5}
+partI_residual_plot(df_shp, frac_tol = 0.014, facet_col = "label")
+```
+
+Pointer: `pipeline_modules.tex` §10 (line 742); the per-R `rnd`/`cl`
+decomposition is in `docs/sigma_prj_py_vs_cpp_report.tex`.
+
+## Pipeline timing & precision audit
+
+```{r audit-table, results='asis'}
+if (audit_loaded) {
+  cat("**Six-bug debugging arc** (transcribed from `pipeline_modules.tex` §12.3):\n\n")
+  knitr::kable(audit_bugs, format = "markdown")
+  cat("\n\n**Per-module wall-time trajectory** (§12.1):\n\n")
+  knitr::kable(audit_timing_trajectory, format = "markdown",
+               digits = 3)
+  cat("\n\n**`n_lnm` convergence sweep** (§12.2 — the whole-pipeline ",
+      "optimum at $n_{\\ln M} = ", audit_headlines$n_lnm_optimum,
+      "$; $n_{\\ln M} = ", audit_headlines$n_lnm_resonance_avoid,
+      "$ hits a GL resonance and must be avoided):\n\n", sep = "")
+  knitr::kable(n_lnm_sweep, format = "markdown", digits = 3)
+} else {
+  cat("*audit_data.R not present in this checkout — see `docs/pipeline_modules.tex` §12 for the timing & precision audit.*\n")
+}
+```
+
+# Part II — Per-term Y1 baseline (appendix)
+
+The sections below validate the *underlying terms* used inside the
+Costanzi-2026 operators (`mor_t2`, `lc_lt_t`, `lo_lc_t`,
+`sigma_crit_inverse_t`, etc.). They are kept as the term-level
+regression suite — Part I is the headline end-to-end view.
+
+## Survey Area
+
+### SDSS Survey footprint function
 
 ```{r}
 local.frac.errormargin = frac.errormargin
@@ -138,7 +376,7 @@ ggplot(omega_z, aes(x = z, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-# Halo Mass Function
+## Halo Mass Function
 
 
 
@@ -207,7 +445,7 @@ ggplot(hmf, aes(x = mass, y = fracerr, color = within.abs)) +
 **This test requires running masses_test.ini in cosmosis_tests first**
 Need to do better than this in the future.
 
-# Volume Element
+## Volume Element
 
 ```{r}
 local.frac.errormargin = 1.0e-3
@@ -263,9 +501,9 @@ ggplot(dvdodz, aes(x = z, y = fracerr, color = within.abs)) +
   geom_hline(yintercept =local.frac.errormargin, color="blue")
 ```
 
-# Scaling Relations
+## Scaling Relations
 
-## Mass-observable relation
+### Mass-observable relation
 
 ```{r}
 local.frac.errormargin = 5 * frac.errormargin
@@ -339,7 +577,7 @@ ggplot(mor_t2, aes(x= lambda, y = resid, color = within.frac)) +
   facet_wrap(mbin ~ .)
 ```
 
-## Projection effect on Scaling relations
+### Projection effect on Scaling relations
 
 ```{r}
 local.frac.errormargin =  frac.errormargin
@@ -413,7 +651,7 @@ ggplot(lc_lt, aes(x= lambda_cen, y = resid, color = within.frac)) +
   facet_wrap(lbin ~ .)
 ```
 
-## Mis-centering effect on scaling relations
+### Mis-centering effect on scaling relations
 
 ```{r}
 local.frac.errormargin =  frac.errormargin
@@ -489,7 +727,7 @@ ggplot(lo_lc, aes(x= deltal, y = resid, color = within.frac)) +
   facet_wrap(Rbin ~ .)
 ```
 
-# Number Counts and Masses in SDSS
+## Number Counts and Masses in SDSS
 
 **This test requires running sdss_analysis.ini in cosmosis_tests first**.
 
@@ -572,7 +810,7 @@ ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-# Number Counts and Masses in DESY1
+## Number Counts and Masses in DESY1
 
 **This test requires running y1_analysis.ini in cosmosis_tests first**
 
@@ -659,7 +897,7 @@ ggplot(inte, aes(x = lambda, y = fracerrm, color = within.abs)) +
   facet_wrap(zbin~.)
 ```
 
-# Cluster Mass Profile
+## Cluster Mass Profile
 
 The Cluster Mass profiles are calculated by a **separate CosmoSIS module**, which is a python wrapper to Tom McClintock's Cluster_toolkit code. The code exists in the folder `delta_sigma`.
 
@@ -668,7 +906,7 @@ The Cluster Mass profiles are calculated by a **separate CosmoSIS module**, whic
 If you are using the supplied `GNUmakefile` to build the document,
 this is done automatically.
 
-## $\xi$ NFW
+### $\xi$ NFW
 
 ```{r}
 local.frac.errormargin = 0.001
@@ -734,7 +972,7 @@ ggplot(filter(xi_nfw, ytrue > 0.0, ytest > 0.0),
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-## $\xi$ 2-halo
+### $\xi$ 2-halo
 
 ```{r}
 local.frac.errormargin = 0.001
@@ -802,7 +1040,7 @@ ggplot(filter(xi_2h, ytest > 0.0, ytrue > 0.0),
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-## $\Sigma$ NFW
+### $\Sigma$ NFW
 
 ```{r}
 local.frac.errormargin = 0.001
@@ -864,7 +1102,7 @@ ggplot(sig_nfw, aes(x = r, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-## $\Sigma$ 2-halo
+### $\Sigma$ 2-halo
 
 ```{r}
 local.frac.errormargin = 0.01
@@ -926,7 +1164,7 @@ ggplot(sig_nfw, aes(x = r, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-## Halo bias $b(M_{200m}, z)$
+### Halo bias $b(M_{200m}, z)$
 
 ```{r}
 local.frac.errormargin =  0.001
@@ -994,9 +1232,9 @@ ggplot(bias, aes(x = logmass, y = fracerr, color = within.abs)) +
   facet_wrap(zbin~ .)
 ```
 
-# Mass Profile corrections
+## Mass Profile corrections
 
-## Mis-centering offset
+### Mis-centering offset
 
 ```{r}
 local.frac.errormargin = frac.errormargin
@@ -1053,9 +1291,9 @@ ggplot(miscent, aes(x = rmis, y = fracerr, color = within.abs)) +
   geom_hline(yintercept = -1 * local.frac.errormargin, color="blue")
 ```
 
-# Lensing
+## Lensing
 
-## Critical density
+### Critical density
 
 ```{r}
 local.frac.errormargin =  0.0001
@@ -1129,10 +1367,10 @@ ggplot(sig_crit, aes(x = zs, y = fracerr, color = within.abs)) +
   facet_wrap(vars(zbin))
 ```
 
-# Mass Concentration Relation
+## Mass Concentration Relation
 For this test, we are comparing the mass-concentration relation we get from the pipeline to the mass concentration relation from Colossus
 
-# Session information
+## Session information
 
 The following R package versions were used to prepare this document.
 

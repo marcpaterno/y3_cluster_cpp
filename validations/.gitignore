@@ -9,3 +9,6 @@ physics_validation_files/
 physics_validation_cache/
 .Rproj.user/
 .qmd
+# Local-only sidecar tables sourced by physics_validation_y1rerun.Rmd
+# (hand-curated from docs/pipeline_modules.tex §12; never committed).
+audit_data.R
