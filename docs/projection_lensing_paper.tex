@@ -222,6 +222,17 @@ $\mathcal{S}_{\Delta\lambda_i}$, while the same kernel sets the
 projection contamination on the lensing profile through the
 selection-affected cluster bias of Sec.~\ref{sec:bias}.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/fig_selection_function.png}
+\caption{Above-threshold richness selection function
+$\mathcal{S}(M\,|\,\lambda^{\rm ob}>\lambda_{\min},z=0.4)$ at five
+threshold values $\lambda_{\min}\in\{5,10,20,30,50\}$.  The transition
+mass tracks the observed-richness threshold roughly as $M\propto
+\lambda_{\min}^{1/\alpha}$ with the MOR slope $\alpha$.}
+\label{fig:selfn}
+\end{figure}
+
 % ----------------------------------------------------------------------------
 \subsection{Halo-model predictions and notation}
 \label{sec:halo_model}
@@ -524,6 +535,19 @@ latent-marginalised regime amplitudes
 $\bbLOSij,\bbLSSij$ give $\bbselij(\theta)$, the
 final input to the lensing profile of the next section.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/fig_bsel_theta.png}
+\caption{Selection-affected cluster bias
+$\bbselij(\theta)$ (CRIMSON solid) at the wall probe
+$(\lambda^{\rm ob},z^{\rm ob})=(25,0.275)$, as published by the C++
+\texttt{bsel} finisher.  The two horizontal asymptotes are the
+latent-marginalised LOS and LSS amplitudes $\bbLOSij$ (dashed) and
+$\bbLSSij$ (dotted), and the dotted vertical line marks the
+sigmoid pivot $\theta = \theta_\lambda/2$.}
+\label{fig:bsel_theta}
+\end{figure}
+
 % ----------------------------------------------------------------------------
 \subsection{Two-halo projected lensing profile}
 \label{sec:lensing}
@@ -544,6 +568,20 @@ The $1$ inside the bracket is the mean (uncorrelated) contribution and
 $b\,\bbsel\,\xinl$ is the correlation-function boost.  $\Smis$ is the
 azimuth-averaged miscentered NFW surface density of the contaminating
 halo, defined in Eq.~\eqref{eq:Smis} below.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/fig_sigma_split.png}
+\caption{Stacked surface density at
+$(\lambda^{\rm ob},z^{\rm ob})=(20,0.5)$.  The 1-halo centred-NFW term
+$\Sigma^{\rm 1h}(R)$ at the bin's effective halo mass dominates
+inside the cluster radius, while the 2-halo projection term
+$\Sigma^{\rm prj}(R)$ from Eq.~\eqref{eq:Sprj} carries the signal at
+large $R$.  The dotted vertical line marks the exclusion radius
+$R_{\rm excl}=R_\lambda(\lambda^{\rm ob})\,(1+z^{\rm ob})$ with
+$R_\lambda=(\lambda^{\rm ob}/100)^{0.2}$.}
+\label{fig:sigma_split}
+\end{figure}
 
 \subsubsection{Lensing excess \texorpdfstring{$\avg{\DSprj(R\,|\,\lob,\zob)}$}{DSprj(R|lob,zob)}}
 
