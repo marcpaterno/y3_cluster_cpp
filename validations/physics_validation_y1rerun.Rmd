@@ -161,17 +161,67 @@ if (audit_loaded) {
 
 ## Linear matter power spectrum P(k, z) — `cp_camb`
 
-CosmoPower emulator vs full CAMB.
+CosmoPower emulator (`ytest`, read from `cdm_baryon_power_lin/p_k`) vs
+full CAMB at the same cosmology (`ytrue`). Comparison is on a 12 z × 25 k
+subsample of the dump grid. Headline: ≤0.7% across the prior box (see
+[`docs/emulator_validation.tex`](../docs/emulator_validation.tex)).
 
-```{r cp-camb-pk, results='asis'}
-partI_tbd("Drive a CAMB run from cosmological_parameters/values.txt and compare against cdm_baryon_power_lin/* in the smoke output. Headline: ≤0.7% across the prior box (see docs/emulator_validation.tex).")
+```{r cp-camb-pk-load, include=FALSE}
+df_pk <- read_observable("cp_camb_pk")
+```
+
+```{r cp-camb-pk-status, results='asis'}
+cat(partI_status(df_pk, frac_tol = 0.007))
+```
+
+```{r cp-camb-pk-plot, fig.asp=0.45}
+if (!is.null(df_pk)) {
+  ggplot(df_pk, aes(x = k_h, y = fracerr, color = factor(z))) +
+    geom_smallpoint() +
+    geom_hline(yintercept = c(-0.007, 0.007),
+               linetype = "dashed", alpha = 0.5) +
+    scale_x_log10() +
+    labs(x = expression(k ~ "[h/Mpc]"),
+         y = "(CAMB - emulator)/CAMB",
+         color = "z") +
+    theme_bw()
+}
 ```
 
 ## Halo mass function $n(M, z)$ — `mf_tinker`
 
-```{r hmf-tinker, results='asis'}
-partI_tbd("Use richness_selection.HMF on a (lnM, z) grid as truth; ytest = mass_function/dndlnmh from the smoke datablock. Includes the (1+z) Tinker-08 z-evolution fix (audit item 4).")
+CosmoSIS `mf_tinker` output (`ytest`, read from `mass_function/dndlnmh`)
+vs `richness_selection.HMF` driven at the same Cosmology (`ytrue`).
+Mass axis is rescaled `M = m_h * (Omega_m - Omega_nu)` to match the
+CosmoSIS convention. Comparison restricted to $M \in [10^{12}, 10^{15}]
+\,M_\odot/h$ and $z \le 0.6$ where the Python halofit-derived $\sigma(M)$
+reference is well-defined.
+
+```{r hmf-tinker-load, include=FALSE}
+df_hmf <- read_observable("hmf_tinker")
 ```
+
+```{r hmf-tinker-status, results='asis'}
+cat(partI_status(df_hmf, frac_tol = 0.05))
+```
+
+```{r hmf-tinker-plot, fig.asp=0.45}
+if (!is.null(df_hmf)) {
+  ggplot(df_hmf, aes(x = M, y = fracerr, color = factor(z))) +
+    geom_smallpoint() +
+    geom_hline(yintercept = c(-0.05, 0.05),
+               linetype = "dashed", alpha = 0.5) +
+    scale_x_log10() +
+    coord_cartesian(ylim = c(-0.5, 0.5)) +
+    labs(x = expression(M ~ "[M"[odot]*"/h]"),
+         y = "(Py HMF - C++ HMF)/Py HMF",
+         color = "z") +
+    theme_bw()
+}
+```
+
+Includes the (1+z) Tinker-08 z-evolution fix (audit item 4) and the
+mass-axis double-shift fix (audit item 1).
 
 ## Halo bias $b(M, z)$ — `halo_model`
 
@@ -179,7 +229,7 @@ partI_tbd("Use richness_selection.HMF on a (lnM, z) grid as truth; ytest = mass_
 partI_tbd("richness_selection.Bias on a (lnM, z) grid as truth; ytest = halomodel/bias from the smoke datablock. Includes the growth-factor normalisation fix (audit item 2).")
 ```
 
-## Number counts $N_i(\\lambda, z)$ — `NumCountsSel` end-to-end
+## Number counts $N_i(\lambda, z)$ — `NumCountsSel` end-to-end
 
 ```{r num-counts, results='asis'}
 partI_tbd("Use the brute-force triple-integral NumCountsFull module as truth; compare against NumCountsSel on the DES-Y3 4×3 (λ, z) grid. Pass criterion: ≤0.3%.")
@@ -208,7 +258,7 @@ cat(partI_status(df_pop, frac_tol = 0.01))
 partI_residual_plot(df_pop, frac_tol = 0.01, facet_col = "label")
 ```
 
-## $b_{\\rm sel,marg}(\\theta)$ closure — `bsel`
+## $b_{\rm sel,marg}(\theta)$ closure — `bsel`
 
 ```{r bsel-load, include=FALSE}
 df_bsel <- read_observable("bsel_theta")
@@ -234,19 +284,19 @@ if (!is.null(df_bsel)) {
 Pointer: `pipeline_modules.tex` §9 (line 684). Includes the
 spurious-$M$-in-prior fix (audit item 6).
 
-## $\\Delta\\Sigma^{1h}(R)$ — 1-halo lensing
+## $\Delta\Sigma^{1h}(R)$ — 1-halo lensing
 
 ```{r dsigma-1h, results='asis'}
 partI_tbd("DSigma1hSel.so vs cluster_toolkit ΔΣ_NFW projected through the same MOR + sel_function. Use the same 50-point R grid as the Part II Σ NFW section.")
 ```
 
-## $\\Delta\\Sigma^{1h,{\\rm mis}}(R)$ — miscentred lensing
+## $\Delta\Sigma^{1h,{\rm mis}}(R)$ — miscentred lensing
 
 ```{r dsigma-1h-mis, results='asis'}
 partI_tbd("DSigma1hMisSel.so + Shear1hMisSel.so against the gamma-kernel convolution table (pipeline_modules.tex §11.2). Headline: per-R linearity in (f_mis, τ_mis) preserved.")
 ```
 
-## $\\Sigma_{\\rm prj}$ — two-halo projection
+## $\Sigma_{\rm prj}$ — two-halo projection
 
 ```{r sigma-prj-load, include=FALSE}
 df_sp <- read_observable("sigma_prj")
@@ -260,7 +310,7 @@ cat(partI_status(df_sp, frac_tol = 0.014))
 partI_residual_plot(df_sp, frac_tol = 0.014, facet_col = "label")
 ```
 
-## $\\Delta\\Sigma_{\\rm prj}$ — two-halo $\\Delta\\Sigma$
+## $\Delta\Sigma_{\rm prj}$ — two-halo $\Delta\Sigma$
 
 ```{r dsigma-prj-load, include=FALSE}
 df_dsp <- read_observable("dsigma_prj")
@@ -274,7 +324,7 @@ cat(partI_status(df_dsp, frac_tol = 0.014))
 partI_residual_plot(df_dsp, frac_tol = 0.014, facet_col = "label")
 ```
 
-## $\\gamma_t^{\\rm prj}$ — two-halo tangential shear
+## $\gamma_t^{\rm prj}$ — two-halo tangential shear
 
 ```{r shear-prj-load, include=FALSE}
 df_shp <- read_observable("shear_prj")

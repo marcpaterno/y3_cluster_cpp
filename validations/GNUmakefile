@@ -23,6 +23,8 @@ COSTANZI_DIR := ../validation-data/costanzi2026
 # 14 observables: 5 wired (real comparisons against the Python ref),
 # 9 still emit NotImplementedError -- the Rmd treats those as "TBD".
 COSTANZI_TSVS := \
+    $(COSTANZI_DIR)/cp_camb_pk.tsv \
+    $(COSTANZI_DIR)/hmf_tinker.tsv \
     $(COSTANZI_DIR)/p_operator.tsv \
     $(COSTANZI_DIR)/sigma_prj.tsv \
     $(COSTANZI_DIR)/dsigma_prj.tsv \
