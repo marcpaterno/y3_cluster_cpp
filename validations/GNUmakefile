@@ -25,11 +25,21 @@ COSTANZI_DIR := ../validation-data/costanzi2026
 COSTANZI_TSVS := \
     $(COSTANZI_DIR)/cp_camb_pk.tsv \
     $(COSTANZI_DIR)/hmf_tinker.tsv \
+    $(COSTANZI_DIR)/halo_bias.tsv \
+    $(COSTANZI_DIR)/num_counts.tsv \
+    $(COSTANZI_DIR)/num_counts_sel.tsv \
     $(COSTANZI_DIR)/p_operator.tsv \
+    $(COSTANZI_DIR)/bsel_plateaus.tsv \
+    $(COSTANZI_DIR)/bsel_theta.tsv \
+    $(COSTANZI_DIR)/sigma_1h.tsv \
+    $(COSTANZI_DIR)/dsigma_1h.tsv \
+    $(COSTANZI_DIR)/shear_1h.tsv \
     $(COSTANZI_DIR)/sigma_prj.tsv \
     $(COSTANZI_DIR)/dsigma_prj.tsv \
     $(COSTANZI_DIR)/shear_prj.tsv \
-    $(COSTANZI_DIR)/bsel_theta.tsv
+    $(COSTANZI_DIR)/sigma_prj_cuhre.tsv \
+    $(COSTANZI_DIR)/dsigma_prj_cuhre.tsv \
+    $(COSTANZI_DIR)/shear_prj_cuhre.tsv
 
 DATAFILES += $(COSTANZI_TSVS)
 

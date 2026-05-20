@@ -328,8 +328,19 @@ def execute(block, config):
     I2 = I1 + J
 
     # --- chi(z) (for theta_lob) -- simple interpolant from distances ------
+    # CosmoSIS distances/d_c is the comoving distance in Mpc (no h factor),
+    # but the C++ p_operator / sigma_prj consumers compute their theta_lob
+    # with chi in cMpc/h (see src/models/p_operator_t.hh line 256:
+    # `chi_o = (*chi_).clamp(zob) * h0_`).  Multiply by h0 here so the
+    # sigmoid we tabulate against `theta` is evaluated at the same theta_lob
+    # the consumers use.
+    # Bug: prior to 2026-05-19 this used raw d_c (Mpc), shifting the C++
+    # b_sel_marginalised sigmoid by a factor of h0 in theta and producing
+    # a 12% residual vs the Python richness_selection.sel_bias reference
+    # at the wall-grid probe (lob=25, zob=0.275); see physics_validation_y1rerun.Rmd §2.7.
+    h0 = float(block["cosmological_parameters", "h0"])
     z_of = _read_vec_1d(block, "distances", "z")
-    chi_of = _read_vec_1d(block, "distances", "d_c")
+    chi_of = _read_vec_1d(block, "distances", "d_c") * h0   # cMpc/h
     def chi(zx): return np.interp(zx, z_of, chi_of)
 
     # --- MOR scalars (for the marginalisation weight) ----------------------

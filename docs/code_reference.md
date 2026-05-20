@@ -126,7 +126,6 @@ a frozen embedded table). "GPU?" = ✓ when a matching `.cuh` exists.
 |---|---|---|---|---|---|
 | `lc_lt_t.hh` | `LC_LT_t` | P(λ_cen \| λ_true, z) projection + percolation (Costanzi+ 2018 eq. 15, frozen DES tables) | static `Interp2D` | `(lc, lt, zt) → double` | ✓ |
 | `lc_lt_y1_t.hh` | `LC_LT_Y1_t` | P(λ_cen \| λ_true, z) Y1 form | `cluster_abundance` | `(lc, lt, zt) → double` | — |
-| `lc_lt_projection_y3.hh` | `LC_LT_PROJECTION_Y3_t` | Y3 projection-only kernel | static | `(lc, lt, zt) → double` | — |
 | `lo_lc_t.hh` | `LO_LC_t` | P(λ_obs \| λ_cen, R_mis) miscentering | `cluster_abundance` (`LO_LC_*`) | `(lo, lc, R_mis) → double` | ✓ |
 | `int_lc_lt_des_t.hh` | `INT_LC_LT_DES_t` | Lookup-table P(λ_c \| λ_t, z) DES | static | `(lc, lt, zt) → double` | ✓ (`.cuh` `t`, `t2`, `t3`) |
 | `int_lc_lt_des_t2.hh` | `INT_LC_LT_DES_t2` | Variant 2 of above | static | `(lc, lt, zt)` | ✓ |
@@ -134,7 +133,7 @@ a frozen embedded table). "GPU?" = ✓ when a matching `.cuh` exists.
 | `int_zo_zt_des_t.hh` | `INT_ZO_ZT_DES_t` | DES Gaussian photo-z (analytic) | `cluster_abundance` | `(zomin, zomax, zt) → double` | ✓ |
 | `zo_zt_des_t.hh` | `ZO_ZT_DES_t` | Pointwise P(z_obs \| z_true) DES | `cluster_abundance` | `(zo, zt) → double` | — |
 | `richness_kernel_t.hh` | `RICHNESS_KERNEL` | Bin-integrated K_i(λ_true, z), K_j(z) | `richness_selection` | per-bin scalars | — |
-| `projection_y3_b_i_t.hh` | `PROJ_Y3_B_i_t` | B_i(λ_true, z): Y3 projection × bin integral (frozen exponential form) | static | `(lt, zt, i) → double` | — |
+| `projection_y3_b_i_t.hh` | `RmSelFunction_t` | K_i(λ_true, z): per-bin Costanzi EMG closed-form (Eq. 34 of richness_selection_function.tex) | `plob_ltr_params` | `(lt, zt) → double` | — |
 | `plob_ltr_emg_t.hh` | `PLOB_LTR_EMG` | EMG parameters for P(λ_obs \| λ_true, z) | `plob_ltr_params` | `(lt, zt)` | — |
 | `sigma_photoz_des.hh` | `SIGMA_PHOTOZ_DES_t` | σ_phot(z_true) DES | static (z grid) | `(zt) → double` | ✓ |
 | `z_kernel_data.hh` | (data) | Embedded 120-node photo-z σ(z) grid [0.10, 0.90] | static | — | — |

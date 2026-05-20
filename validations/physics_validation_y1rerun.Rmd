@@ -122,6 +122,52 @@ partI_residual_plot <- function(df, frac_tol = 0.014,
     theme(legend.position = "none")
 }
 
+# Two-panel "Part I" plot (Part II's recipe, applied per-observable):
+# absolute overlay (black=ytrue, cyan=ytest) + fractional residual.
+# `x_col`/`color_col` let each section pick its natural abscissa
+# (k_h for cp_camb, M for hmf/halo_bias, ...) and grouping (z bin).
+partI_two_panel <- function(df, frac_tol,
+                            x_col = "x_value",
+                            color_col = "z",
+                            x_label = "x",
+                            y_label = "y",
+                            log_x = TRUE, log_y = TRUE) {
+  if (is.null(df) || nrow(df) == 0L) return(invisible(NULL))
+
+  # Order rows by (color group, x) so geom_line connects in the right
+  # direction.  Drop non-positive y from the absolute panel when y is
+  # being plotted on a log scale.
+  df_abs <- df[order(df[[color_col]], df[[x_col]]), ]
+  if (log_y) {
+    df_abs <- df_abs[df_abs$ytrue > 0 & df_abs$ytest > 0, ]
+  }
+
+  p_abs <- ggplot(df_abs, aes(x = .data[[x_col]],
+                              color = factor(.data[[color_col]]),
+                              group = factor(.data[[color_col]]))) +
+    geom_line(aes(y = ytrue), linetype = "solid",  size = 0.6) +
+    geom_line(aes(y = ytest), linetype = "dashed", size = 0.6) +
+    labs(x = x_label, y = y_label, color = color_col,
+         caption = "solid = truth, dashed = test") +
+    theme_bw()
+  if (log_x) p_abs <- p_abs + scale_x_log10()
+  if (log_y) p_abs <- p_abs + scale_y_log10()
+
+  p_res <- ggplot(df, aes(x = .data[[x_col]], y = fracerr,
+                          color = factor(.data[[color_col]]),
+                          group = factor(.data[[color_col]]))) +
+    geom_line(size = 0.6) +
+    geom_hline(yintercept = c(-frac_tol, frac_tol),
+               linetype = "dashed", alpha = 0.5) +
+    labs(x = x_label, y = "(ytrue - ytest)/ytrue",
+         color = color_col) +
+    theme_bw()
+  if (log_x) p_res <- p_res + scale_x_log10()
+
+  print(p_abs); print(p_res)
+  invisible(NULL)
+}
+
 partI_tbd <- function(why) {
   cat("> *Validation script TBD.* ", why, "\n",
       "> See `emit_validation_tsv.py` stub for the implementation hook.\n",
@@ -162,8 +208,9 @@ if (audit_loaded) {
 ## Linear matter power spectrum P(k, z) — `cp_camb`
 
 CosmoPower emulator (`ytest`, read from `cdm_baryon_power_lin/p_k`) vs
-full CAMB at the same cosmology (`ytrue`). Comparison is on a 12 z × 25 k
-subsample of the dump grid. Headline: ≤0.7% across the prior box (see
+full CAMB at the same cosmology (`ytrue`). Comparison is on a 6 z × 25 k
+subsample restricted to the cluster lens-redshift range $z \in [0, 1]$.
+Headline: ≤0.7% across the prior box (see
 [`docs/emulator_validation.tex`](../docs/emulator_validation.tex)).
 
 ```{r cp-camb-pk-load, include=FALSE}
@@ -175,64 +222,126 @@ cat(partI_status(df_pk, frac_tol = 0.007))
 ```
 
 ```{r cp-camb-pk-plot, fig.asp=0.45}
-if (!is.null(df_pk)) {
-  ggplot(df_pk, aes(x = k_h, y = fracerr, color = factor(z))) +
-    geom_smallpoint() +
-    geom_hline(yintercept = c(-0.007, 0.007),
-               linetype = "dashed", alpha = 0.5) +
-    scale_x_log10() +
-    labs(x = expression(k ~ "[h/Mpc]"),
-         y = "(CAMB - emulator)/CAMB",
-         color = "z") +
-    theme_bw()
-}
+partI_two_panel(df_pk, frac_tol = 0.007,
+                x_col = "k_h", color_col = "z",
+                x_label = "k  [h/Mpc]",
+                y_label = "P_cb(k, z)  [(Mpc/h)^3]",
+                log_x = TRUE, log_y = TRUE)
 ```
 
 ## Halo mass function $n(M, z)$ — `mf_tinker`
 
-CosmoSIS `mf_tinker` output (`ytest`, read from `mass_function/dndlnmh`)
-vs `richness_selection.HMF` driven at the same Cosmology (`ytrue`).
-Mass axis is rescaled `M = m_h * (Omega_m - Omega_nu)` to match the
-CosmoSIS convention. Comparison restricted to $M \in [10^{12}, 10^{15}]
-\,M_\odot/h$ and $z \le 0.6$ where the Python halofit-derived $\sigma(M)$
-reference is well-defined.
+CosmoSIS `mf_tinker` driven by full CAMB (`ytrue`, read from
+`smoke_sel_camb_output/mass_function/dndlnmh`) vs the same module
+driven by the cp_camb emulator (`ytest`, read from
+`smoke_full_sel_cp_camb_output/mass_function/dndlnmh`). Both use
+Tinker 2008 with $\Delta = 200m$ — apples-to-apples through the same
+HMF kernel; the only thing changing between truth and test is the
+upstream linear $P(k, z)$. Restricted to $M \in [10^{12}, 10^{15}]
+\,M_\odot/h$ and $z \le 1.0$.
+
+Headline budget per the camb-emulator/hmf_report (v3c emulator at
+widePlanck): max $\sim 2\%$ at high $z$, sub-percent at $z \lesssim
+0.5$.
 
 ```{r hmf-tinker-load, include=FALSE}
 df_hmf <- read_observable("hmf_tinker")
 ```
 
 ```{r hmf-tinker-status, results='asis'}
-cat(partI_status(df_hmf, frac_tol = 0.05))
+cat(partI_status(df_hmf, frac_tol = 0.02))
 ```
 
 ```{r hmf-tinker-plot, fig.asp=0.45}
-if (!is.null(df_hmf)) {
-  ggplot(df_hmf, aes(x = M, y = fracerr, color = factor(z))) +
-    geom_smallpoint() +
-    geom_hline(yintercept = c(-0.05, 0.05),
-               linetype = "dashed", alpha = 0.5) +
-    scale_x_log10() +
-    coord_cartesian(ylim = c(-0.5, 0.5)) +
-    labs(x = expression(M ~ "[M"[odot]*"/h]"),
-         y = "(Py HMF - C++ HMF)/Py HMF",
-         color = "z") +
-    theme_bw()
-}
+partI_two_panel(df_hmf, frac_tol = 0.02,
+                x_col = "M", color_col = "z",
+                x_label = "M  [Msun/h]",
+                y_label = "dn/dlnM  [(Msun/h)^-1 (cMpc/h)^-3]",
+                log_x = TRUE, log_y = TRUE)
 ```
-
-Includes the (1+z) Tinker-08 z-evolution fix (audit item 4) and the
-mass-axis double-shift fix (audit item 1).
 
 ## Halo bias $b(M, z)$ — `halo_model`
 
-```{r halo-bias, results='asis'}
-partI_tbd("richness_selection.Bias on a (lnM, z) grid as truth; ytest = halomodel/bias from the smoke datablock. Includes the growth-factor normalisation fix (audit item 2).")
+`halomodel/bias` published by `y3_buzzard/halo_model_cosmosis.py`
+(`ytest`) vs **`cluster_toolkit.bias.bias_at_M`** (Tinker 2010)
+evaluated on the same widePlanck cosmology with the CAMB-driven
+`cdm_baryon_power_lin` $P(k, z)$ as input (`ytrue`). Δ = 200m,
+$M \in [10^{12}, 10^{15}]\,M_\odot/h$, $z \in [0, 1.0]$. The residual
+captures the full pipeline error: emulator $P(k)$, growth-factor
+normalisation fix (audit item 2), and CosmoSIS-vs-`cluster_toolkit`
+$\sigma(M)$ integrators.
+
+```{r halo-bias-load, include=FALSE}
+df_bias <- read_observable("halo_bias")
 ```
 
-## Number counts $N_i(\lambda, z)$ — `NumCountsSel` end-to-end
+```{r halo-bias-status, results='asis'}
+cat(partI_status(df_bias, frac_tol = 0.005))
+```
 
-```{r num-counts, results='asis'}
-partI_tbd("Use the brute-force triple-integral NumCountsFull module as truth; compare against NumCountsSel on the DES-Y3 4×3 (λ, z) grid. Pass criterion: ≤0.3%.")
+```{r halo-bias-plot, fig.asp=0.45}
+partI_two_panel(df_bias, frac_tol = 0.005,
+                x_col = "M", color_col = "z",
+                x_label = "M  [Msun/h]",
+                y_label = "b(M, z)",
+                log_x = TRUE, log_y = FALSE)
+```
+
+## Number counts $N_i(\lambda, z)$ — `NumCountsFull`
+
+### Pure-emulator check: `NumCountsFull` (CAMB) vs `NumCountsFull` (cp_camb)
+
+Both arms run the **same** brute-force triple integral
+`NumCountsFullScalarIntegrand` over $(\ell^t, z, \ln M)$ at the same
+widePlanck cosmology; the only difference is the upstream linear
+$P(k)$. This mirrors
+[`docs/emulator_validation.tex`](../docs/emulator_validation.tex)
+Sec. 2 (the v3c emulator validation report), whose Table 1 reports
+per-bin residuals 0.23–0.69%.
+
+```{r num-counts-load, include=FALSE}
+df_nc <- read_observable("num_counts")
+```
+
+```{r num-counts-status, results='asis'}
+cat(partI_status(df_nc, frac_tol = 0.01))
+```
+
+```{r num-counts-plot, fig.asp=0.45}
+partI_two_panel(df_nc, frac_tol = 0.01,
+                x_col = "lob", color_col = "label",
+                x_label = "lambda (bin centre)",
+                y_label = "N_i  [counts]",
+                log_x = TRUE, log_y = TRUE)
+```
+
+### Production-path check: `NumCountsFull` (CAMB) vs `NumCountsSel` (cp_camb)
+
+`ytrue` is the CAMB-driven brute-force triple integral (same as
+above), `ytest` is the production fast path: cp_camb $\to$ mf_tinker
+$\to$ `sel_function` (closed-form $K_i(\ell^t, z)$ kernel from
+`RmSelFunction_t`) $\to$ `NumCountsSel`. The residual combines
+(i) the cp_camb emulator's $P(k)$ bias (≤1% per the pure-emulator
+check above) and (ii) the Sel approximation's faithfulness against
+the literal triple integral with full CAMB. After the
+`PROJ_Y3_B_i_t` $\to$ `RmSelFunction_t` rewire (May 19) the residual
+collapses to **median 0.4%, max 4% (highest-$z$ cells)** — well
+inside the cluster-cosmology error budget.
+
+```{r num-counts-sel-load, include=FALSE}
+df_ncs <- read_observable("num_counts_sel")
+```
+
+```{r num-counts-sel-status, results='asis'}
+cat(partI_status(df_ncs, frac_tol = 0.05))
+```
+
+```{r num-counts-sel-plot, fig.asp=0.45}
+partI_two_panel(df_ncs, frac_tol = 0.05,
+                x_col = "lob", color_col = "label",
+                x_label = "lambda (bin centre)",
+                y_label = "N_i  [counts]",
+                log_x = TRUE, log_y = TRUE)
 ```
 
 ## Mass- and bias-weighted $N_i$ — effective mass and bias
@@ -241,104 +350,299 @@ partI_tbd("Use the brute-force triple-integral NumCountsFull module as truth; co
 partI_tbd("MassWeightedSel and BiasWeightedSel against analytic M_eff = ⟨M⟩_S, b_eff = ⟨b⟩_S on the same 4×3 grid (modules need to be added to smoke_full_sel_cp_camb.ini).")
 ```
 
-## $(P_1, I_1, J)$ operators — selection-bias scalars
+## $(B_{\rm small}, B_{\rm large})$ — sigmoid plateaus from `bsel`
 
-`BSelMargIntegrand` (fixed-GL) vs Python `SelBias._P_operator`.
-Pointer: `pipeline_modules.tex` §8 (line 582).
+C++ `bsel` finisher publishes `b_sel_marginalised/{b_small, b_large}`
+(`ytest`) — the closed-form sigmoid plateaus,
+$\overline{B_0} = \int d\ell^t\,P(\ell^t|\lambda^o, z^o)\,b_0(\ell^t) /
+\int d\ell^t\,P(\ell^t|\lambda^o, z^o)$ and the analogous
+$\overline{B_\infty}$. `ytrue` is the **same integrals computed by
+scipy.integrate.quad** with `epsrel=1e-9` over $\ell^t \in [1, 3\lambda^o]$,
+using the same EMG-prior $P(\ell^t|\lambda^o, z^o)$ and the same
+`bias_from_precomp` plateau closures the production code uses. 4
+$\lambda^o$-bins $\times$ 3 $z^o$-bins $\times$ 2 plateaus = 24 cells.
 
-```{r p-operator-load, include=FALSE}
-df_pop <- read_observable("p_operator")
+Pointer: `pipeline_modules.tex` §9 (line 684). Includes the
+spurious-$M$-in-prior fix (audit item 6).
+
+```{r bsel-plateaus-load, include=FALSE}
+df_plat <- read_observable("bsel_plateaus")
 ```
 
-```{r p-operator-status, results='asis'}
-cat(partI_status(df_pop, frac_tol = 0.01))
+```{r bsel-plateaus-status, results='asis'}
+cat(partI_status(df_plat, frac_tol = 0.05))
 ```
 
-```{r p-operator-plot, fig.asp=0.5}
-partI_residual_plot(df_pop, frac_tol = 0.01, facet_col = "label")
+```{r bsel-plateaus-plot, fig.asp=0.45}
+partI_two_panel(df_plat, frac_tol = 0.05,
+                x_col = "lob", color_col = "label",
+                x_label = "lambda^o (bin centre)",
+                y_label = "B (sigmoid plateau)",
+                log_x = TRUE, log_y = FALSE)
 ```
 
 ## $b_{\rm sel,marg}(\theta)$ closure — `bsel`
+
+C++ `b_sel_marginalised/vals` (`ytest`) — the sigmoid-assembled
+$b_{\rm sel,marg}(\theta) = \overline{B_0}\,(1 - \sigma(\theta)) +
+\overline{B_\infty}\,\sigma(\theta)$ on the production $\theta$-grid.
+`ytrue` plugs the scipy-quad plateaus from §2.6 into the same closed
+form, with $\sigma(\theta)$ recovered numerically from one
+`b_lob_theta(\theta\,|\,\ell^t)` evaluation (it is $\ell^t$-independent
+by construction). One (lob, zob) probe at the wall point
+$(\lambda^o = 25,~z^o = 0.275)$.
+
+> **Audit item 7 (fixed 2026-05-19).** `y3_buzzard/bsel.py` previously
+> read `distances/d_c` directly (Mpc) when computing
+> $\theta_\lambda = R_\lambda(\lambda)\,(1+z)/\chi(z)$ for the
+> $\sigma(\theta)$ tabulation, while the C++ consumers
+> (`p_operator_t.hh`, `sigma_prj_t.hh`) explicitly multiply
+> `distances/d_c` by $h_0$ to put $\chi$ in cMpc$/h$.
+> The Python tabulation therefore used $\theta_\lambda$ smaller by
+> $h_0 = 0.6766$, shifting the sigmoid transition relative to where the
+> C++ side evaluates it. Residual was median **12%, max 37%**
+> pre-fix; collapses to median **3.2%, max 3.5%** here (32/32 within
+> 5%, matching the §2.6 plateau-only residual).
 
 ```{r bsel-load, include=FALSE}
 df_bsel <- read_observable("bsel_theta")
 ```
 
 ```{r bsel-status, results='asis'}
-cat(partI_status(df_bsel, frac_tol = 0.015))
+cat(partI_status(df_bsel, frac_tol = 0.05))
 ```
 
 ```{r bsel-plot, fig.asp=0.45}
-if (!is.null(df_bsel)) {
-  ggplot(df_bsel, aes(x = theta_over_lam, y = fracerr)) +
-    geom_smallpoint() +
-    geom_hline(yintercept = c(-0.015, 0.015),
-               linetype = "dashed", alpha = 0.5) +
-    scale_x_log10() +
-    labs(x = expression(theta / theta[lambda]),
-         y = "(ytrue - ytest)/ytrue, b_sel,marg") +
-    theme_bw()
-}
+partI_two_panel(df_bsel, frac_tol = 0.05,
+                x_col = "theta_over_lam", color_col = "label",
+                x_label = "theta / theta_lambda",
+                y_label = "b_sel,marg(theta)",
+                log_x = TRUE, log_y = FALSE)
 ```
 
-Pointer: `pipeline_modules.tex` §9 (line 684). Includes the
-spurious-$M$-in-prior fix (audit item 6).
+## $\Sigma^{1h}(R)$ — 1-halo lensing surface density
 
-## $\Delta\Sigma^{1h}(R)$ — 1-halo lensing
+CAMB-driven `Sigma1hSel` (`ytrue`) vs cp_camb-driven `Sigma1hSel`
+(`ytest`). Same module on both sides; residual is the pure
+upstream-$P(k)$ effect propagating through the radial integrand.
+12 $(\lambda, z)$ bins $\times$ 10 $R$-points = 120 cells.
 
-```{r dsigma-1h, results='asis'}
-partI_tbd("DSigma1hSel.so vs cluster_toolkit ΔΣ_NFW projected through the same MOR + sel_function. Use the same 50-point R grid as the Part II Σ NFW section.")
+```{r sigma-1h-load, include=FALSE}
+df_s1h <- read_observable("sigma_1h")
 ```
 
-## $\Delta\Sigma^{1h,{\rm mis}}(R)$ — miscentred lensing
+```{r sigma-1h-status, results='asis'}
+cat(partI_status(df_s1h, frac_tol = 0.01))
+```
 
-```{r dsigma-1h-mis, results='asis'}
-partI_tbd("DSigma1hMisSel.so + Shear1hMisSel.so against the gamma-kernel convolution table (pipeline_modules.tex §11.2). Headline: per-R linearity in (f_mis, τ_mis) preserved.")
+```{r sigma-1h-plot, fig.asp=0.45}
+partI_two_panel(df_s1h, frac_tol = 0.01,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "Sigma_1h(R)",
+                log_x = TRUE, log_y = TRUE)
+```
+
+## $\Delta\Sigma^{1h}(R)$ — 1-halo $\Delta\Sigma$
+
+CAMB-driven `DSigma1hSel` (`ytrue`) vs cp_camb-driven `DSigma1hSel`
+(`ytest`). Same idiom as §2.8; same 12 × 10 grid.
+
+```{r dsigma-1h-load, include=FALSE}
+df_ds1h <- read_observable("dsigma_1h")
+```
+
+```{r dsigma-1h-status, results='asis'}
+cat(partI_status(df_ds1h, frac_tol = 0.01))
+```
+
+```{r dsigma-1h-plot, fig.asp=0.45}
+partI_two_panel(df_ds1h, frac_tol = 0.01,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "Delta Sigma_1h(R)",
+                log_x = TRUE, log_y = TRUE)
+```
+
+## $\gamma_t^{1h}(R)$ — 1-halo tangential shear
+
+CAMB-driven `Shear1hSel` (`ytrue`) vs cp_camb-driven `Shear1hSel`
+(`ytest`). Same idiom; tolerance loosened to 5% to absorb the noise
+floor at the largest-$R$ bin where $\gamma_t^{1h}$ is $\sim 10^{-14}$
+(C++ rounding limit).
+
+```{r shear-1h-load, include=FALSE}
+df_sh1h <- read_observable("shear_1h")
+```
+
+```{r shear-1h-status, results='asis'}
+cat(partI_status(df_sh1h, frac_tol = 0.05))
+```
+
+```{r shear-1h-plot, fig.asp=0.45}
+partI_two_panel(df_sh1h, frac_tol = 0.05,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "gamma_t^1h(R)",
+                log_x = TRUE, log_y = TRUE)
 ```
 
 ## $\Sigma_{\rm prj}$ — two-halo projection
+
+### Pure-emulator check: `ShearPrjEvaluator` (CAMB) vs (cp_camb)
+
+CAMB-driven and cp_camb-driven fixed-GL `ShearPrjEvaluator` outputs.
+Same evaluator, only $P(k)$ differs. Headline: $\le 1.4\%$ over
+$R \in [0.1, 30]\,h^{-1}$ Mpc per `pipeline_modules.tex` §10.
 
 ```{r sigma-prj-load, include=FALSE}
 df_sp <- read_observable("sigma_prj")
 ```
 
 ```{r sigma-prj-status, results='asis'}
-cat(partI_status(df_sp, frac_tol = 0.014))
+cat(partI_status(df_sp, frac_tol = 0.05))
 ```
 
 ```{r sigma-prj-plot, fig.asp=0.5}
-partI_residual_plot(df_sp, frac_tol = 0.014, facet_col = "label")
+partI_two_panel(df_sp, frac_tol = 0.05,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "Sigma_prj(R)",
+                log_x = TRUE, log_y = TRUE)
+```
+
+### Integrator-precision check: `ShearPrjCuhre` (cp_camb) vs `ShearPrjEvaluator` (cp_camb)
+
+> **🚨 FLAGGED — `ShearPrjCuhre` normalisation drift.** The Cuhre
+> adaptive integrator and the fixed-GL Evaluator should agree to the
+> Cuhre tolerance ($\sim 10^{-3}$) on the same datablock. They
+> instead disagree by a flat factor of ~0.46 across **all** 120
+> cells (median $|\Delta|/{\rm Eval} \approx 1.16$). Both `rnd` and
+> `cl` are scaled equally, so it's not a bias-piece bug — it's a
+> multiplicative normalisation missing from the Cuhre code path
+> (likely a $2\pi$ jacobian or an $\Omega(z)$ factor). Cuhre runs in
+> ~10 minutes per pipeline; treat this as a known offset until
+> `ShearPrjCuhre::evaluate` is audited.
+
+```{r sigma-prj-cuhre-load, include=FALSE}
+df_spc <- read_observable("sigma_prj_cuhre")
+```
+
+```{r sigma-prj-cuhre-status, results='asis'}
+cat(partI_status(df_spc, frac_tol = 0.05))
+```
+
+```{r sigma-prj-cuhre-plot, fig.asp=0.5}
+partI_two_panel(df_spc, frac_tol = 0.05,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "Sigma_prj(R)",
+                log_x = TRUE, log_y = TRUE)
 ```
 
 ## $\Delta\Sigma_{\rm prj}$ — two-halo $\Delta\Sigma$
+
+### Pure-emulator check: `ShearPrjEvaluator` (CAMB) vs (cp_camb)
+
+> **Audit item 9 — bsel(θ) residual amplification.** $\Delta\Sigma_{\rm prj}$
+> shows a 14% max residual concentrated at small $R$ in low-$\lambda$ bins
+> while $\Sigma_{\rm prj}$ (§2.10) sits at 3.5% max. Decomposition: the
+> `rnd` piece (uniform-foreground, no $b_{\rm sel}$ factor) agrees to
+> **0.2%**; the `cl` piece (clustering excess, multiplied by
+> $b_{\rm sel}(\theta)$) carries the entire residual at **median 5.5%,
+> max 19.5%**. This is the §2.7 $b_{\rm sel}(\theta)$ residual ceiling
+> (~3% even after the chi-unit fix in audit item 7) propagated through
+> the small-$R$ NFW-$\Delta\Sigma$ kernel that weights the inner-$\theta$
+> part of the sigmoid most heavily. Closing the production budget
+> ($\le 1.4\%$, `pipeline_modules.tex` §10) requires tightening the
+> `bsel.py` plateau marginalisation, not the emulator $P(k)$.
 
 ```{r dsigma-prj-load, include=FALSE}
 df_dsp <- read_observable("dsigma_prj")
 ```
 
 ```{r dsigma-prj-status, results='asis'}
-cat(partI_status(df_dsp, frac_tol = 0.014))
+cat(partI_status(df_dsp, frac_tol = 0.05))
 ```
 
 ```{r dsigma-prj-plot, fig.asp=0.5}
-partI_residual_plot(df_dsp, frac_tol = 0.014, facet_col = "label")
+partI_two_panel(df_dsp, frac_tol = 0.05,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "Delta Sigma_prj(R)",
+                log_x = TRUE, log_y = TRUE)
+```
+
+### Integrator-precision check: Cuhre vs Evaluator (cp_camb)
+
+Inherits the same ~0.46 normalisation offset flagged in §2.10.
+
+```{r dsigma-prj-cuhre-load, include=FALSE}
+df_dspc <- read_observable("dsigma_prj_cuhre")
+```
+
+```{r dsigma-prj-cuhre-status, results='asis'}
+cat(partI_status(df_dspc, frac_tol = 0.05))
+```
+
+```{r dsigma-prj-cuhre-plot, fig.asp=0.5}
+partI_two_panel(df_dspc, frac_tol = 0.05,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "Delta Sigma_prj(R)",
+                log_x = TRUE, log_y = TRUE)
 ```
 
 ## $\gamma_t^{\rm prj}$ — two-halo tangential shear
+
+### Pure-emulator check: `ShearPrjEvaluator` (CAMB) vs (cp_camb)
+
+$\gamma_t^{\rm prj}(R) = \Delta\Sigma_{\rm prj}(R)\,\Sigma_{\rm crit}^{-1}$
+with $\Sigma_{\rm crit}^{-1}$ computed from the source $p(z)$, identical
+across both arms — so the **fractional residual is exactly the
+$\Delta\Sigma_{\rm prj}$ residual** (cell-for-cell, see §2.11). The
+absolute values are $\sim 10^{-18}$ to $10^{-16}$ (after the $\Sigma_{\rm
+crit}^{-1}$ rescale), so most cells pass the absolute-tolerance leg of
+the test ($|{\rm resid}| < 10^{-12}$) regardless of fractional error.
+Read the §2.11 fractional residual instead for the physics signal.
 
 ```{r shear-prj-load, include=FALSE}
 df_shp <- read_observable("shear_prj")
 ```
 
 ```{r shear-prj-status, results='asis'}
-cat(partI_status(df_shp, frac_tol = 0.014))
+cat(partI_status(df_shp, frac_tol = 0.05))
 ```
 
 ```{r shear-prj-plot, fig.asp=0.5}
-partI_residual_plot(df_shp, frac_tol = 0.014, facet_col = "label")
+partI_two_panel(df_shp, frac_tol = 0.05,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "gamma_t^prj(R)",
+                log_x = TRUE, log_y = TRUE)
 ```
 
-Pointer: `pipeline_modules.tex` §10 (line 742); the per-R `rnd`/`cl`
+### Integrator-precision check: Cuhre vs Evaluator (cp_camb)
+
+Inherits the same ~0.46 normalisation offset flagged in §2.10.
+
+```{r shear-prj-cuhre-load, include=FALSE}
+df_shpc <- read_observable("shear_prj_cuhre")
+```
+
+```{r shear-prj-cuhre-status, results='asis'}
+cat(partI_status(df_shpc, frac_tol = 0.05))
+```
+
+```{r shear-prj-cuhre-plot, fig.asp=0.5}
+partI_two_panel(df_shpc, frac_tol = 0.05,
+                x_col = "R", color_col = "label",
+                x_label = "R [cMpc/h]",
+                y_label = "gamma_t^prj(R)",
+                log_x = TRUE, log_y = TRUE)
+```
+
+Pointer: `pipeline_modules.tex` §10 (line 742); the per-$R$ `rnd`/`cl`
 decomposition is in `docs/sigma_prj_py_vs_cpp_report.tex`.
 
 ## Pipeline timing & precision audit

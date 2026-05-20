@@ -160,7 +160,7 @@ namespace y3_cluster {
     std::optional<y3_cluster::OMEGA_Z_DES> omega_z_;
     std::optional<y3_cluster::MOR_HOD_t>   mor_;
     std::optional<Interp2D>                xi_nl_;   // direct [xi_nl] lookup
-    std::array<std::optional<y3_cluster::PROJ_Y3_B_i_t>, 4> b_i_;
+    std::array<std::optional<y3_cluster::RmSelFunction_t>, 4> b_i_;
 
     // Direct datablock reads for geometry (chi(z)) and photo-z sigma(z).
     std::optional<Interp1D> chi_;       // from distances section
@@ -184,7 +184,6 @@ namespace y3_cluster {
     explicit P_operator_cuhre(cosmosis::DataBlock& cfg)
       : Nth_(10)
     {
-      for (int i = 0; i < 4; ++i) b_i_[i].emplace(i);
       if (cfg.has_val(module_label(), "n_theta"))
         Nth_ = cfg.view<int>(module_label(), "n_theta");
     }
@@ -192,6 +191,7 @@ namespace y3_cluster {
     void
     set_sample(cosmosis::DataBlock& sample)
     {
+      for (int i = 0; i < 4; ++i) b_i_[i].emplace(sample, i);
       hmf_.emplace(sample);
       hmb_.emplace(make_Interp2D(sample, "haloModel", "lnM", "z", "bias"));
       dv_do_dz_.emplace(sample);

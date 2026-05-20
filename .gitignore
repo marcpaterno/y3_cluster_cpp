@@ -2,6 +2,7 @@
 CMakeFiles/
 Testing/
 #validation-data/
+smoke_sel_runs/
 validations_gpu/
 validations/ipython_to_be_imported/
 cosmosis_test_output/
@@ -50,6 +51,20 @@ _deps/
 *.tsv
 *.csv
 *_test_out/
+
+# LaTeX build artefacts (.pdf and .out are already covered above).
+*.aux
+*.log
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# docs/figs/ — script is source, generated PNGs/PDFs are outputs.
+docs/figs/*.png
+docs/figs/*.pdf
+docs/figs/__pycache__/
+__pycache__/
 
 y1_rerun/*.txt
 y1_rerun/*.tgz

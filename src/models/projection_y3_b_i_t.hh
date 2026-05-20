@@ -1,96 +1,57 @@
-// B_i(λ^true, z) — closed-form bin integral of the DES Y3 projection kernel
+// RmSelFunction_t -- closed-form bin-integrated richness kernel K_i(ltr, z)
+// for the DES Y3 selection function.
 //
-//   P(λ^ob | λ^true, z) = (1 - f_prj) · δ(λ^ob - λ^true)
-//                       + f_prj · τ · exp(-τ (λ^ob - λ^true)) · Θ(λ^ob ≥ λ^true)
+// Implements Eq. (34) (Ki_final_expanded) of
+// $PSCRATCH/github/RichnessSelection/docs/richness_selection_function.tex,
+// in compact form Eq. (33) (Ki_final):
 //
-// where (f_prj, τ) = (f_prj, τ)(λ^true, z) are the frozen Y3 tables.
+//   K_i(ltr, z) = (1 - fprj) [Phi((lmax - mu) / sigma)
+//                             - Phi((lmin - mu) / sigma)]
+//               + fprj       [F_EMG(lmax) - F_EMG(lmin)]
 //
-//   B_i(lt, z) = (1 - f_prj) · 1[L_i ≤ lt < U_i]
-//              + f_prj · [exp(-τ · max(0, L_i - lt))
-//                         - exp(-τ · max(0, U_i - lt))]
+// with mu = ltr + Delta_mu and the EMG parameters (Delta_mu, sigma, tau,
+// fprj) read as functions of (ltr, z) from the Costanzi
+// `prj_params_DESY3_lss_lin_dep_getdist_v1.txt` calibration via
+// PlobLtrEMG_t (datablock section "plob_ltr_params").
 //
-// For the last bin (U_i = ∞) the second exponential vanishes.
+// The numerics live in RichnessKernel_t (richness_kernel_t.hh): this class
+// is a thin (bin_index -> bin edges) + (datablock -> PlobLtrEMG_t)
+// adapter so the Costanzi-2026 integrands can address the kernel by bin.
 //
-// Matches `kernels/projection.py:111-154` in the RichnessSelection repo.
+// Mirrors richness_selection/selection_function/kernels.py::K_i.
 #ifndef Y3_CLUSTER_PROJECTION_Y3_B_I_T_HH
 #define Y3_CLUSTER_PROJECTION_Y3_B_I_T_HH
 
-#include "utils/interp_2d.hh"
-#include "models/lc_lt_projection_y3.hh"
+#include "cosmosis/datablock/datablock.hh"
+#include "models/plob_ltr_emg_t.hh"
+#include "models/richness_kernel_t.hh"
 
 #include <array>
-#include <cmath>
 #include <limits>
-#include <vector>
 
 namespace y3_cluster {
 
-  class PROJ_Y3_B_i_t {
+  class RmSelFunction_t {
   public:
-    // Bin edges [20, 30, 45, 60, ∞).
+    // DES Y3 richness bin edges [20, 30, 45, 60, inf).
     static constexpr std::array<double, 5> bin_edges{
       {20.0, 30.0, 45.0, 60.0, std::numeric_limits<double>::infinity()}};
     static constexpr int n_bins = 4;
 
-    explicit PROJ_Y3_B_i_t(int bin_index)
-      : _fprj(_lt_vec(), _zt_vec(), _fprj_vec())
-      , _tau(_lt_vec(), _zt_vec(), _tau_vec())
-      , _Llo(bin_edges[bin_index])
-      , _Lhi(bin_edges[bin_index + 1])
-      , _upper_is_inf(std::isinf(bin_edges[bin_index + 1]))
+    RmSelFunction_t(cosmosis::DataBlock& sample, int bin_index)
+      : _plob(sample)
+      , _kernel(bin_edges[bin_index], bin_edges[bin_index + 1])
     {}
 
     double
-    operator()(double lt, double zt) const
+    operator()(double lt, double z) const
     {
-      double const fp = std::min(std::max(_fprj.clamp(lt, zt), 0.0), 1.0);
-      double const tt = std::max(_tau.clamp(lt, zt), 1e-8);
-
-      double const indicator = (lt >= _Llo && lt < _Lhi) ? 1.0 : 0.0;
-
-      double const dL = std::max(0.0, _Llo - lt);
-      double const expL = std::exp(-tt * dL);
-
-      double expU = 0.0;
-      if (!_upper_is_inf) {
-        double const dU = std::max(0.0, _Lhi - lt);
-        expU = std::exp(-tt * dU);
-      }
-
-      return (1.0 - fp) * indicator + fp * (expL - expU);
+      return _kernel(lt, z, _plob);
     }
 
   private:
-    Interp2D _fprj;
-    Interp2D _tau;
-    double _Llo;
-    double _Lhi;
-    bool _upper_is_inf;
-
-    static std::vector<double>
-    _lt_vec()
-    {
-      return std::vector<double>(projection_y3::lt_bins.begin(),
-                                 projection_y3::lt_bins.end());
-    }
-    static std::vector<double>
-    _zt_vec()
-    {
-      return std::vector<double>(projection_y3::zt_bins.begin(),
-                                 projection_y3::zt_bins.end());
-    }
-    static std::vector<double>
-    _fprj_vec()
-    {
-      return std::vector<double>(projection_y3::fprj_arr.begin(),
-                                 projection_y3::fprj_arr.end());
-    }
-    static std::vector<double>
-    _tau_vec()
-    {
-      return std::vector<double>(projection_y3::tau_arr.begin(),
-                                 projection_y3::tau_arr.end());
-    }
+    PlobLtrEMG_t      _plob;
+    RichnessKernel_t  _kernel;
   };
 
 } // namespace y3_cluster

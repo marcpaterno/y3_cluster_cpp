@@ -5341,6 +5341,7 @@ namespace Catch {
     static struct sigaction
       oldSigActions[]; // [sizeof(signalDefs) / sizeof(SignalDefs)];
     static stack_t oldSigStack;
+    static constexpr std::size_t sigStackSize = 32768;
     static char altStackMem[];
 
     static void handleSignal(int sig);
@@ -8522,7 +8523,7 @@ namespace Catch {
     isSet = true;
     stack_t sigStack;
     sigStack.ss_sp = altStackMem;
-    sigStack.ss_size = SIGSTKSZ;
+    sigStack.ss_size = sigStackSize;
     sigStack.ss_flags = 0;
     sigaltstack(&sigStack, &oldSigStack);
     struct sigaction sa = {};
@@ -8557,7 +8558,7 @@ namespace Catch {
                                                         sizeof(SignalDefs)] =
     {};
   stack_t FatalConditionHandler::oldSigStack = {};
-  char FatalConditionHandler::altStackMem[SIGSTKSZ] = {};
+  char FatalConditionHandler::altStackMem[FatalConditionHandler::sigStackSize] = {};
 
 } // namespace Catch
 

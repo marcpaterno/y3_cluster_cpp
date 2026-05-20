@@ -38,15 +38,12 @@ private:
   std::optional<y3_cluster::DV_DO_DZ_t> dv_do_dz_;
   std::optional<y3_cluster::OMEGA_Z_DES> omega_z_;
   std::optional<y3_cluster::MOR_HOD_t> mor_;
-  std::array<std::optional<y3_cluster::PROJ_Y3_B_i_t>, 4> b_i_;
+  std::array<std::optional<y3_cluster::RmSelFunction_t>, 4> b_i_;
 
   int current_bin_{0};
 
 public:
-  explicit NumCountsFullScalarIntegrand(cosmosis::DataBlock& /*cfg*/)
-  {
-    for (int i = 0; i < 4; ++i) { b_i_[i].emplace(i); }
-  }
+  explicit NumCountsFullScalarIntegrand(cosmosis::DataBlock& /*cfg*/) {}
 
   void
   set_sample(cosmosis::DataBlock& sample)
@@ -55,6 +52,7 @@ public:
     dv_do_dz_.emplace(sample);
     omega_z_.emplace(sample);
     mor_.emplace(sample);
+    for (int i = 0; i < 4; ++i) { b_i_[i].emplace(sample, i); }
   }
 
   void
