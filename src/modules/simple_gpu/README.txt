@@ -1,8 +1,7 @@
-Simplified GPU Modules WITHOUT Selection Function
+Simplified GPU Modules
 =================================================
 
-These modules implement cluster lensing observables using direct MOR integration
-without the pre-tabulated richness selection function S_ij(lnM, z).
+These modules implement cluster lensing observables using direct MOR integration.
 
 MODULES
 -------
