@@ -3,11 +3,10 @@
 // Adapts p_operator_cuhre_t.hh for GPU execution. Computes all three scalars
 // in a single module to share model setup overhead.
 //
-// Outputs to datablock:
-//   bSelMargGPU/P1_vals, P1_errors
-//   bSelMargGPU/I1_vals, I1_errors
-//   bSelMargGPU/J_vals,  J_errors
-//   bSelMargGPU/zo_low, zo_high, lambda_bin  (grid points)
+// Outputs to datablock (matches CPU b_sel_marg sections for bsel.py compatibility):
+//   b_sel_marg_P1/vals, errors, zo_low, zo_high, lambda_bin
+//   b_sel_marg_I1/vals, errors
+//   b_sel_marg_J/vals,  errors
 
 #include "cosmosis/datablock/datablock.hh"
 #include "cosmosis/datablock/ndarray.hh"
@@ -135,26 +134,29 @@ public:
       J_errs[ig] = res_j.errorest;
     }
 
-    // Write results to datablock
+    // Write results to datablock - use same section names as CPU version
+    // so bsel.py can consume the output unchanged
     using cosmosis::ndarray;
-    char const* section = "bSelMargGPU";
 
+    // P1 section
     ndarray<double> P1_arr(P1_vals, {ngrid});
     ndarray<double> P1_err_arr(P1_errs, {ngrid});
-    sample.put_val(section, "P1_vals", P1_arr);
-    sample.put_val(section, "P1_errors", P1_err_arr);
+    sample.put_val("b_sel_marg_P1", "vals", P1_arr);
+    sample.put_val("b_sel_marg_P1", "errors", P1_err_arr);
 
+    // I1 section
     ndarray<double> I1_arr(I1_vals, {ngrid});
     ndarray<double> I1_err_arr(I1_errs, {ngrid});
-    sample.put_val(section, "I1_vals", I1_arr);
-    sample.put_val(section, "I1_errors", I1_err_arr);
+    sample.put_val("b_sel_marg_I1", "vals", I1_arr);
+    sample.put_val("b_sel_marg_I1", "errors", I1_err_arr);
 
+    // J section (= I2 - I1, computed directly)
     ndarray<double> J_arr(J_vals, {ngrid});
     ndarray<double> J_err_arr(J_errs, {ngrid});
-    sample.put_val(section, "J_vals", J_arr);
-    sample.put_val(section, "J_errors", J_err_arr);
+    sample.put_val("b_sel_marg_J", "vals", J_arr);
+    sample.put_val("b_sel_marg_J", "errors", J_err_arr);
 
-    // Write grid points for downstream use
+    // Write grid points to P1 section (bsel.py reads from there)
     std::vector<double> zo_low_out(ngrid), zo_high_out(ngrid), bin_out(ngrid);
     for (size_t i = 0; i < ngrid; ++i) {
       zo_low_out[i]  = cfg_.grid_points.points[i][0];
@@ -164,9 +166,9 @@ public:
     ndarray<double> zo_low_arr(zo_low_out, {ngrid});
     ndarray<double> zo_high_arr(zo_high_out, {ngrid});
     ndarray<double> bin_arr(bin_out, {ngrid});
-    sample.put_val(section, "zo_low", zo_low_arr);
-    sample.put_val(section, "zo_high", zo_high_arr);
-    sample.put_val(section, "lambda_bin", bin_arr);
+    sample.put_val("b_sel_marg_P1", "zo_low", zo_low_arr);
+    sample.put_val("b_sel_marg_P1", "zo_high", zo_high_arr);
+    sample.put_val("b_sel_marg_P1", "lambda_bin", bin_arr);
   }
 
 private:

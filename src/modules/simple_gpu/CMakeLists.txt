@@ -48,4 +48,12 @@ if (USE_CUDA)
   set_target_properties(bSelMargGPU PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
   target_compile_options(bSelMargGPU PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
+  # ShearPrjGPU.cu - GPU shear projection (sigma_prj, dsigma_prj, shear_prj)
+  # Computes 2-halo tangential shear with selection bias
+  add_library(ShearPrjGPU MODULE ShearPrjGPU.cu)
+  target_link_libraries(ShearPrjGPU PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models cuda_utils)
+  target_include_directories(ShearPrjGPU PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  set_target_properties(ShearPrjGPU PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  target_compile_options(ShearPrjGPU PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+
 endif ()
