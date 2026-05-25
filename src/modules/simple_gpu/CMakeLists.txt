@@ -40,4 +40,12 @@ if (USE_CUDA)
   set_target_properties(numberCountsFull PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
   target_compile_options(numberCountsFull PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
 
+  # bSelMargGPU.cu - Unified Costanzi-2026 (P1, I1, J) operators
+  # Adapts p_operator_cuhre_t.hh for GPU with 3D integration + inner GL theta loop
+  add_library(bSelMargGPU MODULE bSelMargGPU.cu)
+  target_link_libraries(bSelMargGPU PRIVATE cosmosis ${NVTX_LIBRARY} utils cuda_models cuda_utils)
+  target_include_directories(bSelMargGPU PRIVATE ${CMAKE_SOURCE_DIR}/src ${CUBACPP_DIR} ${PAGANI_DIR})
+  set_target_properties(bSelMargGPU PROPERTIES POSITION_INDEPENDENT_CODE ON CUDA_ARCHITECTURES ${Y3GCC_TARGET_ARCH})
+  target_compile_options(bSelMargGPU PRIVATE "--expt-relaxed-constexpr" "-lineinfo" "-DCURAND")
+
 endif ()
