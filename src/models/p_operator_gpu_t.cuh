@@ -38,7 +38,25 @@ namespace y3_cuda {
 
   namespace p_op_gpu_detail {
 
-    __host__ __device__ inline constexpr double PI = 3.14159265358979323846;
+    // Use static constexpr for CUDA compatibility (internal linkage required)
+    static constexpr double PI = 3.14159265358979323846;
+    static constexpr int GL_N = 10;
+
+    // GL nodes on [-1, 1] for N=10
+    static constexpr double gl_x10[10] = {
+      -0.9739065285171717, -0.8650633666889845, -0.6794095682990244,
+      -0.4333953941292472, -0.1488743389816312,  0.1488743389816312,
+       0.4333953941292472,  0.6794095682990244,  0.8650633666889845,
+       0.9739065285171717
+    };
+
+    // GL weights for N=10
+    static constexpr double gl_w10[10] = {
+      0.0666713443086881, 0.1494513491505806, 0.2190863625159820,
+      0.2692667193099963, 0.2955242247147529, 0.2955242247147529,
+      0.2692667193099963, 0.2190863625159820, 0.1494513491505806,
+      0.0666713443086881
+    };
 
     __host__ __device__ inline double
     R_lambda(double lam)
@@ -51,7 +69,7 @@ namespace y3_cuda {
     lob_center(int bin)
     {
       // Arithmetic centres: (25, 37.5, 52.5, 130)
-      constexpr double centres[4] = {25.0, 37.5, 52.5, 130.0};
+      double const centres[4] = {25.0, 37.5, 52.5, 130.0};
       return (bin >= 0 && bin < 4) ? centres[bin] : 25.0;
     }
 
@@ -78,31 +96,12 @@ namespace y3_cuda {
                 * ( tt - ll + lo) * (tt + ll + lo);
       sq = fmax(sq, 0.0);
 
+      double const pi_local = 3.14159265358979323846;
       double const A = ll*ll * acos(c1)
                      + lo*lo * acos(c2)
                      - 0.5   * sqrt(sq);
-      return A / (PI * ll * ll);
+      return A / (pi_local * ll * ll);
     }
-
-    // Fixed-size GL nodes for GPU (max 16 nodes)
-    // Pre-computed for N=10 on [-1, 1], scaled at runtime to [a, b]
-    __host__ __device__ inline constexpr int GL_N = 10;
-
-    // GL nodes on [-1, 1] for N=10
-    __device__ __host__ inline constexpr double gl_x10[10] = {
-      -0.9739065285171717, -0.8650633666889845, -0.6794095682990244,
-      -0.4333953941292472, -0.1488743389816312,  0.1488743389816312,
-       0.4333953941292472,  0.6794095682990244,  0.8650633666889845,
-       0.9739065285171717
-    };
-
-    // GL weights for N=10
-    __device__ __host__ inline constexpr double gl_w10[10] = {
-      0.0666713443086881, 0.1494513491505806, 0.2190863625159820,
-      0.2692667193099963, 0.2955242247147529, 0.2955242247147529,
-      0.2692667193099963, 0.2190863625159820, 0.1494513491505806,
-      0.0666713443086881
-    };
 
   }  // namespace p_op_gpu_detail
 
@@ -184,6 +183,22 @@ namespace y3_cuda {
     {
       using namespace p_op_gpu_detail;
 
+      // Local constants for device compatibility
+      constexpr double pi = 3.14159265358979323846;
+      constexpr int gl_n = 10;
+      constexpr double gl_x[10] = {
+        -0.9739065285171717, -0.8650633666889845, -0.6794095682990244,
+        -0.4333953941292472, -0.1488743389816312,  0.1488743389816312,
+         0.4333953941292472,  0.6794095682990244,  0.8650633666889845,
+         0.9739065285171717
+      };
+      constexpr double gl_w[10] = {
+        0.0666713443086881, 0.1494513491505806, 0.2190863625159820,
+        0.2692667193099963, 0.2955242247147529, 0.2955242247147529,
+        0.2692667193099963, 0.2190863625159820, 0.1494513491505806,
+        0.0666713443086881
+      };
+
       // Photo-z kernel: w_z(zt, zob) = 1 - u^2 if |u| < 1
       // Use polynomial fit for sigma_z(zt)
       SIGMA_PHOTOZ_DES_t sigma_z_model;
@@ -223,9 +238,9 @@ namespace y3_cuda {
       double const hlen = 0.5 * (th_hi - th_lo);
 
       double th_sum = 0.0;
-      for (int it = 0; it < GL_N; ++it) {
-        double const th     = mid + hlen * gl_x10[it];
-        double const w_gl   = hlen * gl_w10[it];
+      for (int it = 0; it < gl_n; ++it) {
+        double const th     = mid + hlen * gl_x[it];
+        double const w_gl   = hlen * gl_w[it];
         double const sin_th = sin(th);
         double const fA     = area_overlap(th, theta_lob, theta_lt);
         if (fA <= 0.0) continue;
@@ -234,7 +249,7 @@ namespace y3_cuda {
             chi_z*chi_z + chi_o*chi_o - 2.0*chi_z*chi_o*cos(th), 0.0));
         double const xi_val  = xi_nl_->clamp(dchi_3d, zob_);
         double const sigmoid = 1.0 / (1.0 + exp(-k_sig * (th - th0_sig)));
-        double const w_th    = w_gl * 2.0 * PI * sin_th;
+        double const w_th    = w_gl * 2.0 * pi * sin_th;
 
         th_sum += w_th * fA * WeightF::weight(xi_val, sigmoid);
       }
