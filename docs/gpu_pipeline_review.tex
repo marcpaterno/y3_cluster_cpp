@@ -96,9 +96,9 @@ Module & Status & Notes \\
 \midrule
 \texttt{numberCountsSimple} & \textcolor{green!50!black}{\textbf{TESTED}} & 3D integration $(l_o, z_t, \ln M)$ \\
 \texttt{numberCountsFull} & \textcolor{green!50!black}{\textbf{TESTED}} & 4D integration with EMG scatter \\
-\texttt{sigma1hSimple} & Built & Awaiting haloModel \\
-\texttt{sigmaTotSimple} & Built & Awaiting haloModel \\
-\texttt{shearTotSimple} & Built & Awaiting haloModel \\
+\texttt{sigmaTotSimple} & \textcolor{green!50!black}{\textbf{TESTED}} & Total $\Sigma$ via haloModel adapter \\
+\texttt{sigma1hSimple} & Built & Ready to test \\
+\texttt{shearTotSimple} & Built & Ready to test \\
 \bottomrule
 \end{tabular}
 \caption{GPU module implementation status.}
@@ -170,6 +170,28 @@ The \texttt{Full} counts are $\sim$20\% of \texttt{Simple} counts despite the ri
 
 \paragraph{Timing:} Module execution took 0.27 seconds (4D integration is slower than 3D).
 
+\subsection{Test Results: \texttt{sigmaTotSimple}}
+
+Successfully tested on HPC (2026-05-25). Computes $N \times \langle\Sigma_{\rm tot}(R)\rangle$ via 3D integration over $(l_o, z_t, \ln M)$.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}c c c c@{}}
+\toprule
+$z$ Range & $R=0.5$ Mpc/h & $R=1.0$ Mpc/h & $R=2.0$ Mpc/h \\
+\midrule
+$[0.20, 0.35]$ & $5.48 \times 10^5$ & $7.66 \times 10^5$ & $9.45 \times 10^5$ \\
+$[0.35, 0.50]$ & $5.13 \times 10^5$ & $1.12 \times 10^6$ & $1.20 \times 10^6$ \\
+$[0.50, 0.65]$ & $5.23 \times 10^5$ & $1.16 \times 10^6$ & $1.22 \times 10^6$ \\
+\bottomrule
+\end{tabular}
+\caption{GPU $N \times \langle\Sigma_{\rm tot}(R)\rangle$ results (units: $M_\odot$/pc$^2$ $\times$ counts).}
+\end{table}
+
+\paragraph{Pipeline:} Required adding \texttt{halomodel\_adapter.py} to copy tables from \texttt{haloModel} section to \texttt{deltasigma} section with correct key names for \texttt{SIG\_MAX}.
+
+\paragraph{Timing:} Module execution took 0.45 seconds.
+
 \subsection{New CUDA Models Created}
 
 \paragraph{\texttt{emg\_des\_t.cuh}} -- EMG kernel $P(\lambda_{\rm ob}|\lambda_{\rm tr},z)$
@@ -193,8 +215,10 @@ The \texttt{Full} counts are $\sim$20\% of \texttt{Simple} counts despite the ri
   \item \filepath{src/models/emg\_des\_t.cuh} -- EMG CUDA model
   \item \filepath{src/modules/simple\_gpu/numberCountsFull.cu} -- 4D integration
   \item \filepath{src/modules/simple\_gpu/plob\_ltr\_loader.py} -- EMG coefficient loader
+  \item \filepath{src/modules/simple\_gpu/halomodel\_adapter.py} -- Adapter for haloModel tables
   \item \filepath{cosmosis\_tests/gpu/number\_counts\_simple\_test.ini} -- Minimal test config
   \item \filepath{cosmosis\_tests/gpu/number\_counts\_full\_test.ini} -- 4D test config
+  \item \filepath{cosmosis\_tests/gpu/sigma\_tot\_simple\_test.ini} -- Sigma test config
   \item \filepath{cosmosis\_tests/gpu/values\_simple\_gpu.ini} -- Parameter values
 \end{itemize}
 
@@ -410,22 +434,18 @@ operator()(double lob, double ltr, double z) const {
   \item[$\square$] Compare against CPU \texttt{sel\_function} approach
 \end{itemize}
 
-\subsection{Phase 3: Create GPU haloModel (2--3 days)}
+\subsection{Phase 3: Create GPU haloModel (2--3 days) -- DONE}
 
 The sigma/shear modules require tables from haloModel:
 \begin{itemize}
-  \item[$\square$] $\Sigma_{\rm nfw}(R, \ln M, z)$ -- NFW surface density
-  \item[$\square$] $\Sigma_{\rm hh}(R, z)$ -- 2-halo term (halo-halo)
-  \item[$\square$] $\Delta\Sigma_{\rm nfw}(R, \ln M, z)$ -- NFW excess surface density
-  \item[$\square$] $b(\ln M, z)$ -- halo bias
-  \item[$\square$] $\Sigma_{\rm crit}^{-1}(z)$ -- critical surface density inverse
+  \item[\textcolor{green!50!black}{$\checkmark$}] $\Sigma_{\rm nfw}(R, \ln M, z)$ -- NFW surface density
+  \item[\textcolor{green!50!black}{$\checkmark$}] $\Sigma_{\rm hh}(R, z)$ -- 2-halo term (halo-halo)
+  \item[\textcolor{green!50!black}{$\checkmark$}] $\Delta\Sigma_{\rm nfw}(R, \ln M, z)$ -- NFW excess surface density
+  \item[\textcolor{green!50!black}{$\checkmark$}] $b(\ln M, z)$ -- halo bias
+  \item[$\square$] $\Sigma_{\rm crit}^{-1}(z)$ -- critical surface density inverse (for shear)
 \end{itemize}
 
-Options:
-\begin{enumerate}
-  \item Port \filepath{y3\_buzzard/haloModel.py} to CosmoSIS module format
-  \item Create GPU-native haloModel using existing CUDA interpolators
-\end{enumerate}
+\textbf{Solution:} Created \texttt{halomodel\_adapter.py} that copies from existing \texttt{buildWpGammat.py} output (\texttt{haloModel} section) to \texttt{deltasigma} section with key names expected by \texttt{SIG\_MAX}.
 
 \subsection{Phase 4: GPU Shear/Sigma Validation (2--3 days)}
 
@@ -497,16 +517,18 @@ DeviceInitializer(mpi_info const& info) : id(info.local_rank)
   \item[\textcolor{green!50!black}{$\checkmark$}] 4D module built and tested (\texttt{numberCountsFull.cu})
   \item[\textcolor{green!50!black}{$\checkmark$}] Test configurations in \filepath{cosmosis\_tests/gpu/}
   \item[\textcolor{green!50!black}{$\checkmark$}] EMG coefficients loading via \texttt{prj\_params.py}
+  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{halomodel\_adapter.py} created for sigma/shear modules
+  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{sigmaTotSimple} tested successfully
 \end{itemize}
 
 \subsection{Immediate Next Steps}
 
-\paragraph{1. Run full 12-bin test:}
+\paragraph{1. Fix the \texttt{std::max} bug} in \texttt{sig\_max.cuh} -- change to \texttt{sig\_1 + sig\_2}.
+
+\paragraph{2. Test \texttt{shearTotSimple}:} Needs \texttt{sigmaCritInv} module added to pipeline.
+
+\paragraph{3. Run full 12-bin test:}
 Configure \texttt{numberCountsFull} with all DES Y3 bins (4 richness $\times$ 3 redshift).
-
-\paragraph{2. Fix the \texttt{std::max} bug} in \texttt{sig\_max.cuh} before any shear comparisons.
-
-\paragraph{3. Create/adapt haloModel} to provide NFW and 2-halo tables for sigma/shear modules.
 
 \paragraph{4. Validation comparison:}
 \begin{lstlisting}[language=Python]
@@ -527,8 +549,8 @@ Phase & Effort & Priority & Status \\
 \midrule
 Phase 1: Validate simple modules & 1--2 days & \textbf{High} & \textcolor{green!50!black}{\textbf{DONE}} \\
 Phase 2: Test \texttt{numberCountsFull} (4D) & 1--2 days & High & \textcolor{green!50!black}{\textbf{DONE}} \\
-Phase 3: Implement haloModel for GPU & 2--3 days & Medium & Not started \\
-Phase 4: Test sigma/shear modules & 1--2 days & Medium & Blocked by Phase 3 \\
+Phase 3: Implement haloModel for GPU & 2--3 days & Medium & \textcolor{green!50!black}{\textbf{DONE}} \\
+Phase 4: Test sigma/shear modules & 1--2 days & Medium & \textcolor{orange}{In Progress} \\
 Phase 5: Validate against CPU pipeline & 2--3 days & High & Not started \\
 \midrule
 \textbf{Total estimated effort} & \textbf{7--12 days} & & \\
@@ -543,7 +565,8 @@ Phase 5: Validate against CPU pipeline & 2--3 days & High & Not started \\
   \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsSimple} tested successfully with $<0.1\%$ integration error
   \item[\textcolor{green!50!black}{$\checkmark$}] EMG model (\texttt{emg\_des\_t.cuh}) implemented for observation scatter
   \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsFull} tested with 4D integration and EMG scatter
-  \item[\textcolor{orange}{$\circ$}] \texttt{sigma/shear} modules built but need haloModel tables
+  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{sigmaTotSimple} tested with haloModel adapter
+  \item[\textcolor{orange}{$\circ$}] \texttt{shearTotSimple} ready to test (needs sigmaCritInv)
   \item[\textcolor{red}{$\times$}] Cross-validation against CPU pipeline not yet done
 \end{itemize}
 
