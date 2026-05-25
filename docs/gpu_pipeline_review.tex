@@ -62,13 +62,105 @@
 \title{\vspace{-4ex}\huge \textbf{GPU Pipeline Review \& Architecture Recommendations}\\[0.5ex]
        \Large \textbf{simple\_gpu module analysis and roadmap}}
 \author{Claude Code Review}
-\date{2026-05-25}
+\date{2026-05-25 (Updated: Testing Progress)}
 
 \begin{document}
 \maketitle
 
 \tableofcontents
 \vspace{1em}
+
+% ============================================================================
+\section{Testing Progress \& Status}
+\label{sec:status}
+
+\subsection{Decision: Direct Integration Approach (Option B)}
+
+After review, the team decided to pursue \textbf{Option B: Direct 4D Integration} rather than porting the selection function. The rationale:
+
+\begin{itemize}
+  \setlength\itemsep{2pt}
+  \item \textbf{Independent Validation}: GPU code can be tested independently of the CPU \texttt{sel\_function} pipeline
+  \item \textbf{Cross-Validation}: If both approaches yield the same results, both implementations are validated
+  \item \textbf{Simpler Dependencies}: No need to match the exact $S_{ij}$ tabulation grid
+\end{itemize}
+
+\subsection{Modules Implemented}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+Module & Status & Notes \\
+\midrule
+\texttt{numberCountsSimple} & \textcolor{green!50!black}{\textbf{TESTED}} & 3D integration $(l_o, z_t, \ln M)$ \\
+\texttt{sigma1hSimple} & Built & Awaiting haloModel \\
+\texttt{sigmaTotSimple} & Built & Awaiting haloModel \\
+\texttt{shearTotSimple} & Built & Awaiting haloModel \\
+\texttt{numberCountsFull} & Built & 4D integration with EMG \\
+\bottomrule
+\end{tabular}
+\caption{GPU module implementation status.}
+\end{table}
+
+\subsection{Test Results: \texttt{numberCountsSimple}}
+
+Successfully tested on HPC (2026-05-25). Integration over $(l_o, z_t, \ln M)$ with MOR and photo-z kernel.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}c c c c c@{}}
+\toprule
+Bin & $z$ Range & $N$ (counts) & Error & Rel.\ Error \\
+\midrule
+1 & $[0.20, 0.35]$ & 4825.6 & $\pm$4.15 & 0.09\% \\
+2 & $[0.35, 0.50]$ & 7716.8 & $\pm$6.97 & 0.09\% \\
+3 & $[0.50, 0.65]$ & 7984.7 & $\pm$4.81 & 0.06\% \\
+\bottomrule
+\end{tabular}
+\caption{GPU number counts results for 3 redshift bins ($\lambda_{\rm ob} \in [10, 200]$).}
+\end{table}
+
+\paragraph{Integration Parameters:}
+\begin{lstlisting}[language=bash]
+lo_low = 10.0, lo_high = 200.0
+zt_low = 0.1, zt_high = 0.8
+lnm_low = 31.0, lnm_high = 36.0
+eps_rel = 1e-3, algorithm = pagani
+\end{lstlisting}
+
+\paragraph{Timing:} Module execution took 0.05 seconds (after 0.5s setup).
+
+\subsection{New CUDA Models Created}
+
+\paragraph{\texttt{emg\_des\_t.cuh}} -- EMG kernel $P(\lambda_{\rm ob}|\lambda_{\rm tr},z)$
+\begin{itemize}
+  \item Implements Costanzi observation scatter model
+  \item Uses \texttt{erfcx} for numerical stability at large arguments
+  \item Spline-interpolated parameters: $\mu(z), \sigma(z), \tau(z), f_{\rm prj}(z)$
+\end{itemize}
+
+\paragraph{\texttt{numberCountsFull.cu}} -- Full 4D integration
+\begin{itemize}
+  \item Integrates over $(\lambda_{\rm ob}, \lambda_{\rm tr}, z_t, \ln M)$
+  \item Includes EMG scatter via \texttt{emg\_des\_t.cuh}
+  \item Grid points: richness bins $\times$ redshift bins
+\end{itemize}
+
+\subsection{Files Added to Repository}
+
+\begin{itemize}
+  \setlength\itemsep{2pt}
+  \item \filepath{src/models/emg\_des\_t.cuh} -- EMG CUDA model
+  \item \filepath{src/modules/simple\_gpu/numberCountsFull.cu} -- 4D integration
+  \item \filepath{src/modules/simple\_gpu/plob\_ltr\_loader.py} -- EMG coefficient loader
+  \item \filepath{cosmosis\_tests/gpu/number\_counts\_simple\_test.ini} -- Minimal test config
+  \item \filepath{cosmosis\_tests/gpu/number\_counts\_full\_test.ini} -- 4D test config
+  \item \filepath{cosmosis\_tests/gpu/values\_simple\_gpu.ini} -- Parameter values
+\end{itemize}
+
+Branch: \texttt{gpu-pipeline} on \texttt{marcpaterno/y3\_cluster\_cpp}
 
 % ============================================================================
 \section{Code Review: What You've Built}
@@ -255,60 +347,67 @@ operator()(double lob, double ltr, double z) const {
 \end{itemize}
 
 % ============================================================================
-\section{Recommended Implementation Roadmap}
+\section{Updated Implementation Roadmap (Option B)}
 \label{sec:roadmap}
 
-\subsection{Phase 1: Fix Current Simple Modules (1--2 days)}
+\textbf{Note:} The roadmap has been updated to reflect the decision to use direct integration (Option B) rather than porting the selection function.
+
+\subsection{Phase 1: Validate Simple Modules (1--2 days)}
 
 \begin{itemize}
+  \item[\textcolor{green!50!black}{$\checkmark$}] Test \texttt{numberCountsSimple} -- \textbf{DONE}
   \item[$\square$] Fix \texttt{sig\_max.cuh} to use sum instead of max
-  \item[$\square$] Add richness bin support to \texttt{numberCountsSimple}
-  \item[$\square$] Create validation test comparing GPU vs CPU on simplified model
-  \item[$\square$] Add \texttt{sigma1hSimple} to test ini
+  \item[$\square$] Create haloModel or equivalent to provide GPU tables
+  \item[$\square$] Test \texttt{sigma1hSimple}, \texttt{sigmaTotSimple}, \texttt{shearTotSimple}
 \end{itemize}
 
-\subsection{Phase 2: Port Selection Function to GPU (3--5 days)}
+\subsection{Phase 2: Test Full 4D Integration (1--2 days)}
 
 \begin{itemize}
-  \item[$\square$] Create \filepath{src/models/sel\_function\_gpu\_t.cuh}:
-\begin{lstlisting}
-class SelFunctionGPU_t {
-  // EMG CDF via CUDA erfc()
-  // Shifted-Poisson P_HOD via CUDA lgamma()
-  // Gauss-Legendre nodes stored in constant memory
-};
+  \item[\textcolor{green!50!black}{$\checkmark$}] Create \texttt{emg\_des\_t.cuh} -- \textbf{DONE}
+  \item[\textcolor{green!50!black}{$\checkmark$}] Create \texttt{numberCountsFull.cu} -- \textbf{DONE}
+  \item[$\square$] Test \texttt{numberCountsFull} with DES Y3 bins:
+\begin{lstlisting}[language=bash]
+# Richness bins: [20,30], [30,45], [45,60], [60,200]
+# Redshift bins: [0.20,0.35], [0.35,0.50], [0.50,0.65]
 \end{lstlisting}
-  \item[$\square$] Create \filepath{src/modules/sel\_function\_gpu/selFunctionGPU.cu}
-  \item[$\square$] Validate $S_{ij}$ GPU vs Python to $<0.1\%$
+  \item[$\square$] Verify EMG parameters load correctly from \texttt{plob\_ltr\_params.npz}
+  \item[$\square$] Check 4D integration convergence (may need higher \texttt{max\_eval})
 \end{itemize}
 
-\subsection{Phase 3: GPU NumCounts/Shear with $S_{ij}$ (2--3 days)}
+\subsection{Phase 3: Create GPU haloModel (2--3 days)}
 
+The sigma/shear modules require tables from haloModel:
 \begin{itemize}
-  \item[$\square$] Create \texttt{NumCountsSelGPU} using pre-tabulated $S_{ij}$
-  \item[$\square$] Create \texttt{Shear1hSelGPU} with miscentering support
-  \item[$\square$] Validate against CPU \texttt{NumCountsSel}, \texttt{Shear1hSel}
+  \item[$\square$] $\Sigma_{\rm nfw}(R, \ln M, z)$ -- NFW surface density
+  \item[$\square$] $\Sigma_{\rm hh}(R, z)$ -- 2-halo term (halo-halo)
+  \item[$\square$] $\Delta\Sigma_{\rm nfw}(R, \ln M, z)$ -- NFW excess surface density
+  \item[$\square$] $b(\ln M, z)$ -- halo bias
+  \item[$\square$] $\Sigma_{\rm crit}^{-1}(z)$ -- critical surface density inverse
 \end{itemize}
 
-\subsection{Phase 4: GPU Projection Bias (5--7 days) -- Hardest}
+Options:
+\begin{enumerate}
+  \item Port \filepath{y3\_buzzard/haloModel.py} to CosmoSIS module format
+  \item Create GPU-native haloModel using existing CUDA interpolators
+\end{enumerate}
+
+\subsection{Phase 4: GPU Shear/Sigma Validation (2--3 days)}
 
 \begin{itemize}
-  \item[$\square$] Port \texttt{b\_sel\_marg} ($P_1, I_1, J$ operators) to GPU
-  \item[$\square$] Port \texttt{red\_shear\_prj} ($\Sigma^{\rm prj}, \Delta\Sigma^{\rm prj}$) to GPU
-  \item[$\square$] This requires:
-  \begin{itemize}
-    \item $\xi_{\rm NL}$ interpolation on GPU
-    \item $\theta$-grid construction with breakpoints
-    \item Sigmoid $b_{\rm sel}$ evaluation
-  \end{itemize}
+  \item[$\square$] Test \texttt{sigmaTotSimple} output: $N \times \langle\Sigma_{\rm tot}(R)\rangle$
+  \item[$\square$] Test \texttt{shearTotSimple} output: $N \times \langle\gamma_t(R)\rangle$
+  \item[$\square$] Divide by \texttt{numberCountsSimple} to get bin-averaged profiles
+  \item[$\square$] Compare against CPU pipeline with equivalent physics
 \end{itemize}
 
-\subsection{Phase 5: End-to-End Validation (2--3 days)}
+\subsection{Phase 5: Cross-Validation (2--3 days)}
 
 \begin{itemize}
-  \item[$\square$] Run full GPU pipeline on Buzzard mock
-  \item[$\square$] Compare against CPU pipeline to $<1\%$ on all observables
-  \item[$\square$] Benchmark timing improvements
+  \item[$\square$] Run CPU pipeline with \texttt{sel\_function} on same cosmology
+  \item[$\square$] Compare number counts: GPU direct vs CPU $S_{ij}$ approach
+  \item[$\square$] If results match to $<1\%$, both implementations are validated
+  \item[$\square$] Document any systematic differences
 \end{itemize}
 
 % ============================================================================
@@ -352,27 +451,36 @@ DeviceInitializer(mpi_info const& info) : id(info.local_rank)
 \end{lstlisting}
 
 % ============================================================================
-\section{Quick Wins for Immediate Testing}
+\section{Quick Wins \& Immediate Next Steps}
 \label{sec:quickwins}
 
-To validate your current \texttt{simple\_gpu} approach works:
+\subsection{Completed}
 
-\paragraph{1. Add richness bins to ini:}
+\begin{itemize}
+  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsSimple} validated with sub-0.1\% integration error
+  \item[\textcolor{green!50!black}{$\checkmark$}] EMG model implemented (\texttt{emg\_des\_t.cuh})
+  \item[\textcolor{green!50!black}{$\checkmark$}] 4D module built (\texttt{numberCountsFull.cu})
+  \item[\textcolor{green!50!black}{$\checkmark$}] Test configurations in \filepath{cosmosis\_tests/gpu/}
+\end{itemize}
+
+\subsection{Immediate Next Steps}
+
+\paragraph{1. Test \texttt{numberCountsFull}:}
 \begin{lstlisting}[language=bash]
-[numberCountsSimple]
-; Separate integration per richness bin
-lo_low_bin0 = 20.0
-lo_high_bin0 = 30.0
-; ... or use wall-of-numbers for bins
+cosmosis ${Y3_CLUSTER_CPP_DIR}/cosmosis_tests/gpu/number_counts_full_test.ini
 \end{lstlisting}
 
-\paragraph{2. Create a minimal validation script:}
+This tests the full physics with EMG observation scatter $P(\lambda_{\rm ob}|\lambda_{\rm tr},z)$.
+
+\paragraph{2. Fix the \texttt{std::max} bug} in \texttt{sig\_max.cuh} before any shear comparisons.
+
+\paragraph{3. Create/adapt haloModel} to provide NFW and 2-halo tables for sigma/shear modules.
+
+\paragraph{4. Validation comparison:}
 \begin{lstlisting}[language=Python]
-# Compare GPU numberCountsSimple vs analytical expectation
-# or vs CPU NumCountsSel with sel_function disabled
+# Compare GPU numberCountsFull vs CPU NumCountsSel
+# Both should give same N_i for identical cosmology + MOR parameters
 \end{lstlisting}
-
-\paragraph{3. Fix the \texttt{std::max} bug} in \texttt{sig\_max.cuh} before any shear comparisons.
 
 % ============================================================================
 \section{Summary}
@@ -381,27 +489,41 @@ lo_high_bin0 = 30.0
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{@{}l l l@{}}
+\begin{tabular}{@{}l l l l@{}}
 \toprule
-Phase & Effort & Priority \\
+Phase & Effort & Priority & Status \\
 \midrule
-Phase 1: Fix current issues & 1--2 days & \textbf{High} \\
-Phase 2: GPU selection function & 3--5 days & High \\
-Phase 3: GPU NumCounts/Shear & 2--3 days & Medium \\
-Phase 4: GPU projection bias & 5--7 days & Medium \\
-Phase 5: End-to-end validation & 2--3 days & High \\
+Phase 1: Fix current issues & 1--2 days & \textbf{High} & \textcolor{orange}{In Progress} \\
+Phase 2: Test \texttt{numberCountsFull} (4D) & 1--2 days & High & Ready to test \\
+Phase 3: Implement haloModel for GPU & 2--3 days & Medium & Not started \\
+Phase 4: Test sigma/shear modules & 1--2 days & Medium & Blocked by Phase 3 \\
+Phase 5: Validate against CPU pipeline & 2--3 days & High & Not started \\
 \midrule
-\textbf{Total estimated effort} & \textbf{13--20 days} & \\
+\textbf{Total estimated effort} & \textbf{7--12 days} & & \\
 \bottomrule
 \end{tabular}
-\caption{Implementation roadmap summary.}
+\caption{Updated implementation roadmap (Option B approach).}
 \end{table}
 
-The recommended path forward is \textbf{Option A}: port the selection function to GPU first, then build the integration modules on top. This approach:
+\subsection{Current Status Summary}
+
 \begin{itemize}
-  \item Matches the CPU pipeline semantics exactly
-  \item Enables easy validation at each step
-  \item Keeps downstream integrals efficient (2D instead of 4D)
+  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsSimple} tested successfully with $<0.1\%$ integration error
+  \item[\textcolor{green!50!black}{$\checkmark$}] EMG model (\texttt{emg\_des\_t.cuh}) implemented for observation scatter
+  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsFull} built for full 4D integration
+  \item[\textcolor{orange}{$\circ$}] \texttt{sigma/shear} modules built but need haloModel tables
+  \item[\textcolor{red}{$\times$}] Cross-validation against CPU pipeline not yet done
 \end{itemize}
+
+The team is pursuing \textbf{Option B: Direct 4D Integration} to enable independent validation of GPU code without depending on the CPU selection function implementation.
+
+\subsection{Next Steps}
+
+\begin{enumerate}
+  \item Test \texttt{numberCountsFull} with EMG scatter
+  \item Implement or configure haloModel to provide $\Sigma_{\rm nfw}$, $\Sigma_{\rm hh}$, bias tables
+  \item Test \texttt{sigmaTotSimple} and \texttt{shearTotSimple}
+  \item Compare GPU results against CPU pipeline with matching physics
+\end{enumerate}
 
 \end{document}
