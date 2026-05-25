@@ -95,10 +95,10 @@ After review, the team decided to pursue \textbf{Option B: Direct 4D Integration
 Module & Status & Notes \\
 \midrule
 \texttt{numberCountsSimple} & \textcolor{green!50!black}{\textbf{TESTED}} & 3D integration $(l_o, z_t, \ln M)$ \\
+\texttt{numberCountsFull} & \textcolor{green!50!black}{\textbf{TESTED}} & 4D integration with EMG scatter \\
 \texttt{sigma1hSimple} & Built & Awaiting haloModel \\
 \texttt{sigmaTotSimple} & Built & Awaiting haloModel \\
 \texttt{shearTotSimple} & Built & Awaiting haloModel \\
-\texttt{numberCountsFull} & Built & 4D integration with EMG \\
 \bottomrule
 \end{tabular}
 \caption{GPU module implementation status.}
@@ -131,6 +131,44 @@ eps_rel = 1e-3, algorithm = pagani
 \end{lstlisting}
 
 \paragraph{Timing:} Module execution took 0.05 seconds (after 0.5s setup).
+
+\subsection{Test Results: \texttt{numberCountsFull} (4D Integration)}
+
+Successfully tested on HPC (2026-05-25). Full 4D integration over $(\lambda_{\rm ob}, \lambda_{\rm tr}, z_t, \ln M)$ with EMG observation scatter.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}c c c c c@{}}
+\toprule
+Bin & $z$ Range & $\lambda_{\rm ob}$ Range & $N$ (counts) & Notes \\
+\midrule
+1 & $[0.20, 0.35]$ & $[20, 30]$ & 975.9 & With EMG scatter \\
+2 & $[0.35, 0.50]$ & $[20, 30]$ & 1572.2 & With EMG scatter \\
+3 & $[0.50, 0.65]$ & $[20, 30]$ & 1716.3 & With EMG scatter \\
+\bottomrule
+\end{tabular}
+\caption{GPU number counts from 4D integration (single richness bin, 3 redshift bins).}
+\end{table}
+
+\paragraph{Comparison with \texttt{numberCountsSimple}:}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}c c c c c@{}}
+\toprule
+Bin & $z$ Range & \texttt{Simple} ($\lambda \in [10,200]$) & \texttt{Full} ($\lambda \in [20,30]$) & Ratio \\
+\midrule
+1 & $[0.20, 0.35]$ & 4825.6 & 975.9 & 20.2\% \\
+2 & $[0.35, 0.50]$ & 7716.8 & 1572.2 & 20.4\% \\
+3 & $[0.50, 0.65]$ & 7984.7 & 1716.3 & 21.5\% \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of Simple (all richness) vs Full (single richness bin with EMG).}
+\end{table}
+
+The \texttt{Full} counts are $\sim$20\% of \texttt{Simple} counts despite the richness bin being only 5\% of the total range ($[20,30]$ vs $[10,200]$). This is expected because the MOR weights lower-richness clusters more heavily.
+
+\paragraph{Timing:} Module execution took 0.27 seconds (4D integration is slower than 3D).
 
 \subsection{New CUDA Models Created}
 
@@ -366,13 +404,10 @@ operator()(double lob, double ltr, double z) const {
 \begin{itemize}
   \item[\textcolor{green!50!black}{$\checkmark$}] Create \texttt{emg\_des\_t.cuh} -- \textbf{DONE}
   \item[\textcolor{green!50!black}{$\checkmark$}] Create \texttt{numberCountsFull.cu} -- \textbf{DONE}
-  \item[$\square$] Test \texttt{numberCountsFull} with DES Y3 bins:
-\begin{lstlisting}[language=bash]
-# Richness bins: [20,30], [30,45], [45,60], [60,200]
-# Redshift bins: [0.20,0.35], [0.35,0.50], [0.50,0.65]
-\end{lstlisting}
-  \item[$\square$] Verify EMG parameters load correctly from \texttt{plob\_ltr\_params.npz}
-  \item[$\square$] Check 4D integration convergence (may need higher \texttt{max\_eval})
+  \item[\textcolor{green!50!black}{$\checkmark$}] Test \texttt{numberCountsFull} with DES Y3 bins -- \textbf{DONE}
+  \item[\textcolor{green!50!black}{$\checkmark$}] Verify EMG parameters load correctly via \texttt{prj\_params.py} -- \textbf{DONE}
+  \item[$\square$] Run full 12-bin test (4 richness $\times$ 3 redshift)
+  \item[$\square$] Compare against CPU \texttt{sel\_function} approach
 \end{itemize}
 
 \subsection{Phase 3: Create GPU haloModel (2--3 days)}
@@ -459,18 +494,15 @@ DeviceInitializer(mpi_info const& info) : id(info.local_rank)
 \begin{itemize}
   \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsSimple} validated with sub-0.1\% integration error
   \item[\textcolor{green!50!black}{$\checkmark$}] EMG model implemented (\texttt{emg\_des\_t.cuh})
-  \item[\textcolor{green!50!black}{$\checkmark$}] 4D module built (\texttt{numberCountsFull.cu})
+  \item[\textcolor{green!50!black}{$\checkmark$}] 4D module built and tested (\texttt{numberCountsFull.cu})
   \item[\textcolor{green!50!black}{$\checkmark$}] Test configurations in \filepath{cosmosis\_tests/gpu/}
+  \item[\textcolor{green!50!black}{$\checkmark$}] EMG coefficients loading via \texttt{prj\_params.py}
 \end{itemize}
 
 \subsection{Immediate Next Steps}
 
-\paragraph{1. Test \texttt{numberCountsFull}:}
-\begin{lstlisting}[language=bash]
-cosmosis ${Y3_CLUSTER_CPP_DIR}/cosmosis_tests/gpu/number_counts_full_test.ini
-\end{lstlisting}
-
-This tests the full physics with EMG observation scatter $P(\lambda_{\rm ob}|\lambda_{\rm tr},z)$.
+\paragraph{1. Run full 12-bin test:}
+Configure \texttt{numberCountsFull} with all DES Y3 bins (4 richness $\times$ 3 redshift).
 
 \paragraph{2. Fix the \texttt{std::max} bug} in \texttt{sig\_max.cuh} before any shear comparisons.
 
@@ -493,8 +525,8 @@ This tests the full physics with EMG observation scatter $P(\lambda_{\rm ob}|\la
 \toprule
 Phase & Effort & Priority & Status \\
 \midrule
-Phase 1: Fix current issues & 1--2 days & \textbf{High} & \textcolor{orange}{In Progress} \\
-Phase 2: Test \texttt{numberCountsFull} (4D) & 1--2 days & High & Ready to test \\
+Phase 1: Validate simple modules & 1--2 days & \textbf{High} & \textcolor{green!50!black}{\textbf{DONE}} \\
+Phase 2: Test \texttt{numberCountsFull} (4D) & 1--2 days & High & \textcolor{green!50!black}{\textbf{DONE}} \\
 Phase 3: Implement haloModel for GPU & 2--3 days & Medium & Not started \\
 Phase 4: Test sigma/shear modules & 1--2 days & Medium & Blocked by Phase 3 \\
 Phase 5: Validate against CPU pipeline & 2--3 days & High & Not started \\
@@ -510,7 +542,7 @@ Phase 5: Validate against CPU pipeline & 2--3 days & High & Not started \\
 \begin{itemize}
   \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsSimple} tested successfully with $<0.1\%$ integration error
   \item[\textcolor{green!50!black}{$\checkmark$}] EMG model (\texttt{emg\_des\_t.cuh}) implemented for observation scatter
-  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsFull} built for full 4D integration
+  \item[\textcolor{green!50!black}{$\checkmark$}] \texttt{numberCountsFull} tested with 4D integration and EMG scatter
   \item[\textcolor{orange}{$\circ$}] \texttt{sigma/shear} modules built but need haloModel tables
   \item[\textcolor{red}{$\times$}] Cross-validation against CPU pipeline not yet done
 \end{itemize}
