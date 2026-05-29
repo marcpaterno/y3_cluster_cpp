@@ -52,3 +52,6 @@ add_subdirectory(num_counts_full)
 add_subdirectory(ExampleVector)
 add_subdirectory(ExampleScalar)
 add_subdirectory(ExampleOneD)
+
+# Simple GPU modules (no selection function) for validation
+add_subdirectory(simple_gpu)
