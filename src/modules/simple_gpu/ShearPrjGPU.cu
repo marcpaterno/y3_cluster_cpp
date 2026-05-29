@@ -87,9 +87,12 @@ public:
 
   void execute(DataBlock& sample)
   {
+    std::cerr << "[ShearPrjGPU] execute() start" << std::endl;
     cudaSetDevice(cfg_.device_id);
+    std::cerr << "[ShearPrjGPU] cudaSetDevice done, device=" << cfg_.device_id << std::endl;
 
     size_t const ngrid = cfg_.grid_points.size();
+    std::cerr << "[ShearPrjGPU] ngrid=" << ngrid << std::endl;
 
     // Storage for results
     std::vector<double> sigma_rnd(ngrid), sigma_cl(ngrid), sigma_vals(ngrid);
@@ -97,20 +100,29 @@ public:
     std::vector<double> shear_rnd(ngrid), shear_cl(ngrid), shear_vals(ngrid);
 
     // Create GPU integrator
+    std::cerr << "[ShearPrjGPU] creating integrator, algorithm=" << cfg_.algorithm << std::endl;
     y3_cuda::MultiDimensionalIntegrator<3> integrator(cfg_.algorithm);
     integrator.set_maxeval(cfg_.max_eval);
+    std::cerr << "[ShearPrjGPU] integrator created" << std::endl;
 
     // Create integrands for each component
+    std::cerr << "[ShearPrjGPU] creating integrands" << std::endl;
     y3_cuda::SigmaPrj_gpu<y3_cuda::SigmaRndWeight>  sig_rnd_integrand(sample);
+    std::cerr << "[ShearPrjGPU] sig_rnd_integrand created" << std::endl;
     y3_cuda::SigmaPrj_gpu<y3_cuda::SigmaClWeight>   sig_cl_integrand(sample);
     y3_cuda::SigmaPrj_gpu<y3_cuda::DSigmaRndWeight> dsig_rnd_integrand(sample);
     y3_cuda::SigmaPrj_gpu<y3_cuda::DSigmaClWeight>  dsig_cl_integrand(sample);
+    std::cerr << "[ShearPrjGPU] all integrands created" << std::endl;
 
     // Initialize models from sample
+    std::cerr << "[ShearPrjGPU] calling set_sample on sig_rnd_integrand" << std::endl;
     sig_rnd_integrand.set_sample(sample);
+    std::cerr << "[ShearPrjGPU] sig_rnd_integrand.set_sample done" << std::endl;
     sig_cl_integrand.set_sample(sample);
+    std::cerr << "[ShearPrjGPU] sig_cl_integrand.set_sample done" << std::endl;
     dsig_rnd_integrand.set_sample(sample);
     dsig_cl_integrand.set_sample(sample);
+    std::cerr << "[ShearPrjGPU] all set_sample done" << std::endl;
 
     // Integrate for each grid point
     for (size_t ig = 0; ig < ngrid; ++ig) {
