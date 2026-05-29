@@ -1,16 +1,15 @@
 // sigma_prj_gpu_t.cuh -- GPU adaptation of sigma_prj_t.hh (ShearPrjEvaluator)
 //
 // Costanzi-2026 Sigma_prj / DSigma_prj / gamma_t^prj integrand for CUDA/PAGANI.
-// Direct port from CPU version with GPU-compatible types.
+// Template-based design matching P_operator_gpu for GPU integrator compatibility.
 //
 // Integration: 3D over (theta, z, lnM) per (lob_bin, zob, R) grid point.
-// Inner theta uses the same log-GL approach as the CPU version.
 //
-// The integrand:
-//   I(theta, z, lnM | lob_i, zob_j, R_k)
-//     = 2pi sin(theta) * dV/dz(z) * n(M,z)
-//       * [1 + b(M,z) * b_sel(theta) * xi_NL(|dr|)]
-//       * Sigma_mis(R_k, theta*D_A_o, M) * w_z(z, zob) * Theta(theta > theta_excl)
+// Template parameter WeightF selects which quantity is integrated:
+//   SigmaRnd:  random component of Sigma
+//   SigmaCl:   clustering component of Sigma
+//   DSigmaRnd: random component of Delta-Sigma
+//   DSigmaCl:  clustering component of Delta-Sigma
 #ifndef Y3_CLUSTER_CPP_SIGMA_PRJ_GPU_T_CUH
 #define Y3_CLUSTER_CPP_SIGMA_PRJ_GPU_T_CUH
 
@@ -54,7 +53,6 @@ namespace y3_cuda {
     }
 
     // Photo-z kernel: w_z(z, zob) = 1 - u^2 if |u| < 1, else 0
-    // where u = (z - zob) / sigma_z(z)
     __host__ __device__ inline double
     w_photoz(double z, double zob, double sigma_z)
     {
@@ -83,12 +81,36 @@ namespace y3_cuda {
       return 1.0 / (1.0 + exp(-k * (theta - theta0)));
     }
 
+    // Simplified NFW Sigma (placeholder - real version uses lookup tables)
+    __host__ __device__ inline double
+    compute_sigma_nfw(double R, double R_mis, double lnM)
+    {
+      double const M = exp(lnM);
+      double const r_s = 0.1 * pow(M / 1e14, 0.33);
+      double const x = sqrt(R * R + R_mis * R_mis) / r_s;
+      if (x < 0.01) return 1.0e15 / (x + 0.01);
+      if (x > 100.0) return 0.0;
+      return 1.0e14 * pow(M / 1e14, 0.8) / (x * (1.0 + x) * (1.0 + x));
+    }
+
+    __host__ __device__ inline double
+    compute_dsigma_nfw(double R, double R_mis, double lnM)
+    {
+      double const M = exp(lnM);
+      double const r_s = 0.1 * pow(M / 1e14, 0.33);
+      double const x = sqrt(R * R + R_mis * R_mis) / r_s;
+      if (x < 0.01) return 1.0e15 / (x + 0.01);
+      if (x > 100.0) return 0.0;
+      return 1.0e14 * pow(M / 1e14, 0.8) / (x * x * (1.0 + x));
+    }
+
   }  // namespace sp_gpu_detail
 
 
   // =====================================================================
-  // GPU integrand for Sigma_prj / DSigma_prj / gamma_t^prj
+  // GPU integrand template for Sigma_prj / DSigma_prj
   // =====================================================================
+  template <typename WeightF>
   class SigmaPrj_gpu {
   public:
     using grid_t       = y3_cluster::grid_t<4>;  // (lambda_bin, zo_low, zo_high, radii)
@@ -104,8 +126,6 @@ namespace y3_cuda {
     // GPU-compatible interpolators
     std::optional<quad::Interp2D> hmb_;       // haloModel/bias(lnM, z)
     std::optional<quad::Interp2D> xi_nl_;     // xi_nl(r, z)
-    std::optional<quad::Interp2D> sigma_mis_; // NFW Sigma_mis(R, R_mis, lnM) - simplified
-    std::optional<quad::Interp2D> dsigma_mis_;// NFW DSigma_mis(R, R_mis, lnM) - simplified
     std::optional<quad::Interp1D> chi_;       // distances/d_c(z)
     std::optional<quad::Interp1D> sci_;       // average_sigma_crit_inv(z)
 
@@ -152,7 +172,6 @@ namespace y3_cuda {
       }
 
       // b_sel asymptotes from bsel.py (2D: shape is (n_zob, n_lob))
-      // These are small tables, we'll do simple lookup
       if (sample.has_val("b_sel_marginalised", "b_small") &&
           sample.has_val("b_sel_marginalised", "b_large")) {
         auto lob_vec = sample.view<std::vector<double>>("b_sel_marginalised", "lob");
@@ -162,8 +181,6 @@ namespace y3_cuda {
         auto const& b_large_nd = sample.view<cosmosis::ndarray<double>>(
             "b_sel_marginalised", "b_large");
 
-        // Store as 2D interp tables (zob, lob) -> value
-        // Note: b_small/b_large have shape (n_zob, n_lob) from bsel.py
         std::vector<double> b_small_vec(b_small_nd.begin(), b_small_nd.end());
         std::vector<double> b_large_vec(b_large_nd.begin(), b_large_nd.end());
 
@@ -192,7 +209,6 @@ namespace y3_cuda {
         B_small_ = b_small_->clamp(zob_, lobc);
         B_large_ = b_large_->clamp(zob_, lobc);
       } else {
-        // Fallback if b_sel not available
         B_small_ = 1.0;
         B_large_ = 1.0;
       }
@@ -210,22 +226,17 @@ namespace y3_cuda {
       return size;
     }
 
-    // Integrand at (theta, z, lnM)
-    // Returns: {Sigma_rnd, Sigma_cl, DSigma_rnd, DSigma_cl}
-    __host__ __device__ void
-    operator()(double theta, double z, double lnM,
-               double& sigma_rnd, double& sigma_cl,
-               double& dsigma_rnd, double& dsigma_cl) const
+    // Integrand at (theta, z, lnM) -- returns scalar based on WeightF
+    __host__ __device__ double
+    operator()(double theta, double z, double lnM) const
     {
       using namespace sp_gpu_detail;
-
-      sigma_rnd = sigma_cl = dsigma_rnd = dsigma_cl = 0.0;
 
       // Photo-z kernel
       SIGMA_PHOTOZ_DES_t sigma_z_model;
       double const sig_z = sigma_z_model(z);
       double const wz = w_photoz(z, zob_, sig_z);
-      if (wz <= 0.0) return;
+      if (wz <= 0.0) return 0.0;
 
       // Geometry
       double const chi_z = chi_->clamp(z) * h0_;
@@ -237,60 +248,30 @@ namespace y3_cuda {
       double const dV = (*dv_do_dz_)(z);
       double const hmf_val = (*hmf_)(lnM, z);
       double const common = 2.0 * PI * sin_th * dV * wz * hmf_val;
-      if (common <= 0.0) return;
+      if (common <= 0.0) return 0.0;
 
-      // Simplified NFW Sigma_mis / DSigma_mis
-      // In the full version, these come from pre-cached tables.
-      // For GPU, we use a simplified NFW model or interpolation.
+      // NFW Sigma_mis / DSigma_mis
       double const R_th = theta * D_A_o_;
       double const Sigma_v = compute_sigma_nfw(R_, R_th, lnM);
       double const DSigma_v = compute_dsigma_nfw(R_, R_th, lnM);
 
-      // Random component (no clustering)
-      sigma_rnd = common * Sigma_v;
-      dsigma_rnd = common * DSigma_v;
-
       // Clustering component (only if theta > theta_excl)
+      double xi_val = 0.0;
+      double b_Mz = 0.0;
+      double b_sel = 0.0;
       if (theta > theta_excl_z) {
         double const dchi = sqrt(fmax(
             chi_z * chi_z + chi_o_ * chi_o_
             - 2.0 * chi_z * chi_o_ * cos_th, 0.0));
-        double const xi_val = xi_nl_->clamp(dchi, zob_);
-        double const b_Mz = hmb_->clamp(lnM, z);
-        double const b_sel = B_small_ + (B_large_ - B_small_)
-                           * b_sel_sigmoid(theta, theta_lob_);
-
-        double const wt_cl = common * b_Mz * b_sel * xi_val;
-        sigma_cl = wt_cl * Sigma_v;
-        dsigma_cl = wt_cl * DSigma_v;
+        xi_val = xi_nl_->clamp(dchi, zob_);
+        b_Mz = hmb_->clamp(lnM, z);
+        b_sel = B_small_ + (B_large_ - B_small_)
+                         * b_sel_sigmoid(theta, theta_lob_);
       }
-    }
 
-    // Simplified NFW Sigma (placeholder - real version uses lookup tables)
-    __host__ __device__ double
-    compute_sigma_nfw(double R, double R_mis, double lnM) const
-    {
-      // Simplified NFW surface density
-      // In production, this should use pre-computed lookup tables
-      double const M = exp(lnM);
-      double const r_s = 0.1 * pow(M / 1e14, 0.33);  // Scale radius approximation
-      double const x = sqrt(R * R + R_mis * R_mis) / r_s;
-      if (x < 0.01) return 1.0e15 / (x + 0.01);
-      if (x > 100.0) return 0.0;
-      // NFW projected profile approximation
-      return 1.0e14 * pow(M / 1e14, 0.8) / (x * (1.0 + x) * (1.0 + x));
-    }
-
-    __host__ __device__ double
-    compute_dsigma_nfw(double R, double R_mis, double lnM) const
-    {
-      // Simplified NFW Delta-Sigma (tangential shear profile)
-      double const M = exp(lnM);
-      double const r_s = 0.1 * pow(M / 1e14, 0.33);
-      double const x = sqrt(R * R + R_mis * R_mis) / r_s;
-      if (x < 0.01) return 1.0e15 / (x + 0.01);
-      if (x > 100.0) return 0.0;
-      return 1.0e14 * pow(M / 1e14, 0.8) / (x * x * (1.0 + x));
+      // Return the selected component
+      return WeightF::weight(common, Sigma_v, DSigma_v, b_Mz, b_sel, xi_val,
+                             theta > theta_excl_z);
     }
 
     double get_sci() const { return sci_val_; }
@@ -341,6 +322,52 @@ namespace y3_cuda {
         result.push_back({lambda_bin[i], zo_low[i], zo_high[i], radii[i]});
       }
       return result;
+    }
+  };
+
+  // ---------------------------------------------------------------------
+  // Weight functors for GPU
+  // ---------------------------------------------------------------------
+
+  struct SigmaRndWeight {
+    static char const* name() { return "sigma_rnd"; }
+    __host__ __device__ static double
+    weight(double common, double Sigma_v, double /*DSigma_v*/,
+           double /*b_Mz*/, double /*b_sel*/, double /*xi_val*/, bool /*has_cl*/)
+    {
+      return common * Sigma_v;
+    }
+  };
+
+  struct SigmaClWeight {
+    static char const* name() { return "sigma_cl"; }
+    __host__ __device__ static double
+    weight(double common, double Sigma_v, double /*DSigma_v*/,
+           double b_Mz, double b_sel, double xi_val, bool has_cl)
+    {
+      if (!has_cl) return 0.0;
+      return common * b_Mz * b_sel * xi_val * Sigma_v;
+    }
+  };
+
+  struct DSigmaRndWeight {
+    static char const* name() { return "dsigma_rnd"; }
+    __host__ __device__ static double
+    weight(double common, double /*Sigma_v*/, double DSigma_v,
+           double /*b_Mz*/, double /*b_sel*/, double /*xi_val*/, bool /*has_cl*/)
+    {
+      return common * DSigma_v;
+    }
+  };
+
+  struct DSigmaClWeight {
+    static char const* name() { return "dsigma_cl"; }
+    __host__ __device__ static double
+    weight(double common, double /*Sigma_v*/, double DSigma_v,
+           double b_Mz, double b_sel, double xi_val, bool has_cl)
+    {
+      if (!has_cl) return 0.0;
+      return common * b_Mz * b_sel * xi_val * DSigma_v;
     }
   };
 

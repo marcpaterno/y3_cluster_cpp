@@ -1,7 +1,7 @@
 // ShearPrjGPU.cu -- GPU module for Costanzi-2026 shear projection integrals
 //
 // Computes sigma_prj, dsigma_prj, and shear_prj (gamma_t^prj) on GPU.
-// Outputs match the CPU ShearPrjEvaluator sections for compatibility.
+// Uses PAGANI GPU integrator like bSelMargGPU for proper device execution.
 //
 // Outputs to datablock:
 //   sigma_prj/{vals, rnd, cl}
@@ -91,88 +91,67 @@ public:
 
     size_t const ngrid = cfg_.grid_points.size();
 
-    // Storage for results: total, rnd, cl for each observable
-    std::vector<double> sigma_vals(ngrid), sigma_rnd(ngrid), sigma_cl(ngrid);
-    std::vector<double> dsigma_vals(ngrid), dsigma_rnd(ngrid), dsigma_cl(ngrid);
-    std::vector<double> shear_vals(ngrid), shear_rnd(ngrid), shear_cl(ngrid);
+    // Storage for results
+    std::vector<double> sigma_rnd(ngrid), sigma_cl(ngrid), sigma_vals(ngrid);
+    std::vector<double> dsigma_rnd(ngrid), dsigma_cl(ngrid), dsigma_vals(ngrid);
+    std::vector<double> shear_rnd(ngrid), shear_cl(ngrid), shear_vals(ngrid);
 
-    // Create integrand
-    y3_cuda::SigmaPrj_gpu integrand(sample);
-    integrand.set_sample(sample);
+    // Create GPU integrator
+    y3_cuda::MultiDimensionalIntegrator<3> integrator(cfg_.algorithm);
+    integrator.set_maxeval(cfg_.max_eval);
 
-    // For now, use a simple integration approach
-    // In production, this would use PAGANI or similar GPU integrator
-    // Here we do a fixed-grid Gauss-Legendre approximation
+    // Create integrands for each component
+    y3_cuda::SigmaPrj_gpu<y3_cuda::SigmaRndWeight>  sig_rnd_integrand(sample);
+    y3_cuda::SigmaPrj_gpu<y3_cuda::SigmaClWeight>   sig_cl_integrand(sample);
+    y3_cuda::SigmaPrj_gpu<y3_cuda::DSigmaRndWeight> dsig_rnd_integrand(sample);
+    y3_cuda::SigmaPrj_gpu<y3_cuda::DSigmaClWeight>  dsig_cl_integrand(sample);
 
-    size_t const N_theta = 30;
-    size_t const N_z = 40;
-    size_t const N_M = 24;
-
-    // GL nodes and weights (simplified - using uniform for now)
-    auto make_gl_grid = [](double lo, double hi, size_t n,
-                           std::vector<double>& nodes,
-                           std::vector<double>& weights) {
-      nodes.resize(n);
-      weights.resize(n);
-      double const dx = (hi - lo) / n;
-      for (size_t i = 0; i < n; ++i) {
-        nodes[i] = lo + (i + 0.5) * dx;
-        weights[i] = dx;
-      }
-    };
-
-    std::vector<double> theta_nodes, theta_weights;
-    std::vector<double> z_nodes, z_weights;
-    std::vector<double> M_nodes, M_weights;
-
-    make_gl_grid(cfg_.volume.lows[0], cfg_.volume.highs[0], N_theta,
-                 theta_nodes, theta_weights);
-    make_gl_grid(cfg_.volume.lows[1], cfg_.volume.highs[1], N_z,
-                 z_nodes, z_weights);
-    make_gl_grid(cfg_.volume.lows[2], cfg_.volume.highs[2], N_M,
-                 M_nodes, M_weights);
+    // Initialize models from sample
+    sig_rnd_integrand.set_sample(sample);
+    sig_cl_integrand.set_sample(sample);
+    dsig_rnd_integrand.set_sample(sample);
+    dsig_cl_integrand.set_sample(sample);
 
     // Integrate for each grid point
     for (size_t ig = 0; ig < ngrid; ++ig) {
       auto const& gp = cfg_.grid_points.points[ig];
-      integrand.set_grid_point(gp);
 
-      double acc_S_rnd = 0.0, acc_S_cl = 0.0;
-      double acc_DS_rnd = 0.0, acc_DS_cl = 0.0;
+      // Sigma random
+      sig_rnd_integrand.set_grid_point(gp);
+      auto res_sr = integrator.integrate(sig_rnd_integrand, cfg_.eps_abs,
+                                          cfg_.eps_rel, cfg_.volume);
+      sigma_rnd[ig] = res_sr.estimate;
 
-      // 3D integration loop
-      for (size_t i_th = 0; i_th < N_theta; ++i_th) {
-        for (size_t i_z = 0; i_z < N_z; ++i_z) {
-          for (size_t i_M = 0; i_M < N_M; ++i_M) {
-            double s_rnd, s_cl, ds_rnd, ds_cl;
-            integrand(theta_nodes[i_th], z_nodes[i_z], M_nodes[i_M],
-                      s_rnd, s_cl, ds_rnd, ds_cl);
+      // Sigma clustering
+      sig_cl_integrand.set_grid_point(gp);
+      auto res_sc = integrator.integrate(sig_cl_integrand, cfg_.eps_abs,
+                                          cfg_.eps_rel, cfg_.volume);
+      sigma_cl[ig] = res_sc.estimate;
 
-            double const wt = theta_weights[i_th] * z_weights[i_z] * M_weights[i_M];
-            acc_S_rnd  += wt * s_rnd;
-            acc_S_cl   += wt * s_cl;
-            acc_DS_rnd += wt * ds_rnd;
-            acc_DS_cl  += wt * ds_cl;
-          }
-        }
-      }
+      // DSigma random
+      dsig_rnd_integrand.set_grid_point(gp);
+      auto res_dr = integrator.integrate(dsig_rnd_integrand, cfg_.eps_abs,
+                                          cfg_.eps_rel, cfg_.volume);
+      dsigma_rnd[ig] = res_dr.estimate;
 
-      sigma_rnd[ig]  = acc_S_rnd;
-      sigma_cl[ig]   = acc_S_cl;
-      sigma_vals[ig] = acc_S_rnd + acc_S_cl;
+      // DSigma clustering
+      dsig_cl_integrand.set_grid_point(gp);
+      auto res_dc = integrator.integrate(dsig_cl_integrand, cfg_.eps_abs,
+                                          cfg_.eps_rel, cfg_.volume);
+      dsigma_cl[ig] = res_dc.estimate;
 
-      dsigma_rnd[ig]  = acc_DS_rnd;
-      dsigma_cl[ig]   = acc_DS_cl;
-      dsigma_vals[ig] = acc_DS_rnd + acc_DS_cl;
+      // Totals
+      sigma_vals[ig]  = sigma_rnd[ig] + sigma_cl[ig];
+      dsigma_vals[ig] = dsigma_rnd[ig] + dsigma_cl[ig];
 
-      // gamma_t = DSigma * Sigma_crit_inv
-      double const sci = integrand.get_sci();
-      shear_vals[ig] = dsigma_vals[ig] * sci;
+      // Shear = DSigma * Sigma_crit_inv
+      double const sci = sig_rnd_integrand.get_sci();
       shear_rnd[ig]  = dsigma_rnd[ig] * sci;
       shear_cl[ig]   = dsigma_cl[ig] * sci;
+      shear_vals[ig] = dsigma_vals[ig] * sci;
     }
 
-    // Write results to datablock (same sections as CPU for compatibility)
+    // Write results to datablock
     using cosmosis::ndarray;
 
     // sigma_prj
