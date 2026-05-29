@@ -133,17 +133,14 @@ namespace y3_cuda {
     std::optional<quad::Interp2D> b_small_;   // b_sel_marginalised/b_small(lob, zob)
     std::optional<quad::Interp2D> b_large_;   // b_sel_marginalised/b_large(lob, zob)
 
+    // CPU-side sci interpolation data (for get_sci() called from host)
+    std::vector<double> sci_z_;
+    std::vector<double> sci_vals_;
+
     // Current grid point state
     double zob_         = 0.0;
     double R_           = 0.0;
     int    lob_bin_     = 0;
-    double chi_o_       = 0.0;
-    double D_A_o_       = 0.0;
-    double R_excl_      = 0.0;
-    double theta_lob_   = 0.0;
-    double B_small_     = 0.0;
-    double B_large_     = 0.0;
-    double sci_val_     = 0.0;
 
     // Cosmology
     double h0_ = 1.0;
@@ -165,10 +162,13 @@ namespace y3_cuda {
       xi_nl_.emplace(make_Interp2D(sample, "xi_nl", "r", "z", "xi_nl"));
       chi_.emplace(make_Interp1D(sample, "distances", "z", "d_c"));
 
-      // Optional average_sigma_crit_inv for gamma_t
+      // Optional average_sigma_crit_inv for gamma_t (CPU-side for get_sci())
       if (sample.has_val("average_sigma_crit_inv", "zlense")) {
         sci_.emplace(make_Interp1D(sample, "average_sigma_crit_inv",
                                    "zlense", "sci_average"));
+        // Also store CPU-side copy for get_sci() called from host
+        sci_z_ = sample.view<std::vector<double>>("average_sigma_crit_inv", "zlense");
+        sci_vals_ = sample.view<std::vector<double>>("average_sigma_crit_inv", "sci_average");
       }
 
       // b_sel asymptotes from bsel.py (2D: shape is (n_zob, n_lob))
@@ -194,27 +194,10 @@ namespace y3_cuda {
     void
     set_grid_point(grid_point_t const& pt)
     {
+      // Only store values - do NOT call interpolators here (they run on GPU)
       lob_bin_  = static_cast<int>(pt[0]);
       zob_      = 0.5 * (pt[1] + pt[2]);
       R_        = pt[3];
-
-      double const lobc = sp_gpu_detail::lob_center(lob_bin_);
-      chi_o_    = chi_->clamp(zob_) * h0_;
-      D_A_o_    = chi_o_ / (1.0 + zob_);
-      R_excl_   = sp_gpu_detail::R_lambda(lobc) * (1.0 + zob_);
-      theta_lob_ = sp_gpu_detail::R_lambda(lobc) * (1.0 + zob_) / chi_o_;
-
-      // Get b_sel asymptotes for this (lob, zob)
-      if (b_small_ && b_large_) {
-        B_small_ = b_small_->clamp(zob_, lobc);
-        B_large_ = b_large_->clamp(zob_, lobc);
-      } else {
-        B_small_ = 1.0;
-        B_large_ = 1.0;
-      }
-
-      // Sigma_crit_inv at zob
-      sci_val_ = sci_ ? sci_->clamp(zob_) : 0.0;
     }
 
     size_t
@@ -238,9 +221,24 @@ namespace y3_cuda {
       double const wz = w_photoz(z, zob_, sig_z);
       if (wz <= 0.0) return 0.0;
 
-      // Geometry
+      // Compute geometry (moved from set_grid_point - these use GPU interpolators)
+      double const lobc = lob_center(lob_bin_);
+      double const chi_o = chi_->clamp(zob_) * h0_;
+      double const D_A_o = chi_o / (1.0 + zob_);
+      double const R_excl = R_lambda(lobc) * (1.0 + zob_);
+      double const theta_lob = R_lambda(lobc) * (1.0 + zob_) / chi_o;
+
+      // b_sel asymptotes (use fallback if not available)
+      double B_small = 1.0;
+      double B_large = 1.0;
+      if (b_small_ && b_large_) {
+        B_small = b_small_->clamp(zob_, lobc);
+        B_large = b_large_->clamp(zob_, lobc);
+      }
+
+      // Geometry for this z
       double const chi_z = chi_->clamp(z) * h0_;
-      double const theta_excl_z = theta_excl_at_z(chi_z, chi_o_, R_excl_);
+      double const theta_excl_z = theta_excl_at_z(chi_z, chi_o, R_excl);
       double const sin_th = sin(theta);
       double const cos_th = cos(theta);
 
@@ -251,7 +249,7 @@ namespace y3_cuda {
       if (common <= 0.0) return 0.0;
 
       // NFW Sigma_mis / DSigma_mis
-      double const R_th = theta * D_A_o_;
+      double const R_th = theta * D_A_o;
       double const Sigma_v = compute_sigma_nfw(R_, R_th, lnM);
       double const DSigma_v = compute_dsigma_nfw(R_, R_th, lnM);
 
@@ -261,12 +259,12 @@ namespace y3_cuda {
       double b_sel = 0.0;
       if (theta > theta_excl_z) {
         double const dchi = sqrt(fmax(
-            chi_z * chi_z + chi_o_ * chi_o_
-            - 2.0 * chi_z * chi_o_ * cos_th, 0.0));
+            chi_z * chi_z + chi_o * chi_o
+            - 2.0 * chi_z * chi_o * cos_th, 0.0));
         xi_val = xi_nl_->clamp(dchi, zob_);
         b_Mz = hmb_->clamp(lnM, z);
-        b_sel = B_small_ + (B_large_ - B_small_)
-                         * b_sel_sigmoid(theta, theta_lob_);
+        b_sel = B_small + (B_large - B_small)
+                         * b_sel_sigmoid(theta, theta_lob);
       }
 
       // Return the selected component
@@ -274,7 +272,20 @@ namespace y3_cuda {
                              theta > theta_excl_z);
     }
 
-    double get_sci() const { return sci_val_; }
+    // CPU-side linear interpolation for sci (called from host code)
+    double get_sci() const {
+      if (sci_z_.empty()) return 0.0;
+      // Simple linear interpolation
+      if (zob_ <= sci_z_.front()) return sci_vals_.front();
+      if (zob_ >= sci_z_.back()) return sci_vals_.back();
+      for (size_t i = 1; i < sci_z_.size(); ++i) {
+        if (zob_ <= sci_z_[i]) {
+          double const t = (zob_ - sci_z_[i-1]) / (sci_z_[i] - sci_z_[i-1]);
+          return sci_vals_[i-1] + t * (sci_vals_[i] - sci_vals_[i-1]);
+        }
+      }
+      return sci_vals_.back();
+    }
 
     static char const* module_label() { return "ShearPrjGPU"; }
 
